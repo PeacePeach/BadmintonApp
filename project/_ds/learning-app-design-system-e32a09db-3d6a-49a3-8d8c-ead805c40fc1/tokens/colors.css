@@ -19,6 +19,9 @@
 --sage-100:#eaf0e7;
 --butter-500:#fee7a6;
 --butter-300:#fff3cf;
+/* Accent (primary CTA) */
+--accent-500:#d4f25c;
+--accent:var(--accent-500);
 /* Semantic */
 --bg-app:var(--ink-1);
 --bg-canvas:var(--ink-2);

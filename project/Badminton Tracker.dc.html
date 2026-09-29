@@ -20,13 +20,13 @@
 body{margin:0;background:#111013;font-family:"Poppins",system-ui,sans-serif;}
 *{box-sizing:border-box;}
 *::-webkit-scrollbar{display:none;}
-a{color:var(--accent,#d4f25c);} a:hover{color:#fff;}
+a{color:var(--accent);} a:hover{color:var(--white);}
 input,textarea,button{font-family:inherit;}
-input::placeholder,textarea::placeholder{color:#8f8f91;}
+input::placeholder,textarea::placeholder{color:var(--grey-400);}
 </style>
 </helmet>
 <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 16px;">
-<div data-screen-label="Phone" style="--accent: {{ accent }}; position:relative;width:390px;height:844px;border-radius:48px;background:var(--ink-1);overflow:hidden;color:#fff;box-shadow:0 0 0 10px #232226;">
+<div data-screen-label="Phone" style="--accent: {{ accent }}; position:relative;width:390px;height:844px;border-radius:48px;background:var(--ink-1);overflow:hidden;color:var(--white);box-shadow:0 0 0 10px #232226;">
 
   <div ref="{{ scrollRef }}" style="position:absolute;inset:0;overflow-y:auto;padding:58px 20px 120px;">
     <div style="position:absolute;top:18px;left:34px;font:500 15px/1 var(--font-sans);">9:41</div>
@@ -46,11 +46,11 @@ input::placeholder,textarea::placeholder{color:#8f8f91;}
           </div>
           <div style="background:var(--ink-2);border-radius:26px;padding:20px 22px;display:flex;flex-direction:column;gap:8px;">
             <div style="font:400 13px/1 var(--font-sans);color:var(--grey-400);">Win Rate</div>
-            <div style="font:500 40px/1 var(--font-sans);color:var(--accent,#d4f25c);">{{ overall.pctStr }}</div>
-            <div style="height:6px;border-radius:99px;background:var(--ink-4);overflow:hidden;margin-top:6px;"><div style="height:100%;border-radius:99px;background:var(--accent,#d4f25c);width: {{ overall.pctStr }};"></div></div>
+            <div style="font:500 40px/1 var(--font-sans);color:var(--accent);">{{ overall.pctStr }}</div>
+            <div style="height:6px;border-radius:99px;background:var(--ink-4);overflow:hidden;margin-top:6px;"><div style="height:100%;border-radius:99px;background:var(--accent);width: {{ overall.pctStr }};"></div></div>
           </div>
         </div>
-        <button onClick="{{ startLog }}" style="height:60px;border:none;border-radius:999px;background:var(--accent,#d4f25c);color:var(--ink-1);font:600 17px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;" style-active="transform:scale(.97);">
+        <button onClick="{{ startLog }}" style="height:60px;border:none;border-radius:999px;background:var(--accent);color:var(--ink-1);font:600 17px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;" style-active="transform:scale(.97);">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 22 }}" strokeWidth="{{ 2.2 }}" hint-size="22px,22px"></x-import>
           Log Match
         </button>
@@ -95,7 +95,7 @@ input::placeholder,textarea::placeholder{color:#8f8f91;}
           <div style="display:flex;justify-content:space-between;align-items:flex-end;">
             <div style="display:flex;flex-direction:column;gap:8px;">
               <div style="font:400 13px/1 var(--font-sans);color:var(--grey-400);">Overall Win Rate</div>
-              <div style="font:500 52px/1 var(--font-sans);color:var(--accent,#d4f25c);">{{ overall.pctStr }}</div>
+              <div style="font:500 52px/1 var(--font-sans);color:var(--accent);">{{ overall.pctStr }}</div>
             </div>
             <div style="font:400 15px/1 var(--font-sans);color:var(--grey-200);">{{ overall.label }} W–L</div>
           </div>
@@ -125,7 +125,7 @@ input::placeholder,textarea::placeholder{color:#8f8f91;}
                 <div style="width:40px;height:40px;border-radius:50%;background:var(--ink-4);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ r.initials }}</div>
                 <div style="display:flex;flex-direction:column;gap:6px;min-width:0;">
                   <div style="font:500 15px/1.2 var(--font-sans);">{{ r.name }}</div>
-                  <div style="height:4px;border-radius:99px;background:var(--ink-4);overflow:hidden;"><div style="height:100%;background:var(--accent,#d4f25c);width: {{ r.pctStr }};"></div></div>
+                  <div style="height:4px;border-radius:99px;background:var(--ink-4);overflow:hidden;"><div style="height:100%;background:var(--accent);width: {{ r.pctStr }};"></div></div>
                 </div>
                 <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:52px;">
                   <div style="font:500 15px/1 var(--font-sans);">{{ r.label }}</div>
@@ -143,7 +143,7 @@ input::placeholder,textarea::placeholder{color:#8f8f91;}
                 <div style="width:40px;height:40px;border-radius:50%;background:var(--ink-4);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ r.initials }}</div>
                 <div style="display:flex;flex-direction:column;gap:6px;min-width:0;">
                   <div style="font:500 15px/1.2 var(--font-sans);">{{ r.name }}</div>
-                  <div style="height:4px;border-radius:99px;background:var(--ink-4);overflow:hidden;"><div style="height:100%;background:var(--accent,#d4f25c);width: {{ r.pctStr }};"></div></div>
+                  <div style="height:4px;border-radius:99px;background:var(--ink-4);overflow:hidden;"><div style="height:100%;background:var(--accent);width: {{ r.pctStr }};"></div></div>
                 </div>
                 <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:52px;">
                   <div style="font:500 15px/1 var(--font-sans);">{{ r.label }}</div>
@@ -169,7 +169,7 @@ input::placeholder,textarea::placeholder{color:#8f8f91;}
               <div style="font:400 13px/1 var(--font-sans);color:var(--grey-400);">From Your Notes · What Worked</div>
               <div style="display:flex;flex-wrap:wrap;gap:8px;">
                 <sc-for list="{{ kwWorked }}" as="k" hint-placeholder-count="3">
-                  <div style="height:34px;padding:0 14px;border-radius:99px;background:var(--ink-3);border:1px solid var(--accent,#d4f25c);display:flex;align-items:center;gap:8px;font:400 14px/1 var(--font-sans);">{{ k.label }}<span style="color:var(--accent,#d4f25c);font-weight:600;">{{ k.count }}</span></div>
+                  <div style="height:34px;padding:0 14px;border-radius:99px;background:var(--ink-3);border:1px solid var(--accent);display:flex;align-items:center;gap:8px;font:400 14px/1 var(--font-sans);">{{ k.label }}<span style="color:var(--accent);font-weight:600;">{{ k.count }}</span></div>
                 </sc-for>
               </div>
             </div>
@@ -177,7 +177,7 @@ input::placeholder,textarea::placeholder{color:#8f8f91;}
               <div style="font:400 13px/1 var(--font-sans);color:var(--grey-400);">From Your Notes · Lost Points</div>
               <div style="display:flex;flex-wrap:wrap;gap:8px;">
                 <sc-for list="{{ kwLost }}" as="k" hint-placeholder-count="3">
-                  <div style="height:34px;padding:0 14px;border-radius:99px;background:var(--ink-3);display:flex;align-items:center;gap:8px;font:400 14px/1 var(--font-sans);color:var(--grey-200);">{{ k.label }}<span style="color:#fff;font-weight:600;">{{ k.count }}</span></div>
+                  <div style="height:34px;padding:0 14px;border-radius:99px;background:var(--ink-3);display:flex;align-items:center;gap:8px;font:400 14px/1 var(--font-sans);color:var(--grey-200);">{{ k.label }}<span style="color:var(--white);font-weight:600;">{{ k.count }}</span></div>
                 </sc-for>
               </div>
             </div>
@@ -214,7 +214,7 @@ input::placeholder,textarea::placeholder{color:#8f8f91;}
                   <div style="font:500 22px/1.2 var(--font-sans);">{{ o.label }}</div>
                   <div style="font:400 14px/1.3 var(--font-sans);color:var(--grey-400);">{{ o.sub }}</div>
                 </div>
-                <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 22 }}" color="#8f8f91" hint-size="22px,22px"></x-import>
+                <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 22 }}" color="var(--grey-400)" hint-size="22px,22px"></x-import>
               </div>
             </sc-for>
           </div>
@@ -246,11 +246,11 @@ input::placeholder,textarea::placeholder{color:#8f8f91;}
                 <div style="font:500 17px/1.3 var(--font-sans);">Choose {{ activeSlotLabel }}</div>
                 <div style="height:52px;border-radius:99px;background:var(--ink-2);display:flex;align-items:center;gap:10px;padding:0 18px;color:var(--grey-400);">
                   <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Search" size="{{ 20 }}" hint-size="20px,20px"></x-import>
-                  <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="Search or type a new name" style="flex:1;background:transparent;border:none;outline:none;color:#fff;font:400 15px/1 var(--font-sans);">
+                  <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="Search or type a new name" style="flex:1;background:transparent;border:none;outline:none;color:var(--white);font:400 15px/1 var(--font-sans);">
                 </div>
                 <sc-if value="{{ canAddNew }}" hint-placeholder-val="{{ false }}">
-                  <div onClick="{{ addNew }}" style="height:56px;border-radius:99px;border:1px dashed var(--accent,#d4f25c);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;">
-                    <div style="width:40px;height:40px;border-radius:50%;background:var(--accent,#d4f25c);color:var(--ink-1);display:flex;align-items:center;justify-content:center;">
+                  <div onClick="{{ addNew }}" style="height:56px;border-radius:99px;border:1px dashed var(--accent);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;">
+                    <div style="width:40px;height:40px;border-radius:50%;background:var(--accent);color:var(--ink-1);display:flex;align-items:center;justify-content:center;">
                       <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 20 }}" strokeWidth="{{ 2.2 }}" hint-size="20px,20px"></x-import>
                     </div>
                     <div style="font:500 15px/1 var(--font-sans);">Add “{{ search }}” as New Player</div>
@@ -311,7 +311,7 @@ input::placeholder,textarea::placeholder{color:#8f8f91;}
               </div>
             </sc-for>
             <sc-if value="{{ canAddGame }}" hint-placeholder-val="{{ true }}">
-              <button onClick="{{ addGame }}" style="height:56px;border-radius:99px;background:transparent;border:1px solid var(--ink-4);color:#fff;font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;">
+              <button onClick="{{ addGame }}" style="height:56px;border-radius:99px;background:transparent;border:1px solid var(--ink-4);color:var(--white);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;">
                 <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 18 }}" hint-size="18px,18px"></x-import>
                 Add Game {{ nextGameNo }}
               </button>
@@ -330,11 +330,11 @@ input::placeholder,textarea::placeholder{color:#8f8f91;}
             </div>
             <div style="display:flex;flex-direction:column;gap:10px;">
               <div style="font:500 15px/1 var(--font-sans);">What Worked? <span style="color:var(--grey-400);font-weight:400;">Optional</span></div>
-              <textarea value="{{ log.worked }}" onChange="{{ onWorked }}" rows="3" placeholder="Net play, serve variation…" style="background:var(--ink-2);border:none;outline:none;border-radius:22px;padding:16px 18px;color:#fff;font:400 15px/1.5 var(--font-sans);resize:none;"></textarea>
+              <textarea value="{{ log.worked }}" onChange="{{ onWorked }}" rows="3" placeholder="Net play, serve variation…" style="background:var(--ink-2);border:none;outline:none;border-radius:22px;padding:16px 18px;color:var(--white);font:400 15px/1.5 var(--font-sans);resize:none;"></textarea>
             </div>
             <div style="display:flex;flex-direction:column;gap:10px;">
               <div style="font:500 15px/1 var(--font-sans);">Why Did I Lose Points? <span style="color:var(--grey-400);font-weight:400;">Optional</span></div>
-              <textarea value="{{ log.lost }}" onChange="{{ onLost }}" rows="3" placeholder="Backhand clears, footwork…" style="background:var(--ink-2);border:none;outline:none;border-radius:22px;padding:16px 18px;color:#fff;font:400 15px/1.5 var(--font-sans);resize:none;"></textarea>
+              <textarea value="{{ log.lost }}" onChange="{{ onLost }}" rows="3" placeholder="Backhand clears, footwork…" style="background:var(--ink-2);border:none;outline:none;border-radius:22px;padding:16px 18px;color:var(--white);font:400 15px/1.5 var(--font-sans);resize:none;"></textarea>
             </div>
           </div>
         </sc-if>
@@ -368,7 +368,7 @@ input::placeholder,textarea::placeholder{color:#8f8f91;}
             <div onClick="{{ p.open }}" style="display:flex;align-items:center;gap:12px;cursor:pointer;">
               <div style="width:40px;height:40px;border-radius:50%;background:var(--ink-4);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
               <div style="font:500 16px/1 var(--font-sans);flex:1;">{{ p.name }}</div>
-              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 20 }}" color="#8f8f91" hint-size="20px,20px"></x-import>
+              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 20 }}" color="var(--grey-400)" hint-size="20px,20px"></x-import>
             </div>
           </sc-for>
         </div>
@@ -389,7 +389,7 @@ input::placeholder,textarea::placeholder{color:#8f8f91;}
             <div style="font:500 19px/1.3 var(--font-sans);">Notes</div>
             <div style="background:var(--ink-2);border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:16px;">
               <div style="display:flex;flex-direction:column;gap:6px;">
-                <div style="font:400 13px/1 var(--font-sans);color:var(--accent,#d4f25c);">What Worked</div>
+                <div style="font:400 13px/1 var(--font-sans);color:var(--accent);">What Worked</div>
                 <div style="font:400 15px/1.5 var(--font-sans);">{{ detail.worked }}</div>
               </div>
               <div style="display:flex;flex-direction:column;gap:6px;">
@@ -428,11 +428,11 @@ input::placeholder,textarea::placeholder{color:#8f8f91;}
         </div>
         <div style="height:52px;border-radius:99px;background:var(--ink-2);display:flex;align-items:center;gap:10px;padding:0 18px;color:var(--grey-400);">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Search" size="{{ 20 }}" hint-size="20px,20px"></x-import>
-          <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="Search or type a new name" style="flex:1;background:transparent;border:none;outline:none;color:#fff;font:400 15px/1 var(--font-sans);">
+          <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="Search or type a new name" style="flex:1;background:transparent;border:none;outline:none;color:var(--white);font:400 15px/1 var(--font-sans);">
         </div>
         <sc-if value="{{ canAddNew }}" hint-placeholder-val="{{ false }}">
-          <div onClick="{{ addPlayerOnly }}" style="height:56px;border-radius:99px;border:1px dashed var(--accent,#d4f25c);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;">
-            <div style="width:40px;height:40px;border-radius:50%;background:var(--accent,#d4f25c);color:var(--ink-1);display:flex;align-items:center;justify-content:center;">
+          <div onClick="{{ addPlayerOnly }}" style="height:56px;border-radius:99px;border:1px dashed var(--accent);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;">
+            <div style="width:40px;height:40px;border-radius:50%;background:var(--accent);color:var(--ink-1);display:flex;align-items:center;justify-content:center;">
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 20 }}" strokeWidth="{{ 2.2 }}" hint-size="20px,20px"></x-import>
             </div>
             <div style="font:500 15px/1 var(--font-sans);">Add “{{ search }}”</div>
@@ -446,7 +446,7 @@ input::placeholder,textarea::placeholder{color:#8f8f91;}
                 <div style="font:500 15px/1.2 var(--font-sans);">{{ p.name }}</div>
                 <div style="font:400 12px/1.2 var(--font-sans);color:var(--grey-400);">{{ p.sub }}</div>
               </div>
-              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 20 }}" color="#8f8f91" style="margin-right:10px" hint-size="20px,20px"></x-import>
+              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 20 }}" color="var(--grey-400)" style="margin-right:10px" hint-size="20px,20px"></x-import>
             </div>
           </sc-for>
         </div>
@@ -536,7 +536,7 @@ input::placeholder,textarea::placeholder{color:#8f8f91;}
 
   <!-- Toast -->
   <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
-    <div style="position:absolute;top:54px;left:50%;transform:translateX(-50%);height:44px;padding:0 18px;border-radius:99px;background:#fff;color:var(--ink-1);display:flex;align-items:center;gap:8px;font:500 14px/1 var(--font-sans);white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.35);">
+    <div style="position:absolute;top:54px;left:50%;transform:translateX(-50%);height:44px;padding:0 18px;border-radius:99px;background:var(--white);color:var(--ink-1);display:flex;align-items:center;gap:8px;font:500 14px/1 var(--font-sans);white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.35);">
       <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 18 }}" strokeWidth="{{ 2.2 }}" hint-size="18px,18px"></x-import>
       {{ toast }}
     </div>
@@ -602,14 +602,14 @@ class Component extends DCLogic {
   }
   teamA(m) { return m.type === 'Doubles' ? 'You & ' + this.first(m.partner) : 'You'; }
   teamB(m) { return m.type === 'Doubles' ? m.opps.map(o => this.first(o)).join(' & ') : this.nm(m.opps[0]); }
-  badge(win) { return win ? { badgeBg: 'var(--accent,#d4f25c)', badgeFg: 'var(--ink-1)', resultLabel: 'Win' } : { badgeBg: 'var(--ink-4)', badgeFg: 'var(--grey-200)', resultLabel: 'Loss' }; }
-  dot(win) { return win ? { l: 'W', bg: 'var(--accent,#d4f25c)', fg: 'var(--ink-1)' } : { l: 'L', bg: 'var(--ink-4)', fg: 'var(--grey-200)' }; }
+  badge(win) { return win ? { badgeBg: 'var(--accent)', badgeFg: 'var(--ink-1)', resultLabel: 'Win' } : { badgeBg: 'var(--ink-4)', badgeFg: 'var(--grey-200)', resultLabel: 'Loss' }; }
+  dot(win) { return win ? { l: 'W', bg: 'var(--accent)', fg: 'var(--ink-1)' } : { l: 'L', bg: 'var(--ink-4)', fg: 'var(--grey-200)' }; }
   card(m) {
     const r = this.res(m.games);
     return {
       id: m.id, type: m.type, dateLabel: this.date(m.date), teamA: this.teamA(m), teamB: this.teamB(m), gamesWon: `${r.us}–${r.them}`,
       ...this.badge(r.win),
-      games: m.games.map(g => ({ s: `${g[0]}–${g[1]}`, fg: g[0] > g[1] ? '#fff' : 'var(--grey-400)' })),
+      games: m.games.map(g => ({ s: `${g[0]}–${g[1]}`, fg: g[0] > g[1] ? 'var(--white)' : 'var(--grey-400)' })),
       open: () => this.go('detail', { detailId: m.id })
     };
   }
@@ -661,7 +661,7 @@ class Component extends DCLogic {
   addPlayer(name) { const id = 'p' + Date.now(); this.setState(s => ({ players: [...s.players, { id, name }] })); return id; }
 
   renderVals() {
-    const s = this.state, A = 'var(--accent,#d4f25c)';
+    const s = this.state, A = 'var(--accent)';
     const all = s.matches;
     const overall = this.rec(all);
     const q = s.search.trim().toLowerCase();
@@ -732,11 +732,11 @@ class Component extends DCLogic {
       const roles = { partner: 'Partner', opp1: log.type === 'Doubles' ? 'Opponent 1' : 'Opponent', opp2: 'Opponent 2' };
       const slot = k => {
         const id = log[k], act = log.active === k;
-        return { role: roles[k], name: id ? this.nm(id) : 'Select ' + roles[k], initials: id ? this.ini(id) : '+', fg: id ? '#fff' : 'var(--grey-400)',
-          avBg: id ? 'var(--ink-4)' : 'transparent', avFg: act ? A : '#fff', border: act ? A : 'transparent',
+        return { role: roles[k], name: id ? this.nm(id) : 'Select ' + roles[k], initials: id ? this.ini(id) : '+', fg: id ? 'var(--white)' : 'var(--grey-400)',
+          avBg: id ? 'var(--ink-4)' : 'transparent', avFg: act ? A : 'var(--white)', border: act ? A : 'transparent',
           select: () => this.setLog({ active: k }) };
       };
-      const me = { role: 'Me', name: this.nm('me'), initials: this.ini('me'), fg: '#fff', avBg: A, avFg: 'var(--ink-1)', border: 'transparent', select: () => {} };
+      const me = { role: 'Me', name: this.nm('me'), initials: this.ini('me'), fg: 'var(--white)', avBg: A, avFg: 'var(--ink-1)', border: 'transparent', select: () => {} };
       v.sideA = log.type === 'Doubles' ? [me, slot('partner')] : [me];
       v.sideB = log.type === 'Doubles' ? [slot('opp1'), slot('opp2')] : [slot('opp1')];
       v.hasActiveSlot = !!log.active; v.activeSlotLabel = log.active ? roles[log.active] : '';
@@ -755,10 +755,10 @@ class Component extends DCLogic {
       v.gameRows = log.games.map((g, i) => {
         const [a, b] = this.scoreOf(g, t), us = g.w === 'us';
         return { label: 'Game ' + (i + 1), a: String(a), b: String(b), aName, bName,
-          aFg: a > b ? '#fff' : 'var(--grey-400)', bFg: b > a ? '#fff' : 'var(--grey-400)',
+          aFg: a > b ? 'var(--white)' : 'var(--grey-400)', bFg: b > a ? 'var(--white)' : 'var(--grey-400)',
           usLabel: 'We Won', themLabel: 'They Won',
           usBg: us ? A : 'transparent', usFg: us ? 'var(--ink-1)' : 'var(--grey-200)',
-          themBg: !us ? '#fff' : 'transparent', themFg: !us ? 'var(--ink-1)' : 'var(--grey-200)',
+          themBg: !us ? 'var(--white)' : 'transparent', themFg: !us ? 'var(--ink-1)' : 'var(--grey-200)',
           loserLabel: (us ? bName : aName) + ' Score',
           setUs: () => upd(i, x => ({ ...x, w: 'us' })), setThem: () => upd(i, x => ({ ...x, w: 'them' })),
           dec: () => upd(i, x => ({ ...x, l: Math.max(0, x.l - 1) })), inc: () => upd(i, x => ({ ...x, l: Math.min(cap - 1, x.l + 1) })),
@@ -780,12 +780,12 @@ class Component extends DCLogic {
       const r = this.res(m.games);
       const openP = id => () => this.go('player', { playerId: id });
       v.detail = {
-        dateLong: this.date(m.date, true), type: m.type, resultWord: r.win ? 'Win' : 'Loss', resultColor: r.win ? A : '#fff', gamesWon: `${r.us}–${r.them}`,
+        dateLong: this.date(m.date, true), type: m.type, resultWord: r.win ? 'Win' : 'Loss', resultColor: r.win ? A : 'var(--white)', gamesWon: `${r.us}–${r.them}`,
         sideA: [{ name: 'You · ' + this.nm('me'), initials: this.ini('me'), avBg: A, avFg: 'var(--ink-1)' }]
-          .concat(m.partner ? [{ name: this.nm(m.partner), initials: this.ini(m.partner), avBg: 'var(--ink-4)', avFg: '#fff' }] : []),
+          .concat(m.partner ? [{ name: this.nm(m.partner), initials: this.ini(m.partner), avBg: 'var(--ink-4)', avFg: 'var(--white)' }] : []),
         sideB: m.opps.map(id => ({ name: this.nm(id), initials: this.ini(id), open: openP(id) })),
         aShort: m.partner ? 'You & ' + this.first(m.partner).slice(0, 1) : 'You',
-        rows: m.games.map((g, i) => ({ label: 'Game ' + (i + 1), a: String(g[0]), b: String(g[1]), aFg: g[0] > g[1] ? '#fff' : 'var(--grey-400)', bFg: g[1] > g[0] ? '#fff' : 'var(--grey-400)' })),
+        rows: m.games.map((g, i) => ({ label: 'Game ' + (i + 1), a: String(g[0]), b: String(g[1]), aFg: g[0] > g[1] ? 'var(--white)' : 'var(--grey-400)', bFg: g[1] > g[0] ? 'var(--white)' : 'var(--grey-400)' })),
         hasNotes: !!(m.worked || m.lost), worked: m.worked || '—', lost: m.lost || '—',
         h2h: m.opps.map(id => {
           const tot = this.vs(id), si = this.vs(id, 'Singles'), du = this.vs(id, 'Doubles');
@@ -807,7 +807,7 @@ class Component extends DCLogic {
     if (v.isPlayer) {
       const id = s.playerId, o = this.vs(id), si = this.vs(id, 'Singles'), du = this.vs(id, 'Doubles'), w = this.with(id);
       const inv = all.filter(m => m.opps.includes(id) || m.partner === id);
-      const st = (label, r) => ({ label, value: r.n ? r.label : '—', sub: r.n ? r.pctStr + ' win rate' : 'No matches', fg: r.n && r.pct >= .5 ? A : '#fff' });
+      const st = (label, r) => ({ label, value: r.n ? r.label : '—', sub: r.n ? r.pctStr + ' win rate' : 'No matches', fg: r.n && r.pct >= .5 ? A : 'var(--white)' });
       v.profile = { name: this.nm(id), initials: this.ini(id), sub: `${inv.length} matches together or against`,
         stats: [st('Overall H2H', o), st('Singles H2H', si), st('Doubles H2H', du), st('As Partner', w)],
         recent: inv.slice(0, 5).map(m => this.card(m)) };
