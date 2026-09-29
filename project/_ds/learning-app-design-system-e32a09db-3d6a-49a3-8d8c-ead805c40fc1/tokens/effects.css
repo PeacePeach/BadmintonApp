@@ -1,0 +1,9 @@
+:root{
+--shadow-none:none;
+--shadow-tooltip:0 2px 8px rgba(0,0,0,.12);
+--shadow-stack:0 8px 0 -2px var(--ink-4);
+--ease-out:cubic-bezier(.2,.7,.2,1);/* @kind other */
+--dur-fast:140ms;/* @kind other */
+--dur-base:220ms;/* @kind other */
+--gradient-progress:linear-gradient(90deg,var(--progress-start),var(--progress-end));
+}

@@ -1,0 +1,43 @@
+:root{
+/* Ink / dark surfaces (sampled) */
+--ink-0:#000000;
+--ink-1:#1b1a1d;
+--ink-2:#2a292e;
+--ink-3:#2c2b30;
+--ink-4:#3a393e;
+--ink-5:#4f4e53;
+/* Neutrals on dark */
+--grey-400:#8f8f91;
+--grey-200:#c9c9cb;
+--white:#ffffff;
+/* Pastels */
+--lilac-500:#c5afe4;
+--lilac-600:#b197d2;
+--lilac-300:#e0d3f2;
+--sage-500:#cfdecb;
+--sage-300:#e8e9e0;
+--sage-100:#eaf0e7;
+--butter-500:#fee7a6;
+--butter-300:#fff3cf;
+/* Semantic */
+--bg-app:var(--ink-1);
+--bg-canvas:var(--ink-2);
+--surface-raised:var(--ink-2);
+--surface-chip:var(--ink-3);
+--surface-card-lilac:var(--lilac-500);
+--surface-card-sage:var(--sage-500);
+--surface-card-butter:var(--butter-500);
+--surface-inset-light:rgba(255,255,255,.55);
+--text-on-dark:var(--white);
+--text-on-dark-muted:var(--grey-400);
+--text-on-dark-subtle:var(--ink-5);
+--text-on-light:var(--ink-1);
+--text-on-light-muted:rgba(27,26,29,.55);
+--action-primary:var(--ink-0);
+--action-on-primary:var(--white);
+--border-dark:var(--ink-4);
+--border-active:var(--grey-200);
+--progress-start:var(--lilac-600);
+--progress-end:#2f2b33;
+--progress-track:var(--white);
+}

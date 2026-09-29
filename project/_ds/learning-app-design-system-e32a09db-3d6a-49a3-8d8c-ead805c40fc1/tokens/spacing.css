@@ -1,0 +1,9 @@
+:root{
+--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;
+--screen-pad:20px;
+--card-pad:22px;
+--stack-gap:12px;
+--radius-sm:10px;--radius-md:20px;--radius-lg:26px;--radius-xl:34px;--radius-pill:999px;
+--size-icon-btn:56px;--size-action:50px;--size-chip:44px;--size-avatar:58px;
+--screen-w:390px;
+}
