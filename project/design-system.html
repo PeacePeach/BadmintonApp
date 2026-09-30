@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link
+    rel="stylesheet"
+    href="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/colors.css"
+  />
+
+  <title>Badminton Design System</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 40px;
+      background: var(--ink-1);
+      color: var(--white);
+      font-family: Arial, sans-serif;
+    }
+
+    h1 {
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      margin-top: 40px;
+      margin-bottom: 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+    }
+
+    .swatch {
+      border: 1px solid var(--ink-4);
+      border-radius: 16px;
+      overflow: hidden;
+      background: var(--ink-2);
+    }
+
+    .color {
+      height: 100px;
+    }
+
+    .label {
+      padding: 12px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Badminton Design System</h1>
+
+  <h2>Accent</h2>
+  <div class="grid">
+    <div class="swatch">
+      <div class="color" style="background: var(--accent);"></div>
+      <div class="label">--accent</div>
+    </div>
+  </div>
+
+  <h2>Ink</h2>
+  <div class="grid">
+    <div class="swatch">
+      <div class="color" style="background: var(--ink-0);"></div>
+      <div class="label">--ink-0</div>
+    </div>
+    <div class="swatch">
+      <div class="color" style="background: var(--ink-1);"></div>
+      <div class="label">--ink-1</div>
+    </div>
+    <div class="swatch">
+      <div class="color" style="background: var(--ink-2);"></div>
+      <div class="label">--ink-2</div>
+    </div>
+    <div class="swatch">
+      <div class="color" style="background: var(--ink-3);"></div>
+      <div class="label">--ink-3</div>
+    </div>
+    <div class="swatch">
+      <div class="color" style="background: var(--ink-4);"></div>
+      <div class="label">--ink-4</div>
+    </div>
+    <div class="swatch">
+      <div class="color" style="background: var(--ink-5);"></div>
+      <div class="label">--ink-5</div>
+    </div>
+  </div>
+
+  <h2>Neutral</h2>
+  <div class="grid">
+    <div class="swatch">
+      <div class="color" style="background: var(--grey-400);"></div>
+      <div class="label">--grey-400</div>
+    </div>
+    <div class="swatch">
+      <div class="color" style="background: var(--grey-200);"></div>
+      <div class="label">--grey-200</div>
+    </div>
+    <div class="swatch">
+      <div class="color" style="background: var(--white);"></div>
+      <div class="label">--white</div>
+    </div>
+  </div>
+</body>
+</html>
