@@ -17,16 +17,16 @@
 <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
 <script src="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/_ds_bundle.js"></script>
 <style>
-body{margin:0;background:#111013;font-family:"Poppins",system-ui,sans-serif;}
+body{margin:0;background:var(--bg-primary);font-family:"Poppins",system-ui,sans-serif;}
 *{box-sizing:border-box;}
 *::-webkit-scrollbar{display:none;}
-a{color:var(--accent);} a:hover{color:var(--white);}
+a{color:var(--action-primary);} a:hover{color:var(--text-primary);}
 input,textarea,button{font-family:inherit;}
-input::placeholder,textarea::placeholder{color:var(--grey-400);}
+input::placeholder,textarea::placeholder{color:var(--text-secondary);}
 </style>
 </helmet>
 <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 16px;">
-<div data-screen-label="Phone" style="--accent: {{ accent }}; position:relative;width:390px;height:844px;border-radius:48px;background:var(--ink-1);overflow:hidden;color:var(--white);box-shadow:0 0 0 10px #232226;">
+<div data-screen-label="Phone" style="--action-primary: {{ accent }}; position:relative;width:390px;height:844px;border-radius:48px;background:var(--bg-primary);overflow:hidden;color:var(--text-primary);box-shadow:0 0 0 10px #232226;">
 
   <div ref="{{ scrollRef }}" style="position:absolute;inset:0;overflow-y:auto;padding:58px 20px 120px;">
     <div style="position:absolute;top:18px;left:34px;font:500 15px/1 var(--font-sans);">9:41</div>
@@ -39,18 +39,18 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" size="{{ 48 }}" label="Menu" onClick="{{ toggleMenu }}" hint-size="48px,48px"></x-import>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-          <div style="background:var(--ink-2);border-radius:26px;padding:20px 22px;display:flex;flex-direction:column;gap:8px;">
-            <div style="font:400 13px/1 var(--font-sans);color:var(--grey-400);">Total Matches</div>
+          <div style="background:var(--surface-primary);border-radius:26px;padding:20px 22px;display:flex;flex-direction:column;gap:8px;">
+            <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">Total Matches</div>
             <div style="font:500 40px/1 var(--font-sans);">{{ overall.n }}</div>
-            <div style="font:400 13px/1 var(--font-sans);color:var(--grey-400);">{{ overall.label }} W–L</div>
+            <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ overall.label }} W–L</div>
           </div>
-          <div style="background:var(--ink-2);border-radius:26px;padding:20px 22px;display:flex;flex-direction:column;gap:8px;">
-            <div style="font:400 13px/1 var(--font-sans);color:var(--grey-400);">Win Rate</div>
-            <div style="font:500 40px/1 var(--font-sans);color:var(--accent);">{{ overall.pctStr }}</div>
-            <div style="height:6px;border-radius:99px;background:var(--ink-4);overflow:hidden;margin-top:6px;"><div style="height:100%;border-radius:99px;background:var(--accent);width: {{ overall.pctStr }};"></div></div>
+          <div style="background:var(--surface-primary);border-radius:26px;padding:20px 22px;display:flex;flex-direction:column;gap:8px;">
+            <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">Win Rate</div>
+            <div style="font:500 40px/1 var(--font-sans);color:var(--action-primary);">{{ overall.pctStr }}</div>
+            <div style="height:6px;border-radius:99px;background:var(--border-default);overflow:hidden;margin-top:6px;"><div style="height:100%;border-radius:99px;background:var(--status-win);width: {{ overall.pctStr }};"></div></div>
           </div>
         </div>
-        <button onClick="{{ startLog }}" style="height:60px;border:none;border-radius:999px;background:var(--accent);color:var(--ink-1);font:600 17px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;" style-active="transform:scale(.97);">
+        <button onClick="{{ startLog }}" style="height:60px;border:none;border-radius:999px;background:var(--action-primary);color:var(--action-on-primary);font:600 17px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;" style-active="transform:scale(.97);">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 22 }}" strokeWidth="{{ 2.2 }}" hint-size="22px,22px"></x-import>
           Log Match
         </button>
@@ -61,21 +61,21 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
         </div>
         <div style="display:flex;flex-direction:column;gap:10px;">
           <sc-for list="{{ matchCards }}" as="m" hint-placeholder-count="4">
-            <div onClick="{{ m.open }}" style="background:var(--ink-2);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;cursor:pointer;">
+            <div onClick="{{ m.open }}" style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;cursor:pointer;">
               <div style="display:flex;justify-content:space-between;align-items:center;">
-                <div style="font:400 13px/1 var(--font-sans);color:var(--grey-400);">{{ m.dateLabel }} · {{ m.type }}</div>
+                <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ m.dateLabel }} · {{ m.type }}</div>
                 <div style="height:26px;padding:0 12px;border-radius:99px;display:flex;align-items:center;font:600 12px/1 var(--font-sans);background: {{ m.badgeBg }};color: {{ m.badgeFg }};">{{ m.resultLabel }}</div>
               </div>
               <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;">
                 <div style="display:flex;flex-direction:column;gap:3px;min-width:0;">
                   <div style="font:500 16px/1.3 var(--font-sans);">{{ m.teamA }}</div>
-                  <div style="font:400 15px/1.3 var(--font-sans);color:var(--grey-200);">vs {{ m.teamB }}</div>
+                  <div style="font:400 15px/1.3 var(--font-sans);color:var(--neutral-600);">vs {{ m.teamB }}</div>
                 </div>
                 <div style="font:500 28px/1 var(--font-sans);flex-shrink:0;">{{ m.gamesWon }}</div>
               </div>
               <div style="display:flex;gap:6px;">
                 <sc-for list="{{ m.games }}" as="g" hint-placeholder-count="2">
-                  <div style="height:28px;padding:0 12px;border-radius:99px;background:var(--ink-3);display:flex;align-items:center;font:500 13px/1 var(--font-sans);color: {{ g.fg }};">{{ g.s }}</div>
+                  <div style="height:28px;padding:0 12px;border-radius:99px;background:var(--surface-muted);display:flex;align-items:center;font:500 13px/1 var(--font-sans);color: {{ g.fg }};">{{ g.s }}</div>
                 </sc-for>
               </div>
             </div>
@@ -91,16 +91,16 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
           <div style="font:600 32px/1.2 var(--font-sans);">Insights</div>
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" size="{{ 48 }}" label="Menu" onClick="{{ toggleMenu }}" hint-size="48px,48px"></x-import>
         </div>
-        <div style="background:var(--ink-2);border-radius:34px;padding:24px 22px;display:flex;flex-direction:column;gap:18px;">
+        <div style="background:var(--surface-primary);border-radius:34px;padding:24px 22px;display:flex;flex-direction:column;gap:18px;">
           <div style="display:flex;justify-content:space-between;align-items:flex-end;">
             <div style="display:flex;flex-direction:column;gap:8px;">
-              <div style="font:400 13px/1 var(--font-sans);color:var(--grey-400);">Overall Win Rate</div>
-              <div style="font:500 52px/1 var(--font-sans);color:var(--accent);">{{ overall.pctStr }}</div>
+              <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">Overall Win Rate</div>
+              <div style="font:500 52px/1 var(--font-sans);color:var(--action-primary);">{{ overall.pctStr }}</div>
             </div>
-            <div style="font:400 15px/1 var(--font-sans);color:var(--grey-200);">{{ overall.label }} W–L</div>
+            <div style="font:400 15px/1 var(--font-sans);color:var(--neutral-600);">{{ overall.label }} W–L</div>
           </div>
           <div style="display:flex;flex-direction:column;gap:10px;">
-            <div style="font:400 13px/1 var(--font-sans);color:var(--grey-400);">Last 10 · Newest Right</div>
+            <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">Last 10 · Newest Right</div>
             <div style="display:flex;gap:6px;">
               <sc-for list="{{ form }}" as="d" hint-placeholder-count="10">
                 <div style="flex:1;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;font:600 11px/1 var(--font-sans);background: {{ d.bg }};color: {{ d.fg }};">{{ d.l }}</div>
@@ -110,26 +110,26 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <sc-for list="{{ typeStats }}" as="t" hint-placeholder-count="2">
-            <div style="background:var(--ink-2);border-radius:26px;padding:20px 22px;display:flex;flex-direction:column;gap:8px;">
-              <div style="font:400 13px/1 var(--font-sans);color:var(--grey-400);">{{ t.label }}</div>
+            <div style="background:var(--surface-primary);border-radius:26px;padding:20px 22px;display:flex;flex-direction:column;gap:8px;">
+              <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ t.label }}</div>
               <div style="font:500 36px/1 var(--font-sans);">{{ t.pctStr }}</div>
-              <div style="font:400 13px/1 var(--font-sans);color:var(--grey-400);">{{ t.rec }} W–L</div>
+              <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ t.rec }} W–L</div>
             </div>
           </sc-for>
         </div>
         <div style="display:flex;flex-direction:column;gap:12px;">
           <div style="font:500 19px/1.3 var(--font-sans);">Head-to-Head</div>
-          <div style="background:var(--ink-2);border-radius:26px;padding:6px 20px;display:flex;flex-direction:column;">
+          <div style="background:var(--surface-primary);border-radius:26px;padding:6px 20px;display:flex;flex-direction:column;">
             <sc-for list="{{ h2hBoard }}" as="r" hint-placeholder-count="5">
               <div onClick="{{ r.open }}" style="display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;padding:12px 0;cursor:pointer;">
-                <div style="width:40px;height:40px;border-radius:50%;background:var(--ink-4);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ r.initials }}</div>
+                <div style="width:40px;height:40px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ r.initials }}</div>
                 <div style="display:flex;flex-direction:column;gap:6px;min-width:0;">
                   <div style="font:500 15px/1.2 var(--font-sans);">{{ r.name }}</div>
-                  <div style="height:4px;border-radius:99px;background:var(--ink-4);overflow:hidden;"><div style="height:100%;background:var(--accent);width: {{ r.pctStr }};"></div></div>
+                  <div style="height:4px;border-radius:99px;background:var(--border-default);overflow:hidden;"><div style="height:100%;background:var(--status-win);width: {{ r.pctStr }};"></div></div>
                 </div>
                 <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:52px;">
                   <div style="font:500 15px/1 var(--font-sans);">{{ r.label }}</div>
-                  <div style="font:400 12px/1 var(--font-sans);color:var(--grey-400);">{{ r.pctStr }}</div>
+                  <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);">{{ r.pctStr }}</div>
                 </div>
               </div>
             </sc-for>
@@ -137,17 +137,17 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
         </div>
         <div style="display:flex;flex-direction:column;gap:12px;">
           <div style="font:500 19px/1.3 var(--font-sans);">Partners</div>
-          <div style="background:var(--ink-2);border-radius:26px;padding:6px 20px;display:flex;flex-direction:column;">
+          <div style="background:var(--surface-primary);border-radius:26px;padding:6px 20px;display:flex;flex-direction:column;">
             <sc-for list="{{ partnerBoard }}" as="r" hint-placeholder-count="3">
               <div onClick="{{ r.open }}" style="display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;padding:12px 0;cursor:pointer;">
-                <div style="width:40px;height:40px;border-radius:50%;background:var(--ink-4);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ r.initials }}</div>
+                <div style="width:40px;height:40px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ r.initials }}</div>
                 <div style="display:flex;flex-direction:column;gap:6px;min-width:0;">
                   <div style="font:500 15px/1.2 var(--font-sans);">{{ r.name }}</div>
-                  <div style="height:4px;border-radius:99px;background:var(--ink-4);overflow:hidden;"><div style="height:100%;background:var(--accent);width: {{ r.pctStr }};"></div></div>
+                  <div style="height:4px;border-radius:99px;background:var(--border-default);overflow:hidden;"><div style="height:100%;background:var(--status-win);width: {{ r.pctStr }};"></div></div>
                 </div>
                 <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:52px;">
                   <div style="font:500 15px/1 var(--font-sans);">{{ r.label }}</div>
-                  <div style="font:400 12px/1 var(--font-sans);color:var(--grey-400);">{{ r.pctStr }}</div>
+                  <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);">{{ r.pctStr }}</div>
                 </div>
               </div>
             </sc-for>
@@ -157,27 +157,27 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
           <div style="font:500 19px/1.3 var(--font-sans);">Trends</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
             <sc-for list="{{ trends }}" as="t" hint-placeholder-count="2">
-              <div style="background:var(--ink-2);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:8px;">
-                <div style="font:400 13px/1.3 var(--font-sans);color:var(--grey-400);">{{ t.label }}</div>
+              <div style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:8px;">
+                <div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">{{ t.label }}</div>
                 <div style="font:500 26px/1 var(--font-sans);">{{ t.value }}</div>
-                <div style="font:400 12px/1.3 var(--font-sans);color:var(--grey-400);">{{ t.sub }}</div>
+                <div style="font:400 12px/1.3 var(--font-sans);color:var(--text-secondary);">{{ t.sub }}</div>
               </div>
             </sc-for>
           </div>
-          <div style="background:var(--ink-2);border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:16px;">
+          <div style="background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:16px;">
             <div style="display:flex;flex-direction:column;gap:10px;">
-              <div style="font:400 13px/1 var(--font-sans);color:var(--grey-400);">From Your Notes · What Worked</div>
+              <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">From Your Notes · What Worked</div>
               <div style="display:flex;flex-wrap:wrap;gap:8px;">
                 <sc-for list="{{ kwWorked }}" as="k" hint-placeholder-count="3">
-                  <div style="height:34px;padding:0 14px;border-radius:99px;background:var(--ink-3);border:1px solid var(--accent);display:flex;align-items:center;gap:8px;font:400 14px/1 var(--font-sans);">{{ k.label }}<span style="color:var(--accent);font-weight:600;">{{ k.count }}</span></div>
+                  <div style="height:34px;padding:0 14px;border-radius:99px;background:var(--surface-muted);border:1px solid var(--action-primary);display:flex;align-items:center;gap:8px;font:400 14px/1 var(--font-sans);">{{ k.label }}<span style="color:var(--action-primary);font-weight:600;">{{ k.count }}</span></div>
                 </sc-for>
               </div>
             </div>
             <div style="display:flex;flex-direction:column;gap:10px;">
-              <div style="font:400 13px/1 var(--font-sans);color:var(--grey-400);">From Your Notes · Lost Points</div>
+              <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">From Your Notes · Lost Points</div>
               <div style="display:flex;flex-wrap:wrap;gap:8px;">
                 <sc-for list="{{ kwLost }}" as="k" hint-placeholder-count="3">
-                  <div style="height:34px;padding:0 14px;border-radius:99px;background:var(--ink-3);display:flex;align-items:center;gap:8px;font:400 14px/1 var(--font-sans);color:var(--grey-200);">{{ k.label }}<span style="color:var(--white);font-weight:600;">{{ k.count }}</span></div>
+                  <div style="height:34px;padding:0 14px;border-radius:99px;background:var(--surface-muted);display:flex;align-items:center;gap:8px;font:400 14px/1 var(--font-sans);color:var(--neutral-600);">{{ k.label }}<span style="color:var(--text-primary);font-weight:600;">{{ k.count }}</span></div>
                 </sc-for>
               </div>
             </div>
@@ -193,7 +193,7 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="{{ logBackIcon }}" size="{{ 48 }}" label="Back" onClick="{{ logBack }}" hint-size="48px,48px"></x-import>
           <div style="display:flex;flex-direction:column;gap:4px;">
             <div style="font:500 19px/1.2 var(--font-sans);">Log Match</div>
-            <div style="font:400 13px/1 var(--font-sans);color:var(--grey-400);">Step {{ log.step }} of 4</div>
+            <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">Step {{ log.step }} of 4</div>
           </div>
         </div>
         <div style="display:flex;gap:6px;">
@@ -206,13 +206,13 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
         <sc-if value="{{ step1 }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:12px;">
             <sc-for list="{{ typeOptions }}" as="o" hint-placeholder-count="2">
-              <div onClick="{{ o.select }}" style="background:var(--ink-2);border-radius:26px;padding:24px 22px;display:flex;align-items:center;gap:18px;cursor:pointer;border:1.5px solid {{ o.border }};">
-                <div style="width:60px;height:60px;border-radius:50%;background:var(--ink-4);display:flex;align-items:center;justify-content:center;">
+              <div onClick="{{ o.select }}" style="background:var(--surface-primary);border-radius:26px;padding:24px 22px;display:flex;align-items:center;gap:18px;cursor:pointer;border:1.5px solid {{ o.border }};">
+                <div style="width:60px;height:60px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;">
                   <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ o.icon }}" size="{{ 26 }}" hint-size="26px,26px"></x-import>
                 </div>
                 <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
                   <div style="font:500 22px/1.2 var(--font-sans);">{{ o.label }}</div>
-                  <div style="font:400 14px/1.3 var(--font-sans);color:var(--grey-400);">{{ o.sub }}</div>
+                  <div style="font:400 14px/1.3 var(--font-sans);color:var(--text-secondary);">{{ o.sub }}</div>
                 </div>
                 <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 22 }}" color="var(--grey-400)" hint-size="22px,22px"></x-import>
               </div>
@@ -222,35 +222,35 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
 
         <sc-if value="{{ step2 }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:20px;">
-            <div style="background:var(--ink-2);border-radius:26px;padding:16px;display:flex;flex-direction:column;gap:10px;">
-              <div style="font:400 12px/1 var(--font-sans);color:var(--grey-400);padding:4px 6px 0;">Your Side</div>
+            <div style="background:var(--surface-primary);border-radius:26px;padding:16px;display:flex;flex-direction:column;gap:10px;">
+              <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding:4px 6px 0;">Your Side</div>
               <sc-for list="{{ sideA }}" as="s" hint-placeholder-count="1">
-                <div onClick="{{ s.select }}" style="height:56px;border-radius:99px;background:var(--ink-3);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;border:1.5px solid {{ s.border }};">
+                <div onClick="{{ s.select }}" style="height:56px;border-radius:99px;background:var(--surface-muted);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;border:1.5px solid {{ s.border }};">
                   <div style="width:40px;height:40px;border-radius:50%;background: {{ s.avBg }};color: {{ s.avFg }};display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ s.initials }}</div>
                   <div style="flex:1;font:500 15px/1 var(--font-sans);color: {{ s.fg }};">{{ s.name }}</div>
-                  <div style="font:400 12px/1 var(--font-sans);color:var(--grey-400);padding-right:12px;">{{ s.role }}</div>
+                  <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding-right:12px;">{{ s.role }}</div>
                 </div>
               </sc-for>
-              <div style="font:500 13px/1 var(--font-sans);color:var(--grey-400);text-align:center;padding:4px 0;">vs</div>
-              <div style="font:400 12px/1 var(--font-sans);color:var(--grey-400);padding:0 6px;">Opponents</div>
+              <div style="font:500 13px/1 var(--font-sans);color:var(--text-secondary);text-align:center;padding:4px 0;">vs</div>
+              <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding:0 6px;">Opponents</div>
               <sc-for list="{{ sideB }}" as="s" hint-placeholder-count="1">
-                <div onClick="{{ s.select }}" style="height:56px;border-radius:99px;background:var(--ink-3);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;border:1.5px solid {{ s.border }};">
+                <div onClick="{{ s.select }}" style="height:56px;border-radius:99px;background:var(--surface-muted);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;border:1.5px solid {{ s.border }};">
                   <div style="width:40px;height:40px;border-radius:50%;background: {{ s.avBg }};color: {{ s.avFg }};display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ s.initials }}</div>
                   <div style="flex:1;font:500 15px/1 var(--font-sans);color: {{ s.fg }};">{{ s.name }}</div>
-                  <div style="font:400 12px/1 var(--font-sans);color:var(--grey-400);padding-right:12px;">{{ s.role }}</div>
+                  <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding-right:12px;">{{ s.role }}</div>
                 </div>
               </sc-for>
             </div>
             <sc-if value="{{ hasActiveSlot }}" hint-placeholder-val="{{ true }}">
               <div style="display:flex;flex-direction:column;gap:12px;">
                 <div style="font:500 17px/1.3 var(--font-sans);">Choose {{ activeSlotLabel }}</div>
-                <div style="height:52px;border-radius:99px;background:var(--ink-2);display:flex;align-items:center;gap:10px;padding:0 18px;color:var(--grey-400);">
+                <div style="height:52px;border-radius:99px;background:var(--surface-primary);display:flex;align-items:center;gap:10px;padding:0 18px;color:var(--text-secondary);">
                   <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Search" size="{{ 20 }}" hint-size="20px,20px"></x-import>
-                  <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="Search or type a new name" style="flex:1;background:transparent;border:none;outline:none;color:var(--white);font:400 15px/1 var(--font-sans);">
+                  <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="Search or type a new name" style="flex:1;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 15px/1 var(--font-sans);">
                 </div>
                 <sc-if value="{{ canAddNew }}" hint-placeholder-val="{{ false }}">
-                  <div onClick="{{ addNew }}" style="height:56px;border-radius:99px;border:1px dashed var(--accent);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;">
-                    <div style="width:40px;height:40px;border-radius:50%;background:var(--accent);color:var(--ink-1);display:flex;align-items:center;justify-content:center;">
+                  <div onClick="{{ addNew }}" style="height:56px;border-radius:99px;border:1px dashed var(--action-primary);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;">
+                    <div style="width:40px;height:40px;border-radius:50%;background:var(--action-primary);color:var(--action-on-primary);display:flex;align-items:center;justify-content:center;">
                       <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 20 }}" strokeWidth="{{ 2.2 }}" hint-size="20px,20px"></x-import>
                     </div>
                     <div style="font:500 15px/1 var(--font-sans);">Add “{{ search }}” as New Player</div>
@@ -258,10 +258,10 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
                 </sc-if>
                 <div style="display:flex;flex-direction:column;gap:8px;">
                   <sc-for list="{{ pickList }}" as="p" hint-placeholder-count="5">
-                    <div onClick="{{ p.pick }}" style="height:60px;border-radius:99px;background:var(--ink-2);display:flex;align-items:center;gap:12px;padding:0 10px;cursor:pointer;" style-active="transform:scale(.98);">
-                      <div style="width:42px;height:42px;border-radius:50%;background:var(--ink-4);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
+                    <div onClick="{{ p.pick }}" style="height:60px;border-radius:99px;background:var(--surface-primary);display:flex;align-items:center;gap:12px;padding:0 10px;cursor:pointer;" style-active="transform:scale(.98);">
+                      <div style="width:42px;height:42px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
                       <div style="flex:1;font:500 15px/1 var(--font-sans);">{{ p.name }}</div>
-                      <div style="font:400 12px/1 var(--font-sans);color:var(--grey-400);padding-right:12px;">{{ p.sub }}</div>
+                      <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding-right:12px;">{{ p.sub }}</div>
                     </div>
                   </sc-for>
                 </div>
@@ -273,45 +273,45 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
         <sc-if value="{{ step3 }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:16px;">
             <div style="display:flex;flex-direction:column;gap:10px;">
-              <div style="font:400 13px/1 var(--font-sans);color:var(--grey-400);">Points per Game</div>
-              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--ink-2);padding:6px;border-radius:99px;">
+              <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">Points per Game</div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--surface-primary);padding:6px;border-radius:99px;">
                 <sc-for list="{{ formats }}" as="f" hint-placeholder-count="3">
                   <button onClick="{{ f.select }}" style="height:44px;border:none;border-radius:99px;font:600 16px/1 var(--font-sans);cursor:pointer;background: {{ f.bg }};color: {{ f.fg }};">{{ f.label }}</button>
                 </sc-for>
               </div>
             </div>
             <sc-for list="{{ gameRows }}" as="g" hint-placeholder-count="1">
-              <div style="background:var(--ink-2);border-radius:26px;padding:18px;display:flex;flex-direction:column;gap:16px;">
+              <div style="background:var(--surface-primary);border-radius:26px;padding:18px;display:flex;flex-direction:column;gap:16px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:0 4px;">
                   <div style="font:500 15px/1 var(--font-sans);">{{ g.label }}</div>
                   <sc-if value="{{ g.canRemove }}" hint-placeholder-val="{{ false }}">
-                    <div onClick="{{ g.remove }}" style="font:400 13px/1 var(--font-sans);color:var(--grey-400);cursor:pointer;padding:6px;">Remove</div>
+                    <div onClick="{{ g.remove }}" style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);cursor:pointer;padding:6px;">Remove</div>
                   </sc-if>
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--ink-3);padding:5px;border-radius:99px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--surface-muted);padding:5px;border-radius:99px;">
                   <button onClick="{{ g.setUs }}" style="height:44px;border:none;border-radius:99px;font:500 14px/1 var(--font-sans);cursor:pointer;background: {{ g.usBg }};color: {{ g.usFg }};">{{ g.usLabel }}</button>
                   <button onClick="{{ g.setThem }}" style="height:44px;border:none;border-radius:99px;font:500 14px/1 var(--font-sans);cursor:pointer;background: {{ g.themBg }};color: {{ g.themFg }};">{{ g.themLabel }}</button>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;">
                   <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
                     <div style="font:500 56px/1 var(--font-sans);color: {{ g.aFg }};">{{ g.a }}</div>
-                    <div style="font:400 12px/1 var(--font-sans);color:var(--grey-400);">{{ g.aName }}</div>
+                    <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);">{{ g.aName }}</div>
                   </div>
-                  <div style="font:500 32px/1 var(--font-sans);color:var(--ink-5);padding-bottom:18px;">:</div>
+                  <div style="font:500 32px/1 var(--font-sans);color:var(--text-tertiary);padding-bottom:18px;">:</div>
                   <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
                     <div style="font:500 56px/1 var(--font-sans);color: {{ g.bFg }};">{{ g.b }}</div>
-                    <div style="font:400 12px/1 var(--font-sans);color:var(--grey-400);">{{ g.bName }}</div>
+                    <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);">{{ g.bName }}</div>
                   </div>
                 </div>
-                <div style="display:flex;align-items:center;justify-content:space-between;background:var(--ink-3);border-radius:99px;padding:6px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface-muted);border-radius:99px;padding:6px;">
                   <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Minus" variant="black" size="{{ 52 }}" label="Decrease" onClick="{{ g.dec }}" hint-size="52px,52px"></x-import>
-                  <div style="font:400 13px/1.3 var(--font-sans);color:var(--grey-200);text-align:center;">{{ g.loserLabel }}</div>
+                  <div style="font:400 13px/1.3 var(--font-sans);color:var(--neutral-600);text-align:center;">{{ g.loserLabel }}</div>
                   <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Plus" variant="black" size="{{ 52 }}" label="Increase" onClick="{{ g.inc }}" hint-size="52px,52px"></x-import>
                 </div>
               </div>
             </sc-for>
             <sc-if value="{{ canAddGame }}" hint-placeholder-val="{{ true }}">
-              <button onClick="{{ addGame }}" style="height:56px;border-radius:99px;background:transparent;border:1px solid var(--ink-4);color:var(--white);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;">
+              <button onClick="{{ addGame }}" style="height:56px;border-radius:99px;background:transparent;border:1px solid var(--border-default);color:var(--text-primary);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;">
                 <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 18 }}" hint-size="18px,18px"></x-import>
                 Add Game {{ nextGameNo }}
               </button>
@@ -321,20 +321,20 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
 
         <sc-if value="{{ step4 }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:16px;">
-            <div style="background:var(--ink-2);border-radius:26px;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+            <div style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;">
               <div style="display:flex;flex-direction:column;gap:4px;min-width:0;">
                 <div style="font:500 15px/1.3 var(--font-sans);">{{ draft.teamA }} vs {{ draft.teamB }}</div>
-                <div style="font:400 13px/1.3 var(--font-sans);color:var(--grey-400);">{{ draft.scoreLine }}</div>
+                <div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">{{ draft.scoreLine }}</div>
               </div>
               <div style="height:28px;padding:0 12px;border-radius:99px;display:flex;align-items:center;font:600 12px/1 var(--font-sans);flex-shrink:0;background: {{ draft.badgeBg }};color: {{ draft.badgeFg }};">{{ draft.resultLabel }}</div>
             </div>
             <div style="display:flex;flex-direction:column;gap:10px;">
-              <div style="font:500 15px/1 var(--font-sans);">What Worked? <span style="color:var(--grey-400);font-weight:400;">Optional</span></div>
-              <textarea value="{{ log.worked }}" onChange="{{ onWorked }}" rows="3" placeholder="Net play, serve variation…" style="background:var(--ink-2);border:none;outline:none;border-radius:22px;padding:16px 18px;color:var(--white);font:400 15px/1.5 var(--font-sans);resize:none;"></textarea>
+              <div style="font:500 15px/1 var(--font-sans);">What Worked? <span style="color:var(--text-secondary);font-weight:400;">Optional</span></div>
+              <textarea value="{{ log.worked }}" onChange="{{ onWorked }}" rows="3" placeholder="Net play, serve variation…" style="background:var(--surface-primary);border:none;outline:none;border-radius:22px;padding:16px 18px;color:var(--text-primary);font:400 15px/1.5 var(--font-sans);resize:none;"></textarea>
             </div>
             <div style="display:flex;flex-direction:column;gap:10px;">
-              <div style="font:500 15px/1 var(--font-sans);">Why Did I Lose Points? <span style="color:var(--grey-400);font-weight:400;">Optional</span></div>
-              <textarea value="{{ log.lost }}" onChange="{{ onLost }}" rows="3" placeholder="Backhand clears, footwork…" style="background:var(--ink-2);border:none;outline:none;border-radius:22px;padding:16px 18px;color:var(--white);font:400 15px/1.5 var(--font-sans);resize:none;"></textarea>
+              <div style="font:500 15px/1 var(--font-sans);">Why Did I Lose Points? <span style="color:var(--text-secondary);font-weight:400;">Optional</span></div>
+              <textarea value="{{ log.lost }}" onChange="{{ onLost }}" rows="3" placeholder="Backhand clears, footwork…" style="background:var(--surface-primary);border:none;outline:none;border-radius:22px;padding:16px 18px;color:var(--text-primary);font:400 15px/1.5 var(--font-sans);resize:none;"></textarea>
             </div>
           </div>
         </sc-if>
@@ -350,35 +350,35 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
           <div style="width:48px;"></div>
         </div>
         <div style="display:flex;flex-direction:column;gap:10px;padding:6px 2px;">
-          <div style="font:400 14px/1 var(--font-sans);color:var(--grey-400);">{{ detail.dateLong }} · {{ detail.type }}</div>
+          <div style="font:400 14px/1 var(--font-sans);color:var(--text-secondary);">{{ detail.dateLong }} · {{ detail.type }}</div>
           <div style="display:flex;align-items:baseline;justify-content:space-between;">
             <div style="font:600 48px/1 var(--font-sans);color: {{ detail.resultColor }};">{{ detail.resultWord }}</div>
             <div style="font:500 48px/1 var(--font-sans);">{{ detail.gamesWon }}</div>
           </div>
         </div>
-        <div style="background:var(--ink-2);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:12px;">
+        <div style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:12px;">
           <sc-for list="{{ detail.sideA }}" as="p" hint-placeholder-count="1">
             <div style="display:flex;align-items:center;gap:12px;">
               <div style="width:40px;height:40px;border-radius:50%;background: {{ p.avBg }};color: {{ p.avFg }};display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
               <div style="font:500 16px/1 var(--font-sans);">{{ p.name }}</div>
             </div>
           </sc-for>
-          <div style="height:1px;background:var(--ink-4);margin:4px 0;"></div>
+          <div style="height:1px;background:var(--border-default);margin:4px 0;"></div>
           <sc-for list="{{ detail.sideB }}" as="p" hint-placeholder-count="1">
             <div onClick="{{ p.open }}" style="display:flex;align-items:center;gap:12px;cursor:pointer;">
-              <div style="width:40px;height:40px;border-radius:50%;background:var(--ink-4);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
+              <div style="width:40px;height:40px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
               <div style="font:500 16px/1 var(--font-sans);flex:1;">{{ p.name }}</div>
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 20 }}" color="var(--grey-400)" hint-size="20px,20px"></x-import>
             </div>
           </sc-for>
         </div>
-        <div style="background:var(--ink-2);border-radius:26px;padding:8px 20px;display:flex;flex-direction:column;">
-          <div style="display:grid;grid-template-columns:1fr 64px 64px;padding:12px 0 8px;font:400 12px/1 var(--font-sans);color:var(--grey-400);">
+        <div style="background:var(--surface-primary);border-radius:26px;padding:8px 20px;display:flex;flex-direction:column;">
+          <div style="display:grid;grid-template-columns:1fr 64px 64px;padding:12px 0 8px;font:400 12px/1 var(--font-sans);color:var(--text-secondary);">
             <div>Game</div><div style="text-align:center;">{{ detail.aShort }}</div><div style="text-align:center;">Opp</div>
           </div>
           <sc-for list="{{ detail.rows }}" as="r" hint-placeholder-count="2">
-            <div style="display:grid;grid-template-columns:1fr 64px 64px;align-items:center;padding:12px 0;border-top:1px solid var(--ink-3);">
-              <div style="font:400 15px/1 var(--font-sans);color:var(--grey-200);">{{ r.label }}</div>
+            <div style="display:grid;grid-template-columns:1fr 64px 64px;align-items:center;padding:12px 0;border-top:1px solid var(--border-default);">
+              <div style="font:400 15px/1 var(--font-sans);color:var(--neutral-600);">{{ r.label }}</div>
               <div style="text-align:center;font:500 24px/1 var(--font-sans);color: {{ r.aFg }};">{{ r.a }}</div>
               <div style="text-align:center;font:500 24px/1 var(--font-sans);color: {{ r.bFg }};">{{ r.b }}</div>
             </div>
@@ -387,13 +387,13 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
         <sc-if value="{{ detail.hasNotes }}" hint-placeholder-val="{{ true }}">
           <div style="display:flex;flex-direction:column;gap:12px;">
             <div style="font:500 19px/1.3 var(--font-sans);">Notes</div>
-            <div style="background:var(--ink-2);border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:16px;">
+            <div style="background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:16px;">
               <div style="display:flex;flex-direction:column;gap:6px;">
-                <div style="font:400 13px/1 var(--font-sans);color:var(--accent);">What Worked</div>
+                <div style="font:400 13px/1 var(--font-sans);color:var(--action-primary);">What Worked</div>
                 <div style="font:400 15px/1.5 var(--font-sans);">{{ detail.worked }}</div>
               </div>
               <div style="display:flex;flex-direction:column;gap:6px;">
-                <div style="font:400 13px/1 var(--font-sans);color:var(--grey-400);">Why I Lost Points</div>
+                <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">Why I Lost Points</div>
                 <div style="font:400 15px/1.5 var(--font-sans);">{{ detail.lost }}</div>
               </div>
             </div>
@@ -402,11 +402,11 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
         <div style="display:flex;flex-direction:column;gap:12px;">
           <div style="font:500 19px/1.3 var(--font-sans);">Head-to-Head</div>
           <sc-for list="{{ detail.h2h }}" as="h" hint-placeholder-count="1">
-            <div onClick="{{ h.open }}" style="background:var(--ink-2);border-radius:26px;padding:18px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;">
+            <div onClick="{{ h.open }}" style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;">
               <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;">
-                <div style="font:400 13px/1 var(--font-sans);color:var(--grey-400);">You vs {{ h.name }}</div>
+                <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">You vs {{ h.name }}</div>
                 <div style="font:500 32px/1 var(--font-sans);">{{ h.label }}</div>
-                <div style="font:400 12px/1.3 var(--font-sans);color:var(--grey-400);">{{ h.sub }}</div>
+                <div style="font:400 12px/1.3 var(--font-sans);color:var(--text-secondary);">{{ h.sub }}</div>
               </div>
               <div style="display:flex;gap:4px;">
                 <sc-for list="{{ h.form }}" as="d" hint-placeholder-count="5">
@@ -426,13 +426,13 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="Back" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
           <div style="font:600 28px/1.2 var(--font-sans);">Players</div>
         </div>
-        <div style="height:52px;border-radius:99px;background:var(--ink-2);display:flex;align-items:center;gap:10px;padding:0 18px;color:var(--grey-400);">
+        <div style="height:52px;border-radius:99px;background:var(--surface-primary);display:flex;align-items:center;gap:10px;padding:0 18px;color:var(--text-secondary);">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Search" size="{{ 20 }}" hint-size="20px,20px"></x-import>
-          <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="Search or type a new name" style="flex:1;background:transparent;border:none;outline:none;color:var(--white);font:400 15px/1 var(--font-sans);">
+          <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="Search or type a new name" style="flex:1;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 15px/1 var(--font-sans);">
         </div>
         <sc-if value="{{ canAddNew }}" hint-placeholder-val="{{ false }}">
-          <div onClick="{{ addPlayerOnly }}" style="height:56px;border-radius:99px;border:1px dashed var(--accent);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;">
-            <div style="width:40px;height:40px;border-radius:50%;background:var(--accent);color:var(--ink-1);display:flex;align-items:center;justify-content:center;">
+          <div onClick="{{ addPlayerOnly }}" style="height:56px;border-radius:99px;border:1px dashed var(--action-primary);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;">
+            <div style="width:40px;height:40px;border-radius:50%;background:var(--action-primary);color:var(--action-on-primary);display:flex;align-items:center;justify-content:center;">
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 20 }}" strokeWidth="{{ 2.2 }}" hint-size="20px,20px"></x-import>
             </div>
             <div style="font:500 15px/1 var(--font-sans);">Add “{{ search }}”</div>
@@ -440,11 +440,11 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
         </sc-if>
         <div style="display:flex;flex-direction:column;gap:8px;">
           <sc-for list="{{ playerList }}" as="p" hint-placeholder-count="6">
-            <div onClick="{{ p.open }}" style="min-height:64px;border-radius:99px;background:var(--ink-2);display:flex;align-items:center;gap:12px;padding:10px;cursor:pointer;">
-              <div style="width:44px;height:44px;border-radius:50%;background:var(--ink-4);display:flex;align-items:center;justify-content:center;font:500 14px/1 var(--font-sans);flex-shrink:0;">{{ p.initials }}</div>
+            <div onClick="{{ p.open }}" style="min-height:64px;border-radius:99px;background:var(--surface-primary);display:flex;align-items:center;gap:12px;padding:10px;cursor:pointer;">
+              <div style="width:44px;height:44px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;font:500 14px/1 var(--font-sans);flex-shrink:0;">{{ p.initials }}</div>
               <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;">
                 <div style="font:500 15px/1.2 var(--font-sans);">{{ p.name }}</div>
-                <div style="font:400 12px/1.2 var(--font-sans);color:var(--grey-400);">{{ p.sub }}</div>
+                <div style="font:400 12px/1.2 var(--font-sans);color:var(--text-secondary);">{{ p.sub }}</div>
               </div>
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 20 }}" color="var(--grey-400)" style="margin-right:10px" hint-size="20px,20px"></x-import>
             </div>
@@ -462,31 +462,31 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
           <div style="width:48px;"></div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
-          <div style="width:88px;height:88px;border-radius:50%;background:var(--ink-3);display:flex;align-items:center;justify-content:center;font:500 28px/1 var(--font-sans);">{{ profile.initials }}</div>
+          <div style="width:88px;height:88px;border-radius:50%;background:var(--surface-muted);display:flex;align-items:center;justify-content:center;font:500 28px/1 var(--font-sans);">{{ profile.initials }}</div>
           <div style="font:600 26px/1.2 var(--font-sans);">{{ profile.name }}</div>
-          <div style="font:400 14px/1 var(--font-sans);color:var(--grey-400);">{{ profile.sub }}</div>
+          <div style="font:400 14px/1 var(--font-sans);color:var(--text-secondary);">{{ profile.sub }}</div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <sc-for list="{{ profile.stats }}" as="s" hint-placeholder-count="4">
-            <div style="background:var(--ink-2);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:8px;">
-              <div style="font:400 13px/1 var(--font-sans);color:var(--grey-400);">{{ s.label }}</div>
+            <div style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:8px;">
+              <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ s.label }}</div>
               <div style="font:500 32px/1 var(--font-sans);color: {{ s.fg }};">{{ s.value }}</div>
-              <div style="font:400 12px/1 var(--font-sans);color:var(--grey-400);">{{ s.sub }}</div>
+              <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);">{{ s.sub }}</div>
             </div>
           </sc-for>
         </div>
         <div style="display:flex;flex-direction:column;gap:12px;">
           <div style="font:500 19px/1.3 var(--font-sans);">Recent Matches</div>
           <sc-for list="{{ profile.recent }}" as="m" hint-placeholder-count="3">
-            <div onClick="{{ m.open }}" style="background:var(--ink-2);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;cursor:pointer;">
+            <div onClick="{{ m.open }}" style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;cursor:pointer;">
               <div style="display:flex;justify-content:space-between;align-items:center;">
-                <div style="font:400 13px/1 var(--font-sans);color:var(--grey-400);">{{ m.dateLabel }} · {{ m.type }}</div>
+                <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ m.dateLabel }} · {{ m.type }}</div>
                 <div style="height:26px;padding:0 12px;border-radius:99px;display:flex;align-items:center;font:600 12px/1 var(--font-sans);background: {{ m.badgeBg }};color: {{ m.badgeFg }};">{{ m.resultLabel }}</div>
               </div>
               <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;">
                 <div style="display:flex;flex-direction:column;gap:3px;min-width:0;">
                   <div style="font:500 16px/1.3 var(--font-sans);">{{ m.teamA }}</div>
-                  <div style="font:400 15px/1.3 var(--font-sans);color:var(--grey-200);">vs {{ m.teamB }}</div>
+                  <div style="font:400 15px/1.3 var(--font-sans);color:var(--neutral-600);">vs {{ m.teamB }}</div>
                 </div>
                 <div style="font:500 28px/1 var(--font-sans);flex-shrink:0;">{{ m.gamesWon }}</div>
               </div>
@@ -500,7 +500,7 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
   <!-- Log footer -->
   <sc-if value="{{ isLog }}" hint-placeholder-val="{{ false }}">
     <sc-if value="{{ showLogCta }}" hint-placeholder-val="{{ false }}">
-      <div style="position:absolute;left:0;right:0;bottom:0;padding:14px 20px 34px;background:var(--ink-1);display:flex;flex-direction:column;gap:10px;">
+      <div style="position:absolute;left:0;right:0;bottom:0;padding:14px 20px 34px;background:var(--bg-primary);display:flex;flex-direction:column;gap:10px;">
         <sc-if value="{{ step3 }}" hint-placeholder-val="{{ false }}">
           <div style="text-align:center;font:500 14px/1 var(--font-sans);color: {{ liveResultColor }};">{{ liveResult }}</div>
         </sc-if>
@@ -511,7 +511,7 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
 
   <!-- Tabs -->
   <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
-    <div style="position:absolute;left:0;right:0;bottom:0;height:92px;padding:10px 40px 28px;background:var(--ink-1);border-top:1px solid var(--ink-3);display:grid;grid-template-columns:1fr 1fr;">
+    <div style="position:absolute;left:0;right:0;bottom:0;height:92px;padding:10px 40px 28px;background:var(--bg-primary);border-top:1px solid var(--border-default);display:grid;grid-template-columns:1fr 1fr;">
       <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="2">
         <div onClick="{{ t.select }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;color: {{ t.fg }};">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ t.icon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import>
@@ -524,9 +524,9 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
   <!-- Menu -->
   <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
     <div onClick="{{ toggleMenu }}" style="position:absolute;inset:0;background:rgba(0,0,0,.45);"></div>
-    <div style="position:absolute;top:112px;right:20px;width:210px;background:var(--ink-2);border-radius:26px;padding:8px;display:flex;flex-direction:column;">
+    <div style="position:absolute;top:112px;right:20px;width:210px;background:var(--surface-primary);border-radius:26px;padding:8px;display:flex;flex-direction:column;">
       <sc-for list="{{ menuItems }}" as="i" hint-placeholder-count="3">
-        <div onClick="{{ i.select }}" style="height:52px;border-radius:99px;display:flex;align-items:center;gap:12px;padding:0 14px;cursor:pointer;font:400 15px/1 var(--font-sans);" style-hover="background:var(--ink-3);">
+        <div onClick="{{ i.select }}" style="height:52px;border-radius:99px;display:flex;align-items:center;gap:12px;padding:0 14px;cursor:pointer;font:400 15px/1 var(--font-sans);" style-hover="background:var(--surface-muted);">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ i.icon }}" size="{{ 20 }}" hint-size="20px,20px"></x-import>
           {{ i.label }}
         </div>
@@ -536,7 +536,7 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
 
   <!-- Toast -->
   <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
-    <div style="position:absolute;top:54px;left:50%;transform:translateX(-50%);height:44px;padding:0 18px;border-radius:99px;background:var(--white);color:var(--ink-1);display:flex;align-items:center;gap:8px;font:500 14px/1 var(--font-sans);white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.35);">
+    <div style="position:absolute;top:54px;left:50%;transform:translateX(-50%);height:44px;padding:0 18px;border-radius:99px;background:var(--text-primary);color:var(--action-on-primary);display:flex;align-items:center;gap:8px;font:500 14px/1 var(--font-sans);white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.35);">
       <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 18 }}" strokeWidth="{{ 2.2 }}" hint-size="18px,18px"></x-import>
       {{ toast }}
     </div>
@@ -544,7 +544,7 @@ input::placeholder,textarea::placeholder{color:var(--grey-400);}
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#d4f25c&quot;,&quot;options&quot;:[&quot;#d4f25c&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Matches&quot;,&quot;options&quot;:[&quot;Matches&quot;,&quot;Insights&quot;,&quot;Log Match&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Matches&quot;,&quot;options&quot;:[&quot;Matches&quot;,&quot;Insights&quot;,&quot;Log Match&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
 class Component extends DCLogic {
   scrollRef = React.createRef();
   state = this.seed();
@@ -602,14 +602,14 @@ class Component extends DCLogic {
   }
   teamA(m) { return m.type === 'Doubles' ? 'You & ' + this.first(m.partner) : 'You'; }
   teamB(m) { return m.type === 'Doubles' ? m.opps.map(o => this.first(o)).join(' & ') : this.nm(m.opps[0]); }
-  badge(win) { return win ? { badgeBg: 'var(--accent)', badgeFg: 'var(--ink-1)', resultLabel: 'Win' } : { badgeBg: 'var(--ink-4)', badgeFg: 'var(--grey-200)', resultLabel: 'Loss' }; }
-  dot(win) { return win ? { l: 'W', bg: 'var(--accent)', fg: 'var(--ink-1)' } : { l: 'L', bg: 'var(--ink-4)', fg: 'var(--grey-200)' }; }
+  badge(win) { return win ? { badgeBg: 'var(--status-win)', badgeFg: 'var(--app-background)', resultLabel: 'Win' } : { badgeBg: 'var(--status-loss)', badgeFg: 'var(--app-background)', resultLabel: 'Loss' }; }
+  dot(win) { return win ? { l: 'W', bg: 'var(--status-win)', fg: 'var(--app-background)' } : { l: 'L', bg: 'var(--status-loss)', fg: 'var(--app-background)' }; }
   card(m) {
     const r = this.res(m.games);
     return {
       id: m.id, type: m.type, dateLabel: this.date(m.date), teamA: this.teamA(m), teamB: this.teamB(m), gamesWon: `${r.us}–${r.them}`,
       ...this.badge(r.win),
-      games: m.games.map(g => ({ s: `${g[0]}–${g[1]}`, fg: g[0] > g[1] ? 'var(--white)' : 'var(--grey-400)' })),
+      games: m.games.map(g => ({ s: `${g[0]}–${g[1]}`, fg: g[0] > g[1] ? 'var(--text-primary)' : 'var(--text-secondary)' })),
       open: () => this.go('detail', { detailId: m.id })
     };
   }
@@ -661,13 +661,13 @@ class Component extends DCLogic {
   addPlayer(name) { const id = 'p' + Date.now(); this.setState(s => ({ players: [...s.players, { id, name }] })); return id; }
 
   renderVals() {
-    const s = this.state, A = 'var(--accent)';
+    const s = this.state, A = 'var(--action-primary)';
     const all = s.matches;
     const overall = this.rec(all);
     const q = s.search.trim().toLowerCase();
     const exists = s.players.some(p => p.name.toLowerCase() === q);
     const v = {
-      accent: this.props.accent ?? '#d4f25c', scrollRef: this.scrollRef, overall,
+      accent: this.props.accent ?? '#0259e3', scrollRef: this.scrollRef, overall,
       isMatches: s.screen === 'matches', isInsights: s.screen === 'insights', isLog: s.screen === 'log',
       isDetail: s.screen === 'detail', isPlayers: s.screen === 'players', isPlayer: s.screen === 'player',
       showTabs: s.screen === 'matches' || s.screen === 'insights', menuOpen: s.menu,
@@ -677,7 +677,7 @@ class Component extends DCLogic {
       onSearch: e => this.setState({ search: e.target.value }),
       startLog: () => this.go('log', { log: this.newLog() }),
       tabs: [['Matches', 'matches', 'List'], ['Insights', 'insights', 'ChartColumn']].map(([label, k, icon]) => ({
-        label, icon, fg: s.screen === k ? A : 'var(--grey-400)', select: () => this.setState({ screen: k, back: [], menu: false })
+        label, icon, fg: s.screen === k ? A : 'var(--text-secondary)', select: () => this.setState({ screen: k, back: [], menu: false })
       })),
       menuItems: [
         { label: 'Players', icon: 'Users', select: () => this.go('players') },
@@ -718,12 +718,12 @@ class Component extends DCLogic {
       v.log = log; v.step1 = st === 1; v.step2 = st === 2; v.step3 = st === 3; v.step4 = st === 4;
       v.logBackIcon = st === 1 ? 'X' : 'ChevronLeft';
       v.logBack = () => st === 1 ? this.setState({ screen: 'matches', log: null, back: [] }) : this.setLog({ step: st - 1 });
-      v.stepBar = [1, 2, 3, 4].map(i => ({ bg: i <= st ? A : 'var(--ink-4)' }));
+      v.stepBar = [1, 2, 3, 4].map(i => ({ bg: i <= st ? A : 'var(--border-default)' }));
       v.stepTitle = ['Singles or Doubles?', 'Who Played?', 'Enter Score', 'Match Notes'][st - 1];
       v.showLogCta = st > 1;
       const ok = this.canNext(log);
       v.ctaLabel = st === 4 ? 'Save Match' : 'Continue';
-      v.ctaBg = ok ? A : 'var(--ink-3)'; v.ctaFg = ok ? 'var(--ink-1)' : 'var(--ink-5)';
+      v.ctaBg = ok ? A : 'var(--surface-muted)'; v.ctaFg = ok ? 'var(--action-on-primary)' : 'var(--text-tertiary)';
       v.logNext = () => { if (!this.canNext(this.state.log)) return; st === 4 ? this.save() : this.setLog({ step: st + 1 }); };
       v.typeOptions = [['Singles', 'You vs 1 opponent', 'User'], ['Doubles', 'You + partner vs 2 opponents', 'Users']].map(([label, sub, icon]) => ({
         label, sub, icon, border: log.type === label ? A : 'transparent',
@@ -732,11 +732,11 @@ class Component extends DCLogic {
       const roles = { partner: 'Partner', opp1: log.type === 'Doubles' ? 'Opponent 1' : 'Opponent', opp2: 'Opponent 2' };
       const slot = k => {
         const id = log[k], act = log.active === k;
-        return { role: roles[k], name: id ? this.nm(id) : 'Select ' + roles[k], initials: id ? this.ini(id) : '+', fg: id ? 'var(--white)' : 'var(--grey-400)',
-          avBg: id ? 'var(--ink-4)' : 'transparent', avFg: act ? A : 'var(--white)', border: act ? A : 'transparent',
+        return { role: roles[k], name: id ? this.nm(id) : 'Select ' + roles[k], initials: id ? this.ini(id) : '+', fg: id ? 'var(--text-primary)' : 'var(--text-secondary)',
+          avBg: id ? 'var(--border-default)' : 'transparent', avFg: act ? A : 'var(--text-primary)', border: act ? A : 'transparent',
           select: () => this.setLog({ active: k }) };
       };
-      const me = { role: 'Me', name: this.nm('me'), initials: this.ini('me'), fg: 'var(--white)', avBg: A, avFg: 'var(--ink-1)', border: 'transparent', select: () => {} };
+      const me = { role: 'Me', name: this.nm('me'), initials: this.ini('me'), fg: 'var(--text-primary)', avBg: A, avFg: 'var(--action-on-primary)', border: 'transparent', select: () => {} };
       v.sideA = log.type === 'Doubles' ? [me, slot('partner')] : [me];
       v.sideB = log.type === 'Doubles' ? [slot('opp1'), slot('opp2')] : [slot('opp1')];
       v.hasActiveSlot = !!log.active; v.activeSlotLabel = log.active ? roles[log.active] : '';
@@ -747,7 +747,7 @@ class Component extends DCLogic {
       });
       v.addNew = () => { const id = this.addPlayer(s.search.trim()); this.pick(id); };
       const t = log.format, cap = this.cap(t);
-      v.formats = [21, 15, 11].map(f => ({ label: String(f), bg: f === t ? A : 'transparent', fg: f === t ? 'var(--ink-1)' : 'var(--grey-200)',
+      v.formats = [21, 15, 11].map(f => ({ label: String(f), bg: f === t ? A : 'transparent', fg: f === t ? 'var(--action-on-primary)' : 'var(--neutral-600)',
         select: () => this.setLog(l => ({ format: f, games: l.games.map(g => ({ ...g, l: f - 6 })) })) }));
       const aName = log.type === 'Doubles' ? 'You & ' + (log.partner ? this.first(log.partner) : 'Partner') : 'You';
       const bName = log.type === 'Doubles' ? [log.opp1, log.opp2].map(o => o ? this.first(o) : '—').join(' & ') : (log.opp1 ? this.first(log.opp1) : 'Opponent');
@@ -755,10 +755,10 @@ class Component extends DCLogic {
       v.gameRows = log.games.map((g, i) => {
         const [a, b] = this.scoreOf(g, t), us = g.w === 'us';
         return { label: 'Game ' + (i + 1), a: String(a), b: String(b), aName, bName,
-          aFg: a > b ? 'var(--white)' : 'var(--grey-400)', bFg: b > a ? 'var(--white)' : 'var(--grey-400)',
+          aFg: a > b ? 'var(--text-primary)' : 'var(--text-secondary)', bFg: b > a ? 'var(--text-primary)' : 'var(--text-secondary)',
           usLabel: 'We Won', themLabel: 'They Won',
-          usBg: us ? A : 'transparent', usFg: us ? 'var(--ink-1)' : 'var(--grey-200)',
-          themBg: !us ? 'var(--white)' : 'transparent', themFg: !us ? 'var(--ink-1)' : 'var(--grey-200)',
+          usBg: us ? A : 'transparent', usFg: us ? 'var(--action-on-primary)' : 'var(--neutral-600)',
+          themBg: !us ? 'var(--text-primary)' : 'transparent', themFg: !us ? 'var(--action-on-primary)' : 'var(--neutral-600)',
           loserLabel: (us ? bName : aName) + ' Score',
           setUs: () => upd(i, x => ({ ...x, w: 'us' })), setThem: () => upd(i, x => ({ ...x, w: 'them' })),
           dec: () => upd(i, x => ({ ...x, l: Math.max(0, x.l - 1) })), inc: () => upd(i, x => ({ ...x, l: Math.min(cap - 1, x.l + 1) })),
@@ -768,7 +768,7 @@ class Component extends DCLogic {
       v.addGame = () => this.setLog(l => ({ games: [...l.games, { w: l.games[l.games.length - 1].w === 'us' ? 'them' : 'us', l: l.format - 6 }] }));
       const dr = this.res(this.draftGames(log));
       v.liveResult = dr.us === dr.them ? `Level at ${dr.us}–${dr.them} · Add a deciding game` : (dr.win ? `You win ${dr.us}–${dr.them}` : `You lose ${dr.us}–${dr.them}`);
-      v.liveResultColor = dr.us === dr.them ? 'var(--grey-400)' : dr.win ? A : 'var(--grey-200)';
+      v.liveResultColor = dr.us === dr.them ? 'var(--text-secondary)' : dr.win ? 'var(--status-win)' : 'var(--status-loss)';
       const dm = { type: log.type, partner: log.partner, opps: [log.opp1, log.opp2].filter(Boolean) };
       v.draft = { teamA: log.type ? this.teamA(dm) : '', teamB: dm.opps.length ? this.teamB(dm) : '', scoreLine: this.draftGames(log).map(g => g.join('–')).join('  ·  '), ...this.badge(dr.win) };
       v.onWorked = e => this.setLog({ worked: e.target.value });
@@ -780,12 +780,12 @@ class Component extends DCLogic {
       const r = this.res(m.games);
       const openP = id => () => this.go('player', { playerId: id });
       v.detail = {
-        dateLong: this.date(m.date, true), type: m.type, resultWord: r.win ? 'Win' : 'Loss', resultColor: r.win ? A : 'var(--white)', gamesWon: `${r.us}–${r.them}`,
-        sideA: [{ name: 'You · ' + this.nm('me'), initials: this.ini('me'), avBg: A, avFg: 'var(--ink-1)' }]
-          .concat(m.partner ? [{ name: this.nm(m.partner), initials: this.ini(m.partner), avBg: 'var(--ink-4)', avFg: 'var(--white)' }] : []),
+        dateLong: this.date(m.date, true), type: m.type, resultWord: r.win ? 'Win' : 'Loss', resultColor: r.win ? A : 'var(--text-primary)', gamesWon: `${r.us}–${r.them}`,
+        sideA: [{ name: 'You · ' + this.nm('me'), initials: this.ini('me'), avBg: A, avFg: 'var(--action-on-primary)' }]
+          .concat(m.partner ? [{ name: this.nm(m.partner), initials: this.ini(m.partner), avBg: 'var(--border-default)', avFg: 'var(--text-primary)' }] : []),
         sideB: m.opps.map(id => ({ name: this.nm(id), initials: this.ini(id), open: openP(id) })),
         aShort: m.partner ? 'You & ' + this.first(m.partner).slice(0, 1) : 'You',
-        rows: m.games.map((g, i) => ({ label: 'Game ' + (i + 1), a: String(g[0]), b: String(g[1]), aFg: g[0] > g[1] ? 'var(--white)' : 'var(--grey-400)', bFg: g[1] > g[0] ? 'var(--white)' : 'var(--grey-400)' })),
+        rows: m.games.map((g, i) => ({ label: 'Game ' + (i + 1), a: String(g[0]), b: String(g[1]), aFg: g[0] > g[1] ? 'var(--text-primary)' : 'var(--text-secondary)', bFg: g[1] > g[0] ? 'var(--text-primary)' : 'var(--text-secondary)' })),
         hasNotes: !!(m.worked || m.lost), worked: m.worked || '—', lost: m.lost || '—',
         h2h: m.opps.map(id => {
           const tot = this.vs(id), si = this.vs(id, 'Singles'), du = this.vs(id, 'Doubles');
@@ -807,7 +807,7 @@ class Component extends DCLogic {
     if (v.isPlayer) {
       const id = s.playerId, o = this.vs(id), si = this.vs(id, 'Singles'), du = this.vs(id, 'Doubles'), w = this.with(id);
       const inv = all.filter(m => m.opps.includes(id) || m.partner === id);
-      const st = (label, r) => ({ label, value: r.n ? r.label : '—', sub: r.n ? r.pctStr + ' win rate' : 'No matches', fg: r.n && r.pct >= .5 ? A : 'var(--white)' });
+      const st = (label, r) => ({ label, value: r.n ? r.label : '—', sub: r.n ? r.pctStr + ' win rate' : 'No matches', fg: r.n && r.pct >= .5 ? A : 'var(--text-primary)' });
       v.profile = { name: this.nm(id), initials: this.ini(id), sub: `${inv.length} matches together or against`,
         stats: [st('Overall H2H', o), st('Singles H2H', si), st('Doubles H2H', du), st('As Partner', w)],
         recent: inv.slice(0, 5).map(m => this.card(m)) };
