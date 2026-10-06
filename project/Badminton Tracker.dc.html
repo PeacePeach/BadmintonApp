@@ -726,7 +726,7 @@ class Component extends DCLogic {
       v.ctaBg = ok ? A : 'var(--surface-muted)'; v.ctaFg = ok ? 'var(--action-on-primary)' : 'var(--text-tertiary)';
       v.logNext = () => { if (!this.canNext(this.state.log)) return; st === 4 ? this.save() : this.setLog({ step: st + 1 }); };
       v.typeOptions = [['Singles', 'You vs 1 opponent', 'User'], ['Doubles', 'You + partner vs 2 opponents', 'Users']].map(([label, sub, icon]) => ({
-        label, sub, icon, border: log.type === label ? A : 'transparent',
+        label, sub, icon, border: 'transparent',
         select: () => this.setLog(l => { const n = { ...l, type: label, step: 2, partner: null, opp1: null, opp2: null }; n.active = this.nextEmpty(n); return n; })
       }));
       const roles = { partner: 'Partner', opp1: log.type === 'Doubles' ? 'Opponent 1' : 'Opponent', opp2: 'Opponent 2' };
