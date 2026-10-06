@@ -141,6 +141,9 @@
   --text-tertiary: var(--neutral-300);
   --text-inverse: var(--ink-1);
 
+  /* Input field */
+  --input-field-text-default: var(--neutral-300);
+
   /* Border */
   --border-default: var(--violet-5);
   --border-strong: var(--white);
