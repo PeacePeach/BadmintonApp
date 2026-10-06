@@ -30,6 +30,72 @@
   --butter-300: #fff3cf;
   --butter-500: #fee7a6;
 
+  /* Figma primitive palette — imported from Badminton App / Section 2 */
+  /* Blue */
+  --blue-50: #e6eefc;
+  --blue-75: #97bbf4;
+  --blue-100: #6c9fef;
+  --blue-200: #2d75e8;
+  --blue-300: #0259e3;
+  --blue-400: #013e9f;
+  --blue-500: #01368a;
+
+  /* Orange */
+  --orange-50: #fff3e6;
+  --orange-75: #ffce98;
+  --orange-100: #ffba6d;
+  --orange-200: #ff9c2e;
+  --orange-300: #ff8803;
+  --orange-400: #b35f02;
+  --orange-500: #9c5302;
+
+  /* Violet */
+  --violet-1: #eaeaec;
+  --violet-2: #cbccd1;
+  --violet-3: #a3a3ac;
+  --violet-4: #787885;
+  --violet-5: #4f5061;
+  --violet-6: #28293e;
+  --violet-7: #222335;
+  --violet-8: #1c1d2c;
+  --violet-9: #171723;
+  --violet-10: #12121c;
+
+  /* Green */
+  --green-50: #e6f9f1;
+  --green-75: #98e6c4;
+  --green-100: #6ddcac;
+  --green-200: #2ecd88;
+  --green-300: #03c370;
+  --green-400: #02894e;
+  --green-500: #027744;
+
+  /* Yellow */
+  --yellow-50: #fffae6;
+  --yellow-75: #ffea97;
+  --yellow-100: #ffe16c;
+  --yellow-200: #ffd52d;
+  --yellow-300: #ffcc02;
+  --yellow-400: #b38f01;
+  --yellow-500: #9c7c01;
+
+  /* Cyan */
+  --cyan-50: #e6fafc;
+  --cyan-75: #96ebf1;
+  --cyan-100: #6be3eb;
+  --cyan-200: #2bd6e3;
+  --cyan-300: #00cedd;
+  --cyan-400: #00909b;
+  --cyan-500: #007e87;
+
+  /* Purple */
+  --purple-50: #f0e6fa;
+  --purple-75: #c096eb;
+  --purple-100: #a66be2;
+  --purple-200: #802bd6;
+  --purple-300: #6600cd;
+  --purple-400: #470090;
+  --purple-500: #3e007d;
 
   /* =========================================================
      2. SEMANTIC TOKENS
