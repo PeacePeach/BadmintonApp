@@ -129,28 +129,29 @@
   --bg-secondary: var(--ink-2);
 
   /* Surface */
-  --surface-primary: var(--ink-2);
+  --surface-primary: var(--violet-6);
   --surface-secondary: var(--violet-7);
-  --surface-muted: var(--ink-3);
+  --surface-muted: var(--violet-8);
   --surface-inset-light: rgba(255, 255, 255, .55);
 
   /* Text */
   --text-primary: var(--white);
-  --text-secondary: var(--grey-400);
-  --text-tertiary: var(--ink-5);
+  --text-secondary: var(--neutral-400);
+  --text-tertiary: var(--neutral-300);
   --text-inverse: var(--ink-1);
 
   /* Border */
-  --border-default: var(--ink-4);
-  --border-strong: var(--grey-200);
+  --border-default: var(--violet-5);
+  --border-strong: var(--white);
 
   /* Action */
-  --action-primary: var(--blue-action);
-  --action-on-primary: var(--ink-0);
+  --action-primary: var(--blue-300);
+  --action-on-primary: var(--white);
+  --action-secondary: var(--app-background);
 
   /* Match result */
-  --status-win: var(--blue-win);
-  --status-loss: var(--orange-loss);
+  --status-win: var(--blue-100);
+  --status-loss: var(--orange-300);
 
   /* Progress */
   --progress-start: var(--lilac-600);
