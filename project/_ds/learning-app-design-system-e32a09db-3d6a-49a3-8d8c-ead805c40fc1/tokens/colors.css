@@ -1,46 +1,92 @@
-:root{
-/* Ink / dark surfaces (sampled) */
---ink-0:#000000;
---ink-1:#1b1a1d;
---ink-2:#2a292e;
---ink-3:#2c2b30;
---ink-4:#3a393e;
---ink-5:#4f4e53;
-/* Neutrals on dark */
---grey-400:#8f8f91;
---grey-200:#c9c9cb;
---white:#ffffff;
-/* Pastels */
---lilac-500:#c5afe4;
---lilac-600:#b197d2;
---lilac-300:#e0d3f2;
---sage-500:#cfdecb;
---sage-300:#e8e9e0;
---sage-100:#eaf0e7;
---butter-500:#fee7a6;
---butter-300:#fff3cf;
-/* Accent (primary CTA) */
---accent-500:#d4f25c;
---accent:var(--accent-500);
-/* Semantic */
---bg-app:var(--ink-1);
---bg-canvas:var(--ink-2);
---surface-raised:var(--ink-2);
---surface-chip:var(--ink-3);
---surface-card-lilac:var(--lilac-500);
---surface-card-sage:var(--sage-500);
---surface-card-butter:var(--butter-500);
---surface-inset-light:rgba(255,255,255,.55);
---text-on-dark:var(--white);
---text-on-dark-muted:var(--grey-400);
---text-on-dark-subtle:var(--ink-5);
---text-on-light:var(--ink-1);
---text-on-light-muted:rgba(27,26,29,.55);
---action-primary:var(--ink-0);
---action-on-primary:var(--white);
---border-dark:var(--ink-4);
---border-active:var(--grey-200);
---progress-start:var(--lilac-600);
---progress-end:#2f2b33;
---progress-track:var(--white);
+:root {
+  /* =========================================================
+     1. PRIMITIVE TOKENS
+     Raw color values. Components should usually use semantic
+     tokens below instead of referencing these directly.
+     ========================================================= */
+
+  /* Brand */
+  --accent-500: #d4f25c;
+  --accent: var(--accent-500);
+
+  /* Neutral / dark scale */
+  --ink-0: #000000;
+  --ink-1: #1b1a1d;
+  --ink-2: #2a292e;
+  --ink-3: #2c2b30;
+  --ink-4: #3a393e;
+  --ink-5: #4f4e53;
+  --grey-400: #8f8f91;
+  --grey-200: #c9c9cb;
+  --white: #ffffff;
+
+  /* Extended palette — inherited from the original prototype */
+  --lilac-300: #e0d3f2;
+  --lilac-500: #c5afe4;
+  --lilac-600: #b197d2;
+  --sage-100: #eaf0e7;
+  --sage-300: #e8e9e0;
+  --sage-500: #cfdecb;
+  --butter-300: #fff3cf;
+  --butter-500: #fee7a6;
+
+
+  /* =========================================================
+     2. SEMANTIC TOKENS
+     Describe what a color does, not what the color looks like.
+     New product UI should prefer these tokens.
+     ========================================================= */
+
+  /* Background */
+  --bg-primary: var(--ink-1);
+  --bg-secondary: var(--ink-2);
+
+  /* Surface */
+  --surface-primary: var(--ink-2);
+  --surface-secondary: var(--ink-3);
+  --surface-inset-light: rgba(255, 255, 255, .55);
+
+  /* Text */
+  --text-primary: var(--white);
+  --text-secondary: var(--grey-400);
+  --text-tertiary: var(--ink-5);
+  --text-inverse: var(--ink-1);
+
+  /* Border */
+  --border-default: var(--ink-4);
+  --border-strong: var(--grey-200);
+
+  /* Action */
+  --action-primary: var(--accent);
+  --action-on-primary: var(--ink-0);
+
+  /* Progress */
+  --progress-start: var(--lilac-600);
+  --progress-end: #2f2b33;
+  --progress-track: var(--white);
+
+
+  /* =========================================================
+     3. COMPATIBILITY ALIASES
+     Keep older prototype names working while the app gradually
+     moves to the semantic token names above.
+     ========================================================= */
+
+  --bg-app: var(--bg-primary);
+  --bg-canvas: var(--bg-secondary);
+
+  --surface-raised: var(--surface-primary);
+  --surface-chip: var(--surface-secondary);
+  --surface-card-lilac: var(--lilac-500);
+  --surface-card-sage: var(--sage-500);
+  --surface-card-butter: var(--butter-500);
+
+  --text-on-dark: var(--text-primary);
+  --text-on-dark-muted: var(--text-secondary);
+  --text-on-dark-subtle: var(--text-tertiary);
+  --text-on-light: var(--text-inverse);
+  --text-on-light-muted: rgba(27, 26, 29, .55);
+
+  --border-dark: var(--border-default);
+  --border-active: var(--border-strong);
 }
