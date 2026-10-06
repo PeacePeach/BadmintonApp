@@ -149,6 +149,9 @@
   --action-on-primary: var(--white);
   --action-secondary: var(--app-background);
 
+  /* Bottom navigation */
+  --bottom-nav-selected: var(--text-primary);
+
   /* Filter pill */
   --filter-pill-bg: var(--neutral-100);
   --filter-pill-text-default: var(--text-secondary);
