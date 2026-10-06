@@ -23,6 +23,8 @@ body{margin:0;background:var(--bg-primary);font-family:"Poppins",system-ui,sans-
 a{color:var(--action-primary);} a:hover{color:var(--text-primary);}
 input,textarea,button{font-family:inherit;}
 input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
+.search-field-outline{border:1px solid var(--ghost-button-outline);}
+.search-field-outline:focus-within{border-color:var(--border-strong);}
 </style>
 </helmet>
 <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 16px;">
@@ -244,7 +246,7 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
             <sc-if value="{{ hasActiveSlot }}" hint-placeholder-val="{{ true }}">
               <div style="display:flex;flex-direction:column;gap:12px;">
                 <div style="font:500 17px/1.3 var(--font-sans);">Choose {{ activeSlotLabel }}</div>
-                <div style="height:52px;border-radius:99px;background:transparent;border:1px solid var(--ghost-button-outline);display:flex;align-items:center;gap:10px;padding:0 18px;color:var(--input-field-text-default);">
+                <div class="search-field-outline" style="height:52px;border-radius:99px;background:transparent;display:flex;align-items:center;gap:10px;padding:0 18px;color:var(--input-field-text-default);">
                   <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Search" size="{{ 20 }}" hint-size="20px,20px"></x-import>
                   <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="Search or type a new name" style="flex:1;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 15px/1 var(--font-sans);">
                 </div>
