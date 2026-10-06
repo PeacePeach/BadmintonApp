@@ -145,7 +145,7 @@ Object.assign(__ds_scope, { Icon });
 try { (() => {
 const V = {
   dark: {
-    background: 'var(--neutral-100)',
+    background: 'var(--icon-button-bg)',
     color: 'var(--text-on-dark)',
     border: 'none'
   },
