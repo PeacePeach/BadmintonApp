@@ -20,6 +20,7 @@
 
   /* Cool neutral scale — black to white (neutral-400 is #8F8F91) */
   --neutral-0: #000000;
+  --neutral-75: #202020;
   --neutral-100: #242425;
   --neutral-200: #474749;
   --neutral-300: #6b6b6d;
@@ -150,10 +151,10 @@
   --action-secondary: var(--app-background);
 
   /* Circular icon button */
-  --icon-button-bg: var(--app-background);
+  --icon-button-bg: var(--neutral-75);
 
   /* Filter pill */
-  --filter-pill-bg: var(--app-background);
+  --filter-pill-bg: var(--neutral-75);
   --filter-pill-text-default: var(--text-secondary);
   --filter-pill-text-selected: var(--text-primary);
   --filter-pill-border-selected: var(--border-strong);
