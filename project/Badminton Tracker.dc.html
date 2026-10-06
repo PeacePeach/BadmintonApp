@@ -75,7 +75,7 @@ input::placeholder,textarea::placeholder{color:var(--text-secondary);}
               </div>
               <div style="display:flex;gap:6px;">
                 <sc-for list="{{ m.games }}" as="g" hint-placeholder-count="2">
-                  <div style="height:28px;padding:0 12px;border-radius:99px;background:var(--surface-muted);display:flex;align-items:center;font:500 13px/1 var(--font-sans);color: {{ g.fg }};">{{ g.s }}</div>
+                  <div style="height:28px;padding:0 12px;border-radius:99px;background:var(--score-pill-bg);display:flex;align-items:center;font:500 13px/1 var(--font-sans);color: {{ g.fg }};">{{ g.s }}</div>
                 </sc-for>
               </div>
             </div>
