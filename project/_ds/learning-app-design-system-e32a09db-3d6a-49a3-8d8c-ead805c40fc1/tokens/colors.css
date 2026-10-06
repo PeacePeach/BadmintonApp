@@ -150,10 +150,10 @@
   --action-secondary: var(--app-background);
 
   /* Circular icon button */
-  --icon-button-bg: var(--neutral-0);
+  --icon-button-bg: var(--app-background);
 
   /* Filter pill */
-  --filter-pill-bg: var(--neutral-0);
+  --filter-pill-bg: var(--app-background);
   --filter-pill-text-default: var(--text-secondary);
   --filter-pill-text-selected: var(--text-primary);
   --filter-pill-border-selected: var(--border-strong);
