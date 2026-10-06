@@ -96,9 +96,9 @@ function Chip({
       cursor: 'pointer',
       flexShrink: 0,
       transition: 'all var(--dur-base) var(--ease-out)',
-      background: active ? 'transparent' : 'var(--surface-chip)',
-      color: active ? 'var(--text-on-dark)' : 'var(--text-on-dark-muted)',
-      border: active ? '1px solid var(--border-active)' : '1px solid transparent'
+      background: 'var(--filter-pill-bg)',
+      color: active ? 'var(--filter-pill-text-selected)' : 'var(--filter-pill-text-default)',
+      border: active ? '1px solid var(--filter-pill-border-selected)' : '1px solid transparent'
     }
   }, children);
 }
