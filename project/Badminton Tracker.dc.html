@@ -26,7 +26,7 @@ input::placeholder,textarea::placeholder{color:var(--text-secondary);}
 </style>
 </helmet>
 <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 16px;">
-<div data-screen-label="Phone" style="--action-primary: {{ accent }}; position:relative;width:390px;height:844px;border-radius:48px;background:var(--bg-primary);overflow:hidden;color:var(--text-primary);box-shadow:0 0 0 10px #232226;">
+<div data-screen-label="Phone" style="position:relative;width:390px;height:844px;border-radius:48px;background:var(--bg-primary);overflow:hidden;color:var(--text-primary);box-shadow:0 0 0 10px #232226;">
 
   <div ref="{{ scrollRef }}" style="position:absolute;inset:0;overflow-y:auto;padding:58px 20px 120px;">
     <div style="position:absolute;top:18px;left:34px;font:500 15px/1 var(--font-sans);">9:41</div>
@@ -667,7 +667,7 @@ class Component extends DCLogic {
     const q = s.search.trim().toLowerCase();
     const exists = s.players.some(p => p.name.toLowerCase() === q);
     const v = {
-      accent: this.props.accent ?? '#0259e3', scrollRef: this.scrollRef, overall,
+      scrollRef: this.scrollRef, overall,
       isMatches: s.screen === 'matches', isInsights: s.screen === 'insights', isLog: s.screen === 'log',
       isDetail: s.screen === 'detail', isPlayers: s.screen === 'players', isPlayer: s.screen === 'player',
       showTabs: s.screen === 'matches' || s.screen === 'insights', menuOpen: s.menu,
