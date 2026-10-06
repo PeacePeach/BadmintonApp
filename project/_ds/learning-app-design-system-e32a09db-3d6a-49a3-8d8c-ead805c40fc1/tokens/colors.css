@@ -163,7 +163,7 @@
   --filter-pill-bg: var(--neutral-75);
   --filter-pill-text-default: var(--text-secondary);
   --filter-pill-text-selected: var(--text-primary);
-  --filter-pill-border-selected: var(--border-strong);
+  --filter-pill-border-selected: var(--ghost-button-outline);
 
   /* Score pill */
   --score-pill-bg: var(--violet-7);
