@@ -18,6 +18,18 @@
   --blue-win-soft: #6798ff;
   --orange-loss: #f78406;
 
+  /* Cool neutral scale — black to white (neutral-400 is #8F8F91) */
+  --neutral-0: #000000;
+  --neutral-100: #242425;
+  --neutral-200: #474749;
+  --neutral-300: #6b6b6d;
+  --neutral-400: #8f8f91;
+  --neutral-500: #a6a6a8;
+  --neutral-600: #bdbdbf;
+  --neutral-700: #d4d4d5;
+  --neutral-800: #ebebec;
+  --neutral-900: #ffffff;
+
   /* Neutral / dark scale */
   --ink-0: #000000;
   --ink-1: #1b1a1d;
