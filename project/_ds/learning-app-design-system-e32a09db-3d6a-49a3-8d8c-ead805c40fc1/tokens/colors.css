@@ -9,6 +9,9 @@
   --accent-500: #d4f25c;
   --accent: var(--accent-500);
 
+  /* Standalone app background */
+  --app-background: #1b1a1d;
+
   /* Neutral / dark scale */
   --ink-0: #000000;
   --ink-1: #1b1a1d;
@@ -104,7 +107,7 @@
      ========================================================= */
 
   /* Background */
-  --bg-primary: var(--ink-1);
+  --bg-primary: var(--app-background);
   --bg-secondary: var(--ink-2);
 
   /* Surface */
