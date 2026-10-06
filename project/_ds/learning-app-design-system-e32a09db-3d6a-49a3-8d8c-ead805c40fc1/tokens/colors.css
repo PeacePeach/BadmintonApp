@@ -149,6 +149,12 @@
   --action-on-primary: var(--white);
   --action-secondary: var(--app-background);
 
+  /* Filter pill */
+  --filter-pill-bg: var(--neutral-100);
+  --filter-pill-text-default: var(--text-secondary);
+  --filter-pill-text-selected: var(--text-primary);
+  --filter-pill-border-selected: var(--border-strong);
+
   /* Match result */
   --status-win: var(--blue-100);
   --status-loss: var(--orange-300);
