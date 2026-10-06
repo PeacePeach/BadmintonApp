@@ -718,7 +718,7 @@ class Component extends DCLogic {
       v.log = log; v.step1 = st === 1; v.step2 = st === 2; v.step3 = st === 3; v.step4 = st === 4;
       v.logBackIcon = st === 1 ? 'X' : 'ChevronLeft';
       v.logBack = () => st === 1 ? this.setState({ screen: 'matches', log: null, back: [] }) : this.setLog({ step: st - 1 });
-      v.stepBar = [1, 2, 3, 4].map(i => ({ bg: i <= st ? A : 'var(--border-default)' }));
+      v.stepBar = [1, 2, 3, 4].map(i => ({ bg: i <= st ? 'var(--progress-active)' : 'var(--progress-inactive)' }));
       v.stepTitle = ['Singles or Doubles?', 'Who Played?', 'Enter Score', 'Match Notes'][st - 1];
       v.showLogCta = st > 1;
       const ok = this.canNext(log);
