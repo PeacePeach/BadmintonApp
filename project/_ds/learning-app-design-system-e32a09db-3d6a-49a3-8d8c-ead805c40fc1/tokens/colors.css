@@ -155,6 +155,9 @@
   --filter-pill-text-selected: var(--text-primary);
   --filter-pill-border-selected: var(--border-strong);
 
+  /* Score pill */
+  --score-pill-bg: var(--violet-7);
+
   /* Match result */
   --status-win: var(--blue-100);
   --status-loss: var(--orange-300);
