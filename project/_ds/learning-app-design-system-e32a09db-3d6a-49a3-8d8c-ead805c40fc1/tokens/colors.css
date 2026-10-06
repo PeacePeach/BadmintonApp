@@ -164,7 +164,7 @@
 
   /* Match result */
   --status-win: var(--blue-100);
-  --status-loss: var(--orange-300);
+  --status-loss: var(--orange-200);
 
   /* Progress */
   --progress-active: var(--blue-100);
