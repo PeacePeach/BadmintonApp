@@ -163,9 +163,11 @@
   --status-loss: var(--orange-300);
 
   /* Progress */
-  --progress-start: var(--lilac-600);
-  --progress-end: #2f2b33;
-  --progress-track: var(--white);
+  --progress-active: var(--blue-100);
+  --progress-inactive: var(--violet-8);
+  --progress-start: var(--progress-active);
+  --progress-end: var(--progress-inactive);
+  --progress-track: var(--progress-inactive);
 
 
   /* =========================================================
