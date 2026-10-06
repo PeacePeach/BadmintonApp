@@ -609,7 +609,7 @@ class Component extends DCLogic {
     return {
       id: m.id, type: m.type, dateLabel: this.date(m.date), teamA: this.teamA(m), teamB: this.teamB(m), gamesWon: `${r.us}–${r.them}`,
       ...this.badge(r.win),
-      games: m.games.map(g => ({ s: `${g[0]}–${g[1]}`, fg: g[0] > g[1] ? 'var(--text-primary)' : 'var(--text-secondary)' })),
+      games: m.games.map(g => ({ s: `${g[0]}–${g[1]}`, fg: 'var(--text-secondary)' })),
       open: () => this.go('detail', { detailId: m.id })
     };
   }
