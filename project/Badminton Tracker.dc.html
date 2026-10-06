@@ -251,8 +251,8 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
                   <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="Search or type a new name" style="flex:1;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 15px/1 var(--font-sans);">
                 </div>
                 <sc-if value="{{ canAddNew }}" hint-placeholder-val="{{ false }}">
-                  <div onClick="{{ addNew }}" style="height:56px;border-radius:99px;border:1px dashed var(--action-primary);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;">
-                    <div style="width:40px;height:40px;border-radius:50%;background:var(--action-primary);color:var(--action-on-primary);display:flex;align-items:center;justify-content:center;">
+                  <div onClick="{{ addNew }}" style="height:56px;border-radius:99px;border:1px dashed var(--ghost-button-outline);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;">
+                    <div style="width:40px;height:40px;border-radius:50%;background:transparent;border:1px solid var(--ghost-button-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;">
                       <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 20 }}" strokeWidth="{{ 2.2 }}" hint-size="20px,20px"></x-import>
                     </div>
                     <div style="font:500 15px/1 var(--font-sans);">Add “{{ search }}” as New Player</div>
@@ -433,8 +433,8 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
           <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="Search or type a new name" style="flex:1;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 15px/1 var(--font-sans);">
         </div>
         <sc-if value="{{ canAddNew }}" hint-placeholder-val="{{ false }}">
-          <div onClick="{{ addPlayerOnly }}" style="height:56px;border-radius:99px;border:1px dashed var(--action-primary);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;">
-            <div style="width:40px;height:40px;border-radius:50%;background:var(--action-primary);color:var(--action-on-primary);display:flex;align-items:center;justify-content:center;">
+          <div onClick="{{ addPlayerOnly }}" style="height:56px;border-radius:99px;border:1px dashed var(--ghost-button-outline);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;">
+            <div style="width:40px;height:40px;border-radius:50%;background:transparent;border:1px solid var(--ghost-button-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;">
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 20 }}" strokeWidth="{{ 2.2 }}" hint-size="20px,20px"></x-import>
             </div>
             <div style="font:500 15px/1 var(--font-sans);">Add “{{ search }}”</div>
