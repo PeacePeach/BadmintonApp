@@ -12,100 +12,158 @@
   <title>Badminton Design System</title>
 
   <style>
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
       padding: 40px;
-      background: var(--ink-1);
-      color: var(--white);
+      background: var(--bg-primary);
+      color: var(--text-primary);
       font-family: Arial, sans-serif;
     }
 
-    h1 {
-      margin-bottom: 40px;
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
     }
 
-    h2 {
-      margin-top: 40px;
-      margin-bottom: 16px;
+    h1 { margin: 0 0 8px; }
+    h2 { margin: 48px 0 8px; }
+    h3 { margin: 28px 0 12px; }
+
+    .intro,
+    .section-note {
+      color: var(--text-secondary);
+      line-height: 1.5;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
       gap: 16px;
     }
 
     .swatch {
-      border: 1px solid var(--ink-4);
+      border: 1px solid var(--border-default);
       border-radius: 16px;
       overflow: hidden;
-      background: var(--ink-2);
+      background: var(--surface-primary);
     }
 
-    .color {
-      height: 100px;
-    }
+    .color { height: 96px; }
 
     .label {
       padding: 12px;
       font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .token {
+      display: block;
+      font-family: monospace;
+    }
+
+    .usage {
+      display: block;
+      margin-top: 4px;
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+
+    .semantic-row {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) minmax(160px, 2fr);
+      border-top: 1px solid var(--border-default);
+      min-height: 56px;
+      align-items: center;
+    }
+
+    .semantic-row:last-child {
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    .semantic-name {
+      padding: 12px 16px;
+      font-family: monospace;
+    }
+
+    .semantic-preview {
+      height: 32px;
+      margin: 12px 16px;
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
     }
   </style>
 </head>
 
 <body>
-  <h1>Badminton Design System</h1>
+  <main>
+    <h1>Badminton Design System</h1>
+    <div class="intro">
+      Primitive tokens define the raw palette. Semantic tokens define how colors are used in the product.
+    </div>
 
-  <h2>Accent</h2>
-  <div class="grid">
-    <div class="swatch">
-      <div class="color" style="background: var(--accent);"></div>
-      <div class="label">--accent</div>
-    </div>
-  </div>
+    <h2>Primitive colors</h2>
+    <div class="section-note">Raw palette values. Add new color families here first.</div>
 
-  <h2>Ink</h2>
-  <div class="grid">
-    <div class="swatch">
-      <div class="color" style="background: var(--ink-0);"></div>
-      <div class="label">--ink-0</div>
+    <h3>Brand</h3>
+    <div class="grid">
+      <div class="swatch">
+        <div class="color" style="background: var(--accent-500);"></div>
+        <div class="label">
+          <span class="token">--accent-500</span>
+          <span class="usage">Primary brand lime</span>
+        </div>
+      </div>
     </div>
-    <div class="swatch">
-      <div class="color" style="background: var(--ink-1);"></div>
-      <div class="label">--ink-1</div>
-    </div>
-    <div class="swatch">
-      <div class="color" style="background: var(--ink-2);"></div>
-      <div class="label">--ink-2</div>
-    </div>
-    <div class="swatch">
-      <div class="color" style="background: var(--ink-3);"></div>
-      <div class="label">--ink-3</div>
-    </div>
-    <div class="swatch">
-      <div class="color" style="background: var(--ink-4);"></div>
-      <div class="label">--ink-4</div>
-    </div>
-    <div class="swatch">
-      <div class="color" style="background: var(--ink-5);"></div>
-      <div class="label">--ink-5</div>
-    </div>
-  </div>
 
-  <h2>Neutral</h2>
-  <div class="grid">
-    <div class="swatch">
-      <div class="color" style="background: var(--grey-400);"></div>
-      <div class="label">--grey-400</div>
+    <h3>Neutral</h3>
+    <div class="grid">
+      <div class="swatch"><div class="color" style="background: var(--ink-0);"></div><div class="label"><span class="token">--ink-0</span></div></div>
+      <div class="swatch"><div class="color" style="background: var(--ink-1);"></div><div class="label"><span class="token">--ink-1</span></div></div>
+      <div class="swatch"><div class="color" style="background: var(--ink-2);"></div><div class="label"><span class="token">--ink-2</span></div></div>
+      <div class="swatch"><div class="color" style="background: var(--ink-3);"></div><div class="label"><span class="token">--ink-3</span></div></div>
+      <div class="swatch"><div class="color" style="background: var(--ink-4);"></div><div class="label"><span class="token">--ink-4</span></div></div>
+      <div class="swatch"><div class="color" style="background: var(--ink-5);"></div><div class="label"><span class="token">--ink-5</span></div></div>
+      <div class="swatch"><div class="color" style="background: var(--grey-400);"></div><div class="label"><span class="token">--grey-400</span></div></div>
+      <div class="swatch"><div class="color" style="background: var(--grey-200);"></div><div class="label"><span class="token">--grey-200</span></div></div>
+      <div class="swatch"><div class="color" style="background: var(--white);"></div><div class="label"><span class="token">--white</span></div></div>
     </div>
-    <div class="swatch">
-      <div class="color" style="background: var(--grey-200);"></div>
-      <div class="label">--grey-200</div>
+
+    <h3>Extended palette</h3>
+    <div class="grid">
+      <div class="swatch"><div class="color" style="background: var(--lilac-300);"></div><div class="label"><span class="token">--lilac-300</span></div></div>
+      <div class="swatch"><div class="color" style="background: var(--lilac-500);"></div><div class="label"><span class="token">--lilac-500</span></div></div>
+      <div class="swatch"><div class="color" style="background: var(--lilac-600);"></div><div class="label"><span class="token">--lilac-600</span></div></div>
+      <div class="swatch"><div class="color" style="background: var(--sage-100);"></div><div class="label"><span class="token">--sage-100</span></div></div>
+      <div class="swatch"><div class="color" style="background: var(--sage-300);"></div><div class="label"><span class="token">--sage-300</span></div></div>
+      <div class="swatch"><div class="color" style="background: var(--sage-500);"></div><div class="label"><span class="token">--sage-500</span></div></div>
+      <div class="swatch"><div class="color" style="background: var(--butter-300);"></div><div class="label"><span class="token">--butter-300</span></div></div>
+      <div class="swatch"><div class="color" style="background: var(--butter-500);"></div><div class="label"><span class="token">--butter-500</span></div></div>
     </div>
-    <div class="swatch">
-      <div class="color" style="background: var(--white);"></div>
-      <div class="label">--white</div>
-    </div>
-  </div>
+
+    <h2>Semantic colors</h2>
+    <div class="section-note">These are the tokens product components should normally use.</div>
+
+    <h3>Background & Surface</h3>
+    <div class="semantic-row"><div class="semantic-name">--bg-primary</div><div class="semantic-preview" style="background: var(--bg-primary);"></div></div>
+    <div class="semantic-row"><div class="semantic-name">--bg-secondary</div><div class="semantic-preview" style="background: var(--bg-secondary);"></div></div>
+    <div class="semantic-row"><div class="semantic-name">--surface-primary</div><div class="semantic-preview" style="background: var(--surface-primary);"></div></div>
+    <div class="semantic-row"><div class="semantic-name">--surface-secondary</div><div class="semantic-preview" style="background: var(--surface-secondary);"></div></div>
+
+    <h3>Text</h3>
+    <div class="semantic-row"><div class="semantic-name">--text-primary</div><div class="semantic-preview" style="background: var(--text-primary);"></div></div>
+    <div class="semantic-row"><div class="semantic-name">--text-secondary</div><div class="semantic-preview" style="background: var(--text-secondary);"></div></div>
+    <div class="semantic-row"><div class="semantic-name">--text-tertiary</div><div class="semantic-preview" style="background: var(--text-tertiary);"></div></div>
+    <div class="semantic-row"><div class="semantic-name">--text-inverse</div><div class="semantic-preview" style="background: var(--text-inverse);"></div></div>
+
+    <h3>Border</h3>
+    <div class="semantic-row"><div class="semantic-name">--border-default</div><div class="semantic-preview" style="background: var(--border-default);"></div></div>
+    <div class="semantic-row"><div class="semantic-name">--border-strong</div><div class="semantic-preview" style="background: var(--border-strong);"></div></div>
+
+    <h3>Action</h3>
+    <div class="semantic-row"><div class="semantic-name">--action-primary</div><div class="semantic-preview" style="background: var(--action-primary);"></div></div>
+    <div class="semantic-row"><div class="semantic-name">--action-on-primary</div><div class="semantic-preview" style="background: var(--action-on-primary);"></div></div>
+  </main>
 </body>
 </html>
