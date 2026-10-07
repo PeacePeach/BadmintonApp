@@ -227,7 +227,7 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
             <div style="background:var(--surface-primary);border-radius:26px;padding:16px;display:flex;flex-direction:column;gap:10px;">
               <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding:4px 6px 0;">Your Side</div>
               <sc-for list="{{ sideA }}" as="s" hint-placeholder-count="1">
-                <div onClick="{{ s.select }}" style="height:56px;border-radius:99px;background:var(--surface-muted);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;border:1.5px solid {{ s.border }};">
+                <div onClick="{{ s.select }}" style="height:56px;border-radius:99px;background:var(--surface-muted);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;border:1px solid {{ s.border }};">
                   <div style="width:40px;height:40px;border-radius:50%;background: {{ s.avBg }};color: {{ s.avFg }};display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ s.initials }}</div>
                   <div style="flex:1;font:500 15px/1 var(--font-sans);color: {{ s.fg }};">{{ s.name }}</div>
                   <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding-right:12px;">{{ s.role }}</div>
@@ -236,7 +236,7 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
               <div style="font:500 13px/1 var(--font-sans);color:var(--text-secondary);text-align:center;padding:4px 0;">vs</div>
               <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding:0 6px;">Opponents</div>
               <sc-for list="{{ sideB }}" as="s" hint-placeholder-count="1">
-                <div onClick="{{ s.select }}" style="height:56px;border-radius:99px;background:var(--surface-muted);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;border:1.5px solid {{ s.border }};">
+                <div onClick="{{ s.select }}" style="height:56px;border-radius:99px;background:var(--surface-muted);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;border:1px solid {{ s.border }};">
                   <div style="width:40px;height:40px;border-radius:50%;background: {{ s.avBg }};color: {{ s.avFg }};display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ s.initials }}</div>
                   <div style="flex:1;font:500 15px/1 var(--font-sans);color: {{ s.fg }};">{{ s.name }}</div>
                   <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding-right:12px;">{{ s.role }}</div>
