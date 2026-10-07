@@ -17,7 +17,7 @@ A design system for a mobile e-learning app: track course progress, browse cours
 
 ## Visual foundations
 - **Color:** app bg `--ink-1` #1b1a1d; raised circles/sheets `--ink-2` #2a292e; chips `--ink-3`. Content lives in pastel cards: lilac #c5afe4, sage #cfdecb, butter #fee7a6. Text is white on ink, near-black on pastel. Grey #8f8f91 for secondary text on dark. Pure black #000 is reserved for action circles and small value badges.
-- **Type:** Poppins throughout. SemiBold 32–34 for screen titles (two lines), Medium 22 card titles, Medium 19 section headers, Regular 15–16 body, 13 captions, 11 badges, Medium 40 stat numerals.
+- **Type:** Poppins throughout. SemiBold 32–34 for screen titles (two lines), Medium 22 card titles, Medium 19 section headers, Regular 15–16 body, 13 captions, 11 badges, Medium 40 stat numerals. Use tabular numerals for scores, percentages, records, and other dynamic stats; do not apply them automatically to ordinary body-copy numbers.
 - **Spacing:** 20px screen padding, 22px card padding, 10–12px gaps between sibling cards, ~26px between vertical sections.
 - **Corner radii:** very round. Cards 26px (chart panel 34px), sheets 34px top corners, every control a circle or pill. No square corners anywhere.
 - **Cards:** flat fill, no border, no shadow. A stacked variant shows a darker (#3a393e) card edge peeking below — the only "depth" cue.
