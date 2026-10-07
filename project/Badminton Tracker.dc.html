@@ -432,7 +432,7 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="Back" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
           <div style="font:600 28px/1.2 var(--font-sans);">Players</div>
         </div>
-        <div style="height:52px;border-radius:99px;background:var(--surface-primary);display:flex;align-items:center;gap:10px;padding:0 18px;color:var(--text-secondary);">
+        <div class="search-field-outline" style="height:52px;border-radius:99px;background:transparent;display:flex;align-items:center;gap:10px;padding:0 18px;color:var(--input-field-text-default);">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Search" size="{{ 20 }}" hint-size="20px,20px"></x-import>
           <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="Search or type a new name" style="flex:1;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 15px/1 var(--font-sans);">
         </div>
