@@ -8,6 +8,10 @@
     rel="stylesheet"
     href="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/colors.css"
   />
+  <link
+    rel="stylesheet"
+    href="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/typography.css"
+  />
 
   <title>Badminton Design System</title>
 
@@ -19,7 +23,7 @@
       padding: 40px;
       background: var(--bg-primary);
       color: var(--text-primary);
-      font-family: Arial, sans-serif;
+      font-family: var(--font-family-sans);
     }
 
     main {
@@ -92,6 +96,58 @@
       margin: 12px 16px;
       border: 1px solid var(--border-default);
       border-radius: 8px;
+    }
+
+    .type-specimens {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .type-specimen {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 24px;
+      align-items: center;
+      padding: 20px 0;
+      border-top: 1px solid var(--border-default);
+    }
+
+    .type-specimen:last-child {
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    .type-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .type-name {
+      font: var(--type-label-m);
+      color: var(--text-primary);
+    }
+
+    .type-values {
+      font: var(--type-label-s);
+      color: var(--text-secondary);
+    }
+
+    .type-sample {
+      color: var(--text-primary);
+    }
+
+    .metric-sample {
+      font-variant-numeric: var(--font-variant-numeric-metric);
+    }
+
+    @media (max-width: 700px) {
+      body { padding: 24px; }
+      .type-specimen {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
     }
   </style>
 </head>
@@ -234,6 +290,62 @@
     <h3>Match results</h3>
     <div class="semantic-row"><div class="semantic-name">--status-win</div><div class="semantic-preview" style="background: var(--status-win);"></div><span class="usage">→ blue-100</span></div>
     <div class="semantic-row"><div class="semantic-name">--status-loss</div><div class="semantic-preview" style="background: var(--status-loss);"></div><span class="usage">→ orange-300</span></div>
+  
+    <h2>Typography</h2>
+    <div class="section-note">
+      Semantic type styles for the product. Metrics use tabular numerals for scores, percentages, records, and other dynamic stats.
+    </div>
+
+    <div class="type-specimens">
+      <div class="type-specimen">
+        <div class="type-meta"><span class="type-name">Heading / XL</span><span class="type-values">32 / 40 · 600</span></div>
+        <div class="type-sample type-heading-xl">Matches</div>
+      </div>
+      <div class="type-specimen">
+        <div class="type-meta"><span class="type-name">Heading / L</span><span class="type-values">24 / 32 · 600</span></div>
+        <div class="type-sample type-heading-l">Enter Score</div>
+      </div>
+      <div class="type-specimen">
+        <div class="type-meta"><span class="type-name">Heading / M</span><span class="type-values">20 / 24 · 600</span></div>
+        <div class="type-sample type-heading-m">Head-to-Head</div>
+      </div>
+      <div class="type-specimen">
+        <div class="type-meta"><span class="type-name">Heading / S</span><span class="type-values">16 / 20 · 600</span></div>
+        <div class="type-sample type-heading-s">Recent Matches</div>
+      </div>
+
+      <div class="type-specimen">
+        <div class="type-meta"><span class="type-name">Body / L</span><span class="type-values">16 / 24 · 400</span></div>
+        <div class="type-sample type-body-l">Track every match and learn from your game.</div>
+      </div>
+      <div class="type-specimen">
+        <div class="type-meta"><span class="type-name">Body / M</span><span class="type-values">14 / 20 · 400</span></div>
+        <div class="type-sample type-body-m">Add notes about what worked and where points were lost.</div>
+      </div>
+
+      <div class="type-specimen">
+        <div class="type-meta"><span class="type-name">Label / M</span><span class="type-values">12 / 16 · 500</span></div>
+        <div class="type-sample type-label-m">SINGLES · OCT 7</div>
+      </div>
+      <div class="type-specimen">
+        <div class="type-meta"><span class="type-name">Label / S</span><span class="type-values">10 / 12 · 500 · micro only</span></div>
+        <div class="type-sample type-label-s">LAST 30 DAYS</div>
+      </div>
+
+      <div class="type-specimen">
+        <div class="type-meta"><span class="type-name">Metric / L</span><span class="type-values">52 / 52 · 500 · tabular</span></div>
+        <div class="type-sample type-metric-l metric-sample">62%</div>
+      </div>
+      <div class="type-specimen">
+        <div class="type-meta"><span class="type-name">Metric / M</span><span class="type-values">40 / 40 · 500 · tabular</span></div>
+        <div class="type-sample type-metric-m metric-sample">21 : 15</div>
+      </div>
+      <div class="type-specimen">
+        <div class="type-meta"><span class="type-name">Metric / S</span><span class="type-values">24 / 28 · 500 · tabular</span></div>
+        <div class="type-sample type-metric-s metric-sample">3–1</div>
+      </div>
+    </div>
+
   </main>
 </body>
 </html>
