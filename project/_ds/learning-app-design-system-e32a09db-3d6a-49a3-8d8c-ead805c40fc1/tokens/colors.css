@@ -143,6 +143,7 @@
 
   /* Ghost button */
   --ghost-button-outline: var(--neutral-200);
+  --ghost-button-outline-highlight: var(--neutral-600);
 
   /* Input field */
   --input-field-text-default: var(--neutral-300);
@@ -163,7 +164,7 @@
   --filter-pill-bg: var(--neutral-75);
   --filter-pill-text-default: var(--text-secondary);
   --filter-pill-text-selected: var(--text-primary);
-  --filter-pill-border-selected: var(--ghost-button-outline);
+  --filter-pill-border-selected: var(--ghost-button-outline-highlight);
 
   /* Score pill */
   --score-pill-bg: var(--violet-7);
