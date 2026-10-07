@@ -11,6 +11,7 @@
 --fs-xs:13px;--lh-xs:1.4;/* @kind font */
 --fs-2xs:11px;
 --ls-display:.01em;/* @kind font */
+--numeric-variant-data:tabular-nums;/* @kind font */
 /* semantic */
 --type-display:var(--fw-semibold) var(--fs-display)/var(--lh-display) var(--font-sans);
 --type-title:var(--fw-semibold) var(--fs-h1)/var(--lh-h1) var(--font-sans);
@@ -19,3 +20,6 @@
 --type-body:var(--fw-regular) var(--fs-body)/var(--lh-body) var(--font-sans);
 --type-caption:var(--fw-regular) var(--fs-xs)/var(--lh-xs) var(--font-sans);
 }
+
+/* Use for scores, percentages, records, and other dynamic stats only. */
+.type-numeric-data{font-variant-numeric:var(--numeric-variant-data);}
