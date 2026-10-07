@@ -735,7 +735,7 @@ class Component extends DCLogic {
       const slot = k => {
         const id = log[k], act = log.active === k;
         return { role: roles[k], name: id ? this.nm(id) : 'Select ' + roles[k], initials: id ? this.ini(id) : '+', fg: id ? 'var(--text-primary)' : 'var(--text-secondary)',
-          avBg: id ? 'var(--border-default)' : 'transparent', avFg: id ? 'var(--text-primary)' : 'var(--text-secondary)', border: act ? 'var(--border-strong)' : 'transparent',
+          avBg: id ? 'var(--border-default)' : 'transparent', avFg: id ? 'var(--text-primary)' : 'var(--text-secondary)', border: act ? 'var(--ghost-button-outline)' : 'transparent',
           select: () => this.setLog({ active: k }) };
       };
       const me = { role: 'Me', name: this.nm('me'), initials: this.ini('me'), fg: 'var(--text-primary)', avBg: A, avFg: 'var(--action-on-primary)', border: 'transparent', select: () => {} };
