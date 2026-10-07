@@ -171,7 +171,7 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
               <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">From Your Notes · What Worked</div>
               <div style="display:flex;flex-wrap:wrap;gap:8px;">
                 <sc-for list="{{ kwWorked }}" as="k" hint-placeholder-count="3">
-                  <div style="height:34px;padding:0 14px;border-radius:99px;background:var(--surface-muted);border:1px solid var(--action-primary);display:flex;align-items:center;gap:8px;font:400 14px/1 var(--font-sans);">{{ k.label }}<span style="color:var(--action-primary);font-weight:600;">{{ k.count }}</span></div>
+                  <div style="height:34px;padding:0 14px;border-radius:99px;background:var(--surface-muted);display:flex;align-items:center;gap:8px;font:400 14px/1 var(--font-sans);color:var(--neutral-600);">{{ k.label }}<span style="color:var(--text-primary);font-weight:600;">{{ k.count }}</span></div>
                 </sc-for>
               </div>
             </div>
