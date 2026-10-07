@@ -1,18 +1,96 @@
 :root{
+/* =========================================================
+   TYPOGRAPHY PRIMITIVES
+   ========================================================= */
+
+/* Family */
+--font-family-sans:"Poppins",system-ui,sans-serif;
+
+/* Weight */
+--font-weight-regular:400;/* @kind font */
+--font-weight-medium:500;/* @kind font */
+--font-weight-semibold:600;/* @kind font */
+
+/* Size */
+--font-size-10:10px;
+--font-size-12:12px;
+--font-size-14:14px;
+--font-size-16:16px;
+--font-size-20:20px;
+--font-size-24:24px;
+--font-size-32:32px;
+--font-size-40:40px;
+--font-size-52:52px;
+
+/* Line height */
+--line-height-12:12px;
+--line-height-16:16px;
+--line-height-20:20px;
+--line-height-24:24px;
+--line-height-28:28px;
+--line-height-32:32px;
+--line-height-40:40px;
+--line-height-52:52px;
+
+/* Numeric behavior */
+--font-variant-numeric-metric:tabular-nums;
+
+
+/* =========================================================
+   SEMANTIC TYPOGRAPHY
+   ========================================================= */
+
+/* Heading */
+--type-heading-xl:var(--font-weight-semibold) var(--font-size-32)/var(--line-height-40) var(--font-family-sans);
+--type-heading-l:var(--font-weight-semibold) var(--font-size-24)/var(--line-height-32) var(--font-family-sans);
+--type-heading-m:var(--font-weight-semibold) var(--font-size-20)/var(--line-height-24) var(--font-family-sans);
+--type-heading-s:var(--font-weight-semibold) var(--font-size-16)/var(--line-height-20) var(--font-family-sans);
+
+/* Body */
+--type-body-l:var(--font-weight-regular) var(--font-size-16)/var(--line-height-24) var(--font-family-sans);
+--type-body-m:var(--font-weight-regular) var(--font-size-14)/var(--line-height-20) var(--font-family-sans);
+
+/* Label */
+--type-label-m:var(--font-weight-medium) var(--font-size-12)/var(--line-height-16) var(--font-family-sans);
+--type-label-s:var(--font-weight-medium) var(--font-size-10)/var(--line-height-12) var(--font-family-sans);
+
+/* Metric */
+--type-metric-l:var(--font-weight-medium) var(--font-size-52)/var(--line-height-52) var(--font-family-sans);
+--type-metric-m:var(--font-weight-medium) var(--font-size-40)/var(--line-height-40) var(--font-family-sans);
+--type-metric-s:var(--font-weight-medium) var(--font-size-24)/var(--line-height-28) var(--font-family-sans);
+
+
+/* =========================================================
+   LEGACY / COMPATIBILITY
+   Keep existing components visually unchanged during migration.
+   ========================================================= */
+
 --font-sans:"Poppins",system-ui,sans-serif;
---fw-light:300;/* @kind font */--fw-regular:400;/* @kind font */--fw-medium:500;/* @kind font */--fw-semibold:600;/* @kind font */
---fs-display:34px;--lh-display:1.28;/* @kind font */
---fs-h1:32px;--lh-h1:1.3;/* @kind font */
---fs-h2:22px;--lh-h2:1.35;/* @kind font */
---fs-h3:19px;--lh-h3:1.35;/* @kind font */
---fs-stat:40px;--lh-stat:1;/* @kind font */
---fs-body:16px;--lh-body:1.5;/* @kind font */
---fs-sm:15px;--lh-sm:1.45;/* @kind font */
---fs-xs:13px;--lh-xs:1.4;/* @kind font */
+--fw-light:300;/* @kind font */
+--fw-regular:400;/* @kind font */
+--fw-medium:500;/* @kind font */
+--fw-semibold:600;/* @kind font */
+
+--fs-display:34px;
+--lh-display:1.28;/* @kind font */
+--fs-h1:32px;
+--lh-h1:1.3;/* @kind font */
+--fs-h2:22px;
+--lh-h2:1.35;/* @kind font */
+--fs-h3:19px;
+--lh-h3:1.35;/* @kind font */
+--fs-stat:40px;
+--lh-stat:1;/* @kind font */
+--fs-body:16px;
+--lh-body:1.5;/* @kind font */
+--fs-sm:15px;
+--lh-sm:1.45;/* @kind font */
+--fs-xs:13px;
+--lh-xs:1.4;/* @kind font */
 --fs-2xs:11px;
 --ls-display:.01em;/* @kind font */
---numeric-variant-data:tabular-nums;/* @kind font */
-/* semantic */
+--numeric-variant-data:var(--font-variant-numeric-metric);/* @kind font */
+
 --type-display:var(--fw-semibold) var(--fs-display)/var(--lh-display) var(--font-sans);
 --type-title:var(--fw-semibold) var(--fs-h1)/var(--lh-h1) var(--font-sans);
 --type-card-title:var(--fw-medium) var(--fs-h2)/var(--lh-h2) var(--font-sans);
@@ -21,5 +99,18 @@
 --type-caption:var(--fw-regular) var(--fs-xs)/var(--lh-xs) var(--font-sans);
 }
 
-/* Use for scores, percentages, records, and other dynamic stats only. */
-.type-numeric-data{font-variant-numeric:var(--numeric-variant-data);}
+/* Semantic utility classes for future migration. */
+.type-heading-xl{font:var(--type-heading-xl);}
+.type-heading-l{font:var(--type-heading-l);}
+.type-heading-m{font:var(--type-heading-m);}
+.type-heading-s{font:var(--type-heading-s);}
+.type-body-l{font:var(--type-body-l);}
+.type-body-m{font:var(--type-body-m);}
+.type-label-m{font:var(--type-label-m);}
+.type-label-s{font:var(--type-label-s);}
+.type-metric-l{font:var(--type-metric-l);font-variant-numeric:var(--font-variant-numeric-metric);}
+.type-metric-m{font:var(--type-metric-m);font-variant-numeric:var(--font-variant-numeric-metric);}
+.type-metric-s{font:var(--type-metric-s);font-variant-numeric:var(--font-variant-numeric-metric);}
+
+/* Legacy numeric utility. */
+.type-numeric-data{font-variant-numeric:var(--font-variant-numeric-metric);}
