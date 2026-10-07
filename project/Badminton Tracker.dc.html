@@ -813,7 +813,7 @@ class Component extends DCLogic {
     if (v.isPlayer) {
       const id = s.playerId, o = this.vs(id), si = this.vs(id, 'Singles'), du = this.vs(id, 'Doubles'), w = this.with(id);
       const inv = all.filter(m => m.opps.includes(id) || m.partner === id);
-      const st = (label, r) => ({ label, value: r.n ? r.label : '—', sub: r.n ? r.pctStr + ' win rate' : 'No matches', fg: r.n && r.pct >= .5 ? A : 'var(--text-primary)' });
+      const st = (label, r) => ({ label, value: r.n ? r.label : '—', sub: r.n ? r.pctStr + ' win rate' : 'No matches', fg: 'var(--text-primary)' });
       v.profile = { name: this.nm(id), initials: this.ini(id), sub: `${inv.length} matches together or against`,
         stats: [st('Overall H2H', o), st('Singles H2H', si), st('Doubles H2H', du), st('As Partner', w)],
         recent: inv.slice(0, 5).map(m => this.card(m)) };
