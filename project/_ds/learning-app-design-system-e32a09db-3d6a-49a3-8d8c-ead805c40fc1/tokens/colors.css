@@ -142,7 +142,7 @@
   --text-inverse: var(--ink-1);
 
   /* Ghost button */
-  --ghost-button-outline: var(--neutral-600);
+  --ghost-button-outline: var(--neutral-200);
 
   /* Input field */
   --input-field-text-default: var(--neutral-300);
