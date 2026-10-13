@@ -118,6 +118,14 @@
   --purple-300: #6600cd;
   --purple-400: #470090;
   --purple-500: #3e007d;
+  /* Red */
+  --red-50: #ffefef;
+  --red-75: #ffbcbc;
+  --red-100: #ffa0a0;
+  --red-200: #ff7878;
+  --red-300: #ff5c5c;
+  --red-400: #b34040;
+  --red-500: #9c3838;
 
   /* =========================================================
      2. SEMANTIC TOKENS
@@ -178,7 +186,7 @@
   --status-win: var(--blue-100);
   --status-loss: var(--orange-200);
   /* Feedback */
-  --status-error: var(--orange-200);
+  --status-error: var(--red-300);
 
   /* Progress */
   --progress-active: var(--blue-100);
