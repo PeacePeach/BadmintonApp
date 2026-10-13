@@ -517,7 +517,7 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
 
   <!-- Tabs -->
   <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
-    <div style="position:absolute;left:0;right:0;bottom:0;height:92px;padding:10px 40px 28px;background:var(--bg-primary);border-top:1px solid var(--border-default);display:grid;grid-template-columns:1fr 1fr;">
+    <div style="position:absolute;left:0;right:0;bottom:0;height:92px;padding:10px 40px 28px;background:var(--bg-primary);border-top:1px solid var(--bottom-nav-outline);display:grid;grid-template-columns:1fr 1fr;">
       <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="2">
         <div onClick="{{ t.select }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;color: {{ t.fg }};">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ t.icon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import>

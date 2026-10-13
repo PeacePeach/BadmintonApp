@@ -157,6 +157,9 @@
   --action-on-primary: var(--white);
   --action-secondary: var(--app-background);
 
+  /* Bottom navigation */
+  --bottom-nav-outline: var(--neutral-100);
+
   /* Circular icon button */
   --icon-button-bg: var(--neutral-75);
 
