@@ -39,6 +39,61 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
   <div ref="{{ scrollRef }}" style="position:absolute;inset:0;overflow-y:auto;padding:58px 20px 120px;">
     <div class="fake-status" style="position:absolute;top:18px;left:34px;font:500 15px/1 var(--font-sans);">9:41</div>
 
+    <!-- LOG IN -->
+    <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Log In" style="display:flex;flex-direction:column;gap:32px;padding-top:56px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:0 12px;">
+          <div style="font:600 30px/1.2 var(--font-sans);">Welcome Back</div>
+          <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">Log in to keep tracking your matches.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="font:500 15px/1 var(--font-sans);">Email</div>
+            <div class="search-field-outline" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="email" placeholder="you@example.com" autocomplete="email" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="font:500 15px/1 var(--font-sans);">Password</div>
+            <div class="search-field-outline" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="{{ pwType }}" placeholder="Password" autocomplete="current-password" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"><button onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}" style="width:32px;height:32px;border:none;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 22 }}" hint-size="22px,22px"></x-import></button></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:-4px;"><span onClick="{{ forgotPw }}" style="font:500 14px/1 var(--font-sans);color:var(--status-win);cursor:pointer;">Forgot Password?</span></div>
+        </div>
+        <button onClick="{{ logIn }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;background:var(--action-primary);color:var(--action-on-primary);" style-active="transform:scale(.97);">Log In</button>
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div style="flex:1;height:1px;background:var(--border-default);"></div>
+          <div style="font:500 13px/1 var(--font-sans);color:var(--text-secondary);">Or</div>
+          <div style="flex:1;height:1px;background:var(--border-default);"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <button onClick="{{ logIn }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;" style-active="transform:scale(.98);"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z"></path></svg>Continue with Apple</button>
+          <button onClick="{{ logIn }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;" style-active="transform:scale(.98);"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg>Continue with Google</button>
+        </div>
+        <div style="text-align:center;font:400 15px/1 var(--font-sans);color:var(--text-secondary);">Don't have an account? <span onClick="{{ toSignup }}" style="color:var(--status-win);font-weight:600;cursor:pointer;">Sign Up</span></div>
+      </div>
+    </sc-if>
+
+    <!-- SIGN UP -->
+    <sc-if value="{{ isSignup }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Sign Up" style="display:flex;flex-direction:column;gap:32px;padding-top:56px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:0 12px;">
+          <div style="font:600 30px/1.2 var(--font-sans);">Create Account</div>
+          <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">Start building your match history.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="search-field-outline" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="text" placeholder="Name" autocomplete="name" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
+          <div class="search-field-outline" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="email" placeholder="Email" autocomplete="email" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
+          <div class="search-field-outline" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="{{ pwType }}" placeholder="Password" autocomplete="new-password" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"><button onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}" style="width:32px;height:32px;border:none;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 22 }}" hint-size="22px,22px"></x-import></button></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button onClick="{{ toggleAgree }}" aria-label="Agree to Terms and Privacy Policy" style="width:24px;height:24px;border-radius:7px;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;background: {{ agreeBg }};border:1.5px solid {{ agreeBorder }};color:var(--action-on-primary);">
+            <sc-if value="{{ agree }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 16 }}" strokeWidth="{{ 2.6 }}" hint-size="16px,16px"></x-import></sc-if>
+          </button>
+          <div style="font:400 15px/1.4 var(--font-sans);">I agree to <span style="color:var(--status-win);font-weight:600;">Terms</span> and <span style="color:var(--status-win);font-weight:600;">Privacy Policy</span>.</div>
+        </div>
+        <button onClick="{{ signUp }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;background: {{ signupBg }};color: {{ signupFg }};" style-active="transform:scale(.97);">Sign Up</button>
+        <div style="text-align:center;font:400 15px/1 var(--font-sans);color:var(--text-secondary);">Already have an account? <span onClick="{{ toLogin }}" style="color:var(--status-win);font-weight:600;cursor:pointer;">Log In</span></div>
+      </div>
+    </sc-if>
+
     <!-- MATCHES -->
     <sc-if value="{{ isMatches }}" hint-placeholder-val="{{ true }}">
       <div data-screen-label="Matches" style="display:flex;flex-direction:column;gap:22px;">
@@ -680,7 +735,7 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Matches&quot;,&quot;options&quot;:[&quot;Matches&quot;,&quot;Insights&quot;,&quot;Log Match&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Log In&quot;,&quot;options&quot;:[&quot;Log In&quot;,&quot;Matches&quot;,&quot;Insights&quot;,&quot;Log Match&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
 class Component extends DCLogic {
   scrollRef = React.createRef();
   state = this.seed();
@@ -717,7 +772,7 @@ class Component extends DCLogic {
     ];
     const start = p.startScreen;
     return {
-      screen: start === 'Insights' ? 'insights' : start === 'Log Match' ? 'log' : 'matches',
+      screen: start === 'Log In' ? 'login' : start === 'Insights' ? 'insights' : start === 'Log Match' ? 'log' : 'matches', pwVisible: false, agree: false,
       insTab: 'progress', back: [], filter: 'All', menu: false, detailId: null, playerId: null, search: '', toast: null,
       players, matches, log: start === 'Log Match' ? this.newLog() : null
     };
@@ -814,6 +869,17 @@ class Component extends DCLogic {
       scrollRef: this.scrollRef, overall,
       isMatches: s.screen === 'matches', isInsights: s.screen === 'insights', isLog: s.screen === 'log',
       isDetail: s.screen === 'detail', isPlayers: s.screen === 'players', isPlayer: s.screen === 'player',
+      isLogin: s.screen === 'login', isSignup: s.screen === 'signup',
+      pwType: s.pwVisible ? 'text' : 'password', pwIcon: s.pwVisible ? 'Eye' : 'EyeOff', pwToggleLabel: s.pwVisible ? 'Hide password' : 'Show password',
+      togglePw: () => this.setState(x => ({ pwVisible: !x.pwVisible })),
+      logIn: () => this.setState({ screen: 'matches', back: [], pwVisible: false }),
+      forgotPw: () => this.flash('Not in this prototype'),
+      toSignup: () => this.setState({ screen: 'signup', pwVisible: false, agree: false }),
+      toLogin: () => this.setState({ screen: 'login', pwVisible: false }),
+      agree: s.agree, toggleAgree: () => this.setState(x => ({ agree: !x.agree })),
+      agreeBg: s.agree ? 'var(--action-primary)' : 'transparent', agreeBorder: s.agree ? 'var(--action-primary)' : 'var(--text-secondary)',
+      signupBg: s.agree ? 'var(--action-primary)' : 'var(--surface-muted)', signupFg: s.agree ? 'var(--action-on-primary)' : 'var(--text-tertiary)',
+      signUp: () => { if (this.state.agree) this.setState({ screen: 'matches', back: [], pwVisible: false, agree: false }); },
       showTabs: s.screen === 'matches' || s.screen === 'insights', menuOpen: s.menu,
       hasToast: !!s.toast, toast: s.toast, search: s.search, canAddNew: q.length > 1 && !exists,
       toggleMenu: () => this.setState(x => ({ menu: !x.menu })),
@@ -826,7 +892,8 @@ class Component extends DCLogic {
       menuItems: [
         { label: 'Players', icon: 'Users', select: () => this.go('players') },
         { label: 'Profile', icon: 'CircleUser', select: () => { this.setState({ menu: false }); this.flash('Not in this prototype'); } },
-        { label: 'Settings', icon: 'Settings', select: () => { this.setState({ menu: false }); this.flash('Not in this prototype'); } }
+        { label: 'Settings', icon: 'Settings', select: () => { this.setState({ menu: false }); this.flash('Not in this prototype'); } },
+        { label: 'Log Out', icon: 'LogOut', select: () => this.setState({ screen: 'login', back: [], menu: false, pwVisible: false }) }
       ],
       filters: ['All', 'Singles', 'Doubles'].map(f => ({ label: f, active: s.filter === f, select: () => this.setState({ filter: f }) })),
       matchCards: all.filter(m => s.filter === 'All' || m.type === s.filter).map(m => this.card(m))
