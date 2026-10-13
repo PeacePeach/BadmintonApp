@@ -38,6 +38,14 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
 .splash-text{animation:splash-fade .6s var(--ease-out) .25s both;}
 .splash-line{animation:splash-fade .6s var(--ease-out) .5s both;}
 @media (prefers-reduced-motion:reduce){.splash-mark,.splash-text,.splash-line{animation:none;}}
+/* Auth: field errors, helper text and busy spinner. */
+.search-field-outline.field-error,.search-field-outline.field-error:focus-within{border-color:var(--status-error);}
+.field-msg{font:400 13px/1.4 var(--font-sans);padding:0 22px;}
+@keyframes auth-spin{to{transform:rotate(360deg);}}
+.auth-spinner{width:22px;height:22px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:auth-spin .8s linear infinite;}
+.auth-spinner-sm{width:20px;height:20px;border-width:2px;}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+button:disabled{cursor:default !important;}
 </style>
 </helmet>
 <div class="stage" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 16px;">
@@ -53,26 +61,45 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
           <div style="font:600 30px/1.2 var(--font-sans);">Welcome Back</div>
           <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">Log in to keep tracking your matches.</div>
         </div>
+        <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
+          <div role="alert" style="display:flex;align-items:flex-start;gap:12px;padding:16px 18px;border-radius:22px;background:var(--surface-muted);">
+            <div style="color:var(--status-error);display:flex;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 20 }}" hint-size="20px,20px"></x-import></div>
+            <div style="font:400 14px/1.45 var(--font-sans);color:var(--text-primary);">{{ banner }}</div>
+          </div>
+        </sc-if>
         <div style="display:flex;flex-direction:column;gap:20px;">
           <div style="display:flex;flex-direction:column;gap:10px;">
             <div style="font:500 15px/1 var(--font-sans);">Email</div>
-            <div class="search-field-outline" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="email" placeholder="you@example.com" autocomplete="email" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
+            <div class="search-field-outline {{ emailCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="email" value="{{ f.email }}" onChange="{{ on_email }}" placeholder="you@example.com" autocomplete="email" aria-invalid="{{ emailInvalid }}" aria-label="you@example.com" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
+            <sc-if value="{{ emailErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--status-error);">{{ emailErr }}</div></sc-if>
           </div>
           <div style="display:flex;flex-direction:column;gap:10px;">
             <div style="font:500 15px/1 var(--font-sans);">Password</div>
-            <div class="search-field-outline" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="{{ pwType }}" placeholder="Password" autocomplete="current-password" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"><button onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}" style="width:32px;height:32px;border:none;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 22 }}" hint-size="22px,22px"></x-import></button></div>
+            <div class="search-field-outline {{ passwordCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="{{ pwType }}" value="{{ f.password }}" onChange="{{ on_password }}" placeholder="Password" autocomplete="current-password" aria-invalid="{{ passwordInvalid }}" aria-label="Password" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"><button onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}" style="width:32px;height:32px;border:none;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 22 }}" hint-size="22px,22px"></x-import></button></div>
+            <sc-if value="{{ passwordErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--status-error);">{{ passwordErr }}</div></sc-if>
           </div>
           <div style="display:flex;justify-content:flex-end;margin-top:-4px;"><span onClick="{{ forgotPw }}" style="font:500 14px/1 var(--font-sans);color:var(--status-win);cursor:pointer;">Forgot Password?</span></div>
         </div>
-        <button onClick="{{ logIn }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;background:var(--action-primary);color:var(--action-on-primary);" style-active="transform:scale(.97);">Log In</button>
+        <button onClick="{{ logIn }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--action-primary);color:var(--action-on-primary);" style-active="transform:scale(.97);">
+          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spinner" aria-hidden="true"></span><span class="sr-only">Log In</span></sc-if>
+          <sc-if value="{{ idleSubmit }}" hint-placeholder-val="{{ true }}">Log In</sc-if>
+        </button>
         <div style="display:flex;align-items:center;gap:16px;">
           <div style="flex:1;height:1px;background:var(--border-default);"></div>
           <div style="font:500 13px/1 var(--font-sans);color:var(--text-secondary);">Or</div>
           <div style="flex:1;height:1px;background:var(--border-default);"></div>
         </div>
         <div style="display:flex;flex-direction:column;gap:12px;">
-          <button onClick="{{ logIn }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;" style-active="transform:scale(.98);"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z"></path></svg>Continue with Apple</button>
-          <button onClick="{{ logIn }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;" style-active="transform:scale(.98);"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg>Continue with Google</button>
+          <button onClick="{{ apple.go }}" aria-busy="{{ apple.busy }}" disabled="{{ busyAny }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;opacity:{{ apple.dim }};" style-active="transform:scale(.98);">
+            <sc-if value="{{ apple.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spinner auth-spinner-sm" aria-hidden="true"></span></sc-if>
+            <sc-if value="{{ apple.idle }}" hint-placeholder-val="{{ true }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z"></path></svg></sc-if>
+            Continue with Apple
+          </button>
+          <button onClick="{{ google.go }}" aria-busy="{{ google.busy }}" disabled="{{ busyAny }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;opacity:{{ google.dim }};" style-active="transform:scale(.98);">
+            <sc-if value="{{ google.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spinner auth-spinner-sm" aria-hidden="true"></span></sc-if>
+            <sc-if value="{{ google.idle }}" hint-placeholder-val="{{ true }}"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg></sc-if>
+            Continue with Google
+          </button>
         </div>
         <div style="text-align:center;font:400 15px/1 var(--font-sans);color:var(--text-secondary);">Don't have an account? <span onClick="{{ toSignup }}" style="color:var(--status-win);font-weight:600;cursor:pointer;">Sign Up</span></div>
       </div>
@@ -85,10 +112,26 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
           <div style="font:600 30px/1.2 var(--font-sans);">Create Account</div>
           <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">Start building your match history.</div>
         </div>
+        <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
+          <div role="alert" style="display:flex;align-items:flex-start;gap:12px;padding:16px 18px;border-radius:22px;background:var(--surface-muted);">
+            <div style="color:var(--status-error);display:flex;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 20 }}" hint-size="20px,20px"></x-import></div>
+            <div style="font:400 14px/1.45 var(--font-sans);color:var(--text-primary);">{{ banner }}</div>
+          </div>
+        </sc-if>
         <div style="display:flex;flex-direction:column;gap:16px;">
-          <div class="search-field-outline" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="text" placeholder="Name" autocomplete="name" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
-          <div class="search-field-outline" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="email" placeholder="Email" autocomplete="email" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
-          <div class="search-field-outline" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="{{ pwType }}" placeholder="Password" autocomplete="new-password" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"><button onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}" style="width:32px;height:32px;border:none;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 22 }}" hint-size="22px,22px"></x-import></button></div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div class="search-field-outline {{ nameCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="text" value="{{ f.name }}" onChange="{{ on_name }}" placeholder="Name" autocomplete="name" aria-invalid="{{ nameInvalid }}" aria-label="Name" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
+            <sc-if value="{{ nameErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--status-error);">{{ nameErr }}</div></sc-if>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div class="search-field-outline {{ emailCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="email" value="{{ f.email }}" onChange="{{ on_email }}" placeholder="Email" autocomplete="email" aria-invalid="{{ emailInvalid }}" aria-label="Email" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
+            <sc-if value="{{ emailErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--status-error);">{{ emailErr }}</div></sc-if>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div class="search-field-outline {{ passwordCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="{{ pwType }}" value="{{ f.password }}" onChange="{{ on_password }}" placeholder="Password" autocomplete="new-password" aria-invalid="{{ passwordInvalid }}" aria-label="Password" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"><button onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}" style="width:32px;height:32px;border:none;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 22 }}" hint-size="22px,22px"></x-import></button></div>
+            <sc-if value="{{ passwordErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--status-error);">{{ passwordErr }}</div></sc-if>
+            <sc-if value="{{ passwordHelper }}" hint-placeholder-val="{{ true }}"><div class="field-msg" style="color:var(--text-tertiary);">At least 8 characters</div></sc-if>
+          </div>
         </div>
         <div style="display:flex;align-items:center;gap:12px;">
           <button onClick="{{ toggleAgree }}" aria-label="Agree to Terms and Privacy Policy" style="width:24px;height:24px;border-radius:7px;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;background: {{ agreeBg }};border:1.5px solid {{ agreeBorder }};color:var(--action-on-primary);">
@@ -96,8 +139,70 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
           </button>
           <div style="font:400 15px/1.4 var(--font-sans);">I agree to <span style="color:var(--status-win);font-weight:600;">Terms</span> and <span style="color:var(--status-win);font-weight:600;">Privacy Policy</span>.</div>
         </div>
-        <button onClick="{{ signUp }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;background: {{ signupBg }};color: {{ signupFg }};" style-active="transform:scale(.97);">Sign Up</button>
+        <button onClick="{{ signUp }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;background: {{ signupBg }};color: {{ signupFg }};" style-active="transform:scale(.97);">
+          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spinner" aria-hidden="true"></span><span class="sr-only">Sign Up</span></sc-if>
+          <sc-if value="{{ idleSubmit }}" hint-placeholder-val="{{ true }}">Sign Up</sc-if>
+        </button>
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div style="flex:1;height:1px;background:var(--border-default);"></div>
+          <div style="font:500 13px/1 var(--font-sans);color:var(--text-secondary);">Or</div>
+          <div style="flex:1;height:1px;background:var(--border-default);"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <button onClick="{{ apple.go }}" aria-busy="{{ apple.busy }}" disabled="{{ busyAny }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;opacity:{{ apple.dim }};" style-active="transform:scale(.98);">
+            <sc-if value="{{ apple.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spinner auth-spinner-sm" aria-hidden="true"></span></sc-if>
+            <sc-if value="{{ apple.idle }}" hint-placeholder-val="{{ true }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z"></path></svg></sc-if>
+            Continue with Apple
+          </button>
+          <button onClick="{{ google.go }}" aria-busy="{{ google.busy }}" disabled="{{ busyAny }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;opacity:{{ google.dim }};" style-active="transform:scale(.98);">
+            <sc-if value="{{ google.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spinner auth-spinner-sm" aria-hidden="true"></span></sc-if>
+            <sc-if value="{{ google.idle }}" hint-placeholder-val="{{ true }}"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg></sc-if>
+            Continue with Google
+          </button>
+        </div>
         <div style="text-align:center;font:400 15px/1 var(--font-sans);color:var(--text-secondary);">Already have an account? <span onClick="{{ toLogin }}" style="color:var(--status-win);font-weight:600;cursor:pointer;">Log In</span></div>
+      </div>
+    </sc-if>
+
+    <!-- FORGOT PASSWORD -->
+    <sc-if value="{{ isForgot }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Forgot Password" style="display:flex;flex-direction:column;gap:32px;padding-top:56px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:0 12px;">
+          <div style="font:600 30px/1.2 var(--font-sans);">Forgot Password?</div>
+          <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">Enter the email you use for Rallywise and we'll send you a link to reset your password.</div>
+        </div>
+        <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
+          <div role="alert" style="display:flex;align-items:flex-start;gap:12px;padding:16px 18px;border-radius:22px;background:var(--surface-muted);">
+            <div style="color:var(--status-error);display:flex;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 20 }}" hint-size="20px,20px"></x-import></div>
+            <div style="font:400 14px/1.45 var(--font-sans);color:var(--text-primary);">{{ banner }}</div>
+          </div>
+        </sc-if>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="font:500 15px/1 var(--font-sans);">Email</div>
+            <div class="search-field-outline {{ emailCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="email" value="{{ f.email }}" onChange="{{ on_email }}" placeholder="you@example.com" autocomplete="email" aria-invalid="{{ emailInvalid }}" aria-label="you@example.com" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
+            <sc-if value="{{ emailErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--status-error);">{{ emailErr }}</div></sc-if>
+          </div>
+        <button onClick="{{ sendReset }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--action-primary);color:var(--action-on-primary);" style-active="transform:scale(.97);">
+          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spinner" aria-hidden="true"></span><span class="sr-only">Send Reset Link</span></sc-if>
+          <sc-if value="{{ idleSubmit }}" hint-placeholder-val="{{ true }}">Send Reset Link</sc-if>
+        </button>
+        <div style="text-align:center;font:400 15px/1 var(--font-sans);"><span onClick="{{ toLogin }}" style="color:var(--status-win);font-weight:600;cursor:pointer;">Back to Log In</span></div>
+      </div>
+    </sc-if>
+
+    <!-- CHECK EMAIL -->
+    <sc-if value="{{ isResetSent }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Check Email" style="display:flex;flex-direction:column;gap:32px;padding-top:56px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:0 12px;">
+          <div style="width:64px;height:64px;border-radius:50%;background:var(--icon-button-bg);color:var(--text-primary);display:flex;align-items:center;justify-content:center;margin-bottom:14px;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="MailCheck" size="{{ 28 }}" hint-size="28px,28px"></x-import></div>
+          <div style="font:600 30px/1.2 var(--font-sans);">Check Your Email</div>
+          <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">If an account exists for <span style="color:var(--text-primary);font-weight:500;overflow-wrap:anywhere;">{{ resetEmail }}</span>, you'll get a link to reset your password. It may take a minute to arrive.</div>
+        </div>
+        <button onClick="{{ toLogin }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;background:var(--action-primary);color:var(--action-on-primary);" style-active="transform:scale(.97);">Back to Log In</button>
+        <div style="text-align:center;font:400 15px/1 var(--font-sans);color:var(--text-secondary);">Didn't get the email?
+          <sc-if value="{{ canResend }}" hint-placeholder-val="{{ true }}"><span onClick="{{ resend }}" role="button" style="color:var(--status-win);font-weight:600;cursor:pointer;">Resend</span></sc-if>
+          <sc-if value="{{ resendWait }}" hint-placeholder-val="{{ false }}"><span style="color:var(--text-tertiary);font-variant-numeric:tabular-nums;">Resend in {{ resendIn }}s</span></sc-if>
+        </div>
       </div>
     </sc-if>
 
@@ -754,7 +859,7 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Splash&quot;,&quot;options&quot;:[&quot;Splash&quot;,&quot;Log In&quot;,&quot;Matches&quot;,&quot;Insights&quot;,&quot;Log Match&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Splash&quot;,&quot;options&quot;:[&quot;Splash&quot;,&quot;Log In&quot;,&quot;Sign Up&quot;,&quot;Forgot Password&quot;,&quot;Check Email&quot;,&quot;Matches&quot;,&quot;Insights&quot;,&quot;Log Match&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;authError&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Invalid email&quot;,&quot;Incorrect email or password&quot;,&quot;Email already exists&quot;,&quot;Password too short&quot;,&quot;Network error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
 class Component extends DCLogic {
   scrollRef = React.createRef();
   state = this.seed();
@@ -790,8 +895,11 @@ class Component extends DCLogic {
       M('m20', '2026-07-16', 'Singles', null, ['jordan'], [[21, 13], [21, 16]], ['Placement'], [], '', '', '')
     ];
     const start = p.startScreen;
+    const screens = { 'Splash': 'splash', 'Log In': 'login', 'Sign Up': 'signup', 'Forgot Password': 'forgot', 'Check Email': 'resetSent', 'Insights': 'insights', 'Log Match': 'log' };
     return {
-      screen: start === 'Splash' ? 'splash' : start === 'Log In' ? 'login' : start === 'Insights' ? 'insights' : start === 'Log Match' ? 'log' : 'matches', pwVisible: false, agree: false,
+      screen: screens[start] || 'matches', pwVisible: false, agree: false,
+      f: this.blankForm(), errors: {}, banner: null, busy: null, resetEmail: 'sam@rallywise.app', resendIn: 0,
+      ...this.authPreset(p.authError),
       insTab: 'progress', back: [], filter: 'All', menu: false, detailId: null, playerId: null, search: '', toast: null,
       players, matches, log: start === 'Log Match' ? this.newLog() : null
     };
@@ -804,10 +912,70 @@ class Component extends DCLogic {
   componentDidMount() {
     if (this.state.screen === 'splash') this._splash = setTimeout(() => this.leaveSplash(), 2200);
   }
-  componentWillUnmount() { clearTimeout(this._splash); }
+  componentWillUnmount() { clearTimeout(this._splash); clearTimeout(this._busy); clearInterval(this._tick); }
+
+  // Auth. The prototype has no backend: requests resolve after a short delay. The "Auth error"
+  // prop previews each error, and "Incorrect email or password" / "Network error" keep failing
+  // until it is set back to None. Signing up with sam@rallywise.app also hits "already exists".
+  blankForm() { return { name: '', email: '', password: '' }; }
+  authPreset(kind) {
+    const f = this.blankForm();
+    switch (kind) {
+      case 'Invalid email': return { screen: 'login', f: { ...f, email: 'sam@rallywise' }, errors: { email: this.msg.emailInvalid } };
+      case 'Incorrect email or password': return { screen: 'login', f: { ...f, email: 'sam@rallywise.app', password: 'smash2024' }, banner: this.msg.incorrect };
+      case 'Email already exists': return { screen: 'signup', agree: true, f: { name: 'Sam Rivera', email: 'sam@rallywise.app', password: 'smash2024' }, errors: { email: this.msg.exists } };
+      case 'Password too short': return { screen: 'signup', agree: true, f: { name: 'Sam Rivera', email: 'sam.rivera@example.com', password: 'smash' }, errors: { password: this.msg.pwShort } };
+      case 'Network error': return { screen: 'login', f: { ...f, email: 'sam@rallywise.app', password: 'smash2024' }, banner: this.msg.network };
+      default: return {};
+    }
+  }
+  get msg() { return {
+    emailEmpty: 'Enter your email address.', emailInvalid: 'Enter a valid email address.',
+    pwEmpty: 'Enter your password.', pwShort: 'Use at least 8 characters.', nameEmpty: 'Enter your name.',
+    incorrect: 'Incorrect email or password. Try again or reset your password.',
+    exists: 'An account with this email already exists. Log in instead.',
+    network: "Can't connect right now. Check your connection and try again."
+
+  }; }
+  toAuth(screen, keep) {
+    clearTimeout(this._busy); clearInterval(this._tick);
+    this.setState(s => ({ screen, back: [], pwVisible: false, errors: {}, banner: null, busy: null, resendIn: 0,
+      ...(screen === 'signup' ? { agree: false } : {}), f: keep ? s.f : this.blankForm() }));
+  }
+  emailErr(v) { v = v.trim(); return !v ? this.msg.emailEmpty : /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) ? null : this.msg.emailInvalid; }
+  offline() { return this.props.authError === 'Network error' || (typeof navigator !== 'undefined' && navigator.onLine === false); }
+  // Validate, then fake a request. ok() runs on success; fail() may return an error patch.
+  submit(errors, ok, fail) {
+    if (this.state.busy) return;
+    Object.keys(errors).forEach(k => { if (!errors[k]) delete errors[k]; });
+    if (Object.keys(errors).length) return this.setState({ errors, banner: null });
+    this.setState({ errors: {}, banner: null, busy: 'submit' });
+    this.request(ok, fail);
+  }
+  request(ok, fail) {
+    clearTimeout(this._busy);
+    this._busy = setTimeout(() => {
+      if (this.offline()) return this.setState({ busy: null, banner: this.msg.network });
+      const err = fail && fail();
+      if (err) return this.setState({ busy: null, ...err });
+      this.setState({ busy: null }); ok();
+    }, 900);
+  }
+  social(provider) {
+    if (this.state.busy) return;
+    // The provider's own sheet (Sign in with Apple / Google account picker) takes over here.
+    this.setState({ errors: {}, banner: null, busy: provider });
+    this.request(() => this.toAuth('matches'));
+  }
+  startResendTimer() {
+    clearInterval(this._tick);
+    this.setState({ resendIn: 30 });
+    this._tick = setInterval(() => this.setState(s => { if (s.resendIn <= 1) clearInterval(this._tick); return { resendIn: Math.max(0, s.resendIn - 1) }; }), 1000);
+  }
   leaveSplash() { clearTimeout(this._splash); if (this.state.screen === 'splash') this.setState({ screen: 'login' }); }
 
   componentDidUpdate(pp, ps) {
+    if (pp && this.props.authError !== pp.authError && this.props.authError !== 'None') this.setState({ back: [], busy: null, banner: null, errors: {}, ...this.authPreset(this.props.authError) });
     const a = ps.screen + (ps.log ? ps.log.step : '') + ps.detailId + ps.playerId;
     const b = this.state.screen + (this.state.log ? this.state.log.step : '') + this.state.detailId + this.state.playerId;
     if (a !== b && this.scrollRef.current) this.scrollRef.current.scrollTop = 0;
@@ -897,14 +1065,23 @@ class Component extends DCLogic {
       isLogin: s.screen === 'login', isSignup: s.screen === 'signup', isSplash: s.screen === 'splash', skipSplash: () => this.leaveSplash(),
       pwType: s.pwVisible ? 'text' : 'password', pwIcon: s.pwVisible ? 'Eye' : 'EyeOff', pwToggleLabel: s.pwVisible ? 'Hide password' : 'Show password',
       togglePw: () => this.setState(x => ({ pwVisible: !x.pwVisible })),
-      logIn: () => this.setState({ screen: 'matches', back: [], pwVisible: false }),
-      forgotPw: () => this.flash('Not in this prototype'),
-      toSignup: () => this.setState({ screen: 'signup', pwVisible: false, agree: false }),
-      toLogin: () => this.setState({ screen: 'login', pwVisible: false }),
+      isForgot: s.screen === 'forgot', isResetSent: s.screen === 'resetSent',
+      f: s.f, banner: s.banner, resetEmail: s.resetEmail, resendIn: s.resendIn, canResend: !s.resendIn, resendWait: !!s.resendIn,
+      busyAny: !!s.busy, busySubmit: s.busy === 'submit', idleSubmit: s.busy !== 'submit',
+      logIn: () => { const f = this.state.f; this.submit({ email: this.emailErr(f.email), password: f.password ? null : this.msg.pwEmpty },
+        () => this.toAuth('matches'), () => this.props.authError === 'Incorrect email or password' && { banner: this.msg.incorrect }); },
+      forgotPw: () => this.toAuth('forgot', true),
+      sendReset: () => { const email = this.state.f.email.trim(); this.submit({ email: this.emailErr(email) },
+        () => { this.setState({ screen: 'resetSent', resetEmail: email }); this.startResendTimer(); }); },
+      resend: () => { if (this.state.busy) return; this.setState({ busy: 'resend' }); this.request(() => { this.flash('Reset link sent again'); this.startResendTimer(); }, null); },
+      toSignup: () => this.toAuth('signup'),
+      toLogin: () => this.toAuth('login', s.screen === 'forgot' || s.screen === 'resetSent'),
       agree: s.agree, toggleAgree: () => this.setState(x => ({ agree: !x.agree })),
       agreeBg: s.agree ? 'var(--action-primary)' : 'transparent', agreeBorder: s.agree ? 'var(--action-primary)' : 'var(--text-secondary)',
       signupBg: s.agree ? 'var(--action-primary)' : 'var(--surface-muted)', signupFg: s.agree ? 'var(--action-on-primary)' : 'var(--text-tertiary)',
-      signUp: () => { if (this.state.agree) this.setState({ screen: 'matches', back: [], pwVisible: false, agree: false }); },
+      signUp: () => { if (!this.state.agree) return; const f = this.state.f;
+        this.submit({ name: f.name.trim() ? null : this.msg.nameEmpty, email: this.emailErr(f.email), password: f.password.length >= 8 ? null : f.password ? this.msg.pwShort : this.msg.pwEmpty },
+          () => this.toAuth('matches'), () => f.email.trim().toLowerCase() === 'sam@rallywise.app' && { errors: { email: this.msg.exists } }); },
       showTabs: s.screen === 'matches' || s.screen === 'insights', menuOpen: s.menu,
       hasToast: !!s.toast, toast: s.toast, search: s.search, canAddNew: q.length > 1 && !exists,
       toggleMenu: () => this.setState(x => ({ menu: !x.menu })),
@@ -918,11 +1095,19 @@ class Component extends DCLogic {
         { label: 'Players', icon: 'Users', select: () => this.go('players') },
         { label: 'Profile', icon: 'CircleUser', select: () => { this.setState({ menu: false }); this.flash('Not in this prototype'); } },
         { label: 'Settings', icon: 'Settings', select: () => { this.setState({ menu: false }); this.flash('Not in this prototype'); } },
-        { label: 'Log Out', icon: 'LogOut', select: () => this.setState({ screen: 'login', back: [], menu: false, pwVisible: false }) }
+        { label: 'Log Out', icon: 'LogOut', select: () => { this.setState({ menu: false }); this.toAuth('login'); } }
       ],
       filters: ['All', 'Singles', 'Doubles'].map(f => ({ label: f, active: s.filter === f, select: () => this.setState({ filter: f }) })),
       matchCards: all.filter(m => s.filter === 'All' || m.type === s.filter).map(m => this.card(m))
     };
+
+    for (const k of ['name', 'email', 'password']) {
+      const e = s.errors[k] || null;
+      Object.assign(v, { [k + 'Err']: e, [k + 'Invalid']: !!e, [k + 'Cls']: e ? 'field-error' : '',
+        ['on_' + k]: ev => { const val = ev.target.value; this.setState(x => ({ f: { ...x.f, [k]: val }, errors: { ...x.errors, [k]: null }, banner: null })); } });
+    }
+    v.passwordHelper = !s.errors.password;
+    for (const k of ['apple', 'google']) v[k] = { go: () => this.social(k), busy: s.busy === k, idle: s.busy !== k, dim: s.busy && s.busy !== k ? .5 : 1 };
 
     if (v.isInsights) {
       const chron = all.slice().sort((a, b) => a.date < b.date ? -1 : 1);
