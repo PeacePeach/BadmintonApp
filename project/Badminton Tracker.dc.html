@@ -94,103 +94,192 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
 
     <!-- INSIGHTS -->
     <sc-if value="{{ isInsights }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Insights" style="display:flex;flex-direction:column;gap:26px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="font:600 32px/1.2 var(--font-sans);">Insights</div>
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" size="{{ 48 }}" label="Menu" onClick="{{ toggleMenu }}" hint-size="48px,48px"></x-import>
-        </div>
-        <div style="background:var(--surface-primary);border-radius:34px;padding:24px 22px;display:flex;flex-direction:column;gap:18px;">
-          <div style="display:flex;justify-content:space-between;align-items:flex-end;">
-            <div style="display:flex;flex-direction:column;gap:8px;">
-              <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">Overall Win Rate</div>
-              <div style="font:500 52px/1 var(--font-sans);color:var(--text-primary);">{{ overall.pctStr }}</div>
-            </div>
-            <div style="font:400 15px/1 var(--font-sans);color:var(--neutral-600);">{{ overall.label }} W–L</div>
+      <div data-screen-label="Insights" style="display:flex;flex-direction:column;gap:28px;">
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="font:600 32px/1.2 var(--font-sans);">Insights</div>
+            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" size="{{ 48 }}" label="Menu" onClick="{{ toggleMenu }}" hint-size="48px,48px"></x-import>
           </div>
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">Last 10 · Newest Right</div>
-            <div style="display:flex;gap:6px;">
-              <sc-for list="{{ form }}" as="d" hint-placeholder-count="10">
-                <div style="flex:1;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;font:600 11px/1 var(--font-sans);background: {{ d.bg }};color: {{ d.fg }};">{{ d.l }}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:99px;background:var(--filter-pill-bg);">
+            <sc-for list="{{ insTabs }}" as="t" hint-placeholder-count="2">
+              <button onClick="{{ t.select }}" style="height:44px;border:none;border-radius:99px;font:500 15px/1 var(--font-sans);cursor:pointer;transition:background .18s ease-out,color .18s ease-out;background: {{ t.bg }};color: {{ t.fg }};">{{ t.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <sc-if value="{{ insProgress }}" hint-placeholder-val="{{ true }}">
+          <div data-screen-label="Performance" style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);gap:10px;">
+              <div style="background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:14px;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                  <div style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);padding-top:6px;">Win Rate</div>
+                  <div style="width:36px;height:36px;border-radius:50%;background:var(--surface-muted);display:flex;align-items:center;justify-content:center;color:var(--neutral-600);flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Trophy" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                  <div style="font:500 52px/.95 var(--font-sans);letter-spacing:-.03em;">{{ pf.win }}</div>
+                  <div style="display:flex;align-items:center;gap:6px;font:400 13px/1 var(--font-sans);color:var(--text-secondary);">
+                    <div style="display:flex;align-items:center;gap:3px;font-weight:600;color:var(--status-win);"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ArrowUpRight" size="{{ 15 }}" strokeWidth="{{ 2.4 }}" hint-size="15px,15px"></x-import>{{ pf.delta }}</div>
+                    vs prev 10
+                  </div>
+                </div>
+                <div style="flex:1;min-height:96px;display:flex;align-items:flex-end;justify-content:space-between;gap:4px;padding-top:12px;">
+                  <sc-for list="{{ pf.bars }}" as="b" hint-placeholder-count="10">
+                    <div style="width:8px;border-radius:99px;transition:height .22s ease-out;height: {{ b.h }};background: {{ b.bg }};"></div>
+                  </sc-for>
+                </div>
+                <div style="display:flex;justify-content:space-between;font:400 11px/1 var(--font-sans);color:var(--text-secondary);"><div>5-match form</div><div>Now</div></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="flex:1;background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                    <div style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);line-height:1.4;">Matches Played</div>
+                    <div style="width:36px;height:36px;border-radius:50%;background:var(--surface-muted);display:flex;align-items:center;justify-content:center;color:var(--neutral-600);flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Calendar" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <div style="font:500 40px/1 var(--font-sans);">{{ pf.played }}</div>
+                    <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">Last 30 days</div>
+                  </div>
+                </div>
+                <div style="flex:1;background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                    <div style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);line-height:1.4;">Recent Record</div>
+                    <div style="width:36px;height:36px;border-radius:50%;background:var(--surface-muted);display:flex;align-items:center;justify-content:center;color:var(--neutral-600);flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ListChecks" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <div style="font:500 40px/1 var(--font-sans);">{{ pf.record }}</div>
+                    <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">Last 5 matches</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="background:var(--surface-primary);border-radius:26px;padding:22px 20px;display:flex;flex-direction:column;gap:22px;">
+              <div style="font:500 19px/1.2 var(--font-sans);">Performance Breakdown</div>
+              <sc-for list="{{ pf.rows }}" as="r" hint-placeholder-count="4">
+                <div style="display:grid;grid-template-columns:96px minmax(0,1fr) 62px;align-items:center;gap:14px;">
+                  <div style="font:400 14px/1.3 var(--font-sans);color:var(--neutral-600);">{{ r.label }}</div>
+                  <div style="position:relative;height:8px;border-radius:99px;background:repeating-linear-gradient(-60deg,var(--border-default) 0 1.5px,transparent 1.5px 5px);">
+                    <div style="position:absolute;top:0;bottom:0;border-radius:99px;background:var(--progress-active);left: {{ r.l }};width: {{ r.w }};"></div>
+                    <div style="position:absolute;left:50%;top:-4px;bottom:-4px;width:2px;margin-left:-1px;border-radius:2px;background:var(--text-primary);opacity: {{ r.mid }};"></div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+                    <div style="font:500 16px/1 var(--font-sans);">{{ r.value }}</div>
+                    <div style="font:400 11px/1 var(--font-sans);color:var(--text-secondary);">{{ r.sub }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+
+            <sc-for list="{{ pf.people }}" as="p" hint-placeholder-count="3">
+                <div onClick="{{ p.open }}" style="background:var(--surface-primary);border-radius:26px;display:flex;align-items:center;gap:14px;padding:16px 20px 16px 16px;cursor:pointer;">
+                  <div style="width:44px;height:44px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;font:500 14px/1 var(--font-sans);flex-shrink:0;">{{ p.initials }}</div>
+                  <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;">
+                    <div style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);">{{ p.role }}</div>
+                    <div style="font:500 16px/1.1 var(--font-sans);">{{ p.name }}</div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+                    <div style="font:500 17px/1 var(--font-sans);color: {{ p.vFg }};">{{ p.value }}</div>
+                    <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);">{{ p.sub }}</div>
+                  </div>
+                </div>
+              </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ insCoach }}" hint-placeholder-val="{{ false }}">
+          <div data-screen-label="Grow" style="display:flex;flex-direction:column;gap:44px;padding-top:6px;">
+            <div style="background:var(--surface-primary);border-radius:26px;padding:24px;display:flex;flex-direction:column;gap:14px;">
+              <div style="display:flex;align-items:center;gap:8px;font:400 14px/1 var(--font-sans);color:var(--neutral-600);"><div style="width:6px;height:6px;border-radius:50%;background:var(--status-win);"></div>Key insight</div>
+              <div style="font:500 22px/1.3 var(--font-sans);text-wrap:balance;">Your net game is getting stronger.</div>
+              <div style="font:400 15px/1.5 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">You've won a higher share of net points in your last 6 matches.</div>
+              <div style="position:relative;height:10px;display:flex;gap:6px;margin-top:10px;">
+                <div style="width:72%;flex-shrink:0;border-radius:99px;background:var(--progress-active);"></div>
+                <div style="flex:1;border-radius:99px;background:repeating-linear-gradient(-60deg,var(--border-default) 0 1.5px,transparent 1.5px 5px);"></div>
+                <div style="position:absolute;left:54%;top:-4px;bottom:-4px;width:2px;margin-left:-1px;border-radius:2px;background:var(--text-primary);"></div>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:16px;">
+              <div style="display:flex;flex-direction:column;gap:6px;"><div style="font:500 19px/1.2 var(--font-sans);">Build Next</div><div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">Top areas to improve from recent matches</div></div>
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;">
+                <sc-for list="{{ grow.build }}" as="b" hint-placeholder-count="2">
+                  <div style="background:var(--surface-primary);border-radius:26px;padding:18px;display:flex;flex-direction:column;gap:14px;">
+                    <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
+                      <div style="font:500 16px/1.25 var(--font-sans);">{{ b.name }}</div>
+                      <div style="font:400 13px/1.4 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">{{ b.evidence }}</div>
+                    </div>
+                    <div style="height:1px;background:var(--surface-muted);"></div>
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                      <div style="font:400 12px/1 var(--font-sans);color:var(--status-win);">Try Next</div>
+                      <div style="font:400 14px/1.4 var(--font-sans);text-wrap:pretty;">{{ b.action }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:16px;">
+              <div style="display:flex;flex-direction:column;gap:6px;"><div style="font:500 19px/1.2 var(--font-sans);">Your Strengths</div><div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">What's working. Keep doing these.</div></div>
+              <sc-for list="{{ grow.strengths }}" as="k" hint-placeholder-count="2">
+                <div style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;">
+                  <div style="display:flex;align-items:center;gap:14px;">
+                    <div style="width:40px;height:40px;border-radius:50%;background:var(--surface-muted);color:var(--status-win);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 18 }}" strokeWidth="{{ 2.2 }}" hint-size="18px,18px"></x-import></div>
+                    <div style="display:flex;flex-direction:column;gap:5px;min-width:0;">
+                      <div style="font:500 16px/1.2 var(--font-sans);">{{ k.name }}</div>
+                      <div style="font:400 13px/1.35 var(--font-sans);color:var(--text-secondary);">{{ k.signal }}</div>
+                    </div>
+                  </div>
+                  <div style="height:1px;background:var(--surface-muted);"></div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);">Keep Doing</div>
+                    <div style="font:400 15px/1.45 var(--font-sans);text-wrap:pretty;">{{ k.action }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:16px;">
+              <div style="display:flex;flex-direction:column;gap:6px;"><div style="font:500 19px/1.2 var(--font-sans);">Opponent Plans</div><div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">How to play your toughest opponents</div></div>
+              <sc-for list="{{ grow.opps }}" as="o" hint-placeholder-count="2">
+                <div onClick="{{ o.open }}" style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;cursor:pointer;">
+                  <div style="display:flex;align-items:center;gap:14px;">
+                    <div style="width:40px;height:40px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);flex-shrink:0;">{{ o.initials }}</div>
+                    <div style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:0;">
+                      <div style="font:500 16px/1.2 var(--font-sans);">{{ o.name }}</div>
+                      <div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">{{ o.record }}</div>
+                    </div>
+                    <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 18 }}" color="var(--text-secondary)" hint-size="18px,18px"></x-import>
+                  </div>
+                  <div style="height:1px;background:var(--surface-muted);"></div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <div style="font:400 12px/1 var(--font-sans);color:var(--status-win);">Game Plan</div>
+                    <div style="font:400 15px/1.45 var(--font-sans);text-wrap:pretty;">{{ o.plan }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:16px;">
+              <div style="display:flex;flex-direction:column;gap:6px;"><div style="font:500 19px/1.2 var(--font-sans);">Doubles Play</div><div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">Patterns from your doubles matches</div></div>
+              <sc-for list="{{ grow.doubles }}" as="d" hint-placeholder-count="2">
+                <div style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;">
+                  <div style="display:flex;align-items:flex-start;gap:14px;">
+                    <div style="width:40px;height:40px;border-radius:50%;background:var(--surface-muted);color:var(--neutral-600);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Users" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
+                    <div style="display:flex;flex-direction:column;gap:5px;min-width:0;">
+                      <div style="font:500 16px/1.2 var(--font-sans);">{{ d.name }}</div>
+                      <div style="font:400 13px/1.4 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">{{ d.pattern }}</div>
+                    </div>
+                  </div>
+                  <div style="height:1px;background:var(--surface-muted);"></div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <div style="font:400 12px/1 var(--font-sans);color: {{ d.labelFg }};">{{ d.label }}</div>
+                    <div style="font:400 15px/1.45 var(--font-sans);text-wrap:pretty;">{{ d.action }}</div>
+                  </div>
+                </div>
               </sc-for>
             </div>
           </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-          <sc-for list="{{ typeStats }}" as="t" hint-placeholder-count="2">
-            <div style="background:var(--surface-primary);border-radius:26px;padding:20px 22px;display:flex;flex-direction:column;gap:8px;">
-              <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ t.label }}</div>
-              <div style="font:500 36px/1 var(--font-sans);">{{ t.pctStr }}</div>
-              <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ t.rec }} W–L</div>
-            </div>
-          </sc-for>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          <div style="font:500 19px/1.3 var(--font-sans);">Head-to-Head</div>
-          <div style="background:var(--surface-primary);border-radius:26px;padding:6px 20px;display:flex;flex-direction:column;">
-            <sc-for list="{{ h2hBoard }}" as="r" hint-placeholder-count="5">
-              <div onClick="{{ r.open }}" style="display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;padding:12px 0;cursor:pointer;">
-                <div style="width:40px;height:40px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ r.initials }}</div>
-                <div style="display:flex;flex-direction:column;gap:6px;min-width:0;">
-                  <div style="font:500 15px/1.2 var(--font-sans);">{{ r.name }}</div>
-                  <div style="height:4px;border-radius:99px;background:var(--border-default);overflow:hidden;"><div style="height:100%;background:var(--status-win);width: {{ r.pctStr }};"></div></div>
-                </div>
-                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:52px;">
-                  <div style="font:500 15px/1 var(--font-sans);">{{ r.label }}</div>
-                  <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);">{{ r.pctStr }}</div>
-                </div>
-              </div>
-            </sc-for>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          <div style="font:500 19px/1.3 var(--font-sans);">Partners</div>
-          <div style="background:var(--surface-primary);border-radius:26px;padding:6px 20px;display:flex;flex-direction:column;">
-            <sc-for list="{{ partnerBoard }}" as="r" hint-placeholder-count="3">
-              <div onClick="{{ r.open }}" style="display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;padding:12px 0;cursor:pointer;">
-                <div style="width:40px;height:40px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ r.initials }}</div>
-                <div style="display:flex;flex-direction:column;gap:6px;min-width:0;">
-                  <div style="font:500 15px/1.2 var(--font-sans);">{{ r.name }}</div>
-                  <div style="height:4px;border-radius:99px;background:var(--border-default);overflow:hidden;"><div style="height:100%;background:var(--status-win);width: {{ r.pctStr }};"></div></div>
-                </div>
-                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:52px;">
-                  <div style="font:500 15px/1 var(--font-sans);">{{ r.label }}</div>
-                  <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);">{{ r.pctStr }}</div>
-                </div>
-              </div>
-            </sc-for>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          <div style="font:500 19px/1.3 var(--font-sans);">Trends</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-            <sc-for list="{{ trends }}" as="t" hint-placeholder-count="2">
-              <div style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:8px;">
-                <div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">{{ t.label }}</div>
-                <div style="font:500 26px/1 var(--font-sans);">{{ t.value }}</div>
-                <div style="font:400 12px/1.3 var(--font-sans);color:var(--text-secondary);">{{ t.sub }}</div>
-              </div>
-            </sc-for>
-          </div>
-          <div style="background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:16px;">
-            <div style="display:flex;flex-direction:column;gap:10px;">
-              <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">From Your Notes · What Worked</div>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;">
-                <sc-for list="{{ kwWorked }}" as="k" hint-placeholder-count="3">
-                  <div style="height:34px;padding:0 14px;border-radius:99px;background:var(--surface-muted);display:flex;align-items:center;gap:8px;font:400 14px/1 var(--font-sans);color:var(--neutral-600);">{{ k.label }}<span style="color:var(--text-primary);font-weight:600;">{{ k.count }}</span></div>
-                </sc-for>
-              </div>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:10px;">
-              <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">From Your Notes · Lost Points</div>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;">
-                <sc-for list="{{ kwLost }}" as="k" hint-placeholder-count="3">
-                  <div style="height:34px;padding:0 14px;border-radius:99px;background:var(--surface-muted);display:flex;align-items:center;gap:8px;font:400 14px/1 var(--font-sans);color:var(--neutral-600);">{{ k.label }}<span style="color:var(--text-primary);font-weight:600;">{{ k.count }}</span></div>
-                </sc-for>
-              </div>
-            </div>
-          </div>
-        </div>
+        </sc-if>
       </div>
     </sc-if>
 
@@ -629,7 +718,7 @@ class Component extends DCLogic {
     const start = p.startScreen;
     return {
       screen: start === 'Insights' ? 'insights' : start === 'Log Match' ? 'log' : 'matches',
-      back: [], filter: 'All', menu: false, detailId: null, playerId: null, search: '', toast: null,
+      insTab: 'progress', back: [], filter: 'All', menu: false, detailId: null, playerId: null, search: '', toast: null,
       players, matches, log: start === 'Log Match' ? this.newLog() : null
     };
   }
@@ -745,27 +834,63 @@ class Component extends DCLogic {
 
     if (v.isInsights) {
       const chron = all.slice().sort((a, b) => a.date < b.date ? -1 : 1);
-      v.form = chron.slice(-10).map(m => this.dot(this.res(m.games).win));
-      v.typeStats = ['Singles', 'Doubles'].map(t => { const r = this.rec(all.filter(m => m.type === t)); return { label: t, pctStr: r.pctStr, rec: r.label }; });
-      const opps = [...new Set(all.flatMap(m => m.opps))];
-      v.h2hBoard = opps.map(id => ({ id, r: this.vs(id) })).sort((a, b) => b.r.n - a.r.n || b.r.pct - a.r.pct).slice(0, 6)
-        .map(({ id, r }) => ({ name: this.nm(id), initials: this.ini(id), label: r.label, pctStr: r.pctStr, open: () => this.go('player', { playerId: id }) }));
-      const parts = [...new Set(all.map(m => m.partner).filter(Boolean))];
-      v.partnerBoard = parts.map(id => ({ id, r: this.with(id) })).sort((a, b) => b.r.pct - a.r.pct)
-        .map(({ id, r }) => ({ name: this.nm(id), initials: this.ini(id), label: r.label, pctStr: r.pctStr, open: () => this.go('player', { playerId: id }) }));
-      const dec = this.rec(all.filter(m => m.games.length === 3));
-      const close = all.flatMap(m => m.games).filter(g => Math.abs(g[0] - g[1]) <= 3);
-      const cw = close.filter(g => g[0] > g[1]).length;
-      const l5 = chron.slice(-5).filter(m => this.res(m.games).win).length;
-      v.trends = [
-        { label: 'Last 5 Matches', value: `${l5} Wins`, sub: `vs ${overall.pctStr} overall` },
-        { label: 'Deciding Games', value: dec.label, sub: 'Matches that went to 3' },
-        { label: 'Close Games', value: `${cw}–${close.length - cw}`, sub: 'Decided by 3 or fewer' },
-        { label: 'Singles Games', value: this.rec(all.filter(m => m.type === 'Singles')).label, sub: 'Match record' }
-      ].slice(0, 4);
-      const KW = [['Net Play', /net/i], ['Serve', /serv/i], ['Smash', /smash/i], ['Backhand', /backhand/i], ['Footwork', /footwork/i], ['Defence', /defen/i], ['Drop Shots', /drop/i], ['Clears', /clear/i], ['Stamina', /stamina/i], ['Rotation', /rotation/i], ['Lifts', /lift/i], ['Return', /return/i]];
-      const count = f => KW.map(([label, re]) => ({ label, n: all.filter(m => re.test(m[f])).length })).filter(k => k.n).sort((a, b) => b.n - a.n).slice(0, 4).map(k => ({ label: k.label, count: String(k.n) }));
-      v.kwWorked = count('worked'); v.kwLost = count('lost');
+      const span = chron.slice(-20), half = Math.floor(span.length / 2);
+      const prev = span.slice(0, span.length - half), recent = span.slice(-half);
+      const rr = this.rec(recent), pr = this.rec(prev);
+      const pct = x => Math.round(x * 100);
+      const dl = pct(rr.pct) - pct(pr.pct);
+      v.insProgress = s.insTab !== 'coach'; v.insCoach = !v.insProgress;
+      v.insTabs = [['Performance', 'progress'], ['Grow', 'coach']].map(([label, k]) => { const on = (s.insTab || 'progress') === k; return { label,
+        bg: on ? 'var(--text-primary)' : 'transparent', fg: on ? 'var(--text-inverse)' : 'var(--filter-pill-text-default)', select: () => this.setState({ insTab: k }) }; });
+      {
+        const byT = t => this.rec(all.filter(m => m.type === t));
+        const sg = byT('Singles'), db = byT('Doubles');
+        const games = all.flatMap(m => m.games), cg = games.filter(x => Math.abs(x[0] - x[1]) <= 3), cw = cg.filter(x => x[0] > x[1]).length;
+        const mg = games.length ? games.reduce((t, x) => t + x[0] - x[1], 0) / games.length : 0;
+        const today = new Date('2026-09-22T12:00:00'), cutoff = new Date(today - 30 * 864e5).toISOString().slice(0, 10);
+        const last5 = this.rec(chron.slice(-5));
+        const bars = chron.slice(-10).map((m, i, arr) => { const idx = chron.indexOf(m); const w = this.rec(chron.slice(Math.max(0, idx - 4), idx + 1)).pct;
+          return { h: Math.max(10, Math.round(w * 100)) + '%', bg: i >= arr.length - 4 ? 'var(--progress-active)' : 'var(--border-default)' }; });
+        const row = (label, r, sub) => ({ label, value: r.pctStr, sub, l: '0%', w: pct(r.pct) + '%', mid: 0 });
+        const mw = Math.min(50, Math.abs(mg) * 5);
+        const partners = [...new Set(all.map(m => m.partner).filter(Boolean))].map(id => ({ id, r: this.with(id) })).filter(o => o.r.n >= 2).sort((a, b) => b.r.pct - a.r.pct || b.r.n - a.r.n);
+        const foes = [...new Set(all.flatMap(m => m.opps))].map(id => ({ id, r: this.vs(id) })).filter(o => o.r.n >= 3).sort((a, b) => a.r.pct - b.r.pct || b.r.n - a.r.n);
+        const bp = partners[0], tf = foes[0];
+        const others = s.players.filter(p => p.id !== 'me' && (!bp || p.id !== bp.id) && (!tf || p.id !== tf.id)).map(p => ({ id: p.id, n: all.filter(m => m.partner === p.id || m.opps.includes(p.id)).length })).filter(o => o.n).sort((a, b) => b.n - a.n);
+        const mp = others[0];
+        const person = (role, id, value, sub, vFg) => ({ role, name: this.nm(id), initials: this.ini(id), value, sub, vFg, open: () => this.go('player', { playerId: id }) });
+        v.pf = { win: rr.pctStr, delta: (dl >= 0 ? '+' : '') + dl + '%', bars,
+          played: String(all.filter(m => m.date >= cutoff).length), record: last5.label.replace('–', ' – '),
+          rows: [row('Singles Win Rate', sg, `${sg.w} of ${sg.n}`), row('Doubles Win Rate', db, `${db.w} of ${db.n}`),
+            row('Close Games', { pct: cg.length ? cw / cg.length : 0, pctStr: (cg.length ? pct(cw / cg.length) : 0) + '%' }, `${cw} of ${cg.length}`),
+            { label: 'Avg. Point Margin', value: (mg >= 0 ? '+' : '') + mg.toFixed(1), sub: 'per game', l: mg >= 0 ? '50%' : (50 - mw) + '%', w: mw + '%', mid: 1 }],
+          people: [bp && person('Best Partner', bp.id, bp.r.pctStr, 'Win rate together', 'var(--status-win)'),
+            tf && person('Toughest Opponent', tf.id, tf.r.pctStr, 'Win rate vs them', 'var(--text-primary)'),
+            mp && person('Most Played With', mp.id, String(mp.n), 'Matches together', 'var(--text-primary)')].filter(Boolean) };
+      }
+      {
+        const n6 = chron.filter(m => m.wt.length || m.lt.length).slice(-6), dh = n6.filter(m => m.lt.includes('Defence')).length;
+        const recOf = id => { const r = this.vs(id); return `You're ${r.w}–${r.l} against ${this.first(id)}.`; };
+        const op = (id, plan) => ({ name: this.nm(id), initials: this.ini(id), record: recOf(id), plan, open: () => this.go('player', { playerId: id }) });
+        v.grow = {
+          build: [
+            { name: 'Backhand Defence', evidence: `Lost points in ${dh} of your last ${n6.length} matches.`, action: 'Keep your racket higher during flat exchanges.' },
+            { name: 'Serve Return', evidence: 'Won 38% of return points, lower than usual.', action: 'Return deeper and higher to slow their attack.' }
+          ],
+          strengths: [
+            { name: 'Net Play', signal: 'Tagged as working in each of your last 6 wins.', action: 'Take the shuttle early and keep your replies tight.' },
+            { name: 'Smash Placement', signal: 'Most effective to the backhand side.', action: "Keep targeting your opponent's backhand corner." }
+          ],
+          opps: [
+            op('alex', "Push him deep first and avoid short lifts. He's strong in fast flat exchanges."),
+            op('leo', 'Raise the pace early and attack the first short lift. Keep rallies short.')
+          ],
+          doubles: [
+            { name: 'Rotation', pattern: 'You lose more points when both players stay side-by-side.', label: 'Try Next', labelFg: 'var(--status-win)', action: 'After an attack, recover to front-back earlier.' },
+            { name: 'Front Court Play', pattern: 'You win more when you stay aggressive at the net.', label: 'Keep Doing', labelFg: 'var(--text-secondary)', action: "Hold front court pressure after your partner's serve." }
+          ]
+        };
+      }
     }
 
     if (v.isLog && s.log) {
