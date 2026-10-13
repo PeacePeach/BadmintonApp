@@ -25,13 +25,19 @@ input,textarea,button{font-family:inherit;}
 input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
 .search-field-outline{border:1px solid var(--ghost-button-outline);}
 .search-field-outline:focus-within{border-color:var(--ghost-button-outline-highlight);}
+/* Phone preview: on a real phone, drop the device frame and fill the screen. */
+@media (max-width:500px){
+.stage{padding:0 !important;min-height:100vh !important;}
+.phone{width:100vw !important;height:100vh !important;height:100dvh !important;border-radius:0 !important;box-shadow:none !important;}
+.fake-status{display:none !important;}
+}
 </style>
 </helmet>
-<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 16px;">
-<div data-screen-label="Phone" style="position:relative;width:390px;height:844px;border-radius:48px;background:var(--bg-primary);overflow:hidden;color:var(--text-primary);box-shadow:0 0 0 10px #232226;">
+<div class="stage" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 16px;">
+<div data-screen-label="Phone" class="phone" style="position:relative;width:390px;height:844px;border-radius:48px;background:var(--bg-primary);overflow:hidden;color:var(--text-primary);box-shadow:0 0 0 10px #232226;">
 
   <div ref="{{ scrollRef }}" style="position:absolute;inset:0;overflow-y:auto;padding:58px 20px 120px;">
-    <div style="position:absolute;top:18px;left:34px;font:500 15px/1 var(--font-sans);">9:41</div>
+    <div class="fake-status" style="position:absolute;top:18px;left:34px;font:500 15px/1 var(--font-sans);">9:41</div>
 
     <!-- MATCHES -->
     <sc-if value="{{ isMatches }}" hint-placeholder-val="{{ true }}">
