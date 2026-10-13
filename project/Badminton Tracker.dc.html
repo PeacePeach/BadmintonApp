@@ -31,6 +31,13 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
 .phone{width:100vw !important;height:100vh !important;height:100dvh !important;border-radius:0 !important;box-shadow:none !important;}
 .fake-status{display:none !important;}
 }
+/* Splash: one gentle fade-in, nothing else. */
+@keyframes splash-in{from{opacity:0;transform:translateY(6px) scale(.97);}to{opacity:1;transform:none;}}
+@keyframes splash-fade{from{opacity:0;}to{opacity:1;}}
+.splash-mark{animation:splash-in .7s var(--ease-out) both;}
+.splash-text{animation:splash-fade .6s var(--ease-out) .25s both;}
+.splash-line{animation:splash-fade .6s var(--ease-out) .5s both;}
+@media (prefers-reduced-motion:reduce){.splash-mark,.splash-text,.splash-line{animation:none;}}
 </style>
 </helmet>
 <div class="stage" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 16px;">
@@ -700,6 +707,18 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
     </sc-if>
   </sc-if>
 
+  <!-- Splash -->
+  <sc-if value="{{ isSplash }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Splash" onClick="{{ skipSplash }}" style="position:absolute;inset:0;background:var(--bg-primary);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;">
+      <div style="position:absolute;left:50%;top:42%;width:360px;height:360px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--blue-300) 16%,transparent),transparent);pointer-events:none;"></div>
+      <div style="position:relative;display:flex;flex-direction:column;align-items:center;margin-top:-64px;">
+        <img class="splash-mark" src="assets/rallywise-mark.svg" alt="" width="132" height="72" style="display:block;width:132px;height:auto;">
+        <div class="splash-text" style="margin-top:36px;font:600 34px/1 var(--font-sans);letter-spacing:-.01em;color:var(--text-primary);">Rallywise</div>
+      </div>
+      <div class="splash-line" style="position:absolute;left:0;right:0;bottom:64px;text-align:center;font:400 13px/1.4 var(--font-sans);color:var(--text-tertiary);">Track your game. Grow with every match.</div>
+    </div>
+  </sc-if>
+
   <!-- Tabs -->
   <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
     <div style="position:absolute;left:0;right:0;bottom:0;height:92px;padding:10px 40px 28px;background:var(--bg-primary);border-top:1px solid var(--bottom-nav-outline);display:grid;grid-template-columns:1fr 1fr;">
@@ -735,7 +754,7 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Log In&quot;,&quot;options&quot;:[&quot;Log In&quot;,&quot;Matches&quot;,&quot;Insights&quot;,&quot;Log Match&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Splash&quot;,&quot;options&quot;:[&quot;Splash&quot;,&quot;Log In&quot;,&quot;Matches&quot;,&quot;Insights&quot;,&quot;Log Match&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
 class Component extends DCLogic {
   scrollRef = React.createRef();
   state = this.seed();
@@ -772,7 +791,7 @@ class Component extends DCLogic {
     ];
     const start = p.startScreen;
     return {
-      screen: start === 'Log In' ? 'login' : start === 'Insights' ? 'insights' : start === 'Log Match' ? 'log' : 'matches', pwVisible: false, agree: false,
+      screen: start === 'Splash' ? 'splash' : start === 'Log In' ? 'login' : start === 'Insights' ? 'insights' : start === 'Log Match' ? 'log' : 'matches', pwVisible: false, agree: false,
       insTab: 'progress', back: [], filter: 'All', menu: false, detailId: null, playerId: null, search: '', toast: null,
       players, matches, log: start === 'Log Match' ? this.newLog() : null
     };
@@ -781,6 +800,12 @@ class Component extends DCLogic {
   fmt() { return parseInt((this.props && this.props.defaultFormat) || '21', 10); }
   cap(t) { return { 21: 30, 15: 21, 11: 15 }[t]; }
   newLog() { const t = this.fmt(); return { step: 1, type: null, partner: null, opp1: null, opp2: null, active: null, format: t, games: [{ w: 'us', l: t - 6 }], wt: [], lt: [], worked: '', lost: '', on: '' }; }
+
+  componentDidMount() {
+    if (this.state.screen === 'splash') this._splash = setTimeout(() => this.leaveSplash(), 2200);
+  }
+  componentWillUnmount() { clearTimeout(this._splash); }
+  leaveSplash() { clearTimeout(this._splash); if (this.state.screen === 'splash') this.setState({ screen: 'login' }); }
 
   componentDidUpdate(pp, ps) {
     const a = ps.screen + (ps.log ? ps.log.step : '') + ps.detailId + ps.playerId;
@@ -869,7 +894,7 @@ class Component extends DCLogic {
       scrollRef: this.scrollRef, overall,
       isMatches: s.screen === 'matches', isInsights: s.screen === 'insights', isLog: s.screen === 'log',
       isDetail: s.screen === 'detail', isPlayers: s.screen === 'players', isPlayer: s.screen === 'player',
-      isLogin: s.screen === 'login', isSignup: s.screen === 'signup',
+      isLogin: s.screen === 'login', isSignup: s.screen === 'signup', isSplash: s.screen === 'splash', skipSplash: () => this.leaveSplash(),
       pwType: s.pwVisible ? 'text' : 'password', pwIcon: s.pwVisible ? 'Eye' : 'EyeOff', pwToggleLabel: s.pwVisible ? 'Hide password' : 'Show password',
       togglePw: () => this.setState(x => ({ pwVisible: !x.pwVisible })),
       logIn: () => this.setState({ screen: 'matches', back: [], pwVisible: false }),

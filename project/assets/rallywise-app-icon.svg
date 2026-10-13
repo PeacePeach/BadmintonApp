@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1254 1254">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#00123d"></stop>
+      <stop offset="1" stop-color="#000d2b"></stop>
+    </linearGradient>
+    <linearGradient id="g1" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#0a6cff"></stop>
+      <stop offset="1" stop-color="#22e8ff"></stop>
+    </linearGradient>
+    <linearGradient id="g2" x1="0.1" y1="1" x2="0.9" y2="0">
+      <stop offset="0" stop-color="#0a6cff"></stop>
+      <stop offset="0.6" stop-color="#00e2f2"></stop>
+      <stop offset="1" stop-color="#1affe0"></stop>
+    </linearGradient>
+    <linearGradient id="g3" x1="0.1" y1="1" x2="0.9" y2="0">
+      <stop offset="0" stop-color="#0090d0"></stop>
+      <stop offset="0.55" stop-color="#14e8d8"></stop>
+      <stop offset="1" stop-color="#7cf7c4"></stop>
+    </linearGradient>
+  </defs>
+  <rect width="1254" height="1254" fill="#061a45"></rect>
+  <rect x="72" y="72" width="1110" height="1108" rx="230" fill="url(#bg)"></rect>
+  <path id="large" fill="url(#g3)" d="M545 846 L545 427 C590 406 630 400 672 400 C900 400 1050 600 1031 846 Z"></path>
+  <path id="medium" fill="url(#g2)" d="M401 846 L401 553 C440 531 478 522 515 522 C670 522 795 670 778 846 Z"></path>
+  <path id="small" fill="url(#g1)" d="M224 846 C208 740 290 647 390 647 C492 647 572 742 556 846 Z"></path>
+</svg>
