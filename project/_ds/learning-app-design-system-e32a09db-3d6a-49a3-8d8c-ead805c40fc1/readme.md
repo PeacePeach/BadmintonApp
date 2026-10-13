@@ -31,9 +31,11 @@ A design system for a mobile e-learning app: track course progress, browse cours
 - **Hover/press:** mobile-first; press shrinks. Active chip swaps fill for outline.
 
 ## Iconography
-- Thin outline icons, ~1.6px stroke, rounded caps: bell, search, chevron-left, chevron-down, arrow-up-right, arrow-right, calendar, timer, tablet/book, play (filled). Always sat inside a circle.
-- No icon files were supplied. **Substitution:** [Lucide](https://lucide.dev) via CDN (`https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js`), rendered through the `Icon` component by PascalCase name. Closest match to the mock's stroke style.
-- No emoji, no unicode glyph icons.
+- **Lucide only** (rule from Han). Every UI icon is a Lucide icon rendered through the `Icon` component by PascalCase name, from `https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js`. In a React build use `lucide-react` with the same names.
+- Defaults: 24px, stroke width 2, rounded caps, `currentColor` so icons take design-system text colors. Smaller sizes only where the icon sits in a compact badge or next to small text.
+- Outline only. No filled icons unless explicitly requested.
+- No custom SVG icons unless Lucide has no suitable icon (brand marks such as the Apple and Google sign-in logos are the exception). No emoji, no unicode glyph icons, no other icon libraries.
+- When adding a new UI element, pick the closest semantic Lucide icon and reuse it.
 
 ## Tokens & fonts
 `styles.css` imports `tokens/fonts.css`, `colors.css`, `typography.css`, `spacing.css`, `effects.css`. Poppins loads from Google Fonts (substitution — matched by eye, no binaries provided).
