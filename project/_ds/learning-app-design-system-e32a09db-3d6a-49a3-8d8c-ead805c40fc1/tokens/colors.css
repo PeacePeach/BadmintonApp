@@ -136,7 +136,7 @@
   --surface-inset-light: rgba(255, 255, 255, .55);
 
   /* Text */
-  --text-primary: var(--white);
+  --text-primary: var(--neutral-800);
   --text-secondary: var(--neutral-400);
   --text-tertiary: var(--neutral-300);
   --text-inverse: var(--ink-1);
