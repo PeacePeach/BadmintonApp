@@ -42,8 +42,7 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
 .search-field-outline.field-error,.search-field-outline.field-error:focus-within{border-color:var(--status-error);}
 .field-msg{font:400 13px/1.4 var(--font-sans);padding:0 22px;}
 @keyframes auth-spin{to{transform:rotate(360deg);}}
-.auth-spinner{width:22px;height:22px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:auth-spin .8s linear infinite;}
-.auth-spinner-sm{width:20px;height:20px;border-width:2px;}
+.auth-spin{display:flex;animation:auth-spin .8s linear infinite;}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
 button:disabled{cursor:default !important;}
 </style>
@@ -62,8 +61,8 @@ button:disabled{cursor:default !important;}
           <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">Log in to keep tracking your matches.</div>
         </div>
         <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
-          <div role="alert" style="display:flex;align-items:flex-start;gap:12px;padding:16px 18px;border-radius:22px;background:var(--surface-muted);">
-            <div style="color:var(--status-error);display:flex;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 20 }}" hint-size="20px,20px"></x-import></div>
+          <div role="alert" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:22px;background:var(--surface-muted);">
+            <div style="color:var(--status-error);display:flex;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></div>
             <div style="font:400 14px/1.45 var(--font-sans);color:var(--text-primary);">{{ banner }}</div>
           </div>
         </sc-if>
@@ -81,7 +80,7 @@ button:disabled{cursor:default !important;}
           <div style="display:flex;justify-content:flex-end;margin-top:-4px;"><span onClick="{{ forgotPw }}" style="font:500 14px/1 var(--font-sans);color:var(--status-win);cursor:pointer;">Forgot Password?</span></div>
         </div>
         <button onClick="{{ logIn }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--action-primary);color:var(--action-on-primary);" style-active="transform:scale(.97);">
-          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spinner" aria-hidden="true"></span><span class="sr-only">Log In</span></sc-if>
+          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">Log In</span></sc-if>
           <sc-if value="{{ idleSubmit }}" hint-placeholder-val="{{ true }}">Log In</sc-if>
         </button>
         <div style="display:flex;align-items:center;gap:16px;">
@@ -91,12 +90,12 @@ button:disabled{cursor:default !important;}
         </div>
         <div style="display:flex;flex-direction:column;gap:12px;">
           <button onClick="{{ apple.go }}" aria-busy="{{ apple.busy }}" disabled="{{ busyAny }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;opacity:{{ apple.dim }};" style-active="transform:scale(.98);">
-            <sc-if value="{{ apple.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spinner auth-spinner-sm" aria-hidden="true"></span></sc-if>
+            <sc-if value="{{ apple.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span></sc-if>
             <sc-if value="{{ apple.idle }}" hint-placeholder-val="{{ true }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z"></path></svg></sc-if>
             Continue with Apple
           </button>
           <button onClick="{{ google.go }}" aria-busy="{{ google.busy }}" disabled="{{ busyAny }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;opacity:{{ google.dim }};" style-active="transform:scale(.98);">
-            <sc-if value="{{ google.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spinner auth-spinner-sm" aria-hidden="true"></span></sc-if>
+            <sc-if value="{{ google.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span></sc-if>
             <sc-if value="{{ google.idle }}" hint-placeholder-val="{{ true }}"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg></sc-if>
             Continue with Google
           </button>
@@ -113,8 +112,8 @@ button:disabled{cursor:default !important;}
           <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">Start building your match history.</div>
         </div>
         <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
-          <div role="alert" style="display:flex;align-items:flex-start;gap:12px;padding:16px 18px;border-radius:22px;background:var(--surface-muted);">
-            <div style="color:var(--status-error);display:flex;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 20 }}" hint-size="20px,20px"></x-import></div>
+          <div role="alert" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:22px;background:var(--surface-muted);">
+            <div style="color:var(--status-error);display:flex;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></div>
             <div style="font:400 14px/1.45 var(--font-sans);color:var(--text-primary);">{{ banner }}</div>
           </div>
         </sc-if>
@@ -140,7 +139,7 @@ button:disabled{cursor:default !important;}
           <div style="font:400 15px/1.4 var(--font-sans);">I agree to <span style="color:var(--status-win);font-weight:600;">Terms</span> and <span style="color:var(--status-win);font-weight:600;">Privacy Policy</span>.</div>
         </div>
         <button onClick="{{ signUp }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;background: {{ signupBg }};color: {{ signupFg }};" style-active="transform:scale(.97);">
-          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spinner" aria-hidden="true"></span><span class="sr-only">Sign Up</span></sc-if>
+          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">Sign Up</span></sc-if>
           <sc-if value="{{ idleSubmit }}" hint-placeholder-val="{{ true }}">Sign Up</sc-if>
         </button>
         <div style="display:flex;align-items:center;gap:16px;">
@@ -150,12 +149,12 @@ button:disabled{cursor:default !important;}
         </div>
         <div style="display:flex;flex-direction:column;gap:12px;">
           <button onClick="{{ apple.go }}" aria-busy="{{ apple.busy }}" disabled="{{ busyAny }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;opacity:{{ apple.dim }};" style-active="transform:scale(.98);">
-            <sc-if value="{{ apple.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spinner auth-spinner-sm" aria-hidden="true"></span></sc-if>
+            <sc-if value="{{ apple.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span></sc-if>
             <sc-if value="{{ apple.idle }}" hint-placeholder-val="{{ true }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z"></path></svg></sc-if>
             Continue with Apple
           </button>
           <button onClick="{{ google.go }}" aria-busy="{{ google.busy }}" disabled="{{ busyAny }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;opacity:{{ google.dim }};" style-active="transform:scale(.98);">
-            <sc-if value="{{ google.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spinner auth-spinner-sm" aria-hidden="true"></span></sc-if>
+            <sc-if value="{{ google.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span></sc-if>
             <sc-if value="{{ google.idle }}" hint-placeholder-val="{{ true }}"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg></sc-if>
             Continue with Google
           </button>
@@ -172,8 +171,8 @@ button:disabled{cursor:default !important;}
           <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">Enter the email you use for Rallywise and we'll send you a link to reset your password.</div>
         </div>
         <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
-          <div role="alert" style="display:flex;align-items:flex-start;gap:12px;padding:16px 18px;border-radius:22px;background:var(--surface-muted);">
-            <div style="color:var(--status-error);display:flex;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 20 }}" hint-size="20px,20px"></x-import></div>
+          <div role="alert" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:22px;background:var(--surface-muted);">
+            <div style="color:var(--status-error);display:flex;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></div>
             <div style="font:400 14px/1.45 var(--font-sans);color:var(--text-primary);">{{ banner }}</div>
           </div>
         </sc-if>
@@ -183,7 +182,7 @@ button:disabled{cursor:default !important;}
             <sc-if value="{{ emailErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--status-error);">{{ emailErr }}</div></sc-if>
           </div>
         <button onClick="{{ sendReset }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--action-primary);color:var(--action-on-primary);" style-active="transform:scale(.97);">
-          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spinner" aria-hidden="true"></span><span class="sr-only">Send Reset Link</span></sc-if>
+          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">Send Reset Link</span></sc-if>
           <sc-if value="{{ idleSubmit }}" hint-placeholder-val="{{ true }}">Send Reset Link</sc-if>
         </button>
         <div style="text-align:center;font:400 15px/1 var(--font-sans);"><span onClick="{{ toLogin }}" style="color:var(--status-win);font-weight:600;cursor:pointer;">Back to Log In</span></div>
@@ -194,7 +193,7 @@ button:disabled{cursor:default !important;}
     <sc-if value="{{ isResetSent }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Check Email" style="display:flex;flex-direction:column;gap:32px;padding-top:56px;">
         <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:0 12px;">
-          <div style="width:64px;height:64px;border-radius:50%;background:var(--icon-button-bg);color:var(--text-primary);display:flex;align-items:center;justify-content:center;margin-bottom:14px;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="MailCheck" size="{{ 28 }}" hint-size="28px,28px"></x-import></div>
+          <div style="width:64px;height:64px;border-radius:50%;background:var(--icon-button-bg);color:var(--text-primary);display:flex;align-items:center;justify-content:center;margin-bottom:14px;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="MailCheck" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></div>
           <div style="font:600 30px/1.2 var(--font-sans);">Check Your Email</div>
           <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">If an account exists for <span style="color:var(--text-primary);font-weight:500;overflow-wrap:anywhere;">{{ resetEmail }}</span>, you'll get a link to reset your password. It may take a minute to arrive.</div>
         </div>
