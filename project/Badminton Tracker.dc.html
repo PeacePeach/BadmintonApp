@@ -364,7 +364,7 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
         <div style="display:flex;flex-direction:column;gap:10px;padding:6px 2px;">
           <div style="font:400 14px/1 var(--font-sans);color:var(--text-secondary);">{{ detail.dateLong }} · {{ detail.type }}</div>
           <div style="display:flex;align-items:baseline;justify-content:space-between;">
-            <div style="font:600 48px/1 var(--font-sans);color: {{ detail.resultColor }};">{{ detail.resultWord }}</div>
+            <div style="font:600 48px/1 var(--font-sans);color:var(--text-primary);">{{ detail.resultWord }}</div>
             <div style="font:500 48px/1 var(--font-sans);">{{ detail.gamesWon }}</div>
           </div>
         </div>
@@ -792,7 +792,7 @@ class Component extends DCLogic {
       const r = this.res(m.games);
       const openP = id => () => this.go('player', { playerId: id });
       v.detail = {
-        dateLong: this.date(m.date, true), type: m.type, resultWord: r.win ? 'Win' : 'Loss', resultColor: r.win ? A : 'var(--text-primary)', gamesWon: `${r.us}–${r.them}`,
+        dateLong: this.date(m.date, true), type: m.type, resultWord: r.win ? 'Win' : 'Loss', gamesWon: `${r.us}–${r.them}`,
         sideA: [{ name: 'You · ' + this.nm('me'), initials: this.ini('me'), avBg: A, avFg: 'var(--action-on-primary)' }]
           .concat(m.partner ? [{ name: this.nm(m.partner), initials: this.ini(m.partner), avBg: 'var(--border-default)', avFg: 'var(--text-primary)' }] : []),
         sideB: m.opps.map(id => ({ name: this.nm(id), initials: this.ini(id), open: openP(id) })),
