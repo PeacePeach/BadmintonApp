@@ -147,6 +147,8 @@
 
   /* Input field */
   --input-field-text-default: var(--neutral-300);
+  --input-field-bg: var(--neutral-75);
+  --input-field-outline: var(--neutral-200);
 
   /* Border */
   --border-default: var(--violet-5);
