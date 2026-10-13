@@ -154,7 +154,7 @@
 
   /* Action */
   --action-primary: var(--blue-300);
-  --action-on-primary: var(--white);
+  --action-on-primary: var(--neutral-800);
   --action-secondary: var(--app-background);
 
   /* Bottom navigation */
