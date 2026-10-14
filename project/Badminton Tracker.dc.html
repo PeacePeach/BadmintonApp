@@ -55,6 +55,12 @@ button:disabled{cursor:default !important;}
 @keyframes sheet-up{from{transform:translateY(100%);}to{transform:none;}}
 .sheet{animation:sheet-up .22s var(--ease-out) both;}
 @media (prefers-reduced-motion:reduce){.sheet{animation:none;}}
+/* Toast: one global feedback pill at the top of the screen, slides down in and back up out. */
+@keyframes toast-in{from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:none;}}
+@keyframes toast-out{from{opacity:1;transform:none;}to{opacity:0;transform:translateY(-12px);}}
+.toast{animation:toast-in .22s var(--ease-out) both;}
+.toast.toast-out{animation:toast-out .2s ease-in both;}
+@media (prefers-reduced-motion:reduce){.toast,.toast.toast-out{animation:none;}}
 </style>
 </helmet>
 <div class="stage" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 16px;">
@@ -1262,17 +1268,19 @@ button:disabled{cursor:default !important;}
     </div>
   </sc-if>
 
-  <!-- Toast -->
+  <!-- Toast: the one global feedback message. Call flash(text, 'success' | 'error' | 'info') from anywhere. -->
   <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
-    <div style="position:absolute;top:54px;left:50%;transform:translateX(-50%);height:44px;padding:0 18px;border-radius:99px;background:var(--text-primary);color:var(--text-inverse);display:flex;align-items:center;gap:8px;font:500 14px/1 var(--font-sans);white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.35);">
-      <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 18 }}" hint-size="18px,18px"></x-import>
-      {{ toast }}
+    <div role="{{ toast.role }}" aria-live="{{ toast.live }}" style="position:absolute;left:20px;right:20px;top:calc(48px + env(safe-area-inset-top, 0px));display:flex;justify-content:center;pointer-events:none;">
+      <div class="toast {{ toast.cls }}" style="height:44px;max-width:100%;padding:0 18px 0 14px;border-radius:99px;background:var(--text-primary);color:var(--text-inverse);display:flex;align-items:center;gap:8px;font:500 14px/1 var(--font-sans);box-shadow:0 8px 24px rgba(0,0,0,.35);">
+        <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ toast.icon }}" size="{{ 18 }}" color="{{ toast.iconFg }}" hint-size="18px,18px"></x-import>
+        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ toast.text }}</span>
+      </div>
     </div>
   </sc-if>
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Splash&quot;,&quot;options&quot;:[&quot;Splash&quot;,&quot;Log In&quot;,&quot;Sign Up&quot;,&quot;Forgot Password&quot;,&quot;Check Email&quot;,&quot;Onboarding&quot;,&quot;Matches&quot;,&quot;Match Detail&quot;,&quot;Insights&quot;,&quot;Log Match&quot;,&quot;Settings&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;authError&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Invalid email&quot;,&quot;Incorrect email or password&quot;,&quot;Email already exists&quot;,&quot;Password too short&quot;,&quot;Network error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Normal&quot;,&quot;options&quot;:[&quot;Normal&quot;,&quot;Loading&quot;,&quot;Empty&quot;,&quot;Offline&quot;,&quot;Error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;saveMatch&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Succeeds&quot;,&quot;options&quot;:[&quot;Succeeds&quot;,&quot;Fails&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Splash&quot;,&quot;options&quot;:[&quot;Splash&quot;,&quot;Log In&quot;,&quot;Sign Up&quot;,&quot;Forgot Password&quot;,&quot;Check Email&quot;,&quot;Onboarding&quot;,&quot;Matches&quot;,&quot;Match Detail&quot;,&quot;Insights&quot;,&quot;Log Match&quot;,&quot;Settings&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;authError&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Invalid email&quot;,&quot;Incorrect email or password&quot;,&quot;Email already exists&quot;,&quot;Password too short&quot;,&quot;Network error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Normal&quot;,&quot;options&quot;:[&quot;Normal&quot;,&quot;Loading&quot;,&quot;Empty&quot;,&quot;Offline&quot;,&quot;Error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;saveMatch&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Succeeds&quot;,&quot;options&quot;:[&quot;Succeeds&quot;,&quot;Fails&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;toastPreview&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Success&quot;,&quot;Error&quot;,&quot;Info&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
 class Component extends DCLogic {
   scrollRef = React.createRef();
   state = this.seed();
@@ -1344,7 +1352,7 @@ class Component extends DCLogic {
   componentDidMount() {
     if (this.state.screen === 'splash') this._splash = setTimeout(() => this.leaveSplash(), 2200);
   }
-  componentWillUnmount() { clearTimeout(this._splash); clearTimeout(this._busy); clearInterval(this._tick); clearTimeout(this._save); clearTimeout(this._load); }
+  componentWillUnmount() { clearTimeout(this._t); clearTimeout(this._tOut); clearTimeout(this._splash); clearTimeout(this._busy); clearInterval(this._tick); clearTimeout(this._save); clearTimeout(this._load); }
 
   // Auth. The prototype has no backend: requests resolve after a short delay. The "Auth error"
   // prop previews each error, and "Incorrect email or password" / "Network error" keep failing
@@ -1407,6 +1415,11 @@ class Component extends DCLogic {
   leaveSplash() { clearTimeout(this._splash); if (this.state.screen === 'splash') this.setState({ screen: 'login' }); }
 
   componentDidUpdate(pp, ps) {
+    // "Toast preview" prop fires one example of each toast variant.
+    if (pp && this.props.toastPreview !== pp.toastPreview) {
+      const ex = { Success: ['Match saved', 'success'], Error: ['Something went wrong', 'error'], Info: ['No connection', 'info'] }[this.props.toastPreview];
+      if (ex) this.flash(ex[0], ex[1]);
+    }
     if (pp && this.props.dataState !== pp.dataState) this.setState({ ...this.dataFor(this.props.dataState), filter: 'All', search: '' });
     if (pp && this.props.authError !== pp.authError && this.props.authError !== 'None') this.setState({ back: [], busy: null, banner: null, errors: {}, ...this.authPreset(this.props.authError) });
     const a = ps.screen + (ps.log ? ps.log.step : '') + ps.detailId + ps.playerId;
@@ -1452,7 +1465,13 @@ class Component extends DCLogic {
     const b = s.back.slice(); const prev = b.pop() || { screen: 'matches' };
     return { back: b, search: '', screen: prev.screen === 'log' ? 'matches' : prev.screen, detailId: prev.detailId, playerId: prev.playerId };
   });
-  flash(t) { this.setState({ toast: t }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast: null }), 2400); }
+  // Global toast. kind is 'success' (default), 'error' or 'info'; it auto-dismisses after ~2.5s.
+  flash(text, kind) {
+    clearTimeout(this._t); clearTimeout(this._tOut);
+    this.setState({ toast: { text, kind: kind || 'success', out: false } });
+    this._tOut = setTimeout(() => this.setState(s => s.toast ? { toast: { ...s.toast, out: true } } : null), 2400);
+    this._t = setTimeout(() => this.setState({ toast: null }), 2600);
+  }
   setLog(patch) { this.setState(s => ({ log: { ...s.log, ...(typeof patch === 'function' ? patch(s.log) : patch) } })); }
 
   slotKeys(type) { return type === 'Doubles' ? ['partner', 'opp1', 'opp2'] : ['opp1']; }
@@ -1494,10 +1513,10 @@ class Component extends DCLogic {
       opps: log.type === 'Doubles' ? [log.opp1, log.opp2] : [log.opp1], games: this.draftGames(log), wt: log.wt, lt: log.lt, worked: log.worked.trim(), lost: log.lost.trim(), on: log.on.trim() };
     if (log.editId) {
       this.setState(s => ({ matches: s.matches.map(x => x.id === m.id ? m : x).sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0), screen: 'detail', detailId: m.id, back: s.back.slice(0, -1), log: null }));
-      return this.flash('Match updated · Insights updated');
+      return this.flash('Changes saved');
     }
     this.setState(s => ({ matches: [m, ...s.matches], screen: 'detail', detailId: m.id, back: [{ screen: 'matches' }], log: null, filter: 'All' }));
-    this.flash('Match saved · Insights updated');
+    this.flash('Match saved');
   }
   // Delete confirmation. requestDeleteMatch(id) opens the sheet for any match; Delete calls
   // deleteMatch(id), which removes it, returns to Matches and confirms with a toast.
@@ -1544,7 +1563,7 @@ class Component extends DCLogic {
           () => { this.toAuth('onboarding'); this.setState({ ob: { ...this.newOb(), name: f.name.trim() }, agree: false }); }, () => f.email.trim().toLowerCase() === 'sam@rallywise.app' && { errors: { email: this.msg.exists } }); },
       isOnboarding: s.screen === 'onboarding',
       showTabs: s.screen === 'matches' || s.screen === 'insights', menuOpen: s.menu,
-      hasToast: !!s.toast, toast: s.toast, search: s.search, canAddNew: q.length > 1 && !exists,
+      hasToast: !!s.toast, search: s.search, canAddNew: q.length > 1 && !exists,
       toggleMenu: () => this.setState(x => ({ menu: !x.menu })),
       goBack: this.goBack,
       onSearch: e => this.setState({ search: e.target.value }),
@@ -1855,6 +1874,10 @@ class Component extends DCLogic {
         stats: [st('Overall H2H', o), st('Singles H2H', si), st('Doubles H2H', du), st('As Partner', w)],
         recent: inv.slice(0, 5).map(m => this.card(m)),
         recentEmpty: !inv.length && { ...empty('no-matches', 'No Matches Together Yet', 'Matches you play with or against them will show up here.'), style: { padding: '8px 16px' } } };
+    }
+    if (s.toast) {
+      const t = s.toast, K = { success: ['CircleCheck', 'var(--action-primary)'], error: ['CircleAlert', 'var(--status-error)'], info: ['Info', 'var(--text-inverse)'] }[t.kind] || [];
+      v.toast = { text: t.text, icon: K[0], iconFg: K[1], cls: t.out ? 'toast-out' : '', role: t.kind === 'error' ? 'alert' : 'status', live: t.kind === 'error' ? 'assertive' : 'polite' };
     }
     return v;
   }
