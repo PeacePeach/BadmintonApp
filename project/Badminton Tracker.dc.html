@@ -20,6 +20,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.3/dist/umd/supabase.js"></script>
 <script src="rallywise-config.js"></script>
 <script src="rallywise-backend.js"></script>
+<script src="rallywise-analytics.js"></script>
 <style>
 body{margin:0;background:var(--bg-primary);font-family:"Poppins",system-ui,sans-serif;}
 *{box-sizing:border-box;}
@@ -1273,6 +1274,21 @@ button:disabled{cursor:default !important;}
     </div>
   </sc-if>
 
+  <!-- Share Usage Data: asked once, right after onboarding (or on the next open for accounts that finished it earlier). -->
+  <sc-if value="{{ askConsent }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ consentNo }}" style="position:absolute;inset:0;background:rgba(0,0,0,.45);"></div>
+    <div class="sheet" data-screen-label="Share Usage Data" role="dialog" aria-modal="true" aria-labelledby="consent-title" aria-describedby="consent-body" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface-primary);border-radius:34px 34px 0 0;padding:28px 20px 34px;display:flex;flex-direction:column;gap:24px;">
+      <div style="display:flex;flex-direction:column;gap:8px;text-align:center;padding:0 12px;">
+        <div id="consent-title" style="font:500 19px/1.35 var(--font-sans);">Share Usage Data?</div>
+        <div id="consent-body" style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">Help improve the Rallywise beta with anonymous usage data, like how many matches you log. Your name, email, players and notes are never shared. You can change this anytime in Settings &gt; Privacy.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <button onClick="{{ consentYes }}" style="height:56px;border:none;border-radius:99px;background:var(--action-primary);color:var(--action-on-primary);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">Share Usage Data</button>
+        <button onClick="{{ consentNo }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-muted);color:var(--text-primary);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">Not Now</button>
+      </div>
+    </div>
+  </sc-if>
+
   <!-- Toast: the one global feedback message. Call flash(text, 'success' | 'error' | 'info') from anywhere. -->
   <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
     <div role="{{ toast.role }}" aria-live="{{ toast.live }}" style="position:absolute;left:20px;right:20px;top:calc(48px + env(safe-area-inset-top, 0px));display:flex;justify-content:center;pointer-events:none;">
@@ -1397,7 +1413,7 @@ class Component extends DCLogic {
   // Signs in to an account: loads its data, then opens Matches, or Onboarding if unfinished.
   async enter(user) {
     const b = await this.api(), token = this._enterToken = {};
-    const { state: a, sync, migrated, anonId } = await b.data.load(user);
+    const { state: a, sync, migrated, created, anonId } = await b.data.load(user);
     if (this._enterToken !== token) return; // signed out (or into another account) while loading
     if (this.state.screen !== 'splash') this.toAuth(a.onboarded ? 'matches' : 'onboarding');
     const me = a.players.find(x => x.id === 'me') || {};
@@ -1406,6 +1422,12 @@ class Component extends DCLogic {
     // What was just loaded is already saved; set last, so nothing on screen from before is saved under this account.
     this._saved = this.dataState(a); this.sync = sync; this.user = { ...user, anonId }; this._retryUser = null;
     if (migrated) this.flash('Your matches are now saved to your account');
+    const A = window.RallywiseAnalytics, c = this.analyticsCtx(a.prefs);
+    if (A) { A.setAccount(anonId); if (c && c.consent === 'no') A.clear(anonId); }
+    if (created && !migrated) this.track('signup_completed', { method: user.provider || 'email' }, a.prefs);
+    // app_opened (cold): the first time this account opens on this page load, from a saved session or a log-in.
+    this._opened = this._opened || {};
+    if (anonId && !this._opened[anonId]) { this._opened[anonId] = true; this.track('app_opened', { open_type: 'cold', onboarded: !!a.onboarded, match_count: a.matches.length }, a.prefs); }
     this.afterEnter();
   }
   // Signs in after a successful login or sign-up. If the account's data can't load, the session is
@@ -1416,6 +1438,7 @@ class Component extends DCLogic {
   // Takes the account's data off screen and returns to Log In.
   clearAccount() {
     this._enterToken = null; this.user = null; this.sync = null; this._saved = null; this._retryUser = null; this._recovery = false;
+    if (window.RallywiseAnalytics) window.RallywiseAnalytics.setAccount(null);
     this.toAuth('login');
     this.setState({ email: '', players: [], matches: [], prefs: this.newPrefs(), onboarded: true, detailId: null, playerId: null, log: null, menu: false,
       blocked: null, loading: false, confirmDelete: null, confirmDeleteAccount: false });
@@ -1448,6 +1471,44 @@ class Component extends DCLogic {
   // Back online: retry anything that didn't save.
   onOnline = () => { if (this.user && this.sync && this.sync.pending) this.sync.push(this.dataState()).catch(() => {}); };
 
+  // Beta analytics (rallywise-analytics.js; events in the Rallywise Beta Analytics Plan). Only a signed-in real
+  // account sends anything: never the demo account, and never while a design preview ("Start screen" other than
+  // Splash, or "Data state" other than Normal) is showing. Consent is Share Usage Data: 'ask' until the one-time
+  // prompt is answered (events are held, then sent on yes or dropped on no), then 'yes' or 'no'.
+  analyticsCtx(prefs) {
+    const p = this.props || {}, u = this.user, pr = prefs || this.state.prefs || {};
+    if (!u || !u.anonId || u.email === 'sam@rallywise.app') return null;
+    if ((p.startScreen && p.startScreen !== 'Splash') || (p.dataState && p.dataState !== 'Normal')) return null;
+    return { anonId: u.anonId, consent: pr.usage ? 'yes' : pr.consentAsked ? 'no' : 'ask' };
+  }
+  track(event, props, prefs) { const c = this.analyticsCtx(prefs), A = window.RallywiseAnalytics; if (c && A) A.track(event, props || {}, c); }
+  // Share Usage Data on or off, from the prompt or Privacy. Either answer settles the prompt for good; off also
+  // drops anything not yet sent.
+  setUsage(on) {
+    this.setState(x => ({ prefs: { ...x.prefs, usage: on, consentAsked: true } }));
+    const A = window.RallywiseAnalytics, c = this.analyticsCtx();
+    if (A && c) on ? A.grant(c.anonId) : A.clear(c.anonId);
+  }
+  // Back after 30 minutes or more away counts as a new visit (app_opened resume, with a new session id).
+  onVisibility = () => {
+    if (document.visibilityState === 'hidden') { this._hiddenAt = Date.now(); return; }
+    const away = this._hiddenAt ? Date.now() - this._hiddenAt : 0; this._hiddenAt = null;
+    if (away < 30 * 60e3 || !this.user) return;
+    if (window.RallywiseAnalytics) window.RallywiseAnalytics.newSession();
+    this.track('app_opened', { open_type: 'resume', onboarded: !!this.state.onboarded, match_count: this.state.matches.length });
+  };
+  // Opens Log Match for a new match. source is the button: matches, insights_empty or onboarding.
+  logStart(source) {
+    this.track('match_log_started', { source, match_count: this.state.matches.length });
+    return { ...this.newLog(), startedAt: Date.now() };
+  }
+  // What an edit changed, for match_edited (names only, never the values).
+  changedParts(a, b) {
+    const J = JSON.stringify;
+    return [['date', a.date !== b.date], ['type', a.type !== b.type], ['players', J([a.partner || null, a.opps]) !== J([b.partner || null, b.opps])],
+      ['score', J(a.games) !== J(b.games)], ['notes', J([a.wt, a.lt, a.worked, a.lost, a.on]) !== J([b.wt, b.lt, b.worked, b.lost, b.on])]].filter(x => x[1]).map(x => x[0]);
+  }
+
   // "Data state" prop previews the loading, empty, offline and error states without touching the seed data.
   dataFor(kind, players, matches) {
     if (players) this._seed = { players, matches };
@@ -1474,8 +1535,9 @@ class Component extends DCLogic {
     if (this.state.screen === 'splash') this._splash = setTimeout(() => this.leaveSplash(), 2200);
     if (this._restoring) this.restore();
     window.addEventListener('online', this.onOnline);
+    document.addEventListener('visibilitychange', this.onVisibility);
   }
-  componentWillUnmount() { if (this._unsub) this._unsub(); window.removeEventListener('online', this.onOnline); clearTimeout(this._t); clearTimeout(this._tOut); clearTimeout(this._splash); clearInterval(this._tick); clearTimeout(this._load); }
+  componentWillUnmount() { if (this._unsub) this._unsub(); window.removeEventListener('online', this.onOnline); document.removeEventListener('visibilitychange', this.onVisibility); clearTimeout(this._t); clearTimeout(this._tOut); clearTimeout(this._splash); clearInterval(this._tick); clearTimeout(this._load); }
 
   // Auth. Requests go to the backend (rallywise-backend.js). The "Auth error" prop previews each
   // error, and "Incorrect email or password" / "Network error" keep failing until it is set back to None.
@@ -1560,6 +1622,10 @@ class Component extends DCLogic {
     if (pp && this.props.dataState !== pp.dataState) this.setState({ ...this.dataFor(this.props.dataState), filter: 'All', search: '' });
     if (pp && this.props.authError !== pp.authError && this.props.authError !== 'None') this.setState({ back: [], busy: null, banner: null, errors: {}, ...this.authPreset(this.props.authError) });
     this.persist();
+    // insights_viewed: once per visit to Insights, once its data (or No Insights Yet) is on screen.
+    const cs = this.state;
+    if (cs.screen !== 'insights') this._insSeen = false;
+    else if (!this._insSeen && !cs.loading && !cs.blocked) { this._insSeen = true; this.track('insights_viewed', { has_data: cs.matches.length > 0, match_count: cs.matches.length }); }
     // The runtime passes only prevProps here, so the last scroll key is kept on the instance.
     const k = this.state.screen + (this.state.log ? this.state.log.step : '') + this.state.detailId + this.state.playerId;
     if (k !== this._scrollKey && this.scrollRef.current) this.scrollRef.current.scrollTop = 0;
@@ -1650,6 +1716,13 @@ class Component extends DCLogic {
       ? this.state.matches.map(x => x.id === m.id ? m : x).sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0)
       : [m, ...this.state.matches];
     try { await this.saveNow({ matches }); } catch (e) { return this.setLog({ saving: false, saveErr: true }); }
+    if (log.editId) this.track('match_edited', { match_type: m.type.toLowerCase(), changed: prev ? this.changedParts(prev, m) : [] });
+    else {
+      const r = this.res(m.games);
+      this.track('match_logged', { match_type: m.type.toLowerCase(), format: log.format, result: r.win ? 'win' : 'loss', games: m.games.length,
+        has_notes: !!(m.worked || m.lost || m.on), tag_count: m.wt.length + m.lt.length, match_count: matches.length,
+        log_seconds: log.startedAt ? Math.round((Date.now() - log.startedAt) / 1000) : null });
+    }
     this.commit(m, matches);
   }
   commit(m, matches) {
@@ -1670,6 +1743,8 @@ class Component extends DCLogic {
     try { await this.saveNow({ matches }); }
     catch (e) { this.setState({ confirmDelete: null }); return this.flash(e && e.code === 'network' ? "Couldn't delete. Check your connection." : "Couldn't delete match", 'error'); }
     finally { this._deleting = false; }
+    const gone = this.state.matches.find(m => m.id === id), at = gone && Date.parse(gone.createdAt);
+    this.track('match_deleted', { match_count: matches.length, minutes_since_logged: at ? Math.max(0, Math.round((Date.now() - at) / 6e4)) : null });
     this.setState({ matches, confirmDelete: null, screen: 'matches', back: [], detailId: null, log: null });
     this.flash('Match deleted');
   }
@@ -1677,7 +1752,9 @@ class Component extends DCLogic {
   openForm(screen, acct) { this.go(screen, { acct: { ...this.state.acct, cur: '', next: '', ...acct }, errors: {}, banner: null, pwVisible: false }); }
   openProfile() { const me = this.state.players.find(p => p.id === 'me') || {}; this.openForm('profile', { name: me.name || '', level: me.level || null }); }
   setAcct(patch, errKey) { this.setState(x => ({ acct: { ...x.acct, ...patch }, errors: { ...x.errors, [errKey]: null }, banner: null })); }
-  addPlayer(name) { const id = 'p' + Date.now(); this.setState(s => ({ players: [...s.players, { id, name }] })); return id; }
+  addPlayer(name, source) {
+    this.track('player_added', { source, player_count: this.state.players.filter(p => p.id !== 'me').length + 1 });
+    const id = 'p' + Date.now(); this.setState(s => ({ players: [...s.players, { id, name }] })); return id; }
 
   renderVals() {
     const s = this.state, A = 'var(--action-primary)';
@@ -1734,7 +1811,7 @@ class Component extends DCLogic {
       toggleMenu: () => this.setState(x => ({ menu: !x.menu })),
       goBack: this.goBack,
       onSearch: e => this.setState({ search: e.target.value }),
-      startLog: () => this.go('log', { log: this.newLog() }),
+      startLog: () => this.go('log', { log: this.logStart('matches') }),
       tabs: [['Matches', 'matches', 'List'], ['Insights', 'insights', 'ChartColumn']].map(([label, k, icon]) => ({
         label, icon, fg: s.screen === k ? 'var(--text-primary)' : 'var(--text-secondary)', select: () => this.setState({ screen: k, back: [], menu: false })
       })),
@@ -1827,7 +1904,7 @@ class Component extends DCLogic {
     }
     if (v.isPrefs) {
       const row = (k, label, sub) => { const on = !!s.prefs[k];
-        return { label, sub, on, bg: on ? A : 'transparent', border: on ? A : 'var(--text-secondary)', select: () => this.setState(x => ({ prefs: { ...x.prefs, [k]: !x.prefs[k] } })) }; };
+        return { label, sub, on, bg: on ? A : 'transparent', border: on ? A : 'var(--text-secondary)', select: () => k === 'usage' ? this.setUsage(!this.state.prefs.usage) : this.setState(x => ({ prefs: { ...x.prefs, [k]: !x.prefs[k] } })) }; };
       v.prefTitle = s.screen === 'privacy' ? 'Privacy' : 'Notifications';
       v.prefRows = s.screen === 'privacy'
         ? [row('usage', 'Share Usage Data', 'Anonymous usage data that helps improve Rallywise')]
@@ -1840,15 +1917,20 @@ class Component extends DCLogic {
       this.setState({ busy: 'delete', banner: null });
       this.request(async () => {
         await (await this.api()).auth.deleteAccount();
+        if (window.RallywiseAnalytics && this.user && this.user.anonId) window.RallywiseAnalytics.clear(this.user.anonId); // the server deleted its sent events too
         try { localStorage.removeItem('rallywise.v1.user.' + this.state.email); } catch (e) {} // any pre-cloud copy on this device
         this.clearAccount(); this.flash('Account deleted');
       });
     };
+    // The one-time Share Usage Data prompt: right after onboarding, over whichever screen it led to.
+    const ac = this.analyticsCtx();
+    v.askConsent = !!ac && ac.consent === 'ask' && s.onboarded && !s.loading && !s.blocked && !['splash', 'onboarding', 'login', 'signup', 'forgot', 'resetSent'].includes(s.screen);
+    v.consentYes = () => this.setUsage(true); v.consentNo = () => this.setUsage(false);
     for (const k of ['apple', 'google']) v[k] = { go: () => this.social(k), busy: s.busy === k, idle: s.busy !== k, dim: s.busy && s.busy !== k ? .5 : 1 };
 
     v.insLoading = v.loading;
     v.insHasData = !s.blocked && !s.loading && all.length > 0;
-    v.insState = s.blocked ? v.blockedState : !s.loading && !all.length && empty('no-insights', 'No Insights Yet', 'Log a few matches and your trends will start to show here.', 'Log Match', v.startLog);
+    v.insState = s.blocked ? v.blockedState : !s.loading && !all.length && empty('no-insights', 'No Insights Yet', 'Log a few matches and your trends will start to show here.', 'Log Match', () => this.go('log', { log: this.logStart('insights_empty') }));
     if (v.isInsights && v.insHasData) {
       const chron = all.slice().sort((a, b) => a.date < b.date ? -1 : 1);
       const span = chron.slice(-20), half = Math.floor(span.length / 2);
@@ -1858,7 +1940,9 @@ class Component extends DCLogic {
       const dl = pct(rr.pct) - pct(pr.pct);
       v.insProgress = s.insTab !== 'coach'; v.insCoach = !v.insProgress;
       v.insTabs = [['Performance', 'progress'], ['Grow', 'coach']].map(([label, k]) => { const on = (s.insTab || 'progress') === k; return { label,
-        bg: on ? 'var(--text-primary)' : 'transparent', fg: on ? 'var(--text-inverse)' : 'var(--filter-pill-text-default)', select: () => this.setState({ insTab: k }) }; });
+        bg: on ? 'var(--text-primary)' : 'transparent', fg: on ? 'var(--text-inverse)' : 'var(--filter-pill-text-default)', select: () => {
+        if (k === 'coach' && this.state.insTab !== 'coach') this.track('grow_viewed', { match_count: this.state.matches.length });
+        this.setState({ insTab: k }); } }; });
       {
         const byT = t => this.rec(all.filter(m => m.type === t));
         const sg = byT('Singles'), db = byT('Doubles');
@@ -1914,7 +1998,7 @@ class Component extends DCLogic {
       const ob = s.ob, st = ob.step, ok = st !== 2 || (ob.name.trim() && ob.level);
       const setOb = patch => this.setState(x => ({ ob: { ...x.ob, ...patch } }));
       // Save the profile onto the "me" player, then leave onboarding for good.
-      const finish = extra => this.setState(x => ({ screen: 'matches', back: [], ob: this.newOb(), onboarded: true, players: x.players.map(p => p.id === 'me' ? { ...p, name: x.ob.name.trim(), level: x.ob.level } : p), ...extra }));
+      const finish = (exit, extra) => (this.track('onboarding_completed', { level: ob.level, exit }), this.setState(x => ({ screen: 'matches', back: [], ob: this.newOb(), onboarded: true, players: x.players.map(p => p.id === 'me' ? { ...p, name: x.ob.name.trim(), level: x.ob.level } : p), ...extra })));
       v.obWelcome = st === 1; v.obProfile = st === 2; v.obReady = st === 3;
       v.obName = ob.name; v.onObName = e => setOb({ name: e.target.value });
       v.obBack = () => setOb({ step: 1 });
@@ -1925,8 +2009,8 @@ class Component extends DCLogic {
       v.obReadyTitle = `Ready to play, ${ob.name.trim().split(/\s+/)[0]}`;
       v.obCtaLabel = ['Get started', 'Continue', 'Log your first match'][st - 1];
       v.obCtaBg = ok ? A : 'var(--surface-muted)'; v.obCtaFg = ok ? 'var(--action-on-primary)' : 'var(--text-tertiary)';
-      v.obNext = () => { if (!ok) return; st < 3 ? setOb({ step: st + 1 }) : finish({ screen: 'log', log: this.newLog() }); };
-      v.obToMatches = () => finish();
+      v.obNext = () => { if (!ok) return; st < 3 ? setOb({ step: st + 1 }) : finish('log_first_match', { screen: 'log', log: this.logStart('onboarding') }); };
+      v.obToMatches = () => finish('skip');
     }
 
     if (v.isLog && s.log) {
@@ -1968,7 +2052,7 @@ class Component extends DCLogic {
         ? empty('no-results', 'No Players Found', 'Check the spelling, or type a full name to add them.')
         : empty('no-players', 'No Players Yet', 'Type a name above to add your first player.'));
       if (v.pickEmpty) v.pickEmpty.style = { padding: '16px 16px 8px' };
-      v.addNew = () => { const id = this.addPlayer(s.search.trim()); this.pick(id); };
+      v.addNew = () => { const id = this.addPlayer(s.search.trim(), 'log_match'); this.pick(id); };
       const t = log.format, cap = this.cap(t);
       v.formats = [21, 15, 11].map(f => ({ label: String(f), bg: 'var(--filter-pill-bg)', fg: f === t ? 'var(--filter-pill-text-selected)' : 'var(--filter-pill-text-default)', border: f === t ? 'var(--filter-pill-border-selected)' : 'transparent',
         select: () => this.setLog(l => ({ format: f, games: l.games.map(g => ({ ...g, l: f - 6 })) })) }));
@@ -2048,7 +2132,7 @@ class Component extends DCLogic {
       v.playersEmpty = !v.playerList.length && (q
         ? empty('no-results', 'No Players Found', 'Check the spelling, or add them as a new player.')
         : empty('no-players', 'No Players Yet', 'Players you add or play against will show up here.'));
-      v.addPlayerOnly = () => { this.addPlayer(s.search.trim()); this.setState({ search: '' }); this.flash('Player added'); };
+      v.addPlayerOnly = () => { this.addPlayer(s.search.trim(), 'players'); this.setState({ search: '' }); this.flash('Player added'); };
     }
 
     if (v.isPlayer) {

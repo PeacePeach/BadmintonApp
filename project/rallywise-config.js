@@ -6,5 +6,7 @@ window.RALLYWISE_CONFIG = {
   supabaseAnonKey: 'sb_publishable_Q5V1UtnWkI-xgFW26Vvi2g_S2yEL_OO',
   // Turn a provider on only after enabling it under Authentication > Providers in Supabase.
   // While off, its button says it isn't available yet and never signs anyone in.
-  oauth: { google: false, apple: false }
+  oauth: { google: false, apple: false },
+  // Sent with every analytics event so behaviour before and after a release can be told apart.
+  appVersion: 'beta-2026.10.14'
 };

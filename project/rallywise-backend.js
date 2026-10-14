@@ -47,7 +47,9 @@
   function dataFail(err) { return isNetwork(err) ? fail('network', err) : fail('unknown', err); }
   async function run(q) { const r = await q; if (r.error) throw dataFail(r.error); return r.data; }
 
-  const userOf = u => u && { id: u.id, email: (u.email || '').toLowerCase(), name: (u.user_metadata && u.user_metadata.name) || '' };
+  // provider (email, google, apple) is only used as signup_completed's method.
+  const userOf = u => u && { id: u.id, email: (u.email || '').toLowerCase(), name: (u.user_metadata && u.user_metadata.name) || '',
+    provider: (u.app_metadata && u.app_metadata.provider) || 'email' };
 
   // ---- Auth ----
   const auth = {
@@ -200,7 +202,8 @@
     newPrefs,
     // Loads the user's data. A first sign-in creates the account's rows: from this device's old local data
     // for the same email if there is some (migrated once, then removed from the device), otherwise empty.
-    // Returns { state, sync, migrated, anonId }. anonId is the account's analytics id (never the auth id).
+    // Returns { state, sync, migrated, created, anonId }. created is true when this load made the account's rows
+    // (its first sign-in). anonId is the account's analytics id (never the auth id).
     async load(user) {
       const db = sb(), uid = user.id;
       const [profile, players, matches] = await Promise.all([
@@ -211,7 +214,7 @@
       if (profile) {
         const state = { onboarded: !!profile.onboarded, prefs: { ...newPrefs(), ...(profile.prefs || {}) }, players: players.map(fromPlayerRow), matches: matches.map(fromMatchRow) };
         if (!state.players.some(p => p.id === 'me')) state.players.unshift({ id: 'me', name: user.name, level: null });
-        return { state, sync: createSync(uid, { onboarded: state.onboarded, prefs: profile.prefs || {}, players: players.map(fromPlayerRow), matches: state.matches }), migrated: false, anonId: profile.anon_id };
+        return { state, sync: createSync(uid, { onboarded: state.onboarded, prefs: profile.prefs || {}, players: players.map(fromPlayerRow), matches: state.matches }), migrated: false, created: false, anonId: profile.anon_id };
       }
       const old = legacy(user.email);
       const state = old || { onboarded: false, prefs: newPrefs(), players: [{ id: 'me', name: user.name, level: null }], matches: [] };
@@ -219,12 +222,20 @@
       await sync.push(state);
       if (old) try { localStorage.removeItem(LEGACY(user.email)); } catch (e) {}
       const p = await run(db.from('profiles').select('anon_id').eq('user_id', uid).maybeSingle());
-      return { state, sync, migrated: !!old, anonId: p && p.anon_id };
+      return { state, sync, migrated: !!old, created: true, anonId: p && p.anon_id };
+    }
+  };
+
+  // Beta analytics (rallywise-analytics.js decides what and when). Insert only: the table can't be read back.
+  // Rows carry their own ids and duplicates are ignored, so a batch that is sent twice is stored once.
+  const analytics = {
+    async send(rows) {
+      await run(sb().from('analytics_events').upsert(rows, { onConflict: 'id', ignoreDuplicates: true }));
     }
   };
 
   // The mocked session record from the localStorage version is meaningless now.
   try { localStorage.removeItem('rallywise.v1.session'); } catch (e) {}
 
-  window.RallywiseBackend = { ready, auth, data };
+  window.RallywiseBackend = { ready, auth, data, analytics };
 })();
