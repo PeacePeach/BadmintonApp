@@ -116,10 +116,11 @@
   // ---- Data ----
   const toPlayerRow = (uid, p) => ({ user_id: uid, id: String(p.id), name: String(p.name || ''), level: LEVELS.includes(p.level) ? p.level : null });
   const toMatchRow = (uid, m) => ({ user_id: uid, id: String(m.id), date: m.date, type: m.type, partner: m.partner || null, opps: m.opps || [],
-    games: m.games || [], wt: m.wt || [], lt: m.lt || [], worked: m.worked || '', lost: m.lost || '', opp_notes: m.on || '' });
+    games: m.games || [], wt: m.wt || [], lt: m.lt || [], worked: m.worked || '', lost: m.lost || '', opp_notes: m.on || '',
+    ...(m.createdAt ? { created_at: m.createdAt } : {}) });
   const fromPlayerRow = r => r.id === 'me' ? { id: r.id, name: r.name, level: r.level } : (r.level ? { id: r.id, name: r.name, level: r.level } : { id: r.id, name: r.name });
   const fromMatchRow = r => ({ id: r.id, date: r.date, type: r.type, partner: r.partner, opps: r.opps || [], games: r.games || [],
-    wt: r.wt || [], lt: r.lt || [], worked: r.worked || '', lost: r.lost || '', on: r.opp_notes || '' });
+    wt: r.wt || [], lt: r.lt || [], worked: r.worked || '', lost: r.lost || '', on: r.opp_notes || '', createdAt: r.created_at });
   const newPrefs = () => ({ reminders: true, insights: true, usage: false });
 
   // What the cloud holds, as JSON strings per row, so a sync sends only what changed.
@@ -196,25 +197,26 @@
     newPrefs,
     // Loads the user's data. A first sign-in creates the account's rows: from this device's old local data
     // for the same email if there is some (migrated once, then removed from the device), otherwise empty.
-    // Returns { state, sync, migrated }.
+    // Returns { state, sync, migrated, anonId }. anonId is the account's analytics id (never the auth id).
     async load(user) {
       const db = sb(), uid = user.id;
       const [profile, players, matches] = await Promise.all([
-        run(db.from('profiles').select('onboarded, prefs').eq('user_id', uid).maybeSingle()),
+        run(db.from('profiles').select('onboarded, prefs, anon_id').eq('user_id', uid).maybeSingle()),
         run(db.from('players').select('id, name, level').eq('user_id', uid).order('created_at')),
         run(db.from('matches').select('*').eq('user_id', uid).order('date', { ascending: false }).order('created_at', { ascending: false }))
       ]);
       if (profile) {
         const state = { onboarded: !!profile.onboarded, prefs: { ...newPrefs(), ...(profile.prefs || {}) }, players: players.map(fromPlayerRow), matches: matches.map(fromMatchRow) };
         if (!state.players.some(p => p.id === 'me')) state.players.unshift({ id: 'me', name: user.name, level: null });
-        return { state, sync: createSync(uid, { onboarded: state.onboarded, prefs: profile.prefs || {}, players: players.map(fromPlayerRow), matches: state.matches }), migrated: false };
+        return { state, sync: createSync(uid, { onboarded: state.onboarded, prefs: profile.prefs || {}, players: players.map(fromPlayerRow), matches: state.matches }), migrated: false, anonId: profile.anon_id };
       }
       const old = legacy(user.email);
       const state = old || { onboarded: false, prefs: newPrefs(), players: [{ id: 'me', name: user.name, level: null }], matches: [] };
       const sync = createSync(uid, null);
       await sync.push(state);
       if (old) try { localStorage.removeItem(LEGACY(user.email)); } catch (e) {}
-      return { state, sync, migrated: !!old };
+      const p = await run(db.from('profiles').select('anon_id').eq('user_id', uid).maybeSingle());
+      return { state, sync, migrated: !!old, anonId: p && p.anon_id };
     }
   };
 

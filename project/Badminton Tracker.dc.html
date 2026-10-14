@@ -1390,14 +1390,14 @@ class Component extends DCLogic {
   // Signs in to an account: loads its data, then opens Matches, or Onboarding if unfinished.
   async enter(user) {
     const b = await this.api(), token = this._enterToken = {};
-    const { state: a, sync, migrated } = await b.data.load(user);
+    const { state: a, sync, migrated, anonId } = await b.data.load(user);
     if (this._enterToken !== token) return; // signed out (or into another account) while loading
     if (this.state.screen !== 'splash') this.toAuth(a.onboarded ? 'matches' : 'onboarding');
     const me = a.players.find(x => x.id === 'me') || {};
     this.setState({ email: user.email, players: a.players, matches: a.matches, prefs: a.prefs || this.newPrefs(), onboarded: !!a.onboarded,
       ob: { ...this.newOb(), name: me.name || '' }, filter: 'All', search: '', detailId: null, playerId: null, log: null, blocked: null, loading: false });
     // What was just loaded is already saved; set last, so nothing on screen from before is saved under this account.
-    this._saved = this.dataState(a); this.sync = sync; this.user = user; this._retryUser = null;
+    this._saved = this.dataState(a); this.sync = sync; this.user = { ...user, anonId }; this._retryUser = null;
     if (migrated) this.flash('Your matches are now saved to your account');
     this.afterEnter();
   }
@@ -1635,7 +1635,9 @@ class Component extends DCLogic {
     const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
     if (this.props.saveMatch === 'Fails' || offline) { await new Promise(r => setTimeout(r, 900)); return this.setLog({ saving: false, saveErr: true }); }
     const log = this.state.log;
-    const m = { id: log.editId || 'n' + Date.now(), date: log.date || '2026-09-22', type: log.type, partner: log.type === 'Doubles' ? log.partner : null,
+    const prev = log.editId && this.state.matches.find(x => x.id === log.editId);
+    // createdAt is when the match was first logged; edits keep it. Sample matches have none.
+    const m = { id: log.editId || 'n' + Date.now(), createdAt: prev ? prev.createdAt : new Date().toISOString(), date: log.date || '2026-09-22', type: log.type, partner: log.type === 'Doubles' ? log.partner : null,
       opps: log.type === 'Doubles' ? [log.opp1, log.opp2] : [log.opp1], games: this.draftGames(log), wt: log.wt, lt: log.lt, worked: log.worked.trim(), lost: log.lost.trim(), on: log.on.trim() };
     const matches = log.editId
       ? this.state.matches.map(x => x.id === m.id ? m : x).sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0)

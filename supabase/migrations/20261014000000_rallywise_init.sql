@@ -8,6 +8,8 @@ create table public.profiles (
   user_id    uuid primary key default auth.uid() references auth.users (id) on delete cascade,
   onboarded  boolean not null default false,
   prefs      jsonb   not null default '{}'::jsonb,
+  -- Analytics identity: generated once by the database, kept across devices, never the auth id.
+  anon_id    uuid    not null unique default gen_random_uuid(),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -24,6 +26,7 @@ create table public.players (
 );
 
 -- One logged match. partner/opps hold player ids from the same user's players.
+-- created_at is when the match was first logged (the app sends it; edits keep it).
 create table public.matches (
   user_id    uuid not null default auth.uid() references auth.users (id) on delete cascade,
   id         text not null check (char_length(id) between 1 and 64),
@@ -58,7 +61,12 @@ alter table public.players  enable row level security;
 alter table public.matches  enable row level security;
 
 revoke all on public.profiles, public.players, public.matches from anon;
-grant select, insert, update, delete on public.profiles, public.players, public.matches to authenticated;
+grant select, insert, update, delete on public.players, public.matches to authenticated;
+-- Clients may read their anon_id but never set or change it. Supabase's default privileges grant
+-- whole-table insert/update, which would override column grants, so revoke those first.
+revoke insert, update on public.profiles from authenticated;
+grant select, delete on public.profiles to authenticated;
+grant insert (user_id, onboarded, prefs), update (user_id, onboarded, prefs) on public.profiles to authenticated;
 
 create policy "own profile" on public.profiles for all to authenticated
   using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
