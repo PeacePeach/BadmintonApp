@@ -1285,8 +1285,8 @@ class Component extends DCLogic {
   scrollRef = React.createRef();
   state = this.seed();
 
-  seed() {
-    const p = this.props || {};
+  // Sample data for the demo account (sam@rallywise.app) and the design previews.
+  demoData() {
     const players = [
       { id: 'me', name: 'Sam Rivera', level: 'Intermediate' }, { id: 'alex', name: 'Alex Chen' }, { id: 'priya', name: 'Priya Nair' },
       { id: 'marcus', name: 'Marcus Lee' }, { id: 'jordan', name: 'Jordan Kim' }, { id: 'leo', name: 'Leo Park' },
@@ -1315,22 +1315,75 @@ class Component extends DCLogic {
       M('m19', '2026-07-19', 'Doubles', 'priya', ['leo', 'mei'], [[21, 19], [19, 21], [21, 17]], ['Serve', 'Net'], ['Defence'], '', '', ''),
       M('m20', '2026-07-16', 'Singles', null, ['jordan'], [[21, 13], [21, 16]], ['Placement'], [], '', '', '')
     ];
+    return { players, matches };
+  }
+
+  seed() {
+    const p = this.props || {};
     const start = p.startScreen;
+    // Reopening the app (it starts on the splash) restores the signed-in account, if there is one.
+    const sess = (!start || start === 'Splash') && this.read(this.SESSION);
+    const acct = sess && this.account(sess.email);
+    if (acct) this.user = sess.email;
+    const { players, matches } = acct || this.demoData();
+    const me = players.find(x => x.id === 'me') || {};
     const screens = { 'Splash': 'splash', 'Log In': 'login', 'Sign Up': 'signup', 'Forgot Password': 'forgot', 'Check Email': 'resetSent', 'Onboarding': 'onboarding', 'Match Detail': 'detail', 'Insights': 'insights', 'Log Match': 'log', 'Settings': 'settings' };
     return {
-      screen: screens[start] || 'matches', pwVisible: false, agree: false, ob: this.newOb(),
+      screen: screens[start] || 'matches', pwVisible: false, agree: false, ob: { ...this.newOb(), name: acct && !acct.onboarded ? me.name || '' : '' },
       f: this.blankForm(), errors: {}, banner: null, busy: null, resetEmail: 'sam@rallywise.app', resendIn: 0,
       ...this.authPreset(p.authError),
       insTab: 'progress', back: start === 'Match Detail' ? [{ screen: 'matches' }] : [], filter: 'All', menu: false, confirmDelete: null, detailId: null, playerId: null, search: '', toast: null,
       ...this.dataFor(p.dataState, players, matches), log: start === 'Log Match' ? this.newLog() : null,
-      email: 'sam@rallywise.app', acct: { name: '', level: null, cur: '', next: '' }, prefs: { reminders: true, insights: true, usage: false }, confirmDeleteAccount: false
+      email: acct ? sess.email : 'sam@rallywise.app', acct: { name: '', level: null, cur: '', next: '' }, prefs: (acct && acct.prefs) || this.newPrefs(),
+      onboarded: acct ? !!acct.onboarded : true, confirmDeleteAccount: false
     };
+  }
+  newPrefs() { return { reminders: true, insights: true, usage: false }; }
+
+  // Persistence. There is no backend yet, so each account's data is saved in this browser's localStorage
+  // under its own key (by email), and being signed in is a mocked session record naming that email.
+  // Logging out removes only the session; the account's data comes back on its next sign-in.
+  get SESSION() { return 'rallywise.v1.session'; }
+  key(email) { return 'rallywise.v1.user.' + email; }
+  read(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+  write(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+  account(email) { const a = this.read(this.key(email)); return a && Array.isArray(a.players) && Array.isArray(a.matches) ? a : null; }
+  // The demo account starts with the sample matches; any other new account starts empty and goes through onboarding.
+  newAccount(email, name) {
+    if (email === 'sam@rallywise.app') return { onboarded: true, prefs: this.newPrefs(), ...this.demoData() };
+    return { onboarded: false, prefs: this.newPrefs(), players: [{ id: 'me', name: name || '', level: null }], matches: [] };
+  }
+  // Signs in to an account: saves the session, loads its data and opens Matches, or Onboarding if unfinished.
+  enter(email, name) {
+    email = email.trim().toLowerCase();
+    const a = this.account(email) || this.newAccount(email, name);
+    this.write(this.SESSION, { email }); this.write(this.key(email), a);
+    this.toAuth(a.onboarded ? 'matches' : 'onboarding');
+    const me = a.players.find(x => x.id === 'me') || {};
+    this.setState({ email, players: a.players, matches: a.matches, prefs: a.prefs || this.newPrefs(), onboarded: !!a.onboarded,
+      ob: { ...this.newOb(), name: me.name || '' }, filter: 'All', search: '', detailId: null, playerId: null, log: null, blocked: null, loading: false });
+    this.user = email; // set last, so nothing on screen from before is saved under this account
+  }
+  // Clears the session and takes the account's data off screen.
+  signOut(deleteData) {
+    if (deleteData && this.user) this.write(this.key(this.user), null);
+    this.write(this.SESSION, null); this.user = null;
+    this.toAuth('login');
+    this.setState({ email: '', players: [], matches: [], prefs: this.newPrefs(), detailId: null, playerId: null, log: null, menu: false });
+  }
+  // Saves the signed-in account whenever its data changes (not while a "Data state" preview is showing).
+  persist() {
+    const s = this.state, d = this.props.dataState, last = this._saved || {};
+    if (!this.user || (d && d !== 'Normal')) return;
+    if (s.players === last.players && s.matches === last.matches && s.prefs === last.prefs && s.onboarded === last.onboarded) return;
+    this._saved = { players: s.players, matches: s.matches, prefs: s.prefs, onboarded: s.onboarded };
+    if (!this.write(this.key(this.user), { onboarded: s.onboarded, players: s.players, matches: s.matches, prefs: s.prefs })) this.flash("Couldn't save on this device", 'error');
   }
 
   // "Data state" prop previews the loading, empty, offline and error states without touching the seed data.
   dataFor(kind, players, matches) {
     if (players) this._seed = { players, matches };
-    const d = this._seed;
+    const d = (this.user && this.account(this.user)) || this._seed;
     clearTimeout(this._load);
     if (kind === 'Empty') return { players: d.players.filter(x => x.id === 'me'), matches: [], blocked: null, loading: false };
     return { players: d.players, matches: d.matches, blocked: kind === 'Offline' ? 'offline' : kind === 'Error' ? 'error' : null, loading: kind === 'Loading' };
@@ -1405,16 +1458,16 @@ class Component extends DCLogic {
     if (this.state.busy) return;
     // The provider's own sheet (Sign in with Apple / Google account picker) takes over here.
     this.setState({ errors: {}, banner: null, busy: provider });
-    this.request(() => this.toAuth('matches'));
+    this.request(() => this.enter('sam@rallywise.app'));
   }
   startResendTimer() {
     clearInterval(this._tick);
     this.setState({ resendIn: 30 });
     this._tick = setInterval(() => this.setState(s => { if (s.resendIn <= 1) clearInterval(this._tick); return { resendIn: Math.max(0, s.resendIn - 1) }; }), 1000);
   }
-  leaveSplash() { clearTimeout(this._splash); if (this.state.screen === 'splash') this.setState({ screen: 'login' }); }
+  leaveSplash() { clearTimeout(this._splash); if (this.state.screen === 'splash') this.setState(s => ({ screen: !this.user ? 'login' : s.onboarded ? 'matches' : 'onboarding' })); }
 
-  componentDidUpdate(pp, ps) {
+  componentDidUpdate(pp) {
     // "Toast preview" prop fires one example of each toast variant.
     if (pp && this.props.toastPreview !== pp.toastPreview) {
       const ex = { Success: ['Match saved', 'success'], Error: ['Something went wrong', 'error'], Info: ['No connection', 'info'] }[this.props.toastPreview];
@@ -1422,9 +1475,11 @@ class Component extends DCLogic {
     }
     if (pp && this.props.dataState !== pp.dataState) this.setState({ ...this.dataFor(this.props.dataState), filter: 'All', search: '' });
     if (pp && this.props.authError !== pp.authError && this.props.authError !== 'None') this.setState({ back: [], busy: null, banner: null, errors: {}, ...this.authPreset(this.props.authError) });
-    const a = ps.screen + (ps.log ? ps.log.step : '') + ps.detailId + ps.playerId;
-    const b = this.state.screen + (this.state.log ? this.state.log.step : '') + this.state.detailId + this.state.playerId;
-    if (a !== b && this.scrollRef.current) this.scrollRef.current.scrollTop = 0;
+    this.persist();
+    // The runtime passes only prevProps here, so the last scroll key is kept on the instance.
+    const k = this.state.screen + (this.state.log ? this.state.log.step : '') + this.state.detailId + this.state.playerId;
+    if (k !== this._scrollKey && this.scrollRef.current) this.scrollRef.current.scrollTop = 0;
+    this._scrollKey = k;
   }
 
   nm(id) { const p = this.state.players.find(x => x.id === id); return p ? p.name : ''; }
@@ -1548,7 +1603,7 @@ class Component extends DCLogic {
       f: s.f, banner: s.banner, resetEmail: s.resetEmail, resendIn: s.resendIn, canResend: !s.resendIn, resendWait: !!s.resendIn,
       busyAny: !!s.busy, busySubmit: s.busy === 'submit', idleSubmit: s.busy !== 'submit',
       logIn: () => { const f = this.state.f; this.submit({ email: this.emailErr(f.email), password: f.password ? null : this.msg.pwEmpty },
-        () => this.toAuth('matches'), () => this.props.authError === 'Incorrect email or password' && { banner: this.msg.incorrect }); },
+        () => this.enter(f.email), () => this.props.authError === 'Incorrect email or password' && { banner: this.msg.incorrect }); },
       forgotPw: () => this.toAuth('forgot', true),
       sendReset: () => { const email = this.state.f.email.trim(); this.submit({ email: this.emailErr(email) },
         () => { this.setState({ screen: 'resetSent', resetEmail: email }); this.startResendTimer(); }); },
@@ -1560,7 +1615,7 @@ class Component extends DCLogic {
       signupBg: s.agree ? 'var(--action-primary)' : 'var(--surface-muted)', signupFg: s.agree ? 'var(--action-on-primary)' : 'var(--text-tertiary)',
       signUp: () => { if (!this.state.agree) return; const f = this.state.f;
         this.submit({ name: f.name.trim() ? null : this.msg.nameEmpty, email: this.emailErr(f.email), password: f.password.length >= 8 ? null : f.password ? this.msg.pwShort : this.msg.pwEmpty },
-          () => { this.toAuth('onboarding'); this.setState({ ob: { ...this.newOb(), name: f.name.trim() }, agree: false }); }, () => f.email.trim().toLowerCase() === 'sam@rallywise.app' && { errors: { email: this.msg.exists } }); },
+          () => { this.enter(f.email, f.name.trim()); this.setState({ agree: false }); }, () => { const e = f.email.trim().toLowerCase(); return (e === 'sam@rallywise.app' || this.account(e)) && { errors: { email: this.msg.exists } }; }); },
       isOnboarding: s.screen === 'onboarding',
       showTabs: s.screen === 'matches' || s.screen === 'insights', menuOpen: s.menu,
       hasToast: !!s.toast, search: s.search, canAddNew: q.length > 1 && !exists,
@@ -1578,7 +1633,7 @@ class Component extends DCLogic {
         { label: 'Players', icon: 'Users', select: () => this.go('players') },
         { label: 'Profile', icon: 'CircleUser', select: () => this.openProfile() },
         { label: 'Settings', icon: 'Settings', select: () => this.go('settings') },
-        { label: 'Log Out', icon: 'LogOut', select: () => { this.setState({ menu: false }); this.toAuth('login'); } }
+        { label: 'Log Out', icon: 'LogOut', select: () => this.signOut() }
       ],
       filters: ['All', 'Singles', 'Doubles'].map(f => ({ label: f, active: s.filter === f, select: () => this.setState({ filter: f }) })),
       matchCards: all.filter(m => s.filter === 'All' || m.type === s.filter).map(m => this.card(m))
@@ -1615,7 +1670,7 @@ class Component extends DCLogic {
         ['Notifications', 'Match reminders and insight updates', 'Bell', () => this.go('notifications')],
         ['Privacy', 'How your data is used', 'Shield', () => this.go('privacy')]
       ].map(([label, sub, icon, open]) => ({ label, sub, icon, open }));
-      v.logOut = () => this.toAuth('login');
+      v.logOut = () => this.signOut();
     }
     if (v.isMyProfile) {
       const a = s.acct, name = a.name.trim();
@@ -1657,7 +1712,7 @@ class Component extends DCLogic {
     v.deleteAccount = () => {
       if (this.state.busy) return;
       this.setState({ busy: 'delete', banner: null });
-      this.request(() => { this.setState({ confirmDeleteAccount: false }); this.toAuth('login'); this.flash('Account deleted'); });
+      this.request(() => { this.setState({ confirmDeleteAccount: false }); this.signOut(true); this.flash('Account deleted'); });
     };
     for (const k of ['apple', 'google']) v[k] = { go: () => this.social(k), busy: s.busy === k, idle: s.busy !== k, dim: s.busy && s.busy !== k ? .5 : 1 };
 
@@ -1729,7 +1784,7 @@ class Component extends DCLogic {
       const ob = s.ob, st = ob.step, ok = st !== 2 || (ob.name.trim() && ob.level);
       const setOb = patch => this.setState(x => ({ ob: { ...x.ob, ...patch } }));
       // Save the profile onto the "me" player, then leave onboarding for good.
-      const finish = extra => this.setState(x => ({ screen: 'matches', back: [], ob: this.newOb(), players: x.players.map(p => p.id === 'me' ? { ...p, name: x.ob.name.trim(), level: x.ob.level } : p), ...extra }));
+      const finish = extra => this.setState(x => ({ screen: 'matches', back: [], ob: this.newOb(), onboarded: true, players: x.players.map(p => p.id === 'me' ? { ...p, name: x.ob.name.trim(), level: x.ob.level } : p), ...extra }));
       v.obWelcome = st === 1; v.obProfile = st === 2; v.obReady = st === 3;
       v.obName = ob.name; v.onObName = e => setOb({ name: e.target.value });
       v.obBack = () => setOb({ step: 1 });
