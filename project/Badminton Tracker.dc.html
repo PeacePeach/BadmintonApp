@@ -46,9 +46,9 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
 .auth-spin{display:flex;animation:auth-spin .8s linear infinite;}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
 button:disabled{cursor:default !important;}
-/* Toast: one global feedback pill, floats above the bottom bar and slides in and out. */
-@keyframes toast-in{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
-@keyframes toast-out{from{opacity:1;transform:none;}to{opacity:0;transform:translateY(12px);}}
+/* Toast: one global feedback pill at the top of the screen, slides down in and back up out. */
+@keyframes toast-in{from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:none;}}
+@keyframes toast-out{from{opacity:1;transform:none;}to{opacity:0;transform:translateY(-12px);}}
 .toast{animation:toast-in .22s var(--ease-out) both;}
 .toast.toast-out{animation:toast-out .2s ease-in both;}
 @media (prefers-reduced-motion:reduce){.toast,.toast.toast-out{animation:none;}}
@@ -951,7 +951,7 @@ button:disabled{cursor:default !important;}
 
   <!-- Toast: the one global feedback message. Call flash(text, 'success' | 'error' | 'info') from anywhere. -->
   <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
-    <div role="{{ toast.role }}" aria-live="{{ toast.live }}" style="position:absolute;left:20px;right:20px;bottom: {{ toast.bottom }};display:flex;justify-content:center;pointer-events:none;">
+    <div role="{{ toast.role }}" aria-live="{{ toast.live }}" style="position:absolute;left:20px;right:20px;top:calc(10px + env(safe-area-inset-top, 0px));display:flex;justify-content:center;pointer-events:none;">
       <div class="toast {{ toast.cls }}" style="height:44px;max-width:100%;padding:0 18px 0 14px;border-radius:99px;background:var(--text-primary);color:var(--text-inverse);display:flex;align-items:center;gap:8px;font:500 14px/1 var(--font-sans);box-shadow:0 8px 24px rgba(0,0,0,.35);">
         <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ toast.icon }}" size="{{ 18 }}" color="{{ toast.iconFg }}" hint-size="18px,18px"></x-import>
         <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ toast.text }}</span>
@@ -1475,10 +1475,7 @@ class Component extends DCLogic {
     }
     if (s.toast) {
       const t = s.toast, K = { success: ['CircleCheck', 'var(--action-primary)'], error: ['CircleAlert', 'var(--status-error)'], info: ['Info', 'var(--text-inverse)'] }[t.kind] || [];
-      // Sit just above whatever is pinned to the bottom: tab bar, Log Match footer, onboarding footer, or the safe area.
-      const above = v.showTabs ? 104 : v.isLog && v.showLogCta ? (v.step3 ? 148 : 120) : v.isOnboarding ? (v.obReady ? 192 : 120) : 34;
-      v.toast = { text: t.text, icon: K[0], iconFg: K[1], cls: t.out ? 'toast-out' : '', role: t.kind === 'error' ? 'alert' : 'status', live: t.kind === 'error' ? 'assertive' : 'polite',
-        bottom: `calc(${above}px + env(safe-area-inset-bottom, 0px))` };
+      v.toast = { text: t.text, icon: K[0], iconFg: K[1], cls: t.out ? 'toast-out' : '', role: t.kind === 'error' ? 'alert' : 'status', live: t.kind === 'error' ? 'assertive' : 'polite' };
     }
     return v;
   }
