@@ -5,6 +5,9 @@
 // partner, opps, games, wt, lt, worked, lost, on }] }. It is stored as rows in profiles / players / matches,
 // each keyed by the signed-in user's id; row-level security keeps every user to their own rows.
 (function () {
+  // The page can run its helmet scripts twice. A second copy would make a second Supabase client on the same
+  // session storage, and the two would race each other refreshing the token, so keep the first.
+  if (window.RallywiseBackend) return;
   // Scripts in the page's helmet load in no fixed order, so config and the Supabase library are read when used.
   const conf = () => window.RALLYWISE_CONFIG || {};
   const LEVELS = ['Beginner', 'Intermediate', 'Advanced', 'Competitive'];
