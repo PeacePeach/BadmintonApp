@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "",
+  "installCommand": "",
+  "outputDirectory": "project",
+  "rewrites": [
+    { "source": "/", "destination": "/Badminton%20Tracker.dc.html" }
+  ]
+}
