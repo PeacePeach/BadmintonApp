@@ -13,6 +13,8 @@
     href="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/typography.css"
   />
 
+  <script src="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/illustrations.js"></script>
+
   <title>Badminton Design System</title>
 
   <style>
@@ -141,6 +143,32 @@
     .metric-sample {
       font-variant-numeric: var(--font-variant-numeric-metric);
     }
+
+    .illus-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .illus-card {
+      border-radius: 26px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-default);
+      padding: 24px 16px 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 6px;
+    }
+
+    .illus-art { width: 160px; height: 160px; margin-bottom: 12px; }
+    .illus-title { font: 500 17px/1.35 var(--font-sans, Poppins, sans-serif); }
+    .illus-name { font: 400 13px/1.4 ui-monospace, monospace; color: var(--text-secondary); }
+    .illus-use { font: 400 13px/1.4 var(--font-sans, Poppins, sans-serif); color: var(--text-secondary); }
+
+    .rules { color: var(--text-secondary); line-height: 1.6; padding-left: 20px; }
 
     @media (max-width: 700px) {
       body { padding: 24px; }
@@ -357,6 +385,49 @@
         <div class="type-sample type-metric-s metric-sample">3–1</div>
       </div>
     </div>
+
+    <h2>Illustrations</h2>
+    <div class="section-note">Simple graphics for empty, error, success and connection states. Use <code>EmptyState</code> (illustration, title, body, optional action) or <code>Illustration</code> on its own from <code>_ds/…/illustrations.js</code>.</div>
+
+    <h3>Style rules</h3>
+    <ul class="rules">
+      <li>Soft circular backdrop (r 60 on a 160 canvas), centered, with plenty of space around it.</li>
+      <li>2px outlines in <code>--illustration-line</code>, object bodies in <code>--illustration-surface</code>.</li>
+      <li>One small filled area per drawing in <code>--illustration-fill</code>, with <code>--illustration-detail</code> for lines on top of it.</li>
+      <li>Flat 2D only: no 3D, shading, scenes, heavy gradients or decoration. Not used in auth or onboarding.</li>
+    </ul>
+
+    <h3>Tokens</h3>
+    <div class="semantic-row"><div class="semantic-name">--illustration-backdrop</div><div class="semantic-preview" style="background: var(--illustration-backdrop);"></div><span class="usage">→ blue-100, 18% to 0% opacity</span></div>
+    <div class="semantic-row"><div class="semantic-name">--illustration-line</div><div class="semantic-preview" style="background: var(--illustration-line);"></div><span class="usage">→ blue-100</span></div>
+    <div class="semantic-row"><div class="semantic-name">--illustration-fill</div><div class="semantic-preview" style="background: var(--illustration-fill);"></div><span class="usage">→ blue-200</span></div>
+    <div class="semantic-row"><div class="semantic-name">--illustration-surface</div><div class="semantic-preview" style="background: var(--illustration-surface);"></div><span class="usage">→ bg-primary</span></div>
+    <div class="semantic-row"><div class="semantic-name">--illustration-detail</div><div class="semantic-preview" style="background: var(--illustration-detail);"></div><span class="usage">→ blue-50</span></div>
+
+    <h3>Set</h3>
+    <div class="illus-grid" id="illus-grid"></div>
+    <script>
+      (function () {
+        var ns = window.LearningAppDesignSystem_e32a09;
+        var items = [
+          ['no-matches', 'No Matches Yet', 'Matches list, filtered list'],
+          ['no-players', 'No Players Yet', 'Players list'],
+          ['no-insights', 'No Insights Yet', 'Insights before any data'],
+          ['no-results', 'No Players Found', 'Search with no results'],
+          ['error', 'Something Went Wrong', 'Load or save failed'],
+          ['success', 'All Done', 'Completed actions'],
+          ['connection-lost', 'Connection Lost', 'Offline or network failure']
+        ];
+        var grid = document.getElementById('illus-grid');
+        items.forEach(function (it) {
+          var card = document.createElement('div');
+          card.className = 'illus-card';
+          card.innerHTML = '<div class="illus-art">' + ns.illustrationMarkup(it[0]) + '</div>' +
+            '<div class="illus-title">' + it[1] + '</div><div class="illus-name">' + it[0] + '</div><div class="illus-use">' + it[2] + '</div>';
+          grid.appendChild(card);
+        });
+      })();
+    </script>
 
   </main>
 </body>

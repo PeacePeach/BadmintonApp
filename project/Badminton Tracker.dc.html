@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/styles.css">
 <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
 <script src="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/_ds_bundle.js"></script>
+<script src="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/illustrations.js"></script>
 <style>
 body{margin:0;background:var(--bg-primary);font-family:"Poppins",system-ui,sans-serif;}
 *{box-sizing:border-box;}
@@ -262,6 +263,10 @@ button:disabled{cursor:default !important;}
           <div style="font:600 32px/1.2 var(--font-sans);">Matches</div>
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" size="{{ 48 }}" label="Menu" onClick="{{ toggleMenu }}" hint-size="48px,48px"></x-import>
         </div>
+        <sc-if value="{{ blocked }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ blockedState.illustration }}" title="{{ blockedState.title }}" body="{{ blockedState.body }}" actionLabel="{{ blockedState.actionLabel }}" onAction="{{ blockedState.onAction }}" hint-size="350px,330px"></x-import>
+        </sc-if>
+        <sc-if value="{{ notBlocked }}" hint-placeholder-val="{{ true }}">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <div style="background:var(--surface-primary);border-radius:26px;padding:20px 22px;display:flex;flex-direction:column;gap:8px;">
             <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">Total Matches</div>
@@ -271,7 +276,7 @@ button:disabled{cursor:default !important;}
           <div style="background:var(--surface-primary);border-radius:26px;padding:20px 22px;display:flex;flex-direction:column;gap:8px;">
             <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">Win Rate</div>
             <div style="font:500 40px/1 var(--font-sans);color:var(--text-primary);">{{ overall.pctStr }}</div>
-            <div style="height:6px;border-radius:99px;background:var(--border-default);overflow:hidden;margin-top:6px;"><div style="height:100%;border-radius:99px;background:var(--status-win);width: {{ overall.pctStr }};"></div></div>
+            <div style="height:6px;border-radius:99px;background:var(--border-default);overflow:hidden;margin-top:6px;"><div style="height:100%;border-radius:99px;background:var(--status-win);width: {{ overall.barW }};"></div></div>
           </div>
         </div>
         <button onClick="{{ startLog }}" style="height:60px;border:none;border-radius:999px;background:var(--action-primary);color:var(--action-on-primary);font:600 17px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;" style-active="transform:scale(.97);">
@@ -304,7 +309,11 @@ button:disabled{cursor:default !important;}
               </div>
             </div>
           </sc-for>
+          <sc-if value="{{ matchesEmpty }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ matchesEmpty.illustration }}" title="{{ matchesEmpty.title }}" body="{{ matchesEmpty.body }}" actionLabel="{{ matchesEmpty.actionLabel }}" onAction="{{ matchesEmpty.onAction }}" hint-size="350px,300px"></x-import>
+          </sc-if>
         </div>
+        </sc-if>
       </div>
     </sc-if>
 
@@ -316,12 +325,18 @@ button:disabled{cursor:default !important;}
             <div style="font:600 32px/1.2 var(--font-sans);">Insights</div>
             <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" size="{{ 48 }}" label="Menu" onClick="{{ toggleMenu }}" hint-size="48px,48px"></x-import>
           </div>
+          <sc-if value="{{ insHasData }}" hint-placeholder-val="{{ true }}">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:99px;background:var(--filter-pill-bg);">
             <sc-for list="{{ insTabs }}" as="t" hint-placeholder-count="2">
               <button onClick="{{ t.select }}" style="height:44px;border:none;border-radius:99px;font:500 15px/1 var(--font-sans);cursor:pointer;transition:background .18s ease-out,color .18s ease-out;background: {{ t.bg }};color: {{ t.fg }};">{{ t.label }}</button>
             </sc-for>
           </div>
+          </sc-if>
         </div>
+
+        <sc-if value="{{ insState }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ insState.illustration }}" title="{{ insState.title }}" body="{{ insState.body }}" actionLabel="{{ insState.actionLabel }}" onAction="{{ insState.onAction }}" hint-size="350px,330px"></x-import>
+        </sc-if>
 
         <sc-if value="{{ insProgress }}" hint-placeholder-val="{{ true }}">
           <div data-screen-label="Performance" style="display:flex;flex-direction:column;gap:10px;">
@@ -778,6 +793,10 @@ button:disabled{cursor:default !important;}
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="Back" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
           <div style="font:600 28px/1.2 var(--font-sans);">Players</div>
         </div>
+        <sc-if value="{{ blocked }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ blockedState.illustration }}" title="{{ blockedState.title }}" body="{{ blockedState.body }}" actionLabel="{{ blockedState.actionLabel }}" onAction="{{ blockedState.onAction }}" hint-size="350px,330px"></x-import>
+        </sc-if>
+        <sc-if value="{{ notBlocked }}" hint-placeholder-val="{{ true }}">
         <div class="search-field-outline" style="height:52px;border-radius:99px;background:transparent;display:flex;align-items:center;gap:10px;padding:0 18px;color:var(--input-field-text-default);">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Search" size="{{ 24 }}" hint-size="24px,24px"></x-import>
           <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="Search or type a new name" style="flex:1;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 15px/1 var(--font-sans);">
@@ -801,7 +820,11 @@ button:disabled{cursor:default !important;}
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 24 }}" color="var(--grey-400)" style="margin-right:10px" hint-size="24px,24px"></x-import>
             </div>
           </sc-for>
+          <sc-if value="{{ playersEmpty }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ playersEmpty.illustration }}" title="{{ playersEmpty.title }}" body="{{ playersEmpty.body }}" actionLabel="{{ playersEmpty.actionLabel }}" onAction="{{ playersEmpty.onAction }}" hint-size="350px,300px"></x-import>
+          </sc-if>
         </div>
+        </sc-if>
       </div>
     </sc-if>
 
@@ -918,7 +941,7 @@ button:disabled{cursor:default !important;}
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Splash&quot;,&quot;options&quot;:[&quot;Splash&quot;,&quot;Log In&quot;,&quot;Sign Up&quot;,&quot;Forgot Password&quot;,&quot;Check Email&quot;,&quot;Onboarding&quot;,&quot;Matches&quot;,&quot;Insights&quot;,&quot;Log Match&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;authError&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Invalid email&quot;,&quot;Incorrect email or password&quot;,&quot;Email already exists&quot;,&quot;Password too short&quot;,&quot;Network error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Splash&quot;,&quot;options&quot;:[&quot;Splash&quot;,&quot;Log In&quot;,&quot;Sign Up&quot;,&quot;Forgot Password&quot;,&quot;Check Email&quot;,&quot;Onboarding&quot;,&quot;Matches&quot;,&quot;Insights&quot;,&quot;Log Match&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;authError&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Invalid email&quot;,&quot;Incorrect email or password&quot;,&quot;Email already exists&quot;,&quot;Password too short&quot;,&quot;Network error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Normal&quot;,&quot;options&quot;:[&quot;Normal&quot;,&quot;Empty&quot;,&quot;Offline&quot;,&quot;Error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
 class Component extends DCLogic {
   scrollRef = React.createRef();
   state = this.seed();
@@ -960,8 +983,16 @@ class Component extends DCLogic {
       f: this.blankForm(), errors: {}, banner: null, busy: null, resetEmail: 'sam@rallywise.app', resendIn: 0,
       ...this.authPreset(p.authError),
       insTab: 'progress', back: [], filter: 'All', menu: false, detailId: null, playerId: null, search: '', toast: null,
-      players, matches, log: start === 'Log Match' ? this.newLog() : null
+      ...this.dataFor(p.dataState, players, matches), log: start === 'Log Match' ? this.newLog() : null
     };
+  }
+
+  // "Data state" prop previews the empty, offline and error states without touching the seed data.
+  dataFor(kind, players, matches) {
+    if (players) this._seed = { players, matches };
+    const d = this._seed;
+    if (kind === 'Empty') return { players: d.players.filter(x => x.id === 'me'), matches: [], blocked: null };
+    return { players: d.players, matches: d.matches, blocked: kind === 'Offline' ? 'offline' : kind === 'Error' ? 'error' : null };
   }
 
   fmt() { return parseInt((this.props && this.props.defaultFormat) || '21', 10); }
@@ -1036,6 +1067,7 @@ class Component extends DCLogic {
   leaveSplash() { clearTimeout(this._splash); if (this.state.screen === 'splash') this.setState({ screen: 'login' }); }
 
   componentDidUpdate(pp, ps) {
+    if (pp && this.props.dataState !== pp.dataState) this.setState({ ...this.dataFor(this.props.dataState), filter: 'All', search: '' });
     if (pp && this.props.authError !== pp.authError && this.props.authError !== 'None') this.setState({ back: [], busy: null, banner: null, errors: {}, ...this.authPreset(this.props.authError) });
     const a = ps.screen + (ps.log ? ps.log.step : '') + ps.detailId + ps.playerId;
     const b = this.state.screen + (this.state.log ? this.state.log.step : '') + this.state.detailId + this.state.playerId;
@@ -1068,7 +1100,7 @@ class Component extends DCLogic {
   }
   rec(list) {
     const w = list.filter(m => this.res(m.games).win).length, n = list.length;
-    return { w, l: n - w, n, label: `${w}–${n - w}`, pct: n ? w / n : 0, pctStr: n ? Math.round(w / n * 100) + '%' : '—' };
+    return { w, l: n - w, n, label: `${w}–${n - w}`, pct: n ? w / n : 0, pctStr: n ? Math.round(w / n * 100) + '%' : '—', barW: n ? Math.round(w / n * 100) + '%' : '0%' };
   }
   vs(pid, type) { return this.rec(this.state.matches.filter(m => m.opps.includes(pid) && (!type || m.type === type))); }
   with(pid) { return this.rec(this.state.matches.filter(m => m.partner === pid)); }
@@ -1163,6 +1195,16 @@ class Component extends DCLogic {
       matchCards: all.filter(m => s.filter === 'All' || m.type === s.filter).map(m => this.card(m))
     };
 
+    const empty = (illustration, title, body, actionLabel, onAction) => ({ illustration, title, body, actionLabel: actionLabel || null, onAction: onAction || null });
+    const retry = () => this.setState({ blocked: null });
+    v.blocked = !!s.blocked; v.notBlocked = !s.blocked;
+    v.blockedState = s.blocked === 'offline'
+      ? empty('connection-lost', 'Connection Lost', 'Check your Wi-Fi or mobile data, then try again.', 'Try Again', retry)
+      : empty('error', 'Something Went Wrong', "We couldn't load your data. Try again in a moment.", 'Try Again', retry);
+    v.matchesEmpty = !v.matchCards.length && (all.length
+      ? empty('no-matches', `No ${s.filter} Matches Yet`, `${s.filter} matches you log will show up here.`)
+      : empty('no-matches', 'No Matches Yet', 'Log your first match to start tracking results.'));
+
     for (const k of ['name', 'email', 'password']) {
       const e = s.errors[k] || null;
       Object.assign(v, { [k + 'Err']: e, [k + 'Invalid']: !!e, [k + 'Cls']: e ? 'field-error' : '',
@@ -1171,7 +1213,9 @@ class Component extends DCLogic {
     v.passwordHelper = !s.errors.password;
     for (const k of ['apple', 'google']) v[k] = { go: () => this.social(k), busy: s.busy === k, idle: s.busy !== k, dim: s.busy && s.busy !== k ? .5 : 1 };
 
-    if (v.isInsights) {
+    v.insHasData = !s.blocked && all.length > 0;
+    v.insState = s.blocked ? v.blockedState : !all.length && empty('no-insights', 'No Insights Yet', 'Log a few matches and your trends will start to show here.', 'Log Match', v.startLog);
+    if (v.isInsights && v.insHasData) {
       const chron = all.slice().sort((a, b) => a.date < b.date ? -1 : 1);
       const span = chron.slice(-20), half = Math.floor(span.length / 2);
       const prev = span.slice(0, span.length - half), recent = span.slice(-half);
@@ -1356,6 +1400,9 @@ class Component extends DCLogic {
         const parts = [o.n ? 'H2H ' + o.label : null, w.n ? 'Partner ' + w.label : null].filter(Boolean);
         return { name: p.name, initials: this.ini(p.id), sub: parts.join(' · ') || 'No matches yet', open: () => this.go('player', { playerId: p.id }) };
       });
+      v.playersEmpty = !v.playerList.length && (q
+        ? empty('no-results', 'No Players Found', 'Check the spelling, or add them as a new player.')
+        : empty('no-players', 'No Players Yet', 'Players you add or play against will show up here.'));
       v.addPlayerOnly = () => { this.addPlayer(s.search.trim()); this.setState({ search: '' }); this.flash('Player added'); };
     }
 
