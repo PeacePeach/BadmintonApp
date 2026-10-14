@@ -1607,7 +1607,7 @@ class Component extends DCLogic {
         rows: m.games.map((g, i) => ({ label: 'Game ' + (i + 1), a: String(g[0]), b: String(g[1]), aFg: g[0] > g[1] ? 'var(--text-primary)' : 'var(--text-secondary)', bFg: g[1] > g[0] ? 'var(--text-primary)' : 'var(--text-secondary)' })),
         hasNotes: !!(m.wt.length || m.lt.length || m.worked || m.lost || m.on),
         noteRows: [
-          (m.wt.length || m.worked) && { label: 'What Worked', labelFg: A, tags: m.wt.join(' · '), text: m.worked },
+          (m.wt.length || m.worked) && { label: 'What Worked', labelFg: 'var(--text-secondary)', tags: m.wt.join(' · '), text: m.worked },
           (m.lt.length || m.lost) && { label: 'What Cost Points', labelFg: 'var(--text-secondary)', tags: m.lt.join(' · '), text: m.lost },
           m.on && { label: 'On ' + this.teamB(m), labelFg: 'var(--text-secondary)', tags: '', text: m.on }
         ].filter(Boolean),
