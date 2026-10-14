@@ -205,6 +205,56 @@ button:disabled{cursor:default !important;}
       </div>
     </sc-if>
 
+    <!-- ONBOARDING -->
+    <sc-if value="{{ isOnboarding }}" hint-placeholder-val="{{ false }}">
+      <sc-if value="{{ obWelcome }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Onboarding · Welcome" style="min-height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:28px;text-align:center;padding:0 12px 40px;">
+          <img src="assets/rallywise-mark.svg" alt="" width="88" height="48" style="display:block;width:88px;height:auto;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+            <div style="font:600 30px/1.2 var(--font-sans);">Welcome to Rallywise</div>
+            <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">Track your matches, understand your game, and improve over time.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ obProfile }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Onboarding · Profile" style="display:flex;flex-direction:column;gap:28px;">
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="Back" onClick="{{ obBack }}" hint-size="48px,48px"></x-import>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="font:600 30px/1.25 var(--font-sans);">Set up your profile</div>
+            <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">This helps Rallywise make sense of your matches.</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="font:500 15px/1 var(--font-sans);">Name</div>
+            <div class="search-field-outline" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="text" value="{{ obName }}" onChange="{{ onObName }}" placeholder="Your name" autocomplete="name" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="font:500 15px/1 var(--font-sans);">Skill level</div>
+            <div role="radiogroup" aria-label="Skill level" style="display:flex;flex-direction:column;gap:10px;">
+              <sc-for list="{{ obLevels }}" as="o" hint-placeholder-count="4">
+                <button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.select }}" style="height:56px;border-radius:99px;background:var(--surface-primary);border:1.5px solid {{ o.border }};color:var(--text-primary);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 22px;cursor:pointer;" style-active="transform:scale(.98);">
+                  <span>{{ o.label }}</span>
+                  <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:1.5px solid {{ o.dotBorder }};color:var(--action-on-primary);">
+                    <sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 14 }}" hint-size="14px,14px"></x-import></sc-if>
+                  </span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ obReady }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Onboarding · Ready" style="min-height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:28px;text-align:center;padding:0 12px 100px;">
+          <div style="width:64px;height:64px;border-radius:50%;background:var(--surface-primary);color:var(--status-win);display:flex;align-items:center;justify-content:center;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+            <div style="font:600 30px/1.2 var(--font-sans);">{{ obReadyTitle }}</div>
+            <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">Start logging your matches. Your insights will build over time as you play.</div>
+          </div>
+        </div>
+      </sc-if>
+    </sc-if>
+
     <!-- MATCHES -->
     <sc-if value="{{ isMatches }}" hint-placeholder-val="{{ true }}">
       <div data-screen-label="Matches" style="display:flex;flex-direction:column;gap:22px;">
@@ -811,6 +861,16 @@ button:disabled{cursor:default !important;}
     </sc-if>
   </sc-if>
 
+  <!-- Onboarding footer -->
+  <sc-if value="{{ isOnboarding }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:14px 20px 34px;background:var(--bg-primary);display:flex;flex-direction:column;gap:12px;">
+      <button onClick="{{ obNext }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;background: {{ obCtaBg }};color: {{ obCtaFg }};" style-active="transform:scale(.97);">{{ obCtaLabel }}</button>
+      <sc-if value="{{ obReady }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ obToMatches }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;background:var(--surface-primary);color:var(--text-primary);" style-active="transform:scale(.97);">Go to Matches</button>
+      </sc-if>
+    </div>
+  </sc-if>
+
   <!-- Splash -->
   <sc-if value="{{ isSplash }}" hint-placeholder-val="{{ false }}">
     <div data-screen-label="Splash" onClick="{{ skipSplash }}" style="position:absolute;inset:0;background:var(--bg-primary);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;">
@@ -858,7 +918,7 @@ button:disabled{cursor:default !important;}
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Splash&quot;,&quot;options&quot;:[&quot;Splash&quot;,&quot;Log In&quot;,&quot;Sign Up&quot;,&quot;Forgot Password&quot;,&quot;Check Email&quot;,&quot;Matches&quot;,&quot;Insights&quot;,&quot;Log Match&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;authError&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Invalid email&quot;,&quot;Incorrect email or password&quot;,&quot;Email already exists&quot;,&quot;Password too short&quot;,&quot;Network error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Splash&quot;,&quot;options&quot;:[&quot;Splash&quot;,&quot;Log In&quot;,&quot;Sign Up&quot;,&quot;Forgot Password&quot;,&quot;Check Email&quot;,&quot;Onboarding&quot;,&quot;Matches&quot;,&quot;Insights&quot;,&quot;Log Match&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;authError&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Invalid email&quot;,&quot;Incorrect email or password&quot;,&quot;Email already exists&quot;,&quot;Password too short&quot;,&quot;Network error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
 class Component extends DCLogic {
   scrollRef = React.createRef();
   state = this.seed();
@@ -894,9 +954,9 @@ class Component extends DCLogic {
       M('m20', '2026-07-16', 'Singles', null, ['jordan'], [[21, 13], [21, 16]], ['Placement'], [], '', '', '')
     ];
     const start = p.startScreen;
-    const screens = { 'Splash': 'splash', 'Log In': 'login', 'Sign Up': 'signup', 'Forgot Password': 'forgot', 'Check Email': 'resetSent', 'Insights': 'insights', 'Log Match': 'log' };
+    const screens = { 'Splash': 'splash', 'Log In': 'login', 'Sign Up': 'signup', 'Forgot Password': 'forgot', 'Check Email': 'resetSent', 'Onboarding': 'onboarding', 'Insights': 'insights', 'Log Match': 'log' };
     return {
-      screen: screens[start] || 'matches', pwVisible: false, agree: false,
+      screen: screens[start] || 'matches', pwVisible: false, agree: false, ob: this.newOb(),
       f: this.blankForm(), errors: {}, banner: null, busy: null, resetEmail: 'sam@rallywise.app', resendIn: 0,
       ...this.authPreset(p.authError),
       insTab: 'progress', back: [], filter: 'All', menu: false, detailId: null, playerId: null, search: '', toast: null,
@@ -907,6 +967,8 @@ class Component extends DCLogic {
   fmt() { return parseInt((this.props && this.props.defaultFormat) || '21', 10); }
   cap(t) { return { 21: 30, 15: 21, 11: 15 }[t]; }
   newLog() { const t = this.fmt(); return { step: 1, type: null, partner: null, opp1: null, opp2: null, active: null, format: t, games: [{ w: 'us', l: t - 6 }], wt: [], lt: [], worked: '', lost: '', on: '' }; }
+
+  newOb() { return { step: 1, name: '', level: null }; }
 
   componentDidMount() {
     if (this.state.screen === 'splash') this._splash = setTimeout(() => this.leaveSplash(), 2200);
@@ -1080,7 +1142,8 @@ class Component extends DCLogic {
       signupBg: s.agree ? 'var(--action-primary)' : 'var(--surface-muted)', signupFg: s.agree ? 'var(--action-on-primary)' : 'var(--text-tertiary)',
       signUp: () => { if (!this.state.agree) return; const f = this.state.f;
         this.submit({ name: f.name.trim() ? null : this.msg.nameEmpty, email: this.emailErr(f.email), password: f.password.length >= 8 ? null : f.password ? this.msg.pwShort : this.msg.pwEmpty },
-          () => this.toAuth('matches'), () => f.email.trim().toLowerCase() === 'sam@rallywise.app' && { errors: { email: this.msg.exists } }); },
+          () => { this.toAuth('onboarding'); this.setState({ ob: this.newOb(), agree: false }); }, () => f.email.trim().toLowerCase() === 'sam@rallywise.app' && { errors: { email: this.msg.exists } }); },
+      isOnboarding: s.screen === 'onboarding',
       showTabs: s.screen === 'matches' || s.screen === 'insights', menuOpen: s.menu,
       hasToast: !!s.toast, toast: s.toast, search: s.search, canAddNew: q.length > 1 && !exists,
       toggleMenu: () => this.setState(x => ({ menu: !x.menu })),
@@ -1167,6 +1230,25 @@ class Component extends DCLogic {
           ]
         };
       }
+    }
+
+    if (v.isOnboarding) {
+      const ob = s.ob, st = ob.step, ok = st !== 2 || (ob.name.trim() && ob.level);
+      const setOb = patch => this.setState(x => ({ ob: { ...x.ob, ...patch } }));
+      // Save the profile onto the "me" player, then leave onboarding for good.
+      const finish = extra => this.setState(x => ({ screen: 'matches', back: [], ob: this.newOb(), players: x.players.map(p => p.id === 'me' ? { ...p, name: x.ob.name.trim(), level: x.ob.level } : p), ...extra }));
+      v.obWelcome = st === 1; v.obProfile = st === 2; v.obReady = st === 3;
+      v.obName = ob.name; v.onObName = e => setOb({ name: e.target.value });
+      v.obBack = () => setOb({ step: 1 });
+      v.obLevels = ['Beginner', 'Intermediate', 'Advanced', 'Competitive'].map(label => {
+        const on = ob.level === label;
+        return { label, on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent', dotBg: on ? 'var(--action-primary)' : 'transparent', dotBorder: on ? 'var(--action-primary)' : 'var(--text-secondary)', select: () => setOb({ level: label }) };
+      });
+      v.obReadyTitle = `Ready to play, ${ob.name.trim().split(/\s+/)[0]}`;
+      v.obCtaLabel = ['Get started', 'Continue', 'Log your first match'][st - 1];
+      v.obCtaBg = ok ? A : 'var(--surface-muted)'; v.obCtaFg = ok ? 'var(--action-on-primary)' : 'var(--text-tertiary)';
+      v.obNext = () => { if (!ok) return; st < 3 ? setOb({ step: st + 1 }) : finish({ screen: 'log', log: this.newLog() }); };
+      v.obToMatches = () => finish();
     }
 
     if (v.isLog && s.log) {
