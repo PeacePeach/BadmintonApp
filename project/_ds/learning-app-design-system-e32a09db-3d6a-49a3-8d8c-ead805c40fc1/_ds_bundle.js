@@ -109,8 +109,8 @@ Object.assign(__ds_scope, { Chip });
 try { (() => {
 function Icon({
   name,
-  size = 22,
-  strokeWidth = 1.6,
+  size = 24,
+  strokeWidth = 2,
   color = 'currentColor',
   fill = 'none',
   style
@@ -204,9 +204,8 @@ function IconButton({
     onMouseLeave: e => e.currentTarget.style.transform = ''
   }, /*#__PURE__*/React.createElement(__ds_scope.Icon, {
     name: icon,
-    size: iconSize || Math.round(s * 0.42),
-    fill: iconFill,
-    strokeWidth: variant === 'black' ? 1.8 : 1.6
+    size: iconSize || 24,
+    fill: iconFill
   }));
   if (!ring) return btn;
   return /*#__PURE__*/React.createElement("div", {
@@ -652,7 +651,6 @@ function CourseCard({
     extra: extra
   }) : /*#__PURE__*/React.createElement("span", null), /*#__PURE__*/React.createElement(__ds_scope.IconButton, {
     icon: action === 'play' ? 'Play' : 'ArrowUpRight',
-    iconFill: action === 'play' ? 'currentColor' : undefined,
     variant: "black",
     onClick: onAction
   })));

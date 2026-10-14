@@ -74,7 +74,7 @@ button:disabled{cursor:default !important;}
           </div>
           <div style="display:flex;flex-direction:column;gap:10px;">
             <div style="font:500 15px/1 var(--font-sans);">Password</div>
-            <div class="search-field-outline {{ passwordCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="{{ pwType }}" value="{{ f.password }}" onChange="{{ on_password }}" placeholder="Password" autocomplete="current-password" aria-invalid="{{ passwordInvalid }}" aria-label="Password" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"><button onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}" style="width:32px;height:32px;border:none;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 22 }}" hint-size="22px,22px"></x-import></button></div>
+            <div class="search-field-outline {{ passwordCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="{{ pwType }}" value="{{ f.password }}" onChange="{{ on_password }}" placeholder="Password" autocomplete="current-password" aria-invalid="{{ passwordInvalid }}" aria-label="Password" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"><button onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}" style="width:32px;height:32px;border:none;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import></button></div>
             <sc-if value="{{ passwordErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--status-error);">{{ passwordErr }}</div></sc-if>
           </div>
           <div style="display:flex;justify-content:flex-end;margin-top:-4px;"><span onClick="{{ forgotPw }}" style="font:500 14px/1 var(--font-sans);color:var(--status-win);cursor:pointer;">Forgot Password?</span></div>
@@ -127,14 +127,14 @@ button:disabled{cursor:default !important;}
             <sc-if value="{{ emailErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--status-error);">{{ emailErr }}</div></sc-if>
           </div>
           <div style="display:flex;flex-direction:column;gap:8px;">
-            <div class="search-field-outline {{ passwordCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="{{ pwType }}" value="{{ f.password }}" onChange="{{ on_password }}" placeholder="Password" autocomplete="new-password" aria-invalid="{{ passwordInvalid }}" aria-label="Password" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"><button onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}" style="width:32px;height:32px;border:none;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 22 }}" hint-size="22px,22px"></x-import></button></div>
+            <div class="search-field-outline {{ passwordCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="{{ pwType }}" value="{{ f.password }}" onChange="{{ on_password }}" placeholder="Password" autocomplete="new-password" aria-invalid="{{ passwordInvalid }}" aria-label="Password" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"><button onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}" style="width:32px;height:32px;border:none;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import></button></div>
             <sc-if value="{{ passwordErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--status-error);">{{ passwordErr }}</div></sc-if>
             <sc-if value="{{ passwordHelper }}" hint-placeholder-val="{{ true }}"><div class="field-msg" style="color:var(--text-tertiary);">At least 8 characters</div></sc-if>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:12px;">
           <button onClick="{{ toggleAgree }}" aria-label="Agree to Terms and Privacy Policy" style="width:24px;height:24px;border-radius:7px;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;background: {{ agreeBg }};border:1.5px solid {{ agreeBorder }};color:var(--action-on-primary);">
-            <sc-if value="{{ agree }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 16 }}" strokeWidth="{{ 2.6 }}" hint-size="16px,16px"></x-import></sc-if>
+            <sc-if value="{{ agree }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 16 }}" hint-size="16px,16px"></x-import></sc-if>
           </button>
           <div style="font:400 15px/1.4 var(--font-sans);">I agree to <span style="color:var(--status-win);font-weight:600;">Terms</span> and <span style="color:var(--status-win);font-weight:600;">Privacy Policy</span>.</div>
         </div>
@@ -275,7 +275,7 @@ button:disabled{cursor:default !important;}
           </div>
         </div>
         <button onClick="{{ startLog }}" style="height:60px;border:none;border-radius:999px;background:var(--action-primary);color:var(--action-on-primary);font:600 17px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;" style-active="transform:scale(.97);">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 22 }}" strokeWidth="{{ 2.2 }}" hint-size="22px,22px"></x-import>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import>
           Log Match
         </button>
         <div style="display:flex;gap:8px;">
@@ -334,7 +334,7 @@ button:disabled{cursor:default !important;}
                 <div style="display:flex;flex-direction:column;gap:10px;">
                   <div style="font:500 52px/.95 var(--font-sans);letter-spacing:-.03em;">{{ pf.win }}</div>
                   <div style="display:flex;align-items:center;gap:6px;font:400 13px/1 var(--font-sans);color:var(--text-secondary);">
-                    <div style="display:flex;align-items:center;gap:3px;font-weight:600;color:var(--status-win);"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ArrowUpRight" size="{{ 15 }}" strokeWidth="{{ 2.4 }}" hint-size="15px,15px"></x-import>{{ pf.delta }}</div>
+                    <div style="display:flex;align-items:center;gap:3px;font-weight:600;color:var(--status-win);"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ArrowUpRight" size="{{ 15 }}" hint-size="15px,15px"></x-import>{{ pf.delta }}</div>
                     vs prev 10
                   </div>
                 </div>
@@ -439,7 +439,7 @@ button:disabled{cursor:default !important;}
               <sc-for list="{{ grow.strengths }}" as="k" hint-placeholder-count="2">
                 <div style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;">
                   <div style="display:flex;align-items:center;gap:14px;">
-                    <div style="width:40px;height:40px;border-radius:50%;background:var(--surface-muted);color:var(--status-win);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 18 }}" strokeWidth="{{ 2.2 }}" hint-size="18px,18px"></x-import></div>
+                    <div style="width:40px;height:40px;border-radius:50%;background:var(--surface-muted);color:var(--status-win);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
                     <div style="display:flex;flex-direction:column;gap:5px;min-width:0;">
                       <div style="font:500 16px/1.2 var(--font-sans);">{{ k.name }}</div>
                       <div style="font:400 13px/1.35 var(--font-sans);color:var(--text-secondary);">{{ k.signal }}</div>
@@ -464,7 +464,7 @@ button:disabled{cursor:default !important;}
                       <div style="font:500 16px/1.2 var(--font-sans);">{{ o.name }}</div>
                       <div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">{{ o.record }}</div>
                     </div>
-                    <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 18 }}" color="var(--text-secondary)" hint-size="18px,18px"></x-import>
+                    <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 24 }}" color="var(--text-secondary)" hint-size="24px,24px"></x-import>
                   </div>
                   <div style="height:1px;background:var(--surface-muted);"></div>
                   <div style="display:flex;flex-direction:column;gap:6px;">
@@ -521,13 +521,13 @@ button:disabled{cursor:default !important;}
             <sc-for list="{{ typeOptions }}" as="o" hint-placeholder-count="2">
               <div onClick="{{ o.select }}" style="background:var(--surface-primary);border-radius:26px;padding:24px 22px;display:flex;align-items:center;gap:18px;cursor:pointer;border:1.5px solid {{ o.border }};">
                 <div style="width:60px;height:60px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;">
-                  <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ o.icon }}" size="{{ 26 }}" hint-size="26px,26px"></x-import>
+                  <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ o.icon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import>
                 </div>
                 <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
                   <div style="font:500 22px/1.2 var(--font-sans);">{{ o.label }}</div>
                   <div style="font:400 14px/1.3 var(--font-sans);color:var(--text-secondary);">{{ o.sub }}</div>
                 </div>
-                <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 22 }}" color="var(--grey-400)" hint-size="22px,22px"></x-import>
+                <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 24 }}" color="var(--grey-400)" hint-size="24px,24px"></x-import>
               </div>
             </sc-for>
           </div>
@@ -539,7 +539,7 @@ button:disabled{cursor:default !important;}
               <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding:4px 6px 0;">Your Side</div>
               <sc-for list="{{ sideA }}" as="s" hint-placeholder-count="1">
                 <div onClick="{{ s.select }}" style="height:56px;border-radius:99px;background:var(--surface-muted);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;border:1px solid {{ s.border }};">
-                  <div style="width:40px;height:40px;border-radius:50%;background: {{ s.avBg }};color: {{ s.avFg }};display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ s.initials }}</div>
+                  <div style="width:40px;height:40px;border-radius:50%;background: {{ s.avBg }};color: {{ s.avFg }};display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ s.initials }}<sc-if value="{{ s.empty }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import></sc-if></div>
                   <div style="flex:1;font:500 15px/1 var(--font-sans);color: {{ s.fg }};">{{ s.name }}</div>
                   <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding-right:12px;">{{ s.role }}</div>
                 </div>
@@ -548,7 +548,7 @@ button:disabled{cursor:default !important;}
               <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding:0 6px;">Opponents</div>
               <sc-for list="{{ sideB }}" as="s" hint-placeholder-count="1">
                 <div onClick="{{ s.select }}" style="height:56px;border-radius:99px;background:var(--surface-muted);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;border:1px solid {{ s.border }};">
-                  <div style="width:40px;height:40px;border-radius:50%;background: {{ s.avBg }};color: {{ s.avFg }};display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ s.initials }}</div>
+                  <div style="width:40px;height:40px;border-radius:50%;background: {{ s.avBg }};color: {{ s.avFg }};display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ s.initials }}<sc-if value="{{ s.empty }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import></sc-if></div>
                   <div style="flex:1;font:500 15px/1 var(--font-sans);color: {{ s.fg }};">{{ s.name }}</div>
                   <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding-right:12px;">{{ s.role }}</div>
                 </div>
@@ -558,13 +558,13 @@ button:disabled{cursor:default !important;}
               <div style="display:flex;flex-direction:column;gap:12px;">
                 <div style="font:500 17px/1.3 var(--font-sans);">Choose {{ activeSlotLabel }}</div>
                 <div class="search-field-outline" style="height:52px;border-radius:99px;background:transparent;display:flex;align-items:center;gap:10px;padding:0 18px;color:var(--input-field-text-default);">
-                  <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Search" size="{{ 20 }}" hint-size="20px,20px"></x-import>
+                  <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Search" size="{{ 24 }}" hint-size="24px,24px"></x-import>
                   <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="Search or type a new name" style="flex:1;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 15px/1 var(--font-sans);">
                 </div>
                 <sc-if value="{{ canAddNew }}" hint-placeholder-val="{{ false }}">
                   <div onClick="{{ addNew }}" style="height:56px;border-radius:99px;border:1px dashed var(--ghost-button-outline);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;">
                     <div style="width:40px;height:40px;border-radius:50%;background:transparent;border:1px solid var(--ghost-button-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;">
-                      <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 20 }}" strokeWidth="{{ 2.2 }}" hint-size="20px,20px"></x-import>
+                      <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import>
                     </div>
                     <div style="font:500 15px/1 var(--font-sans);">Add “{{ search }}” as New Player</div>
                   </div>
@@ -618,11 +618,11 @@ button:disabled{cursor:default !important;}
                 </div>
                 <div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface-muted);border-radius:99px;padding:6px;">
                   <button onClick="{{ g.dec }}" aria-label="Decrease" style="width:52px;height:52px;border-radius:50%;background:transparent;border:1px solid var(--ghost-button-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;">
-                    <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Minus" size="{{ 22 }}" strokeWidth="{{ 1.8 }}" hint-size="22px,22px"></x-import>
+                    <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Minus" size="{{ 24 }}" hint-size="24px,24px"></x-import>
                   </button>
                   <div style="font:400 13px/1.3 var(--font-sans);color:var(--neutral-600);text-align:center;">{{ g.loserLabel }}</div>
                   <button onClick="{{ g.inc }}" aria-label="Increase" style="width:52px;height:52px;border-radius:50%;background:transparent;border:1px solid var(--ghost-button-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;">
-                    <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 22 }}" strokeWidth="{{ 1.8 }}" hint-size="22px,22px"></x-import>
+                    <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import>
                   </button>
                 </div>
               </div>
@@ -717,7 +717,7 @@ button:disabled{cursor:default !important;}
             <div onClick="{{ p.open }}" style="display:flex;align-items:center;gap:12px;cursor:pointer;">
               <div style="width:40px;height:40px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
               <div style="font:500 16px/1 var(--font-sans);flex:1;">{{ p.name }}</div>
-              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 20 }}" color="var(--grey-400)" hint-size="20px,20px"></x-import>
+              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 24 }}" color="var(--grey-400)" hint-size="24px,24px"></x-import>
             </div>
           </sc-for>
         </div>
@@ -779,13 +779,13 @@ button:disabled{cursor:default !important;}
           <div style="font:600 28px/1.2 var(--font-sans);">Players</div>
         </div>
         <div class="search-field-outline" style="height:52px;border-radius:99px;background:transparent;display:flex;align-items:center;gap:10px;padding:0 18px;color:var(--input-field-text-default);">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Search" size="{{ 20 }}" hint-size="20px,20px"></x-import>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Search" size="{{ 24 }}" hint-size="24px,24px"></x-import>
           <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="Search or type a new name" style="flex:1;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 15px/1 var(--font-sans);">
         </div>
         <sc-if value="{{ canAddNew }}" hint-placeholder-val="{{ false }}">
           <div onClick="{{ addPlayerOnly }}" style="height:56px;border-radius:99px;border:1px dashed var(--ghost-button-outline);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;">
             <div style="width:40px;height:40px;border-radius:50%;background:transparent;border:1px solid var(--ghost-button-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;">
-              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 20 }}" strokeWidth="{{ 2.2 }}" hint-size="20px,20px"></x-import>
+              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import>
             </div>
             <div style="font:500 15px/1 var(--font-sans);">Add “{{ search }}”</div>
           </div>
@@ -798,7 +798,7 @@ button:disabled{cursor:default !important;}
                 <div style="font:500 15px/1.2 var(--font-sans);">{{ p.name }}</div>
                 <div style="font:400 12px/1.2 var(--font-sans);color:var(--text-secondary);">{{ p.sub }}</div>
               </div>
-              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 20 }}" color="var(--grey-400)" style="margin-right:10px" hint-size="20px,20px"></x-import>
+              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 24 }}" color="var(--grey-400)" style="margin-right:10px" hint-size="24px,24px"></x-import>
             </div>
           </sc-for>
         </div>
@@ -901,7 +901,7 @@ button:disabled{cursor:default !important;}
     <div style="position:absolute;top:112px;right:20px;width:210px;background:var(--surface-primary);border-radius:26px;padding:8px;display:flex;flex-direction:column;">
       <sc-for list="{{ menuItems }}" as="i" hint-placeholder-count="3">
         <div onClick="{{ i.select }}" style="height:52px;border-radius:99px;display:flex;align-items:center;gap:12px;padding:0 14px;cursor:pointer;font:400 15px/1 var(--font-sans);" style-hover="background:var(--surface-muted);">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ i.icon }}" size="{{ 20 }}" hint-size="20px,20px"></x-import>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ i.icon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import>
           {{ i.label }}
         </div>
       </sc-for>
@@ -911,7 +911,7 @@ button:disabled{cursor:default !important;}
   <!-- Toast -->
   <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
     <div style="position:absolute;top:54px;left:50%;transform:translateX(-50%);height:44px;padding:0 18px;border-radius:99px;background:var(--text-primary);color:var(--action-on-primary);display:flex;align-items:center;gap:8px;font:500 14px/1 var(--font-sans);white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.35);">
-      <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 18 }}" strokeWidth="{{ 2.2 }}" hint-size="18px,18px"></x-import>
+      <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 18 }}" hint-size="18px,18px"></x-import>
       {{ toast }}
     </div>
   </sc-if>
@@ -1270,7 +1270,7 @@ class Component extends DCLogic {
       const roles = { partner: 'Partner', opp1: log.type === 'Doubles' ? 'Opponent 1' : 'Opponent', opp2: 'Opponent 2' };
       const slot = k => {
         const id = log[k], act = log.active === k;
-        return { role: roles[k], name: id ? this.nm(id) : 'Select ' + roles[k], initials: id ? this.ini(id) : '+', fg: id ? 'var(--text-primary)' : 'var(--text-secondary)',
+        return { role: roles[k], name: id ? this.nm(id) : 'Select ' + roles[k], initials: id ? this.ini(id) : '', empty: !id, fg: id ? 'var(--text-primary)' : 'var(--text-secondary)',
           avBg: id ? 'var(--border-default)' : 'transparent', avFg: id ? 'var(--text-primary)' : 'var(--text-secondary)', border: act ? 'var(--ghost-button-outline-highlight)' : 'transparent',
           select: () => this.setLog({ active: k }) };
       };
