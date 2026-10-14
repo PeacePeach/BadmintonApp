@@ -802,10 +802,7 @@ button:disabled{cursor:default !important;}
         <div style="display:flex;align-items:center;justify-content:space-between;">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="Back" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
           <div style="font:500 17px/1 var(--font-sans);">Match Detail</div>
-          <sc-if value="{{ detailReady }}" hint-placeholder-val="{{ true }}">
-            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Trash2" size="{{ 48 }}" label="Delete match" onClick="{{ askDelete }}" hint-size="48px,48px"></x-import>
-          </sc-if>
-          <sc-if value="{{ detailLoading }}" hint-placeholder-val="{{ false }}"><div style="width:48px;"></div></sc-if>
+          <div style="width:48px;"></div>
         </div>
         <sc-if value="{{ detailLoading }}" hint-placeholder-val="{{ false }}">
           <div aria-busy="true" style="display:flex;flex-direction:column;gap:22px;">
@@ -1135,7 +1132,7 @@ class Component extends DCLogic {
       screen: screens[start] || 'matches', pwVisible: false, agree: false, ob: this.newOb(),
       f: this.blankForm(), errors: {}, banner: null, busy: null, resetEmail: 'sam@rallywise.app', resendIn: 0,
       ...this.authPreset(p.authError),
-      insTab: 'progress', back: start === 'Match Detail' ? [{ screen: 'matches' }] : [], filter: 'All', menu: false, confirmDelete: false, detailId: null, playerId: null, search: '', toast: null,
+      insTab: 'progress', back: start === 'Match Detail' ? [{ screen: 'matches' }] : [], filter: 'All', menu: false, confirmDelete: null, detailId: null, playerId: null, search: '', toast: null,
       ...this.dataFor(p.dataState, players, matches), log: start === 'Log Match' ? this.newLog() : null
     };
   }
@@ -1308,6 +1305,13 @@ class Component extends DCLogic {
       opps: log.type === 'Doubles' ? [log.opp1, log.opp2] : [log.opp1], games: this.draftGames(log), wt: log.wt, lt: log.lt, worked: log.worked.trim(), lost: log.lost.trim(), on: log.on.trim() };
     this.setState(s => ({ matches: [m, ...s.matches], screen: 'detail', detailId: m.id, back: [{ screen: 'matches' }], log: null, filter: 'All' }));
     this.flash('Match saved · Insights updated');
+  }
+  // Delete confirmation. requestDeleteMatch(id) opens the sheet for any match; Delete calls
+  // deleteMatch(id), which removes it, returns to Matches and confirms with a toast.
+  requestDeleteMatch(id) { if (id) this.setState({ confirmDelete: id, menu: false }); }
+  deleteMatch(id) {
+    this.setState(x => ({ matches: x.matches.filter(m => m.id !== id), confirmDelete: null, screen: 'matches', back: [], detailId: null, log: null }));
+    this.flash('Match deleted');
   }
   addPlayer(name) { const id = 'p' + Date.now(); this.setState(s => ({ players: [...s.players, { id, name }] })); return id; }
 
@@ -1545,14 +1549,9 @@ class Component extends DCLogic {
       v.linkHint = 'Tags feed your Skill Trends and Coach. Opponent notes build your game plan for ' + oppName + '.';
     }
 
-    v.confirmDelete = v.isDetail && s.confirmDelete;
-    v.askDelete = () => this.setState({ confirmDelete: true });
-    v.cancelDelete = () => this.setState({ confirmDelete: false });
-    v.doDelete = () => {
-      const id = this.state.detailId || (all[0] && all[0].id);
-      this.setState(x => ({ matches: x.matches.filter(m => m.id !== id), confirmDelete: false, screen: 'matches', back: [], detailId: null }));
-      this.flash('Match deleted');
-    };
+    v.confirmDelete = !!s.confirmDelete;
+    v.cancelDelete = () => this.setState({ confirmDelete: null });
+    v.doDelete = () => this.deleteMatch(s.confirmDelete);
     v.detailLoading = v.isDetail && !!s.loading; v.detailReady = !s.loading;
     if (v.isDetail && !s.loading && all.length) {
       const m = all.find(x => x.id === s.detailId) || all[0];
