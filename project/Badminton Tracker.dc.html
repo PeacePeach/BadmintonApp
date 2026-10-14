@@ -592,6 +592,9 @@ button:disabled{cursor:default !important;}
                       <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding-right:12px;">{{ p.sub }}</div>
                     </div>
                   </sc-for>
+                  <sc-if value="{{ pickEmpty }}" hint-placeholder-val="{{ false }}">
+                    <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ pickEmpty.illustration }}" title="{{ pickEmpty.title }}" body="{{ pickEmpty.body }}" size="{{ 120 }}" style="{{ pickEmpty.style }}" hint-size="350px,260px"></x-import>
+                  </sc-if>
                 </div>
               </div>
             </sc-if>
@@ -867,6 +870,9 @@ button:disabled{cursor:default !important;}
               </div>
             </div>
           </sc-for>
+          <sc-if value="{{ profile.recentEmpty }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ profile.recentEmpty.illustration }}" title="{{ profile.recentEmpty.title }}" body="{{ profile.recentEmpty.body }}" size="{{ 120 }}" style="{{ profile.recentEmpty.style }}" hint-size="350px,260px"></x-import>
+          </sc-if>
         </div>
       </div>
     </sc-if>
@@ -1327,6 +1333,10 @@ class Component extends DCLogic {
         const r = log.active === 'partner' ? this.with(p.id) : this.vs(p.id);
         return { name: p.name, initials: this.ini(p.id), sub: r.n ? (log.active === 'partner' ? 'Together ' : 'H2H ') + r.label : 'New', pick: () => this.pick(p.id) };
       });
+      v.pickEmpty = !v.pickList.length && !v.canAddNew && (q
+        ? empty('no-results', 'No Players Found', 'Check the spelling, or type a full name to add them.')
+        : empty('no-players', 'No Players Yet', 'Type a name above to add your first player.'));
+      if (v.pickEmpty) v.pickEmpty.style = { padding: '16px 16px 8px' };
       v.addNew = () => { const id = this.addPlayer(s.search.trim()); this.pick(id); };
       const t = log.format, cap = this.cap(t);
       v.formats = [21, 15, 11].map(f => ({ label: String(f), bg: 'var(--filter-pill-bg)', fg: f === t ? 'var(--filter-pill-text-selected)' : 'var(--filter-pill-text-default)', border: f === t ? 'var(--filter-pill-border-selected)' : 'transparent',
@@ -1412,7 +1422,8 @@ class Component extends DCLogic {
       const st = (label, r) => ({ label, value: r.n ? r.label : '—', sub: r.n ? r.pctStr + ' win rate' : 'No matches', fg: 'var(--text-primary)' });
       v.profile = { name: this.nm(id), initials: this.ini(id), sub: `${inv.length} matches together or against`,
         stats: [st('Overall H2H', o), st('Singles H2H', si), st('Doubles H2H', du), st('As Partner', w)],
-        recent: inv.slice(0, 5).map(m => this.card(m)) };
+        recent: inv.slice(0, 5).map(m => this.card(m)),
+        recentEmpty: !inv.length && { ...empty('no-matches', 'No Matches Together Yet', 'Matches you play with or against them will show up here.'), style: { padding: '8px 16px' } } };
     }
     return v;
   }
