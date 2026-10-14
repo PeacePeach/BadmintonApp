@@ -46,6 +46,15 @@ input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
 .auth-spin{display:flex;animation:auth-spin .8s linear infinite;}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
 button:disabled{cursor:default !important;}
+/* Loading: skeleton blocks pulse gently in place of content. */
+@keyframes skel-pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+.skel{background:var(--surface-muted);border-radius:99px;animation:skel-pulse 1.4s ease-in-out infinite;}
+.skel-bg{background:var(--surface-primary);}
+@media (prefers-reduced-motion:reduce){.skel{animation:none;}}
+/* Delete confirmation sheet. */
+@keyframes sheet-up{from{transform:translateY(100%);}to{transform:none;}}
+.sheet{animation:sheet-up .22s var(--ease-out) both;}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none;}}
 </style>
 </helmet>
 <div class="stage" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 16px;">
@@ -266,7 +275,46 @@ button:disabled{cursor:default !important;}
         <sc-if value="{{ blocked }}" hint-placeholder-val="{{ false }}">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ blockedState.illustration }}" title="{{ blockedState.title }}" body="{{ blockedState.body }}" actionLabel="{{ blockedState.actionLabel }}" onAction="{{ blockedState.onAction }}" hint-size="350px,330px"></x-import>
         </sc-if>
-        <sc-if value="{{ notBlocked }}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+          <div aria-busy="true" style="display:flex;flex-direction:column;gap:22px;">
+            <span class="sr-only" role="status">Loading matches</span>
+            <div aria-hidden="true" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <sc-for list="{{ skel2 }}" as="k" hint-placeholder-count="2">
+                <div style="background:var(--surface-primary);border-radius:26px;padding:20px 22px;display:flex;flex-direction:column;gap:8px;">
+                  <div class="skel" style="height:13px;width:70%;"></div>
+                  <div class="skel" style="height:40px;width:50%;"></div>
+                  <div class="skel" style="height:13px;width:40%;"></div>
+                </div>
+              </sc-for>
+            </div>
+            <button onClick="{{ startLog }}" style="height:60px;border:none;border-radius:999px;background:var(--action-primary);color:var(--action-on-primary);font:600 17px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;" style-active="transform:scale(.97);">
+              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import>
+              Log Match
+            </button>
+            <div aria-hidden="true" style="display:flex;flex-direction:column;gap:10px;">
+              <sc-for list="{{ skel3 }}" as="k" hint-placeholder-count="3">
+                <div style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div class="skel" style="height:13px;width:38%;"></div>
+                    <div class="skel" style="height:26px;width:48px;"></div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;">
+                    <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
+                      <div class="skel" style="height:16px;width:45%;"></div>
+                      <div class="skel" style="height:15px;width:35%;"></div>
+                    </div>
+                    <div class="skel" style="height:28px;width:44px;"></div>
+                  </div>
+                  <div style="display:flex;gap:6px;">
+                    <div class="skel" style="height:28px;width:60px;"></div>
+                    <div class="skel" style="height:28px;width:60px;"></div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ matchesReady }}" hint-placeholder-val="{{ true }}">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <div style="background:var(--surface-primary);border-radius:26px;padding:20px 22px;display:flex;flex-direction:column;gap:8px;">
             <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">Total Matches</div>
@@ -333,6 +381,45 @@ button:disabled{cursor:default !important;}
           </div>
           </sc-if>
         </div>
+
+        <sc-if value="{{ insLoading }}" hint-placeholder-val="{{ false }}">
+          <div aria-busy="true" style="display:flex;flex-direction:column;gap:10px;">
+            <span class="sr-only" role="status">Loading insights</span>
+            <div aria-hidden="true" style="display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);gap:10px;">
+              <div style="background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:14px;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                  <div class="skel" style="height:11px;width:56px;margin-top:6px;"></div>
+                  <div class="skel" style="width:36px;height:36px;border-radius:50%;"></div>
+                </div>
+                <div class="skel" style="height:50px;width:70%;"></div>
+                <div class="skel" style="height:13px;width:60%;"></div>
+                <div class="skel" style="flex:1;min-height:96px;border-radius:18px;margin-top:12px;"></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <sc-for list="{{ skel2 }}" as="k" hint-placeholder-count="2">
+                  <div style="background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:14px;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                      <div class="skel" style="height:11px;width:60%;margin-top:6px;"></div>
+                      <div class="skel" style="width:36px;height:36px;border-radius:50%;flex-shrink:0;"></div>
+                    </div>
+                    <div class="skel" style="height:40px;width:50%;"></div>
+                    <div class="skel" style="height:13px;width:70%;"></div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div aria-hidden="true" style="background:var(--surface-primary);border-radius:26px;padding:22px 20px;display:flex;flex-direction:column;gap:22px;">
+              <div class="skel" style="height:19px;width:55%;"></div>
+              <sc-for list="{{ skel3 }}" as="k" hint-placeholder-count="3">
+                <div style="display:grid;grid-template-columns:96px minmax(0,1fr) 62px;align-items:center;gap:14px;">
+                  <div class="skel" style="height:14px;"></div>
+                  <div class="skel" style="height:8px;"></div>
+                  <div class="skel" style="height:16px;width:44px;justify-self:end;"></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
 
         <sc-if value="{{ insState }}" hint-placeholder-val="{{ false }}">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ insState.illustration }}" title="{{ insState.title }}" body="{{ insState.body }}" actionLabel="{{ insState.actionLabel }}" onAction="{{ insState.onAction }}" hint-size="350px,330px"></x-import>
@@ -709,6 +796,7 @@ button:disabled{cursor:default !important;}
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChartColumn" size="{{ 18 }}" hint-size="18px,18px"></x-import>
               <div style="font:400 13px/1.45 var(--font-sans);">{{ linkHint }}</div>
             </div>
+            <sc-if value="{{ saveErr }}" hint-placeholder-val="{{ false }}"><div style="height:76px;"></div></sc-if>
           </div>
         </sc-if>
       </div>
@@ -722,6 +810,37 @@ button:disabled{cursor:default !important;}
           <div style="font:500 17px/1 var(--font-sans);">Match Detail</div>
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" size="{{ 48 }}" label="Match actions" onClick="{{ toggleMenu }}" hint-size="48px,48px"></x-import>
         </div>
+        <sc-if value="{{ detailLoading }}" hint-placeholder-val="{{ false }}">
+          <div aria-busy="true" style="display:flex;flex-direction:column;gap:22px;">
+            <span class="sr-only" role="status">Loading match</span>
+            <div aria-hidden="true" style="display:flex;flex-direction:column;gap:14px;padding:6px 2px;">
+              <div class="skel skel-bg" style="height:14px;width:55%;"></div>
+              <div style="display:flex;justify-content:space-between;">
+                <div class="skel skel-bg" style="height:48px;width:40%;"></div>
+                <div class="skel skel-bg" style="height:48px;width:24%;"></div>
+              </div>
+            </div>
+            <div aria-hidden="true" style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:12px;">
+              <sc-for list="{{ skel2 }}" as="k" hint-placeholder-count="2">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <div class="skel" style="width:40px;height:40px;border-radius:50%;flex-shrink:0;"></div>
+                  <div class="skel" style="height:16px;width:50%;"></div>
+                </div>
+              </sc-for>
+            </div>
+            <div aria-hidden="true" style="background:var(--surface-primary);border-radius:26px;padding:8px 20px;display:flex;flex-direction:column;">
+              <div style="padding:12px 0 8px;"><div class="skel" style="height:12px;width:30%;"></div></div>
+              <sc-for list="{{ skel3 }}" as="k" hint-placeholder-count="3">
+                <div style="display:grid;grid-template-columns:1fr 64px 64px;align-items:center;padding:12px 0;border-top:1px solid var(--border-default);">
+                  <div class="skel" style="height:15px;width:40%;"></div>
+                  <div class="skel" style="height:24px;width:32px;justify-self:center;"></div>
+                  <div class="skel" style="height:24px;width:32px;justify-self:center;"></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ detailReady }}" hint-placeholder-val="{{ true }}">
         <div style="display:flex;flex-direction:column;gap:10px;padding:6px 2px;">
           <div style="font:400 14px/1 var(--font-sans);color:var(--text-secondary);">{{ detail.dateLong }} · {{ detail.type }}</div>
           <div style="display:flex;align-items:baseline;justify-content:space-between;">
@@ -792,6 +911,7 @@ button:disabled{cursor:default !important;}
             </div>
           </sc-for>
         </div>
+        </sc-if>
       </div>
     </sc-if>
 
@@ -891,7 +1011,16 @@ button:disabled{cursor:default !important;}
         <sc-if value="{{ step3 }}" hint-placeholder-val="{{ false }}">
           <div style="text-align:center;font:500 14px/1 var(--font-sans);color: {{ liveResultColor }};">{{ liveResult }}</div>
         </sc-if>
-        <button onClick="{{ logNext }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;background: {{ ctaBg }};color: {{ ctaFg }};">{{ ctaLabel }}</button>
+        <sc-if value="{{ saveErr }}" hint-placeholder-val="{{ false }}">
+          <div role="alert" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:22px;background:var(--surface-muted);">
+            <div style="color:var(--status-error);display:flex;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></div>
+            <div style="font:400 14px/1.45 var(--font-sans);color:var(--text-primary);">Couldn't save your match. Check your connection and try again.</div>
+          </div>
+        </sc-if>
+        <button onClick="{{ logNext }}" aria-busy="{{ saving }}" disabled="{{ saving }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;background: {{ ctaBg }};color: {{ ctaFg }};">
+          <sc-if value="{{ saving }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">Saving match</span></sc-if>
+          <sc-if value="{{ notSaving }}" hint-placeholder-val="{{ true }}">{{ ctaLabel }}</sc-if>
+        </button>
       </div>
     </sc-if>
   </sc-if>
@@ -943,9 +1072,24 @@ button:disabled{cursor:default !important;}
     </div>
   </sc-if>
 
+  <!-- Delete confirmation -->
+  <sc-if value="{{ confirmDelete }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ cancelDelete }}" style="position:absolute;inset:0;background:rgba(0,0,0,.45);"></div>
+    <div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="del-title" aria-describedby="del-body" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface-primary);border-radius:34px 34px 0 0;padding:28px 20px 34px;display:flex;flex-direction:column;gap:24px;">
+      <div style="display:flex;flex-direction:column;gap:8px;text-align:center;padding:0 12px;">
+        <div id="del-title" style="font:500 19px/1.35 var(--font-sans);">Delete Match?</div>
+        <div id="del-body" style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">This removes the score and notes for good.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <button onClick="{{ doDelete }}" style="height:56px;border:none;border-radius:99px;background:var(--status-error);color:var(--text-primary);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">Delete</button>
+        <button onClick="{{ cancelDelete }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-muted);color:var(--text-primary);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">Cancel</button>
+      </div>
+    </div>
+  </sc-if>
+
   <!-- Toast -->
   <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
-    <div style="position:absolute;top:54px;left:50%;transform:translateX(-50%);height:44px;padding:0 18px;border-radius:99px;background:var(--text-primary);color:var(--action-on-primary);display:flex;align-items:center;gap:8px;font:500 14px/1 var(--font-sans);white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.35);">
+    <div style="position:absolute;top:54px;left:50%;transform:translateX(-50%);height:44px;padding:0 18px;border-radius:99px;background:var(--text-primary);color:var(--text-inverse);display:flex;align-items:center;gap:8px;font:500 14px/1 var(--font-sans);white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.35);">
       <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 18 }}" hint-size="18px,18px"></x-import>
       {{ toast }}
     </div>
@@ -953,7 +1097,7 @@ button:disabled{cursor:default !important;}
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Splash&quot;,&quot;options&quot;:[&quot;Splash&quot;,&quot;Log In&quot;,&quot;Sign Up&quot;,&quot;Forgot Password&quot;,&quot;Check Email&quot;,&quot;Onboarding&quot;,&quot;Matches&quot;,&quot;Insights&quot;,&quot;Log Match&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;authError&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Invalid email&quot;,&quot;Incorrect email or password&quot;,&quot;Email already exists&quot;,&quot;Password too short&quot;,&quot;Network error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Normal&quot;,&quot;options&quot;:[&quot;Normal&quot;,&quot;Empty&quot;,&quot;Offline&quot;,&quot;Error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Splash&quot;,&quot;options&quot;:[&quot;Splash&quot;,&quot;Log In&quot;,&quot;Sign Up&quot;,&quot;Forgot Password&quot;,&quot;Check Email&quot;,&quot;Onboarding&quot;,&quot;Matches&quot;,&quot;Match Detail&quot;,&quot;Insights&quot;,&quot;Log Match&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;authError&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Invalid email&quot;,&quot;Incorrect email or password&quot;,&quot;Email already exists&quot;,&quot;Password too short&quot;,&quot;Network error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Normal&quot;,&quot;options&quot;:[&quot;Normal&quot;,&quot;Loading&quot;,&quot;Empty&quot;,&quot;Offline&quot;,&quot;Error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;saveMatch&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Succeeds&quot;,&quot;options&quot;:[&quot;Succeeds&quot;,&quot;Fails&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
 class Component extends DCLogic {
   scrollRef = React.createRef();
   state = this.seed();
@@ -989,22 +1133,23 @@ class Component extends DCLogic {
       M('m20', '2026-07-16', 'Singles', null, ['jordan'], [[21, 13], [21, 16]], ['Placement'], [], '', '', '')
     ];
     const start = p.startScreen;
-    const screens = { 'Splash': 'splash', 'Log In': 'login', 'Sign Up': 'signup', 'Forgot Password': 'forgot', 'Check Email': 'resetSent', 'Onboarding': 'onboarding', 'Insights': 'insights', 'Log Match': 'log' };
+    const screens = { 'Splash': 'splash', 'Log In': 'login', 'Sign Up': 'signup', 'Forgot Password': 'forgot', 'Check Email': 'resetSent', 'Onboarding': 'onboarding', 'Match Detail': 'detail', 'Insights': 'insights', 'Log Match': 'log' };
     return {
       screen: screens[start] || 'matches', pwVisible: false, agree: false, ob: this.newOb(),
       f: this.blankForm(), errors: {}, banner: null, busy: null, resetEmail: 'sam@rallywise.app', resendIn: 0,
       ...this.authPreset(p.authError),
-      insTab: 'progress', back: [], filter: 'All', menu: false, detailId: null, playerId: null, search: '', toast: null,
+      insTab: 'progress', back: start === 'Match Detail' ? [{ screen: 'matches' }] : [], filter: 'All', menu: false, confirmDelete: null, detailId: null, playerId: null, search: '', toast: null,
       ...this.dataFor(p.dataState, players, matches), log: start === 'Log Match' ? this.newLog() : null
     };
   }
 
-  // "Data state" prop previews the empty, offline and error states without touching the seed data.
+  // "Data state" prop previews the loading, empty, offline and error states without touching the seed data.
   dataFor(kind, players, matches) {
     if (players) this._seed = { players, matches };
     const d = this._seed;
-    if (kind === 'Empty') return { players: d.players.filter(x => x.id === 'me'), matches: [], blocked: null };
-    return { players: d.players, matches: d.matches, blocked: kind === 'Offline' ? 'offline' : kind === 'Error' ? 'error' : null };
+    clearTimeout(this._load);
+    if (kind === 'Empty') return { players: d.players.filter(x => x.id === 'me'), matches: [], blocked: null, loading: false };
+    return { players: d.players, matches: d.matches, blocked: kind === 'Offline' ? 'offline' : kind === 'Error' ? 'error' : null, loading: kind === 'Loading' };
   }
 
   fmt() { return parseInt((this.props && this.props.defaultFormat) || '21', 10); }
@@ -1023,7 +1168,7 @@ class Component extends DCLogic {
   componentDidMount() {
     if (this.state.screen === 'splash') this._splash = setTimeout(() => this.leaveSplash(), 2200);
   }
-  componentWillUnmount() { clearTimeout(this._splash); clearTimeout(this._busy); clearInterval(this._tick); }
+  componentWillUnmount() { clearTimeout(this._splash); clearTimeout(this._busy); clearInterval(this._tick); clearTimeout(this._save); clearTimeout(this._load); }
 
   // Auth. The prototype has no backend: requests resolve after a short delay. The "Auth error"
   // prop previews each error, and "Incorrect email or password" / "Network error" keep failing
@@ -1155,7 +1300,19 @@ class Component extends DCLogic {
     if (log.step === 3) { const r = this.res(this.draftGames(log)); return r.us !== r.them; }
     return true;
   }
+  // Saving is a fake request too. The "Save match" prop set to Fails (or a real offline browser)
+  // keeps it failing; the draft stays put so Save Again can retry.
   save() {
+    if (this.state.log.saving) return;
+    this.setLog({ saving: true, saveErr: false });
+    clearTimeout(this._save);
+    this._save = setTimeout(() => {
+      const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
+      if (this.props.saveMatch === 'Fails' || offline) return this.setLog({ saving: false, saveErr: true });
+      this.commit();
+    }, 900);
+  }
+  commit() {
     const log = this.state.log;
     const m = { id: log.editId || 'n' + Date.now(), date: log.date || '2026-09-22', type: log.type, partner: log.type === 'Doubles' ? log.partner : null,
       opps: log.type === 'Doubles' ? [log.opp1, log.opp2] : [log.opp1], games: this.draftGames(log), wt: log.wt, lt: log.lt, worked: log.worked.trim(), lost: log.lost.trim(), on: log.on.trim() };
@@ -1166,11 +1323,11 @@ class Component extends DCLogic {
     this.setState(s => ({ matches: [m, ...s.matches], screen: 'detail', detailId: m.id, back: [{ screen: 'matches' }], log: null, filter: 'All' }));
     this.flash('Match saved · Insights updated');
   }
-  // Delete confirmation is owned by the shared dialog (Error and loading states work).
-  // Until it lands this hook deletes directly; the dialog should open here and call deleteMatch(id) on confirm.
-  requestDeleteMatch(id) { this.setState({ menu: false }); this.deleteMatch(id); }
+  // Delete confirmation. requestDeleteMatch(id) opens the sheet for any match; Delete calls
+  // deleteMatch(id), which removes it, returns to Matches and confirms with a toast.
+  requestDeleteMatch(id) { if (id) this.setState({ confirmDelete: id, menu: false }); }
   deleteMatch(id) {
-    this.setState(s => ({ matches: s.matches.filter(x => x.id !== id), screen: 'matches', back: [], detailId: null, menu: false }));
+    this.setState(x => ({ matches: x.matches.filter(m => m.id !== id), confirmDelete: null, screen: 'matches', back: [], detailId: null, log: null }));
     this.flash('Match deleted');
   }
   addPlayer(name) { const id = 'p' + Date.now(); this.setState(s => ({ players: [...s.players, { id, name }] })); return id; }
@@ -1216,8 +1373,8 @@ class Component extends DCLogic {
         label, icon, fg: s.screen === k ? 'var(--text-primary)' : 'var(--text-secondary)', select: () => this.setState({ screen: k, back: [], menu: false })
       })),
       menuItems: s.screen === 'detail' ? [
-        { label: 'Edit Match', icon: 'Pencil', select: () => { const m = all.find(x => x.id === s.detailId); this.setState({ menu: false }); if (m) this.go('log', { log: this.editLog(m) }); } },
-        { label: 'Delete Match', icon: 'Trash2', select: () => this.requestDeleteMatch(s.detailId) }
+        { label: 'Edit Match', icon: 'Pencil', select: () => { const m = all.find(x => x.id === s.detailId) || all[0]; this.setState({ menu: false }); if (m) this.go('log', { log: this.editLog(m) }); } },
+        { label: 'Delete Match', icon: 'Trash2', select: () => { const m = all.find(x => x.id === s.detailId) || all[0]; if (m) this.requestDeleteMatch(m.id); } }
       ] : [
         { label: 'Players', icon: 'Users', select: () => this.go('players') },
         { label: 'Profile', icon: 'CircleUser', select: () => { this.setState({ menu: false }); this.flash('Not in this prototype'); } },
@@ -1229,11 +1386,15 @@ class Component extends DCLogic {
     };
 
     const empty = (illustration, title, body, actionLabel, onAction) => ({ illustration, title, body, actionLabel: actionLabel || null, onAction: onAction || null });
-    const retry = () => this.setState({ blocked: null });
+    // Try Again shows the skeleton briefly, as a real refetch would.
+    const retry = () => { this.setState({ blocked: null, loading: true }); clearTimeout(this._load); this._load = setTimeout(() => this.setState({ loading: false }), 900); };
     v.blocked = !!s.blocked; v.notBlocked = !s.blocked;
+    v.loading = !s.blocked && !!s.loading; v.matchesReady = !s.blocked && !s.loading;
+    v.skel2 = [1, 2]; v.skel3 = [1, 2, 3];
+    const what = { insights: 'Insights', players: 'Players' }[s.screen] || 'Matches';
     v.blockedState = s.blocked === 'offline'
       ? empty('connection-lost', 'Connection Lost', 'Check your Wi-Fi or mobile data, then try again.', 'Try Again', retry)
-      : empty('error', 'Something Went Wrong', "We couldn't load your data. Try again in a moment.", 'Try Again', retry);
+      : empty('error', `Couldn't Load ${what}`, 'Something went wrong on our side. Try again in a moment.', 'Try Again', retry);
     v.matchesEmpty = !v.matchCards.length && (all.length
       ? empty('no-matches', `No ${s.filter} Matches Yet`, `${s.filter} matches you log will show up here.`)
       : empty('no-matches', 'No Matches Yet', 'Log your first match to start tracking results.'));
@@ -1246,8 +1407,9 @@ class Component extends DCLogic {
     v.passwordHelper = !s.errors.password;
     for (const k of ['apple', 'google']) v[k] = { go: () => this.social(k), busy: s.busy === k, idle: s.busy !== k, dim: s.busy && s.busy !== k ? .5 : 1 };
 
-    v.insHasData = !s.blocked && all.length > 0;
-    v.insState = s.blocked ? v.blockedState : !all.length && empty('no-insights', 'No Insights Yet', 'Log a few matches and your trends will start to show here.', 'Log Match', v.startLog);
+    v.insLoading = v.loading;
+    v.insHasData = !s.blocked && !s.loading && all.length > 0;
+    v.insState = s.blocked ? v.blockedState : !s.loading && !all.length && empty('no-insights', 'No Insights Yet', 'Log a few matches and your trends will start to show here.', 'Log Match', v.startLog);
     if (v.isInsights && v.insHasData) {
       const chron = all.slice().sort((a, b) => a.date < b.date ? -1 : 1);
       const span = chron.slice(-20), half = Math.floor(span.length / 2);
@@ -1339,7 +1501,8 @@ class Component extends DCLogic {
       v.stepTitle = ['Singles or Doubles?', 'Who Played?', 'Enter Score', 'Match Notes'][st - 1];
       v.showLogCta = st > 1;
       const ok = this.canNext(log);
-      v.ctaLabel = st === 4 ? (v.isEdit ? 'Save Changes' : 'Save Match') : 'Continue';
+      v.ctaLabel = st === 4 ? (log.saveErr ? 'Save Again' : v.isEdit ? 'Save Changes' : 'Save Match') : 'Continue';
+      v.saving = !!log.saving; v.notSaving = !log.saving; v.saveErr = st === 4 && !!log.saveErr;
       v.ctaBg = ok ? A : 'var(--surface-muted)'; v.ctaFg = ok ? 'var(--action-on-primary)' : 'var(--text-tertiary)';
       v.logNext = () => { if (!this.canNext(this.state.log)) return; st === 4 ? this.save() : this.setLog({ step: st + 1 }); };
       v.typeOptions = [['Singles', 'You vs 1 opponent', 'User'], ['Doubles', 'You + partner vs 2 opponents', 'Users']].map(([label, sub, icon]) => ({
@@ -1408,7 +1571,11 @@ class Component extends DCLogic {
       v.linkHint = 'Tags feed your Skill Trends and Coach. Opponent notes build your game plan for ' + oppName + '.';
     }
 
-    if (v.isDetail) {
+    v.confirmDelete = !!s.confirmDelete;
+    v.cancelDelete = () => this.setState({ confirmDelete: null });
+    v.doDelete = () => this.deleteMatch(s.confirmDelete);
+    v.detailLoading = v.isDetail && !!s.loading; v.detailReady = !s.loading;
+    if (v.isDetail && !s.loading && all.length) {
       const m = all.find(x => x.id === s.detailId) || all[0];
       const r = this.res(m.games);
       const openP = id => () => this.go('player', { playerId: id });
