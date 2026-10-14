@@ -1142,7 +1142,7 @@ class Component extends DCLogic {
       signupBg: s.agree ? 'var(--action-primary)' : 'var(--surface-muted)', signupFg: s.agree ? 'var(--action-on-primary)' : 'var(--text-tertiary)',
       signUp: () => { if (!this.state.agree) return; const f = this.state.f;
         this.submit({ name: f.name.trim() ? null : this.msg.nameEmpty, email: this.emailErr(f.email), password: f.password.length >= 8 ? null : f.password ? this.msg.pwShort : this.msg.pwEmpty },
-          () => { this.toAuth('onboarding'); this.setState({ ob: this.newOb(), agree: false }); }, () => f.email.trim().toLowerCase() === 'sam@rallywise.app' && { errors: { email: this.msg.exists } }); },
+          () => { this.toAuth('onboarding'); this.setState({ ob: { ...this.newOb(), name: f.name.trim() }, agree: false }); }, () => f.email.trim().toLowerCase() === 'sam@rallywise.app' && { errors: { email: this.msg.exists } }); },
       isOnboarding: s.screen === 'onboarding',
       showTabs: s.screen === 'matches' || s.screen === 'insights', menuOpen: s.menu,
       hasToast: !!s.toast, toast: s.toast, search: s.search, canAddNew: q.length > 1 && !exists,
