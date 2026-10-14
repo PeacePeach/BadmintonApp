@@ -6,7 +6,7 @@ Accounts and match data live in a Supabase project. The prototype talks to it th
 ## One-time setup
 
 1. Create a project at supabase.com.
-2. Run the migration: open **SQL Editor**, paste `migrations/20261014000000_rallywise_init.sql`, and run it.
+2. Run the migrations in order: open **SQL Editor**, paste each file in `migrations/` (oldest first), and run it.
    (Or, with the Supabase CLI: `supabase link --project-ref <ref>` then `supabase db push`.)
 3. **Project Settings > API**: copy the Project URL and the `anon` `public` key into
    `project/rallywise-config.js`. Never use the `service_role` key in the app.
