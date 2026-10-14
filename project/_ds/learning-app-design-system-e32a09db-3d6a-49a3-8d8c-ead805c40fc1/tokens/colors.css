@@ -186,7 +186,7 @@
   --status-win: var(--blue-100);
   --status-loss: var(--orange-200);
   /* Feedback */
-  --status-error: var(--red-300);
+  --status-error: var(--red-400);
 
   /* Progress */
   --progress-active: var(--blue-100);
