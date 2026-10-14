@@ -188,6 +188,13 @@
   /* Feedback */
   --status-error: var(--red-400);
 
+  /* Illustration — empty, error, success and connection states */
+  --illustration-backdrop: var(--blue-100);
+  --illustration-line: var(--blue-100);
+  --illustration-fill: var(--blue-200);
+  --illustration-surface: var(--bg-primary);
+  --illustration-detail: var(--blue-50);
+
   /* Progress */
   --progress-active: var(--blue-100);
   --progress-inactive: var(--violet-8);
