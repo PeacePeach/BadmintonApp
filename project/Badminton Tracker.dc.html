@@ -17,6 +17,9 @@
 <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
 <script src="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/_ds_bundle.js"></script>
 <script src="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/illustrations.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.3/dist/umd/supabase.js"></script>
+<script src="rallywise-config.js"></script>
+<script src="rallywise-backend.js"></script>
 <style>
 body{margin:0;background:var(--bg-primary);font-family:"Poppins",system-ui,sans-serif;}
 *{box-sizing:border-box;}
@@ -1118,11 +1121,13 @@ button:disabled{cursor:default !important;}
           </div>
         </sc-if>
         <div style="display:flex;flex-direction:column;gap:20px;">
+          <sc-if value="{{ needCurrent }}" hint-placeholder-val="{{ true }}">
           <div style="display:flex;flex-direction:column;gap:10px;">
             <div style="font:500 15px/1 var(--font-sans);">Current password</div>
             <div class="search-field-outline {{ curCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="{{ pwType }}" value="{{ pwCur }}" onChange="{{ onPwCur }}" placeholder="Current password" autocomplete="current-password" aria-invalid="{{ curInvalid }}" aria-label="Current password" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"><button onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}" style="width:32px;height:32px;border:none;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import></button></div>
             <sc-if value="{{ curErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--status-error);">{{ curErr }}</div></sc-if>
           </div>
+          </sc-if>
           <div style="display:flex;flex-direction:column;gap:10px;">
             <div style="font:500 15px/1 var(--font-sans);">New password</div>
             <div class="search-field-outline {{ passwordCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="{{ pwType }}" value="{{ pwNext }}" onChange="{{ onPwNext }}" placeholder="New password" autocomplete="new-password" aria-invalid="{{ passwordInvalid }}" aria-label="New password" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
@@ -1321,69 +1326,132 @@ class Component extends DCLogic {
   seed() {
     const p = this.props || {};
     const start = p.startScreen;
-    // Reopening the app (it starts on the splash) restores the signed-in account, if there is one.
-    const sess = (!start || start === 'Splash') && this.read(this.SESSION);
-    const acct = sess && this.account(sess.email);
-    if (acct) this.user = sess.email;
-    const { players, matches } = acct || this.demoData();
-    const me = players.find(x => x.id === 'me') || {};
+    // Reopening the app (it starts on the splash) restores the signed-in account; see restore().
+    this._restoring = !start || start === 'Splash';
+    const { players, matches } = this.demoData();
     const screens = { 'Splash': 'splash', 'Log In': 'login', 'Sign Up': 'signup', 'Forgot Password': 'forgot', 'Check Email': 'resetSent', 'Onboarding': 'onboarding', 'Match Detail': 'detail', 'Insights': 'insights', 'Log Match': 'log', 'Settings': 'settings' };
     return {
-      screen: screens[start] || 'matches', pwVisible: false, agree: false, ob: { ...this.newOb(), name: acct && !acct.onboarded ? me.name || '' : '' },
+      screen: screens[start] || 'matches', pwVisible: false, agree: false, ob: this.newOb(),
       f: this.blankForm(), errors: {}, banner: null, busy: null, resetEmail: 'sam@rallywise.app', resendIn: 0,
       ...this.authPreset(p.authError),
       insTab: 'progress', back: start === 'Match Detail' ? [{ screen: 'matches' }] : [], filter: 'All', menu: false, confirmDelete: null, detailId: null, playerId: null, search: '', toast: null,
       ...this.dataFor(p.dataState, players, matches), log: start === 'Log Match' ? this.newLog() : null,
-      email: acct ? sess.email : 'sam@rallywise.app', acct: { name: '', level: null, cur: '', next: '' }, prefs: (acct && acct.prefs) || this.newPrefs(),
-      onboarded: acct ? !!acct.onboarded : true, confirmDeleteAccount: false
+      email: 'sam@rallywise.app', acct: { name: '', level: null, cur: '', next: '' }, prefs: this.newPrefs(),
+      onboarded: true, confirmDeleteAccount: false
     };
   }
   newPrefs() { return { reminders: true, insights: true, usage: false }; }
+  // Today as YYYY-MM-DD on this device's clock. Design previews keep the sample data's day.
+  today() {
+    const s = (this.props || {}).startScreen;
+    if (s && s !== 'Splash') return '2026-09-22';
+    const d = new Date();
+    return new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+  }
 
-  // Persistence. There is no backend yet, so each account's data is saved in this browser's localStorage
-  // under its own key (by email), and being signed in is a mocked session record naming that email.
-  // Logging out removes only the session; the account's data comes back on its next sign-in.
-  get SESSION() { return 'rallywise.v1.session'; }
-  key(email) { return 'rallywise.v1.user.' + email; }
-  read(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
-  write(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
-  account(email) { const a = this.read(this.key(email)); return a && Array.isArray(a.players) && Array.isArray(a.matches) ? a : null; }
-  // The demo account starts with the sample matches; any other new account starts empty and goes through onboarding.
-  newAccount(email, name) {
-    if (email === 'sam@rallywise.app') return { onboarded: true, prefs: this.newPrefs(), ...this.demoData() };
-    return { onboarded: false, prefs: this.newPrefs(), players: [{ id: 'me', name: name || '', level: null }], matches: [] };
+  // Accounts and data live in Supabase, behind rallywise-backend.js. this.user is the signed-in
+  // { id, email, name }, and this.sync saves that user's data to the cloud, sending only what changed.
+  // Logging out ends this device's session; the data stays in the account. Design previews (any
+  // "Start screen" but Splash) show the sample data and never touch the backend.
+  async api() {
+    for (let i = 0; i < 100 && !window.RallywiseBackend; i++) await new Promise(r => setTimeout(r, 50));
+    const b = window.RallywiseBackend;
+    if (!b) throw { code: 'network' };
+    await b.ready();
+    return b;
   }
-  // Signs in to an account: saves the session, loads its data and opens Matches, or Onboarding if unfinished.
-  enter(email, name) {
-    email = email.trim().toLowerCase();
-    const a = this.account(email) || this.newAccount(email, name);
-    this.write(this.SESSION, { email }); this.write(this.key(email), a);
-    this.toAuth(a.onboarded ? 'matches' : 'onboarding');
+  dataState(s) { s = s || this.state; return { onboarded: s.onboarded, players: s.players, matches: s.matches, prefs: s.prefs }; }
+  // On open: restore the saved session, load its data, then leave the splash.
+  async restore() {
+    let user = null;
+    try {
+      const b = await this.api();
+      this._unsub = b.auth.onChange((event, u) => this.authEvent(event, u));
+      user = await b.auth.restore();
+    } catch (e) { user = null; }
+    if (user) { this._retryUser = user; await this.openFor(user); }
+    this._restoring = false;
+    if (this._splashDone) this.leaveSplash();
+  }
+  authEvent(event) {
+    // Signed out elsewhere (another tab, or the session was revoked): take this account's data off screen.
+    if (event === 'SIGNED_OUT' && this.user && !this._signingOut) this.clearAccount();
+    // Opened from a password reset link: once the account is open, go straight to Change Password.
+    if (event === 'PASSWORD_RECOVERY') { this._recovery = true; this.afterEnter(); }
+  }
+  afterEnter() {
+    if (!this._recovery || !this.user || this.state.screen === 'splash') return;
+    this._recovery = false;
+    this.openForm('password', { recovery: true });
+  }
+  // Loads the account's data and opens it. If the data can't load, the app opens on the Connection Lost /
+  // Couldn't Load state, and Try Again calls this again.
+  async openFor(user) {
+    try { await this.enter(user); }
+    catch (e) {
+      if (this._retryUser !== user) return;
+      this.setState({ screen: this.state.screen === 'splash' ? 'splash' : 'matches', back: [], email: user.email, players: [], matches: [], onboarded: true,
+        loading: false, blocked: e && e.code === 'network' ? 'offline' : 'error' });
+    }
+  }
+  // Signs in to an account: loads its data, then opens Matches, or Onboarding if unfinished.
+  async enter(user) {
+    const b = await this.api(), token = this._enterToken = {};
+    const { state: a, sync, migrated, anonId } = await b.data.load(user);
+    if (this._enterToken !== token) return; // signed out (or into another account) while loading
+    if (this.state.screen !== 'splash') this.toAuth(a.onboarded ? 'matches' : 'onboarding');
     const me = a.players.find(x => x.id === 'me') || {};
-    this.setState({ email, players: a.players, matches: a.matches, prefs: a.prefs || this.newPrefs(), onboarded: !!a.onboarded,
+    this.setState({ email: user.email, players: a.players, matches: a.matches, prefs: a.prefs || this.newPrefs(), onboarded: !!a.onboarded,
       ob: { ...this.newOb(), name: me.name || '' }, filter: 'All', search: '', detailId: null, playerId: null, log: null, blocked: null, loading: false });
-    this.user = email; // set last, so nothing on screen from before is saved under this account
+    // What was just loaded is already saved; set last, so nothing on screen from before is saved under this account.
+    this._saved = this.dataState(a); this.sync = sync; this.user = { ...user, anonId }; this._retryUser = null;
+    if (migrated) this.flash('Your matches are now saved to your account');
+    this.afterEnter();
   }
-  // Clears the session and takes the account's data off screen.
-  signOut(deleteData) {
-    if (deleteData && this.user) this.write(this.key(this.user), null);
-    this.write(this.SESSION, null); this.user = null;
+  // Signs in after a successful login or sign-up. If the account's data can't load, the session is
+  // dropped again so the form can simply be retried.
+  async signedIn(b, user) {
+    try { await this.enter(user); } catch (e) { await b.auth.signOut(); throw e; }
+  }
+  // Takes the account's data off screen and returns to Log In.
+  clearAccount() {
+    this._enterToken = null; this.user = null; this.sync = null; this._saved = null; this._retryUser = null; this._recovery = false;
     this.toAuth('login');
-    this.setState({ email: '', players: [], matches: [], prefs: this.newPrefs(), detailId: null, playerId: null, log: null, menu: false });
+    this.setState({ email: '', players: [], matches: [], prefs: this.newPrefs(), onboarded: true, detailId: null, playerId: null, log: null, menu: false,
+      blocked: null, loading: false, confirmDelete: null, confirmDeleteAccount: false });
+  }
+  // Log Out: saves anything still unsaved if it can, ends this device's session and clears the screen.
+  async signOut() {
+    if (this._signingOut) return;
+    this._signingOut = true; this.setState({ menu: false });
+    try {
+      if (this.sync && this.sync.pending) await this.sync.push(this.dataState()).catch(() => this.flash("Some changes couldn't be saved", 'error'));
+      const b = await this.api().catch(() => null);
+      if (b) await b.auth.signOut();
+    } finally { this.clearAccount(); this._signingOut = false; }
   }
   // Saves the signed-in account whenever its data changes (not while a "Data state" preview is showing).
   persist() {
     const s = this.state, d = this.props.dataState, last = this._saved || {};
-    if (!this.user || (d && d !== 'Normal')) return;
+    if (!this.user || !this.sync || (d && d !== 'Normal')) return;
     if (s.players === last.players && s.matches === last.matches && s.prefs === last.prefs && s.onboarded === last.onboarded) return;
-    this._saved = { players: s.players, matches: s.matches, prefs: s.prefs, onboarded: s.onboarded };
-    if (!this.write(this.key(this.user), { onboarded: s.onboarded, players: s.players, matches: s.matches, prefs: s.prefs })) this.flash("Couldn't save on this device", 'error');
+    this._saved = this.dataState(s);
+    this.sync.push(this._saved).catch(e => this.flash(e && e.code === 'network' ? "Couldn't save. Check your connection." : "Couldn't save your changes", 'error'));
   }
+  // For actions with their own spinner (save match, delete match, save profile): saves the change to the
+  // cloud first and throws if that fails, so the screen only changes once it is saved.
+  async saveNow(patch) {
+    const next = { ...this.dataState(), ...patch }, d = this.props.dataState;
+    if (this.user && this.sync && !(d && d !== 'Normal')) { await this.sync.push(next); this._saved = next; }
+    return next;
+  }
+  // Back online: retry anything that didn't save.
+  onOnline = () => { if (this.user && this.sync && this.sync.pending) this.sync.push(this.dataState()).catch(() => {}); };
 
   // "Data state" prop previews the loading, empty, offline and error states without touching the seed data.
   dataFor(kind, players, matches) {
     if (players) this._seed = { players, matches };
-    const d = (this.user && this.account(this.user)) || this._seed;
+    const d = (this.user && this._saved) || this._seed;
     clearTimeout(this._load);
     if (kind === 'Empty') return { players: d.players.filter(x => x.id === 'me'), matches: [], blocked: null, loading: false };
     return { players: d.players, matches: d.matches, blocked: kind === 'Offline' ? 'offline' : kind === 'Error' ? 'error' : null, loading: kind === 'Loading' };
@@ -1404,12 +1472,13 @@ class Component extends DCLogic {
 
   componentDidMount() {
     if (this.state.screen === 'splash') this._splash = setTimeout(() => this.leaveSplash(), 2200);
+    if (this._restoring) this.restore();
+    window.addEventListener('online', this.onOnline);
   }
-  componentWillUnmount() { clearTimeout(this._t); clearTimeout(this._tOut); clearTimeout(this._splash); clearTimeout(this._busy); clearInterval(this._tick); clearTimeout(this._save); clearTimeout(this._load); }
+  componentWillUnmount() { if (this._unsub) this._unsub(); window.removeEventListener('online', this.onOnline); clearTimeout(this._t); clearTimeout(this._tOut); clearTimeout(this._splash); clearInterval(this._tick); clearTimeout(this._load); }
 
-  // Auth. The prototype has no backend: requests resolve after a short delay. The "Auth error"
-  // prop previews each error, and "Incorrect email or password" / "Network error" keep failing
-  // until it is set back to None. Signing up with sam@rallywise.app also hits "already exists".
+  // Auth. Requests go to the backend (rallywise-backend.js). The "Auth error" prop previews each
+  // error, and "Incorrect email or password" / "Network error" keep failing until it is set back to None.
   blankForm() { return { name: '', email: '', password: '' }; }
   authPreset(kind) {
     const f = this.blankForm();
@@ -1427,45 +1496,60 @@ class Component extends DCLogic {
     pwEmpty: 'Enter your password.', pwShort: 'Use at least 8 characters.', nameEmpty: 'Enter your name.',
     incorrect: 'Incorrect email or password. Try again or reset your password.',
     exists: 'An account with this email already exists. Log in instead.',
-    network: "Can't connect right now. Check your connection and try again."
+    network: "Can't connect right now. Check your connection and try again.",
+    unconfirmed: 'Confirm your email first. Open the link we sent you, then log in.',
+    rate: 'Too many attempts. Wait a minute and try again.',
+    config: "Rallywise can't reach its server. Try again later.",
+    unknown: 'Something went wrong. Try again in a moment.',
+    pwWeak: 'Choose a stronger password.', pwSame: 'Use a different password from your current one.', curWrong: 'Incorrect password.'
 
   }; }
   toAuth(screen, keep) {
-    clearTimeout(this._busy); clearInterval(this._tick);
+    clearInterval(this._tick);
     this.setState(s => ({ screen, back: [], pwVisible: false, errors: {}, banner: null, busy: null, resendIn: 0,
       ...(screen === 'signup' ? { agree: false } : {}), f: keep ? s.f : this.blankForm() }));
   }
   emailErr(v) { v = v.trim(); return !v ? this.msg.emailEmpty : /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) ? null : this.msg.emailInvalid; }
   offline() { return this.props.authError === 'Network error' || (typeof navigator !== 'undefined' && navigator.onLine === false); }
-  // Validate, then fake a request. ok() runs on success; fail() may return an error patch.
-  submit(errors, ok, fail) {
+  // Validate, then run the request. task() does the work; it may return an error patch for the form,
+  // and anything it throws becomes the banner.
+  submit(errors, task) {
     if (this.state.busy) return;
     Object.keys(errors).forEach(k => { if (!errors[k]) delete errors[k]; });
     if (Object.keys(errors).length) return this.setState({ errors, banner: null });
     this.setState({ errors: {}, banner: null, busy: 'submit' });
-    this.request(ok, fail);
+    this.request(task);
   }
-  request(ok, fail) {
-    clearTimeout(this._busy);
-    this._busy = setTimeout(() => {
-      if (this.offline()) return this.setState({ busy: null, banner: this.msg.network });
-      const err = fail && fail();
-      if (err) return this.setState({ busy: null, ...err });
-      this.setState({ busy: null }); ok();
-    }, 900);
+  async request(task) {
+    if (this.offline()) return this.setState({ busy: null, banner: this.msg.network });
+    let err = null;
+    try { err = await task(); } catch (e) { err = { banner: this.errMsg(e) }; }
+    this.setState({ busy: null, ...(err || {}) });
   }
-  social(provider) {
+  errMsg(e) { return this.msg[{ network: 'network', incorrect: 'incorrect', unconfirmed: 'unconfirmed', rate: 'rate', config: 'config' }[e && e.code] || 'unknown']; }
+  // Google / Apple go through the backend's OAuth redirect when enabled in rallywise-config.js.
+  // Until then the button says so and signs no one in.
+  async social(provider) {
     if (this.state.busy) return;
-    // The provider's own sheet (Sign in with Apple / Google account picker) takes over here.
+    const b = await this.api().catch(() => null);
+    if (!b || !b.auth.oauthEnabled(provider)) return this.flash((provider === 'apple' ? 'Apple' : 'Google') + " sign-in isn't available yet", 'info');
     this.setState({ errors: {}, banner: null, busy: provider });
-    this.request(() => this.enter('sam@rallywise.app'));
+    this.request(() => b.auth.oauth(provider)); // on success the page leaves for the provider's sign-in
   }
   startResendTimer() {
     clearInterval(this._tick);
     this.setState({ resendIn: 30 });
     this._tick = setInterval(() => this.setState(s => { if (s.resendIn <= 1) clearInterval(this._tick); return { resendIn: Math.max(0, s.resendIn - 1) }; }), 1000);
   }
-  leaveSplash() { clearTimeout(this._splash); if (this.state.screen === 'splash') this.setState(s => ({ screen: !this.user ? 'login' : s.onboarded ? 'matches' : 'onboarding' })); }
+  // Leaves the splash once it has shown and the saved session has been checked. If the account's data is
+  // still loading, Matches shows its loading state until it arrives.
+  leaveSplash() {
+    clearTimeout(this._splash); this._splashDone = true;
+    if (this.state.screen !== 'splash' || (this._restoring && !this._retryUser)) return;
+    if (this._restoring) return this.setState({ screen: 'matches', back: [], loading: true, blocked: null, players: [], matches: [] });
+    this.setState(s => ({ screen: this.user ? (s.onboarded ? 'matches' : 'onboarding') : this._retryUser ? 'matches' : 'login' }));
+    setTimeout(() => this.afterEnter(), 0);
+  }
 
   componentDidUpdate(pp) {
     // "Toast preview" prop fires one example of each toast variant.
@@ -1550,37 +1634,46 @@ class Component extends DCLogic {
     if (log.step === 3) { const r = this.res(this.draftGames(log)); return r.us !== r.them; }
     return true;
   }
-  // Saving is a fake request too. The "Save match" prop set to Fails (or a real offline browser)
-  // keeps it failing; the draft stays put so Save Again can retry.
-  save() {
+  // Saving writes the match to the cloud before leaving the form. If that fails (or the "Save match"
+  // prop is set to Fails), the draft stays put so Save Again can retry.
+  async save() {
     if (this.state.log.saving) return;
     this.setLog({ saving: true, saveErr: false });
-    clearTimeout(this._save);
-    this._save = setTimeout(() => {
-      const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
-      if (this.props.saveMatch === 'Fails' || offline) return this.setLog({ saving: false, saveErr: true });
-      this.commit();
-    }, 900);
-  }
-  commit() {
+    const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
+    if (this.props.saveMatch === 'Fails' || offline) { await new Promise(r => setTimeout(r, 900)); return this.setLog({ saving: false, saveErr: true }); }
     const log = this.state.log;
-    const m = { id: log.editId || 'n' + Date.now(), date: log.date || '2026-09-22', type: log.type, partner: log.type === 'Doubles' ? log.partner : null,
+    const prev = log.editId && this.state.matches.find(x => x.id === log.editId);
+    // createdAt is when the match was first logged; edits keep it. Sample matches have none.
+    const m = { id: log.editId || 'n' + Date.now(), createdAt: prev ? prev.createdAt : new Date().toISOString(), date: log.date || this.today(), type: log.type, partner: log.type === 'Doubles' ? log.partner : null,
       opps: log.type === 'Doubles' ? [log.opp1, log.opp2] : [log.opp1], games: this.draftGames(log), wt: log.wt, lt: log.lt, worked: log.worked.trim(), lost: log.lost.trim(), on: log.on.trim() };
-    if (log.editId) {
-      this.setState(s => ({ matches: s.matches.map(x => x.id === m.id ? m : x).sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0), screen: 'detail', detailId: m.id, back: s.back.slice(0, -1), log: null }));
+    const matches = log.editId
+      ? this.state.matches.map(x => x.id === m.id ? m : x).sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0)
+      : [m, ...this.state.matches];
+    try { await this.saveNow({ matches }); } catch (e) { return this.setLog({ saving: false, saveErr: true }); }
+    this.commit(m, matches);
+  }
+  commit(m, matches) {
+    if (this.state.log && this.state.log.editId) {
+      this.setState(s => ({ matches, screen: 'detail', detailId: m.id, back: s.back.slice(0, -1), log: null }));
       return this.flash('Changes saved');
     }
-    this.setState(s => ({ matches: [m, ...s.matches], screen: 'detail', detailId: m.id, back: [{ screen: 'matches' }], log: null, filter: 'All' }));
+    this.setState({ matches, screen: 'detail', detailId: m.id, back: [{ screen: 'matches' }], log: null, filter: 'All' });
     this.flash('Match saved');
   }
   // Delete confirmation. requestDeleteMatch(id) opens the sheet for any match; Delete calls
   // deleteMatch(id), which removes it, returns to Matches and confirms with a toast.
   requestDeleteMatch(id) { if (id) this.setState({ confirmDelete: id, menu: false }); }
-  deleteMatch(id) {
-    this.setState(x => ({ matches: x.matches.filter(m => m.id !== id), confirmDelete: null, screen: 'matches', back: [], detailId: null, log: null }));
+  async deleteMatch(id) {
+    if (this._deleting) return;
+    this._deleting = true;
+    const matches = this.state.matches.filter(m => m.id !== id);
+    try { await this.saveNow({ matches }); }
+    catch (e) { this.setState({ confirmDelete: null }); return this.flash(e && e.code === 'network' ? "Couldn't delete. Check your connection." : "Couldn't delete match", 'error'); }
+    finally { this._deleting = false; }
+    this.setState({ matches, confirmDelete: null, screen: 'matches', back: [], detailId: null, log: null });
     this.flash('Match deleted');
   }
-  // Settings & account. Saves reuse the auth fake request, so the busy spinner and network banner match.
+  // Settings & account. Saves reuse the auth request, so the busy spinner and network banner match.
   openForm(screen, acct) { this.go(screen, { acct: { ...this.state.acct, cur: '', next: '', ...acct }, errors: {}, banner: null, pwVisible: false }); }
   openProfile() { const me = this.state.players.find(p => p.id === 'me') || {}; this.openForm('profile', { name: me.name || '', level: me.level || null }); }
   setAcct(patch, errKey) { this.setState(x => ({ acct: { ...x.acct, ...patch }, errors: { ...x.errors, [errKey]: null }, banner: null })); }
@@ -1602,12 +1695,19 @@ class Component extends DCLogic {
       isForgot: s.screen === 'forgot', isResetSent: s.screen === 'resetSent',
       f: s.f, banner: s.banner, resetEmail: s.resetEmail, resendIn: s.resendIn, canResend: !s.resendIn, resendWait: !!s.resendIn,
       busyAny: !!s.busy, busySubmit: s.busy === 'submit', idleSubmit: s.busy !== 'submit',
-      logIn: () => { const f = this.state.f; this.submit({ email: this.emailErr(f.email), password: f.password ? null : this.msg.pwEmpty },
-        () => this.enter(f.email), () => this.props.authError === 'Incorrect email or password' && { banner: this.msg.incorrect }); },
+      logIn: () => { const f = this.state.f; this.submit({ email: this.emailErr(f.email), password: f.password ? null : this.msg.pwEmpty }, async () => {
+        if (this.props.authError === 'Incorrect email or password') return { banner: this.msg.incorrect };
+        const b = await this.api();
+        await this.signedIn(b, await b.auth.signIn(f.email.trim().toLowerCase(), f.password));
+      }); },
       forgotPw: () => this.toAuth('forgot', true),
-      sendReset: () => { const email = this.state.f.email.trim(); this.submit({ email: this.emailErr(email) },
-        () => { this.setState({ screen: 'resetSent', resetEmail: email }); this.startResendTimer(); }); },
-      resend: () => { if (this.state.busy) return; this.setState({ busy: 'resend' }); this.request(() => { this.flash('Reset link sent again'); this.startResendTimer(); }, null); },
+      sendReset: () => { const email = this.state.f.email.trim(); this.submit({ email: this.emailErr(email) }, async () => {
+        await (await this.api()).auth.sendReset(email.toLowerCase());
+        this.setState({ screen: 'resetSent', resetEmail: email }); this.startResendTimer(); }); },
+      resend: () => { if (this.state.busy) return; this.setState({ busy: 'resend' }); this.request(async () => {
+        try { await (await this.api()).auth.sendReset(this.state.resetEmail.trim().toLowerCase()); }
+        catch (e) { this.flash(this.errMsg(e), 'error'); return; }
+        this.flash('Reset link sent again'); this.startResendTimer(); }); },
       toSignup: () => this.toAuth('signup'),
       toLogin: () => this.toAuth('login', s.screen === 'forgot' || s.screen === 'resetSent'),
       agree: s.agree, toggleAgree: () => this.setState(x => ({ agree: !x.agree })),
@@ -1615,7 +1715,19 @@ class Component extends DCLogic {
       signupBg: s.agree ? 'var(--action-primary)' : 'var(--surface-muted)', signupFg: s.agree ? 'var(--action-on-primary)' : 'var(--text-tertiary)',
       signUp: () => { if (!this.state.agree) return; const f = this.state.f;
         this.submit({ name: f.name.trim() ? null : this.msg.nameEmpty, email: this.emailErr(f.email), password: f.password.length >= 8 ? null : f.password ? this.msg.pwShort : this.msg.pwEmpty },
-          () => { this.enter(f.email, f.name.trim()); this.setState({ agree: false }); }, () => { const e = f.email.trim().toLowerCase(); return (e === 'sam@rallywise.app' || this.account(e)) && { errors: { email: this.msg.exists } }; }); },
+          async () => {
+            const b = await this.api(), email = f.email.trim().toLowerCase();
+            let r;
+            try { r = await b.auth.signUp(email, f.password, f.name.trim()); }
+            catch (e) {
+              if (e.code === 'exists') return { errors: { email: this.msg.exists } };
+              if (e.code === 'weak') return { errors: { password: this.msg.pwWeak } };
+              throw e;
+            }
+            // Projects that require email confirmation give no session yet: log in after opening the link.
+            if (r.needsConfirm) { this.toAuth('login'); this.setState({ f: { ...this.blankForm(), email } }); return this.flash('Check your email to confirm your account', 'info'); }
+            await this.signedIn(b, r.user); this.setState({ agree: false });
+          }); },
       isOnboarding: s.screen === 'onboarding',
       showTabs: s.screen === 'matches' || s.screen === 'insights', menuOpen: s.menu,
       hasToast: !!s.toast, search: s.search, canAddNew: q.length > 1 && !exists,
@@ -1640,8 +1752,12 @@ class Component extends DCLogic {
     };
 
     const empty = (illustration, title, body, actionLabel, onAction) => ({ illustration, title, body, actionLabel: actionLabel || null, onAction: onAction || null });
-    // Try Again shows the skeleton briefly, as a real refetch would.
-    const retry = () => { this.setState({ blocked: null, loading: true }); clearTimeout(this._load); this._load = setTimeout(() => this.setState({ loading: false }), 900); };
+    // Try Again reloads the account's data; in a "Data state" preview it shows the skeleton briefly.
+    const retry = () => {
+      this.setState({ blocked: null, loading: true }); clearTimeout(this._load);
+      if (this._retryUser) return this.openFor(this._retryUser);
+      this._load = setTimeout(() => this.setState({ loading: false }), 900);
+    };
     v.blocked = !!s.blocked; v.notBlocked = !s.blocked;
     v.loading = !s.blocked && !!s.loading; v.matchesReady = !s.blocked && !s.loading;
     v.skel2 = [1, 2]; v.skel3 = [1, 2, 3];
@@ -1680,9 +1796,10 @@ class Component extends DCLogic {
         const on = a.level === label;
         return { label, on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent', dotBg: on ? 'var(--action-primary)' : 'transparent', dotBorder: on ? 'var(--action-primary)' : 'var(--text-secondary)', select: () => this.setAcct({ level: label }, 'level') };
       });
-      v.saveProfile = () => this.submit({ name: name ? null : this.msg.nameEmpty }, () => {
-        this.setState(x => ({ players: x.players.map(p => p.id === 'me' ? { ...p, name, level: x.acct.level } : p) }));
-        this.goBack(); this.flash('Profile saved');
+      v.saveProfile = () => this.submit({ name: name ? null : this.msg.nameEmpty }, async () => {
+        const players = this.state.players.map(p => p.id === 'me' ? { ...p, name, level: this.state.acct.level } : p);
+        await this.saveNow({ players });
+        this.setState({ players }); this.goBack(); this.flash('Profile saved');
       });
     }
     if (v.isAccount) {
@@ -1696,8 +1813,17 @@ class Component extends DCLogic {
       v.onPwCur = e => this.setAcct({ cur: e.target.value }, 'current');
       v.onPwNext = e => this.setAcct({ next: e.target.value }, 'password');
       v.curErr = s.errors.current || null; v.curInvalid = !!v.curErr; v.curCls = v.curErr ? 'field-error' : '';
-      v.savePassword = () => this.submit({ current: a.cur ? null : 'Enter your current password.', password: a.next.length >= 8 ? null : a.next ? this.msg.pwShort : 'Enter a new password.' },
-        () => { this.goBack(); this.flash('Password updated'); });
+      // After a reset link the current password isn't asked for (needCurrent hides that field).
+      v.needCurrent = !a.recovery;
+      v.savePassword = () => this.submit({ current: a.recovery || a.cur ? null : 'Enter your current password.', password: a.next.length >= 8 ? null : a.next ? this.msg.pwShort : 'Enter a new password.' }, async () => {
+        try { await (await this.api()).auth.changePassword(this.state.email, a.cur, a.next, !!a.recovery); }
+        catch (e) {
+          if (e.code === 'current') return { errors: { current: this.msg.curWrong } };
+          if (e.code === 'weak' || e.code === 'same') return { errors: { password: e.code === 'weak' ? this.msg.pwWeak : this.msg.pwSame } };
+          throw e;
+        }
+        this.goBack(); this.flash('Password updated');
+      });
     }
     if (v.isPrefs) {
       const row = (k, label, sub) => { const on = !!s.prefs[k];
@@ -1712,7 +1838,11 @@ class Component extends DCLogic {
     v.deleteAccount = () => {
       if (this.state.busy) return;
       this.setState({ busy: 'delete', banner: null });
-      this.request(() => { this.setState({ confirmDeleteAccount: false }); this.signOut(true); this.flash('Account deleted'); });
+      this.request(async () => {
+        await (await this.api()).auth.deleteAccount();
+        try { localStorage.removeItem('rallywise.v1.user.' + this.state.email); } catch (e) {} // any pre-cloud copy on this device
+        this.clearAccount(); this.flash('Account deleted');
+      });
     };
     for (const k of ['apple', 'google']) v[k] = { go: () => this.social(k), busy: s.busy === k, idle: s.busy !== k, dim: s.busy && s.busy !== k ? .5 : 1 };
 
@@ -1734,7 +1864,7 @@ class Component extends DCLogic {
         const sg = byT('Singles'), db = byT('Doubles');
         const games = all.flatMap(m => m.games), cg = games.filter(x => Math.abs(x[0] - x[1]) <= 3), cw = cg.filter(x => x[0] > x[1]).length;
         const mg = games.length ? games.reduce((t, x) => t + x[0] - x[1], 0) / games.length : 0;
-        const today = new Date('2026-09-22T12:00:00'), cutoff = new Date(today - 30 * 864e5).toISOString().slice(0, 10);
+        const today = new Date(this.today() + 'T12:00:00'), cutoff = new Date(today - 30 * 864e5).toISOString().slice(0, 10);
         const last5 = this.rec(chron.slice(-5));
         const bars = chron.slice(-10).map((m, i, arr) => { const idx = chron.indexOf(m); const w = this.rec(chron.slice(Math.max(0, idx - 4), idx + 1)).pct;
           return { h: Math.max(10, Math.round(w * 100)) + '%', bg: i >= arr.length - 4 ? 'var(--progress-active)' : 'var(--border-default)' }; });
