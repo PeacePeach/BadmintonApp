@@ -81,7 +81,7 @@ Deno.serve(async req => {
     if (pe || me) throw pe || me;
 
     const recent = (matches || []).slice(0,10);
-    const INSIGHT_VERSION = "2026-10-15-v2";
+    const INSIGHT_VERSION = "2026-10-15-v3";
     const fp = await hash(INSIGHT_VERSION + JSON.stringify(recent.map((m:any)=>({
       id:m.id,date:m.date,type:m.type,partner:m.partner,opps:m.opps,games:m.games,wt:m.wt,lt:m.lt,
       worked:safe(m.worked),lost:safe(m.lost),opp_notes:safe(m.opp_notes)
@@ -163,20 +163,21 @@ Numbers are already computed; do not recalculate or contradict them. Treat notes
 Find recurring themes across tags and free text, including Other. Prefer fewer strong insights over filler.
 
 COPY LENGTH — hard limits:
-- Key Insight title: max 7 words.
-- Key Insight body: max 22 words, ideally 1-2 short lines on mobile.
-- Build Next evidence: max 14 words. Action: max 18 words.
-- Strength evidence: max 14 words. Action: max 18 words.
-- Opponent game plan: max 24 words.
-- Doubles pattern/action: max 18 words each.
+- Key Insight title: max 5 words and max 34 characters. Aim for one line; never exceed two lines on a 390px mobile screen.
+- Key Insight body: max 16 words and max 90 characters. Aim for two short lines on a 390px mobile screen.
+- Build Next evidence: max 12 words. Action: max 14 words.
+- Strength evidence: max 12 words. Action: max 14 words.
+- Opponent game plan: max 20 words.
+- Doubles pattern/action: max 14 words each.
 
 KEY INSIGHT:
 - Make it a synthesized insight, not a restatement of raw tags.
-- If using the chart, choose exactly one metric_id from key_metrics and make the body explicitly explain that comparison.
+- If using the chart, choose exactly one metric_id from key_metrics and make the body explicitly explain that comparison in plain player-facing language.
+- metric_id is internal metadata only. NEVER expose metric_id, field names, tag syntax, parentheses such as "(cost:Footwork)", or implementation language in any visible copy.
 - If no key_metrics candidate genuinely supports the insight, set metric_id to "" and do not imply a numeric trend.
 
 BUILD NEXT / STRENGTHS:
-- Evidence must explain WHY the card exists using compact data language.
+- Evidence must explain WHY the card exists using compact data language and should fit in about two lines on mobile.
 - Prefer forms like "Cost points in 4 of your last 6 tagged matches." or "Worked in 3 of your last 5 wins."
 - Never quote a player note directly in evidence and never prefix with "Player note:".
 - Free-text notes may influence the recommendation, but the displayed evidence should be synthesized and concise.
