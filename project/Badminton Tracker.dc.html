@@ -535,8 +535,8 @@ button:disabled{cursor:default !important;}
             <sc-if value="{{ grow.showKey }}" hint-placeholder-val="{{ true }}">
             <div style="background:var(--surface-primary);border-radius:26px;padding:24px;display:flex;flex-direction:column;gap:14px;">
               <div style="display:flex;align-items:center;gap:8px;font:400 14px/1 var(--font-sans);color:var(--neutral-600);"><div style="width:6px;height:6px;border-radius:50%;background:var(--status-win);"></div>Key insight</div>
-              <div style="font:500 22px/1.3 var(--font-sans);text-wrap:balance;">Your net game is getting stronger.</div>
-              <div style="font:400 15px/1.5 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">You've won a higher share of net points in your last 6 matches.</div>
+              <div style="font:500 22px/1.3 var(--font-sans);text-wrap:balance;">{{ grow.keyTitle }}</div>
+              <div style="font:400 15px/1.5 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">{{ grow.keyBody }}</div>
               <div style="position:relative;height:10px;display:flex;gap:6px;margin-top:10px;">
                 <div style="width:72%;flex-shrink:0;border-radius:99px;background:var(--progress-active);"></div>
                 <div style="flex:1;border-radius:99px;background:repeating-linear-gradient(-60deg,var(--border-default) 0 1.5px,transparent 1.5px 5px);"></div>
@@ -1380,7 +1380,7 @@ class Component extends DCLogic {
       screen: screens[start] || 'matches', pwVisible: false, agree: false, ob: this.newOb(),
       f: this.blankForm(), errors: {}, banner: null, busy: null, resetEmail: 'sam@rallywise.app', resendIn: 0,
       ...this.authPreset(p.authError),
-      insTab: 'progress', back: start === 'Match Detail' ? [{ screen: 'matches' }] : [], filter: 'All', menu: false, confirmDelete: null, detailId: null, playerId: null, search: '', toast: null,
+      insTab: 'progress', aiGrow: null, growBusy: false, back: start === 'Match Detail' ? [{ screen: 'matches' }] : [], filter: 'All', menu: false, confirmDelete: null, detailId: null, playerId: null, search: '', toast: null,
       ...this.dataFor(p.dataState, players, matches), log: start === 'Log Match' ? this.newLog() : null,
       email: 'sam@rallywise.app', acct: { name: '', level: null, cur: '', next: '' }, prefs: this.newPrefs(),
       onboarded: true, confirmDeleteAccount: false
@@ -1413,6 +1413,18 @@ class Component extends DCLogic {
     return b;
   }
   dataState(s) { s = s || this.state; return { onboarded: s.onboarded, players: s.players, matches: s.matches, prefs: s.prefs }; }
+  async refreshGrow() {
+    if (!this.live() || !this.user || this.state.growBusy) return;
+    this.setState({ growBusy: true });
+    try {
+      const b = await this.api();
+      const insight = await b.insights.generate();
+      if (insight) this.setState({ aiGrow: insight, growBusy: false });
+      else this.setState({ growBusy: false });
+    } catch (e) {
+      this.setState({ growBusy: false });
+    }
+  }
   // On open: restore the saved session, load its data, then leave the splash.
   async restore() {
     let user = null;
@@ -1457,6 +1469,7 @@ class Component extends DCLogic {
       ob: { ...this.newOb(), name: me.name || '' }, filter: 'All', search: '', detailId: null, playerId: null, log: null, blocked: null, loading: false });
     // What was just loaded is already saved; set last, so nothing on screen from before is saved under this account.
     this._saved = this.dataState(a); this.sync = sync; this.user = { ...user, anonId }; this._retryUser = null;
+    if (b.insights) b.insights.cached().then(insight => { if (insight && this.user && this.user.id === user.id) this.setState({ aiGrow: insight }); }).catch(() => {});
     if (migrated) this.flash('Your matches are now saved to your account');
     const A = window.RallywiseAnalytics, c = this.analyticsCtx(a.prefs);
     if (A) { A.setAccount(anonId); if (c && c.consent === 'no') A.clear(anonId); }
@@ -1477,7 +1490,7 @@ class Component extends DCLogic {
     if (window.RallywiseAnalytics) window.RallywiseAnalytics.setAccount(null);
     this.toAuth('login');
     this.setState({ email: '', players: [], matches: [], prefs: this.newPrefs(), onboarded: true, detailId: null, playerId: null, log: null, menu: false,
-      blocked: null, loading: false, confirmDelete: null, confirmDeleteAccount: false });
+      blocked: null, loading: false, aiGrow: null, growBusy: false, confirmDelete: null, confirmDeleteAccount: false });
   }
   // Log Out: saves anything still unsaved if it can, ends this device's session and clears the screen.
   async signOut() {
@@ -1765,6 +1778,7 @@ class Component extends DCLogic {
     this.commit(m, matches);
   }
   commit(m, matches) {
+    setTimeout(() => this.refreshGrow(), 0);
     if (this.state.log && this.state.log.editId) {
       this.setState(s => ({ matches, screen: 'detail', detailId: m.id, back: s.back.slice(0, -1), log: null }));
       return this.flash('Changes saved');
@@ -1785,6 +1799,7 @@ class Component extends DCLogic {
     const gone = this.state.matches.find(m => m.id === id), at = gone && Date.parse(gone.createdAt);
     this.track('match_deleted', { match_count: matches.length, minutes_since_logged: at ? Math.max(0, Math.round((Date.now() - at) / 6e4)) : null });
     this.setState({ matches, confirmDelete: null, screen: 'matches', back: [], detailId: null, log: null });
+    setTimeout(() => this.refreshGrow(), 0);
     this.flash('Match deleted');
   }
   // Settings & account. Saves reuse the auth request, so the busy spinner and network banner match.
@@ -1982,7 +1997,10 @@ class Component extends DCLogic {
       v.insProgress = s.insTab !== 'coach'; v.insCoach = !v.insProgress;
       v.insTabs = [['Performance', 'progress'], ['Grow', 'coach']].map(([label, k]) => { const on = (s.insTab || 'progress') === k; return { label,
         bg: on ? 'var(--text-primary)' : 'transparent', fg: on ? 'var(--text-inverse)' : 'var(--filter-pill-text-default)', select: () => {
-        if (k === 'coach' && this.state.insTab !== 'coach') this.track('grow_viewed', { match_count: this.state.matches.length });
+        if (k === 'coach' && this.state.insTab !== 'coach') {
+          this.track('grow_viewed', { match_count: this.state.matches.length });
+          setTimeout(() => this.refreshGrow(), 0);
+        }
         this.setState({ insTab: k }); } }; });
       {
         const byT = t => this.rec(all.filter(m => m.type === t));
@@ -2039,8 +2057,23 @@ class Component extends DCLogic {
         // Design previews keep the sample coaching above. Real accounts only see what their own matches back up:
         // tags they picked (2 or more times), and their own notes on opponents. The key insight and Doubles Play are
         // sample-only until they can be worked out from real data.
-        if (!this.live()) v.grow = { ...sample, showKey: true, showBuild: true, showStrengths: true, showOpps: true, showDoubles: true, empty: null };
-        else {
+        if (!this.live()) v.grow = { ...sample, keyTitle: 'Your net game is getting stronger.', keyBody: "You've won a higher share of net points in your last 6 matches.", showKey: true, showBuild: true, showStrengths: true, showOpps: true, showDoubles: true, empty: null };
+        else if (s.aiGrow) {
+          const ai = s.aiGrow;
+          const opps = (ai.opponentPlans || []).map(x => {
+            const id = x.player_id;
+            return id && this.nm(id) ? op(id, x.plan) : null;
+          }).filter(Boolean);
+          const doubles = (ai.doublesPlay || []).map(x => ({ ...x, labelFg: x.label === 'Try Next' ? 'var(--status-win)' : 'var(--text-secondary)' }));
+          const build = ai.buildNext || [], strengths = ai.strengths || [], key = ai.keyInsight || null;
+          v.grow = {
+            keyTitle: key ? key.title : '', keyBody: key ? key.body : '',
+            build, strengths, opps, doubles,
+            showKey: !!key, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: !!doubles.length,
+            empty: !key && !build.length && !strengths.length && !opps.length && !doubles.length &&
+              empty('no-insights', 'Not Enough Data Yet', 'Log a few more matches and add notes about what worked, what cost points, or what you noticed.')
+          };
+        } else {
           const tagged = chron.filter(m => m.wt.length || m.lt.length).slice(-6), wins = chron.filter(m => m.wt.length && this.res(m.games).win).slice(-6);
           const top = (list, k) => Object.entries(list.flatMap(m => m[k]).filter(t => t !== 'Other').reduce((c, t) => ({ ...c, [t]: (c[t] || 0) + 1 }), {}))
             .filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]).slice(0, 2);
@@ -2048,7 +2081,7 @@ class Component extends DCLogic {
           const strengths = top(wins, 'wt').map(([t, n]) => ({ name: t, signal: `Tagged as working in ${n} of your last ${wins.length} wins.`, action: '' }));
           const opps = [...new Set(all.flatMap(m => m.opps))].map(id => ({ id, r: this.vs(id), note: all.find(m => m.on && m.opps.includes(id)) }))
             .filter(o => o.note && this.nm(o.id)).sort((a, b) => a.r.pct - b.r.pct || b.r.n - a.r.n).slice(0, 2).map(o => op(o.id, o.note.on));
-          v.grow = { build, strengths, opps, doubles: [], showKey: false, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: false,
+          v.grow = { keyTitle: '', keyBody: '', build, strengths, opps, doubles: [], showKey: false, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: false,
             empty: !build.length && !strengths.length && !opps.length && empty('no-insights', 'Not Enough Data Yet', 'Tag what worked and what cost you points when you log matches, or add notes on opponents. Grow builds from those.') };
         }
       }
