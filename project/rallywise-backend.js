@@ -239,8 +239,20 @@
     }
   };
 
+  const insights = {
+    async generate() {
+      const { data, error } = await sb().functions.invoke('generate-grow-insights', { body: {} });
+      if (error) throw dataFail(error);
+      return data && data.insight ? data.insight : null;
+    },
+    async cached() {
+      const row = await run(sb().from('ai_insights').select('insight_json,generated_at').maybeSingle());
+      return row ? row.insight_json : null;
+    }
+  };
+
   // The mocked session record from the localStorage version is meaningless now.
   try { localStorage.removeItem('rallywise.v1.session'); } catch (e) {}
 
-  window.RallywiseBackend = { ready, auth, data, analytics };
+  window.RallywiseBackend = { ready, auth, data, analytics, insights };
 })();
