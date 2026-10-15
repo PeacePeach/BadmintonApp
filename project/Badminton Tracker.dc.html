@@ -83,6 +83,10 @@ button:disabled{cursor:default !important;}
    lang="zh-Hans", such as the 简体中文 option shown in English. */
 :root[lang="zh-Hans"],[lang="zh-Hans"]{--font-sans:"Poppins","Noto Sans SC",sans-serif;}
 :root[lang="zh-Hans"] body{font-family:"Poppins","Noto Sans SC",sans-serif;}
+/* In Chinese, wide tracking reads as gaps between characters and uppercase does nothing, so tracked labels (.tl)
+   tighten; text set below 12px (.zh12) comes up to 12px, where Noto keeps its stroke detail. English is unchanged. */
+:root[lang="zh-Hans"] .tl{letter-spacing:.04em !important;text-transform:none !important;}
+:root[lang="zh-Hans"] .zh12{font-size:12px !important;}
 </style>
 </helmet>
 <div class="stage" style="width:100%;height:100vh;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:0;">
@@ -95,8 +99,8 @@ button:disabled{cursor:default !important;}
     <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Log In" style="display:flex;flex-direction:column;gap:32px;padding-top:56px;">
         <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:0 12px;">
-          <div style="font:600 30px/1.2 var(--font-sans);">Welcome Back</div>
-          <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">Log in to keep tracking your matches.</div>
+          <div style="font:600 30px/1.2 var(--font-sans);">{{ tx.welcomeBack }}</div>
+          <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">{{ tx.loginBody }}</div>
         </div>
         <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
           <div role="alert" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:22px;background:var(--surface-muted);">
@@ -106,39 +110,39 @@ button:disabled{cursor:default !important;}
         </sc-if>
         <div style="display:flex;flex-direction:column;gap:20px;">
           <div style="display:flex;flex-direction:column;gap:10px;">
-            <div style="font:500 15px/1 var(--font-sans);">Email</div>
-            <div class="search-field-outline {{ emailCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="email" value="{{ f.email }}" onChange="{{ on_email }}" placeholder="you@example.com" autocomplete="email" aria-invalid="{{ emailInvalid }}" aria-label="you@example.com" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
+            <div style="font:500 15px/1 var(--font-sans);">{{ tx.email }}</div>
+            <div class="search-field-outline {{ emailCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="email" value="{{ f.email }}" onChange="{{ on_email }}" placeholder="you@example.com" autocomplete="email" aria-invalid="{{ emailInvalid }}" aria-label="{{ tx.email }}" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
             <sc-if value="{{ emailErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--status-error);">{{ emailErr }}</div></sc-if>
           </div>
           <div style="display:flex;flex-direction:column;gap:10px;">
-            <div style="font:500 15px/1 var(--font-sans);">Password</div>
-            <div class="search-field-outline {{ passwordCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="{{ pwType }}" value="{{ f.password }}" onChange="{{ on_password }}" placeholder="Password" autocomplete="current-password" aria-invalid="{{ passwordInvalid }}" aria-label="Password" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"><button onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}" style="width:32px;height:32px;border:none;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import></button></div>
+            <div style="font:500 15px/1 var(--font-sans);">{{ tx.password }}</div>
+            <div class="search-field-outline {{ passwordCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="{{ pwType }}" value="{{ f.password }}" onChange="{{ on_password }}" placeholder="{{ tx.password }}" autocomplete="current-password" aria-invalid="{{ passwordInvalid }}" aria-label="{{ tx.password }}" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"><button onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}" style="width:32px;height:32px;border:none;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import></button></div>
             <sc-if value="{{ passwordErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--status-error);">{{ passwordErr }}</div></sc-if>
           </div>
-          <div style="display:flex;justify-content:flex-end;margin-top:-4px;"><span onClick="{{ forgotPw }}" style="font:500 14px/1 var(--font-sans);color:var(--status-win);cursor:pointer;">Forgot Password?</span></div>
+          <div style="display:flex;justify-content:flex-end;margin-top:-4px;"><span onClick="{{ forgotPw }}" style="font:500 14px/1 var(--font-sans);color:var(--status-win);cursor:pointer;">{{ tx.forgotPw }}</span></div>
         </div>
         <button onClick="{{ logIn }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--action-primary);color:var(--action-on-primary);" style-active="transform:scale(.97);">
-          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">Log In</span></sc-if>
-          <sc-if value="{{ idleSubmit }}" hint-placeholder-val="{{ true }}">Log In</sc-if>
+          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">{{ tx.logIn }}</span></sc-if>
+          <sc-if value="{{ idleSubmit }}" hint-placeholder-val="{{ true }}">{{ tx.logIn }}</sc-if>
         </button>
         <div style="display:flex;align-items:center;gap:16px;">
           <div style="flex:1;height:1px;background:var(--border-default);"></div>
-          <div style="font:500 13px/1 var(--font-sans);color:var(--text-secondary);">Or</div>
+          <div style="font:500 13px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.or }}</div>
           <div style="flex:1;height:1px;background:var(--border-default);"></div>
         </div>
         <div style="display:flex;flex-direction:column;gap:12px;">
           <button onClick="{{ apple.go }}" aria-busy="{{ apple.busy }}" disabled="{{ busyAny }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;opacity:{{ apple.dim }};" style-active="transform:scale(.98);">
             <sc-if value="{{ apple.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span></sc-if>
             <sc-if value="{{ apple.idle }}" hint-placeholder-val="{{ true }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z"></path></svg></sc-if>
-            Continue with Apple
+            {{ tx.withApple }}
           </button>
           <button onClick="{{ google.go }}" aria-busy="{{ google.busy }}" disabled="{{ busyAny }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;opacity:{{ google.dim }};" style-active="transform:scale(.98);">
             <sc-if value="{{ google.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span></sc-if>
             <sc-if value="{{ google.idle }}" hint-placeholder-val="{{ true }}"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg></sc-if>
-            Continue with Google
+            {{ tx.withGoogle }}
           </button>
         </div>
-        <div style="text-align:center;font:400 15px/1 var(--font-sans);color:var(--text-secondary);">Don't have an account? <span onClick="{{ toSignup }}" style="color:var(--status-win);font-weight:600;cursor:pointer;">Sign Up</span></div>
+        <div style="text-align:center;font:400 15px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.noAccount }}<span onClick="{{ toSignup }}" style="color:var(--status-win);font-weight:600;cursor:pointer;">{{ tx.signUp }}</span></div>
       </div>
     </sc-if>
 
@@ -146,8 +150,8 @@ button:disabled{cursor:default !important;}
     <sc-if value="{{ isSignup }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Sign Up" style="display:flex;flex-direction:column;gap:32px;padding-top:56px;">
         <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:0 12px;">
-          <div style="font:600 30px/1.2 var(--font-sans);">Create Account</div>
-          <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">Start building your match history.</div>
+          <div style="font:600 30px/1.2 var(--font-sans);">{{ tx.createAccount }}</div>
+          <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">{{ tx.signupBody }}</div>
         </div>
         <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
           <div role="alert" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:22px;background:var(--surface-muted);">
@@ -157,47 +161,47 @@ button:disabled{cursor:default !important;}
         </sc-if>
         <div style="display:flex;flex-direction:column;gap:16px;">
           <div style="display:flex;flex-direction:column;gap:8px;">
-            <div class="search-field-outline {{ nameCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="text" value="{{ f.name }}" onChange="{{ on_name }}" placeholder="Name" autocomplete="name" aria-invalid="{{ nameInvalid }}" aria-label="Name" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
+            <div class="search-field-outline {{ nameCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="text" value="{{ f.name }}" onChange="{{ on_name }}" placeholder="{{ tx.name }}" autocomplete="name" aria-invalid="{{ nameInvalid }}" aria-label="{{ tx.name }}" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
             <sc-if value="{{ nameErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--status-error);">{{ nameErr }}</div></sc-if>
           </div>
           <div style="display:flex;flex-direction:column;gap:8px;">
-            <div class="search-field-outline {{ emailCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="email" value="{{ f.email }}" onChange="{{ on_email }}" placeholder="Email" autocomplete="email" aria-invalid="{{ emailInvalid }}" aria-label="Email" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
+            <div class="search-field-outline {{ emailCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="email" value="{{ f.email }}" onChange="{{ on_email }}" placeholder="{{ tx.email }}" autocomplete="email" aria-invalid="{{ emailInvalid }}" aria-label="{{ tx.email }}" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
             <sc-if value="{{ emailErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--status-error);">{{ emailErr }}</div></sc-if>
           </div>
           <div style="display:flex;flex-direction:column;gap:8px;">
-            <div class="search-field-outline {{ passwordCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="{{ pwType }}" value="{{ f.password }}" onChange="{{ on_password }}" placeholder="Password" autocomplete="new-password" aria-invalid="{{ passwordInvalid }}" aria-label="Password" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"><button onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}" style="width:32px;height:32px;border:none;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import></button></div>
+            <div class="search-field-outline {{ passwordCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="{{ pwType }}" value="{{ f.password }}" onChange="{{ on_password }}" placeholder="{{ tx.password }}" autocomplete="new-password" aria-invalid="{{ passwordInvalid }}" aria-label="{{ tx.password }}" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"><button onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}" style="width:32px;height:32px;border:none;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import></button></div>
             <sc-if value="{{ passwordErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--status-error);">{{ passwordErr }}</div></sc-if>
-            <sc-if value="{{ passwordHelper }}" hint-placeholder-val="{{ true }}"><div class="field-msg" style="color:var(--text-tertiary);">At least 8 characters</div></sc-if>
+            <sc-if value="{{ passwordHelper }}" hint-placeholder-val="{{ true }}"><div class="field-msg" style="color:var(--text-tertiary);">{{ tx.pwHelper }}</div></sc-if>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:12px;">
-          <button onClick="{{ toggleAgree }}" aria-label="Agree to Terms and Privacy Policy" style="width:24px;height:24px;border-radius:7px;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;background: {{ agreeBg }};border:1.5px solid {{ agreeBorder }};color:var(--action-on-primary);">
+          <button onClick="{{ toggleAgree }}" aria-label="{{ tx.agreeLabel }}" style="width:24px;height:24px;border-radius:7px;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;background: {{ agreeBg }};border:1.5px solid {{ agreeBorder }};color:var(--action-on-primary);">
             <sc-if value="{{ agree }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 16 }}" hint-size="16px,16px"></x-import></sc-if>
           </button>
-          <div style="font:400 15px/1.4 var(--font-sans);">I agree to <span style="color:var(--status-win);font-weight:600;">Terms</span> and <span style="color:var(--status-win);font-weight:600;">Privacy Policy</span>.</div>
+          <div style="font:400 15px/1.4 var(--font-sans);">{{ tx.agreeA }}<span style="color:var(--status-win);font-weight:600;">{{ tx.terms }}</span>{{ tx.agreeAnd }}<span style="color:var(--status-win);font-weight:600;">{{ tx.privacyPolicy }}</span>{{ tx.agreeEnd }}</div>
         </div>
         <button onClick="{{ signUp }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;background: {{ signupBg }};color: {{ signupFg }};" style-active="transform:scale(.97);">
-          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">Sign Up</span></sc-if>
-          <sc-if value="{{ idleSubmit }}" hint-placeholder-val="{{ true }}">Sign Up</sc-if>
+          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">{{ tx.signUp }}</span></sc-if>
+          <sc-if value="{{ idleSubmit }}" hint-placeholder-val="{{ true }}">{{ tx.signUp }}</sc-if>
         </button>
         <div style="display:flex;align-items:center;gap:16px;">
           <div style="flex:1;height:1px;background:var(--border-default);"></div>
-          <div style="font:500 13px/1 var(--font-sans);color:var(--text-secondary);">Or</div>
+          <div style="font:500 13px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.or }}</div>
           <div style="flex:1;height:1px;background:var(--border-default);"></div>
         </div>
         <div style="display:flex;flex-direction:column;gap:12px;">
           <button onClick="{{ apple.go }}" aria-busy="{{ apple.busy }}" disabled="{{ busyAny }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;opacity:{{ apple.dim }};" style-active="transform:scale(.98);">
             <sc-if value="{{ apple.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span></sc-if>
             <sc-if value="{{ apple.idle }}" hint-placeholder-val="{{ true }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z"></path></svg></sc-if>
-            Continue with Apple
+            {{ tx.withApple }}
           </button>
           <button onClick="{{ google.go }}" aria-busy="{{ google.busy }}" disabled="{{ busyAny }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;opacity:{{ google.dim }};" style-active="transform:scale(.98);">
             <sc-if value="{{ google.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span></sc-if>
             <sc-if value="{{ google.idle }}" hint-placeholder-val="{{ true }}"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg></sc-if>
-            Continue with Google
+            {{ tx.withGoogle }}
           </button>
         </div>
-        <div style="text-align:center;font:400 15px/1 var(--font-sans);color:var(--text-secondary);">Already have an account? <span onClick="{{ toLogin }}" style="color:var(--status-win);font-weight:600;cursor:pointer;">Log In</span></div>
+        <div style="text-align:center;font:400 15px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.haveAccount }}<span onClick="{{ toLogin }}" style="color:var(--status-win);font-weight:600;cursor:pointer;">{{ tx.logIn }}</span></div>
       </div>
     </sc-if>
 
@@ -205,8 +209,8 @@ button:disabled{cursor:default !important;}
     <sc-if value="{{ isForgot }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Forgot Password" style="display:flex;flex-direction:column;gap:32px;padding-top:56px;">
         <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:0 12px;">
-          <div style="font:600 30px/1.2 var(--font-sans);">Forgot Password?</div>
-          <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">Enter the email you use for Rallywise and we'll send you a link to reset your password.</div>
+          <div style="font:600 30px/1.2 var(--font-sans);">{{ tx.forgotPw }}</div>
+          <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">{{ tx.forgotBody }}</div>
         </div>
         <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
           <div role="alert" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:22px;background:var(--surface-muted);">
@@ -215,15 +219,15 @@ button:disabled{cursor:default !important;}
           </div>
         </sc-if>
         <div style="display:flex;flex-direction:column;gap:10px;">
-            <div style="font:500 15px/1 var(--font-sans);">Email</div>
-            <div class="search-field-outline {{ emailCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="email" value="{{ f.email }}" onChange="{{ on_email }}" placeholder="you@example.com" autocomplete="email" aria-invalid="{{ emailInvalid }}" aria-label="you@example.com" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
+            <div style="font:500 15px/1 var(--font-sans);">{{ tx.email }}</div>
+            <div class="search-field-outline {{ emailCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="email" value="{{ f.email }}" onChange="{{ on_email }}" placeholder="you@example.com" autocomplete="email" aria-invalid="{{ emailInvalid }}" aria-label="{{ tx.email }}" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
             <sc-if value="{{ emailErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--status-error);">{{ emailErr }}</div></sc-if>
           </div>
         <button onClick="{{ sendReset }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--action-primary);color:var(--action-on-primary);" style-active="transform:scale(.97);">
-          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">Send Reset Link</span></sc-if>
-          <sc-if value="{{ idleSubmit }}" hint-placeholder-val="{{ true }}">Send Reset Link</sc-if>
+          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">{{ tx.sendReset }}</span></sc-if>
+          <sc-if value="{{ idleSubmit }}" hint-placeholder-val="{{ true }}">{{ tx.sendReset }}</sc-if>
         </button>
-        <div style="text-align:center;font:400 15px/1 var(--font-sans);"><span onClick="{{ toLogin }}" style="color:var(--status-win);font-weight:600;cursor:pointer;">Back to Log In</span></div>
+        <div style="text-align:center;font:400 15px/1 var(--font-sans);"><span onClick="{{ toLogin }}" style="color:var(--status-win);font-weight:600;cursor:pointer;">{{ tx.backToLogin }}</span></div>
       </div>
     </sc-if>
 
@@ -232,13 +236,13 @@ button:disabled{cursor:default !important;}
       <div data-screen-label="Check Email" style="display:flex;flex-direction:column;gap:32px;padding-top:56px;">
         <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:0 12px;">
           <div style="width:64px;height:64px;border-radius:50%;background:var(--icon-button-bg);color:var(--text-primary);display:flex;align-items:center;justify-content:center;margin-bottom:14px;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="MailCheck" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></div>
-          <div style="font:600 30px/1.2 var(--font-sans);">Check Your Email</div>
-          <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">If an account exists for <span style="color:var(--text-primary);font-weight:500;overflow-wrap:anywhere;">{{ resetEmail }}</span>, you'll get a link to reset your password. It may take a minute to arrive.</div>
+          <div style="font:600 30px/1.2 var(--font-sans);">{{ tx.checkEmail }}</div>
+          <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">{{ tx.resetBodyA }}<span style="color:var(--text-primary);font-weight:500;overflow-wrap:anywhere;">{{ resetEmail }}</span>{{ tx.resetBodyB }}</div>
         </div>
-        <button onClick="{{ toLogin }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;background:var(--action-primary);color:var(--action-on-primary);" style-active="transform:scale(.97);">Back to Log In</button>
-        <div style="text-align:center;font:400 15px/1 var(--font-sans);color:var(--text-secondary);">Didn't get the email?
-          <sc-if value="{{ canResend }}" hint-placeholder-val="{{ true }}"><span onClick="{{ resend }}" role="button" style="color:var(--status-win);font-weight:600;cursor:pointer;">Resend</span></sc-if>
-          <sc-if value="{{ resendWait }}" hint-placeholder-val="{{ false }}"><span style="color:var(--text-tertiary);font-variant-numeric:tabular-nums;">Resend in {{ resendIn }}s</span></sc-if>
+        <button onClick="{{ toLogin }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;background:var(--action-primary);color:var(--action-on-primary);" style-active="transform:scale(.97);">{{ tx.backToLogin }}</button>
+        <div style="text-align:center;font:400 15px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.noEmail }}
+          <sc-if value="{{ canResend }}" hint-placeholder-val="{{ true }}"><span onClick="{{ resend }}" role="button" style="color:var(--status-win);font-weight:600;cursor:pointer;">{{ tx.resend }}</span></sc-if>
+          <sc-if value="{{ resendWait }}" hint-placeholder-val="{{ false }}"><span style="color:var(--text-tertiary);font-variant-numeric:tabular-nums;">{{ resendInLabel }}</span></sc-if>
         </div>
       </div>
     </sc-if>
@@ -310,14 +314,14 @@ button:disabled{cursor:default !important;}
       <div data-screen-label="Matches" style="display:flex;flex-direction:column;gap:22px;">
         <div style="display:flex;align-items:center;justify-content:space-between;">
           <div style="font:600 32px/1.2 var(--font-sans);">{{ tx.matches }}</div>
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" size="{{ 48 }}" label="Menu" onClick="{{ toggleMenu }}" hint-size="48px,48px"></x-import>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" size="{{ 48 }}" label="{{ tx.menu }}" onClick="{{ toggleMenu }}" hint-size="48px,48px"></x-import>
         </div>
         <sc-if value="{{ blocked }}" hint-placeholder-val="{{ false }}">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ blockedState.illustration }}" title="{{ blockedState.title }}" body="{{ blockedState.body }}" actionLabel="{{ blockedState.actionLabel }}" onAction="{{ blockedState.onAction }}" hint-size="350px,330px"></x-import>
         </sc-if>
         <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
           <div aria-busy="true" style="display:flex;flex-direction:column;gap:22px;">
-            <span class="sr-only" role="status">Loading matches</span>
+            <span class="sr-only" role="status">{{ tx.loadingMatches }}</span>
             <div aria-hidden="true" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
               <sc-for list="{{ skel2 }}" as="k" hint-placeholder-count="2">
                 <div style="background:var(--surface-primary);border-radius:26px;padding:20px 22px;display:flex;flex-direction:column;gap:8px;">
@@ -329,7 +333,7 @@ button:disabled{cursor:default !important;}
             </div>
             <button disabled="{{ true }}" style="height:60px;border:none;border-radius:999px;background:var(--surface-muted);color:var(--text-tertiary);font:600 17px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;">
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import>
-              Log Match
+              {{ tx.logMatch }}
             </button>
             <div aria-hidden="true" style="display:flex;flex-direction:column;gap:10px;">
               <sc-for list="{{ skel3 }}" as="k" hint-placeholder-count="3">
@@ -357,19 +361,19 @@ button:disabled{cursor:default !important;}
         <sc-if value="{{ matchesReady }}" hint-placeholder-val="{{ true }}">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <div style="background:var(--surface-primary);border-radius:26px;padding:20px 22px;display:flex;flex-direction:column;gap:8px;">
-            <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">Total Matches</div>
+            <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.totalMatches }}</div>
             <div style="font:500 40px/1 var(--font-sans);">{{ overall.n }}</div>
-            <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ overall.label }} W–L</div>
+            <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ overallWL }}</div>
           </div>
           <div style="background:var(--surface-primary);border-radius:26px;padding:20px 22px;display:flex;flex-direction:column;gap:8px;">
-            <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">Win Rate</div>
+            <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.winRate }}</div>
             <div style="font:500 40px/1 var(--font-sans);color:var(--text-primary);">{{ overall.pctStr }}</div>
             <div style="height:6px;border-radius:99px;background:var(--border-default);overflow:hidden;margin-top:6px;"><div style="height:100%;border-radius:99px;background:var(--status-win);width: {{ overall.barW }};"></div></div>
           </div>
         </div>
         <button onClick="{{ startLog }}" style="height:60px;border:none;border-radius:999px;background:var(--action-primary);color:var(--action-on-primary);font:600 17px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;" style-active="transform:scale(.97);">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import>
-          Log Match
+          {{ tx.logMatch }}
         </button>
         <div style="display:flex;gap:8px;">
           <sc-for list="{{ filters }}" as="f" hint-placeholder-count="3">
@@ -411,7 +415,7 @@ button:disabled{cursor:default !important;}
         <div style="display:flex;flex-direction:column;gap:20px;">
           <div style="display:flex;align-items:center;justify-content:space-between;">
             <div style="font:600 32px/1.2 var(--font-sans);">{{ tx.insights }}</div>
-            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" size="{{ 48 }}" label="Menu" onClick="{{ toggleMenu }}" hint-size="48px,48px"></x-import>
+            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" size="{{ 48 }}" label="{{ tx.menu }}" onClick="{{ toggleMenu }}" hint-size="48px,48px"></x-import>
           </div>
           <sc-if value="{{ insHasData }}" hint-placeholder-val="{{ true }}">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:99px;background:var(--filter-pill-bg);">
@@ -424,7 +428,7 @@ button:disabled{cursor:default !important;}
 
         <sc-if value="{{ insLoading }}" hint-placeholder-val="{{ false }}">
           <div aria-busy="true" style="display:flex;flex-direction:column;gap:10px;">
-            <span class="sr-only" role="status">Loading insights</span>
+            <span class="sr-only" role="status">{{ tx.loadingInsights }}</span>
             <div aria-hidden="true" style="display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);gap:10px;">
               <div style="background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:14px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;">
@@ -470,14 +474,14 @@ button:disabled{cursor:default !important;}
             <div style="display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);gap:10px;">
               <div style="background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:14px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                  <div style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);padding-top:6px;">Win Rate</div>
+                  <div class="tl zh12" style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);padding-top:6px;">{{ tx.winRate }}</div>
                   <div style="width:36px;height:36px;border-radius:50%;background:var(--surface-muted);display:flex;align-items:center;justify-content:center;color:var(--neutral-600);flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Trophy" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
                 </div>
                 <div style="display:flex;flex-direction:column;gap:10px;">
                   <div style="font:500 52px/.95 var(--font-sans);letter-spacing:-.03em;">{{ pf.win }}</div>
                   <div style="display:flex;align-items:center;gap:6px;font:400 13px/1 var(--font-sans);color:var(--text-secondary);">
                     <div style="display:flex;align-items:center;gap:3px;font-weight:600;color: {{ pf.deltaFg }};"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pf.deltaIcon }}" size="{{ 15 }}" hint-size="15px,15px"></x-import>{{ pf.delta }}</div>
-                    vs prev 10
+                    {{ tx.vsPrev10 }}
                   </div>
                 </div>
                 <div style="flex:1;min-height:96px;display:flex;align-items:flex-end;justify-content:space-between;gap:4px;padding-top:12px;">
@@ -485,34 +489,34 @@ button:disabled{cursor:default !important;}
                     <div style="width:8px;border-radius:99px;transition:height .22s ease-out;height: {{ b.h }};background: {{ b.bg }};"></div>
                   </sc-for>
                 </div>
-                <div style="display:flex;justify-content:space-between;font:400 11px/1 var(--font-sans);color:var(--text-secondary);"><div>5-match form</div><div>Now</div></div>
+                <div class="zh12" style="display:flex;justify-content:space-between;font:400 11px/1 var(--font-sans);color:var(--text-secondary);"><div>{{ tx.form5 }}</div><div>{{ tx.now }}</div></div>
               </div>
               <div style="display:flex;flex-direction:column;gap:10px;">
                 <div style="flex:1;background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;">
                   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
-                    <div style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);line-height:1.4;">Matches Played</div>
+                    <div class="tl zh12" style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);line-height:1.4;">{{ tx.matchesPlayed }}</div>
                     <div style="width:36px;height:36px;border-radius:50%;background:var(--surface-muted);display:flex;align-items:center;justify-content:center;color:var(--neutral-600);flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Calendar" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
                   </div>
                   <div style="display:flex;flex-direction:column;gap:6px;">
                     <div style="font:500 40px/1 var(--font-sans);">{{ pf.played }}</div>
-                    <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">Last 30 days</div>
+                    <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.last30 }}</div>
                   </div>
                 </div>
                 <div style="flex:1;background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;">
                   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
-                    <div style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);line-height:1.4;">Recent Record</div>
+                    <div class="tl zh12" style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);line-height:1.4;">{{ tx.recentRecord }}</div>
                     <div style="width:36px;height:36px;border-radius:50%;background:var(--surface-muted);display:flex;align-items:center;justify-content:center;color:var(--neutral-600);flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ListChecks" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
                   </div>
                   <div style="display:flex;flex-direction:column;gap:6px;">
                     <div style="font:500 40px/1 var(--font-sans);">{{ pf.record }}</div>
-                    <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">Last 5 matches</div>
+                    <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.last5 }}</div>
                   </div>
                 </div>
               </div>
             </div>
 
             <div style="background:var(--surface-primary);border-radius:26px;padding:22px 20px;display:flex;flex-direction:column;gap:22px;">
-              <div style="font:500 19px/1.2 var(--font-sans);">Performance Breakdown</div>
+              <div style="font:500 19px/1.2 var(--font-sans);">{{ tx.breakdown }}</div>
               <sc-for list="{{ pf.rows }}" as="r" hint-placeholder-count="4">
                 <div style="display:grid;grid-template-columns:96px minmax(0,1fr) 62px;align-items:center;gap:14px;">
                   <div style="font:400 14px/1.3 var(--font-sans);color:var(--neutral-600);">{{ r.label }}</div>
@@ -522,7 +526,7 @@ button:disabled{cursor:default !important;}
                   </div>
                   <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
                     <div style="font:500 16px/1 var(--font-sans);">{{ r.value }}</div>
-                    <div style="font:400 11px/1 var(--font-sans);color:var(--text-secondary);">{{ r.sub }}</div>
+                    <div class="zh12" style="font:400 11px/1 var(--font-sans);color:var(--text-secondary);">{{ r.sub }}</div>
                   </div>
                 </div>
               </sc-for>
@@ -532,7 +536,7 @@ button:disabled{cursor:default !important;}
                 <div onClick="{{ p.open }}" style="background:var(--surface-primary);border-radius:26px;display:flex;align-items:center;gap:14px;padding:16px 20px 16px 16px;cursor:pointer;">
                   <div style="width:44px;height:44px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;font:500 14px/1 var(--font-sans);flex-shrink:0;">{{ p.initials }}</div>
                   <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;">
-                    <div style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);">{{ p.role }}</div>
+                    <div class="tl zh12" style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);">{{ p.role }}</div>
                     <div style="font:500 16px/1.1 var(--font-sans);">{{ p.name }}</div>
                   </div>
                   <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
@@ -551,7 +555,7 @@ button:disabled{cursor:default !important;}
             </sc-if>
             <sc-if value="{{ grow.showKey }}" hint-placeholder-val="{{ true }}">
             <div style="background:var(--surface-primary);border-radius:26px;padding:24px;display:flex;flex-direction:column;gap:14px;">
-              <div style="display:flex;align-items:center;gap:8px;font:400 14px/1 var(--font-sans);color:var(--neutral-600);"><div style="width:6px;height:6px;border-radius:50%;background:var(--status-win);"></div>Key insight</div>
+              <div style="display:flex;align-items:center;gap:8px;font:400 14px/1 var(--font-sans);color:var(--neutral-600);"><div style="width:6px;height:6px;border-radius:50%;background:var(--status-win);"></div>{{ tx.keyInsight }}</div>
               <div style="font:500 22px/1.3 var(--font-sans);text-wrap:balance;">{{ grow.keyTitle }}</div>
               <div style="font:400 15px/1.5 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">{{ grow.keyBody }}</div>
               <sc-if value="{{ grow.showKeyChart }}" hint-placeholder-val="{{ true }}">
@@ -566,7 +570,7 @@ button:disabled{cursor:default !important;}
 
             <sc-if value="{{ grow.showBuild }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;flex-direction:column;gap:16px;">
-              <div style="display:flex;flex-direction:column;gap:6px;"><div style="font:500 19px/1.2 var(--font-sans);">Build Next</div><div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">Top areas to improve from recent matches</div></div>
+              <div style="display:flex;flex-direction:column;gap:6px;"><div style="font:500 19px/1.2 var(--font-sans);">{{ tx.buildNext }}</div><div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">{{ tx.buildNextSub }}</div></div>
               <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;">
                 <sc-for list="{{ grow.build }}" as="b" hint-placeholder-count="2">
                   <div style="background:var(--surface-primary);border-radius:26px;padding:18px;display:flex;flex-direction:column;gap:14px;">
@@ -577,7 +581,7 @@ button:disabled{cursor:default !important;}
                     <sc-if value="{{ b.action }}" hint-placeholder-val="{{ true }}">
                     <div style="height:1px;background:var(--surface-muted);"></div>
                     <div style="display:flex;flex-direction:column;gap:6px;">
-                      <div style="font:400 12px/1 var(--font-sans);color:var(--status-win);">Try Next</div>
+                      <div style="font:400 12px/1 var(--font-sans);color:var(--status-win);">{{ tx.tryNext }}</div>
                       <div style="font:400 14px/1.4 var(--font-sans);text-wrap:pretty;">{{ b.action }}</div>
                     </div>
                     </sc-if>
@@ -589,7 +593,7 @@ button:disabled{cursor:default !important;}
 
             <sc-if value="{{ grow.showStrengths }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;flex-direction:column;gap:16px;">
-              <div style="display:flex;flex-direction:column;gap:6px;"><div style="font:500 19px/1.2 var(--font-sans);">Your Strengths</div><div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">What's working. Keep doing these.</div></div>
+              <div style="display:flex;flex-direction:column;gap:6px;"><div style="font:500 19px/1.2 var(--font-sans);">{{ tx.strengths }}</div><div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">{{ tx.strengthsSub }}</div></div>
               <sc-for list="{{ grow.strengths }}" as="k" hint-placeholder-count="2">
                 <div style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;">
                   <div style="display:flex;align-items:center;gap:14px;">
@@ -602,7 +606,7 @@ button:disabled{cursor:default !important;}
                   <sc-if value="{{ k.action }}" hint-placeholder-val="{{ true }}">
                   <div style="height:1px;background:var(--surface-muted);"></div>
                   <div style="display:flex;flex-direction:column;gap:6px;">
-                    <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);">Keep Doing</div>
+                    <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.keepDoing }}</div>
                     <div style="font:400 15px/1.45 var(--font-sans);text-wrap:pretty;">{{ k.action }}</div>
                   </div>
                   </sc-if>
@@ -613,7 +617,7 @@ button:disabled{cursor:default !important;}
 
             <sc-if value="{{ grow.showOpps }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;flex-direction:column;gap:16px;">
-              <div style="display:flex;flex-direction:column;gap:6px;"><div style="font:500 19px/1.2 var(--font-sans);">Opponent Plans</div><div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">How to play your toughest opponents</div></div>
+              <div style="display:flex;flex-direction:column;gap:6px;"><div style="font:500 19px/1.2 var(--font-sans);">{{ tx.oppPlans }}</div><div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">{{ tx.oppPlansSub }}</div></div>
               <sc-for list="{{ grow.opps }}" as="o" hint-placeholder-count="2">
                 <div onClick="{{ o.open }}" style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;cursor:pointer;">
                   <div style="display:flex;align-items:center;gap:14px;">
@@ -626,7 +630,7 @@ button:disabled{cursor:default !important;}
                   </div>
                   <div style="height:1px;background:var(--surface-muted);"></div>
                   <div style="display:flex;flex-direction:column;gap:6px;">
-                    <div style="font:400 12px/1 var(--font-sans);color:var(--status-win);">Game Plan</div>
+                    <div style="font:400 12px/1 var(--font-sans);color:var(--status-win);">{{ tx.gamePlan }}</div>
                     <div style="font:400 15px/1.45 var(--font-sans);text-wrap:pretty;">{{ o.plan }}</div>
                   </div>
                 </div>
@@ -636,7 +640,7 @@ button:disabled{cursor:default !important;}
 
             <sc-if value="{{ grow.showDoubles }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;flex-direction:column;gap:16px;">
-              <div style="display:flex;flex-direction:column;gap:6px;"><div style="font:500 19px/1.2 var(--font-sans);">Doubles Play</div><div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">Patterns from your doubles matches</div></div>
+              <div style="display:flex;flex-direction:column;gap:6px;"><div style="font:500 19px/1.2 var(--font-sans);">{{ tx.doublesPlay }}</div><div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">{{ tx.doublesPlaySub }}</div></div>
               <sc-for list="{{ grow.doubles }}" as="d" hint-placeholder-count="2">
                 <div style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;">
                   <div style="display:flex;align-items:flex-start;gap:14px;">
@@ -664,10 +668,10 @@ button:disabled{cursor:default !important;}
     <sc-if value="{{ isLog }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Log Match" style="display:flex;flex-direction:column;gap:24px;">
         <div style="display:flex;align-items:center;gap:14px;">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="{{ logBackIcon }}" size="{{ 48 }}" label="Back" onClick="{{ logBack }}" hint-size="48px,48px"></x-import>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="{{ logBackIcon }}" size="{{ 48 }}" label="{{ tx.back }}" onClick="{{ logBack }}" hint-size="48px,48px"></x-import>
           <div style="display:flex;flex-direction:column;gap:4px;">
             <div style="font:500 19px/1.2 var(--font-sans);">{{ logTitle }}</div>
-            <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">Step {{ log.step }} of 4</div>
+            <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ stepOf }}</div>
           </div>
         </div>
         <div style="display:flex;gap:6px;">
@@ -697,7 +701,7 @@ button:disabled{cursor:default !important;}
         <sc-if value="{{ step2 }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:20px;">
             <div style="background:var(--surface-primary);border-radius:26px;padding:16px;display:flex;flex-direction:column;gap:10px;">
-              <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding:4px 6px 0;">Your Side</div>
+              <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding:4px 6px 0;">{{ tx.yourSide }}</div>
               <sc-for list="{{ sideA }}" as="s" hint-placeholder-count="1">
                 <div onClick="{{ s.select }}" style="height:56px;border-radius:99px;background:var(--surface-muted);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;border:1px solid {{ s.border }};">
                   <div style="width:40px;height:40px;border-radius:50%;background: {{ s.avBg }};color: {{ s.avFg }};display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ s.initials }}<sc-if value="{{ s.empty }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import></sc-if></div>
@@ -706,7 +710,7 @@ button:disabled{cursor:default !important;}
                 </div>
               </sc-for>
               <div style="font:500 13px/1 var(--font-sans);color:var(--text-secondary);text-align:center;padding:4px 0;">vs</div>
-              <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding:0 6px;">Opponents</div>
+              <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding:0 6px;">{{ tx.opponents }}</div>
               <sc-for list="{{ sideB }}" as="s" hint-placeholder-count="1">
                 <div onClick="{{ s.select }}" style="height:56px;border-radius:99px;background:var(--surface-muted);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;border:1px solid {{ s.border }};">
                   <div style="width:40px;height:40px;border-radius:50%;background: {{ s.avBg }};color: {{ s.avFg }};display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ s.initials }}<sc-if value="{{ s.empty }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import></sc-if></div>
@@ -717,17 +721,17 @@ button:disabled{cursor:default !important;}
             </div>
             <sc-if value="{{ hasActiveSlot }}" hint-placeholder-val="{{ true }}">
               <div style="display:flex;flex-direction:column;gap:12px;">
-                <div style="font:500 17px/1.3 var(--font-sans);">Choose {{ activeSlotLabel }}</div>
+                <div style="font:500 17px/1.3 var(--font-sans);">{{ chooseSlot }}</div>
                 <div class="search-field-outline" style="height:52px;border-radius:99px;background:transparent;display:flex;align-items:center;gap:10px;padding:0 18px;color:var(--input-field-text-default);">
                   <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Search" size="{{ 24 }}" hint-size="24px,24px"></x-import>
-                  <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="Search or type a new name" style="flex:1;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 15px/1 var(--font-sans);">
+                  <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="{{ tx.searchName }}" style="flex:1;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 15px/1 var(--font-sans);">
                 </div>
                 <sc-if value="{{ canAddNew }}" hint-placeholder-val="{{ false }}">
                   <div onClick="{{ addNew }}" style="height:56px;border-radius:99px;border:1px dashed var(--ghost-button-outline);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;">
                     <div style="width:40px;height:40px;border-radius:50%;background:transparent;border:1px solid var(--ghost-button-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;">
                       <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import>
                     </div>
-                    <div style="font:500 15px/1 var(--font-sans);">Add “{{ search }}” as New Player</div>
+                    <div style="font:500 15px/1 var(--font-sans);">{{ addNewLabel }}</div>
                   </div>
                 </sc-if>
                 <div style="display:flex;flex-direction:column;gap:8px;">
@@ -750,7 +754,7 @@ button:disabled{cursor:default !important;}
         <sc-if value="{{ step3 }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:16px;">
             <div style="display:flex;flex-direction:column;gap:10px;">
-              <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">Points per Game</div>
+              <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.pointsPerGame }}</div>
               <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
                 <sc-for list="{{ formats }}" as="f" hint-placeholder-count="3">
                   <button onClick="{{ f.select }}" style="height:44px;border:1px solid {{ f.border }};border-radius:99px;font:600 16px/1 var(--font-sans);cursor:pointer;background: {{ f.bg }};color: {{ f.fg }};">{{ f.label }}</button>
@@ -762,7 +766,7 @@ button:disabled{cursor:default !important;}
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:0 4px;">
                   <div style="font:500 15px/1 var(--font-sans);">{{ g.label }}</div>
                   <sc-if value="{{ g.canRemove }}" hint-placeholder-val="{{ false }}">
-                    <div onClick="{{ g.remove }}" style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);cursor:pointer;padding:6px;">Remove</div>
+                    <div onClick="{{ g.remove }}" style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);cursor:pointer;padding:6px;">{{ tx.remove }}</div>
                   </sc-if>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--surface-muted);padding:5px;border-radius:99px;">
@@ -781,11 +785,11 @@ button:disabled{cursor:default !important;}
                   </div>
                 </div>
                 <div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface-muted);border-radius:99px;padding:6px;">
-                  <button onClick="{{ g.dec }}" aria-label="Decrease" style="width:52px;height:52px;border-radius:50%;background:transparent;border:1px solid var(--ghost-button-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;">
+                  <button onClick="{{ g.dec }}" aria-label="{{ tx.decrease }}" style="width:52px;height:52px;border-radius:50%;background:transparent;border:1px solid var(--ghost-button-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;">
                     <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Minus" size="{{ 24 }}" hint-size="24px,24px"></x-import>
                   </button>
                   <div style="font:400 13px/1.3 var(--font-sans);color:var(--neutral-600);text-align:center;">{{ g.loserLabel }}</div>
-                  <button onClick="{{ g.inc }}" aria-label="Increase" style="width:52px;height:52px;border-radius:50%;background:transparent;border:1px solid var(--ghost-button-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;">
+                  <button onClick="{{ g.inc }}" aria-label="{{ tx.increase }}" style="width:52px;height:52px;border-radius:50%;background:transparent;border:1px solid var(--ghost-button-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;">
                     <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import>
                   </button>
                 </div>
@@ -794,7 +798,7 @@ button:disabled{cursor:default !important;}
             <sc-if value="{{ canAddGame }}" hint-placeholder-val="{{ true }}">
               <button onClick="{{ addGame }}" style="height:56px;border-radius:99px;background:transparent;border:1px solid var(--ghost-button-outline);color:var(--text-primary);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;">
                 <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 18 }}" hint-size="18px,18px"></x-import>
-                Add Game {{ nextGameNo }}
+                {{ addGameLabel }}
               </button>
             </sc-if>
           </div>
@@ -802,10 +806,10 @@ button:disabled{cursor:default !important;}
 
         <sc-if value="{{ step4 }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:30px;">
-            <div style="font:400 15px/1.4 var(--font-sans);color:var(--text-secondary);margin-top:-12px;">About 30 seconds. Everything is optional.</div>
+            <div style="font:400 15px/1.4 var(--font-sans);color:var(--text-secondary);margin-top:-12px;">{{ tx.notesIntro }}</div>
             <sc-if value="{{ isEdit }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:14px;">
-                <div style="font:500 19px/1.3 var(--font-sans);">Date</div>
+                <div style="font:500 19px/1.3 var(--font-sans);">{{ tx.date }}</div>
                 <input type="date" value="{{ log.date }}" onChange="{{ onDate }}" style="height:52px;background:var(--input-field-bg);border:1px solid var(--input-field-outline);outline:none;border-radius:99px;padding:0 18px;color:var(--text-primary);font:400 15px/1 var(--font-sans);color-scheme:dark;">
               </div>
             </sc-if>
@@ -818,8 +822,8 @@ button:disabled{cursor:default !important;}
             </div>
             <div style="display:flex;flex-direction:column;gap:14px;">
               <div style="display:flex;justify-content:space-between;align-items:baseline;">
-                <div style="font:500 19px/1.3 var(--font-sans);">What Worked?</div>
-                <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">Pick up to 3</div>
+                <div style="font:500 19px/1.3 var(--font-sans);">{{ tx.whatWorked }}</div>
+                <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.pickUpTo3 }}</div>
               </div>
               <div style="display:flex;flex-wrap:wrap;gap:8px;">
                 <sc-for list="{{ workedTags }}" as="t" hint-placeholder-count="8">
@@ -827,13 +831,13 @@ button:disabled{cursor:default !important;}
                 </sc-for>
               </div>
               <sc-if value="{{ hasWt }}" hint-placeholder-val="{{ false }}">
-                <textarea value="{{ log.worked }}" onChange="{{ onWorked }}" rows="2" placeholder="What specifically worked?" style="background:var(--input-field-bg);border:1px solid var(--input-field-outline);outline:none;border-radius:22px;padding:14px 18px;color:var(--text-primary);font:400 15px/1.5 var(--font-sans);resize:none;"></textarea>
+                <textarea value="{{ log.worked }}" onChange="{{ onWorked }}" rows="2" placeholder="{{ tx.workedPh }}" style="background:var(--input-field-bg);border:1px solid var(--input-field-outline);outline:none;border-radius:22px;padding:14px 18px;color:var(--text-primary);font:400 15px/1.5 var(--font-sans);resize:none;"></textarea>
               </sc-if>
             </div>
             <div style="display:flex;flex-direction:column;gap:14px;">
               <div style="display:flex;justify-content:space-between;align-items:baseline;">
-                <div style="font:500 19px/1.3 var(--font-sans);">What Cost You Points?</div>
-                <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">Pick up to 3</div>
+                <div style="font:500 19px/1.3 var(--font-sans);">{{ tx.whatCost }}</div>
+                <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.pickUpTo3 }}</div>
               </div>
               <div style="display:flex;flex-wrap:wrap;gap:8px;">
                 <sc-for list="{{ lostTags }}" as="t" hint-placeholder-count="8">
@@ -841,15 +845,15 @@ button:disabled{cursor:default !important;}
                 </sc-for>
               </div>
               <sc-if value="{{ hasLt }}" hint-placeholder-val="{{ false }}">
-                <textarea value="{{ log.lost }}" onChange="{{ onLost }}" rows="2" placeholder="What kept happening?" style="background:var(--input-field-bg);border:1px solid var(--input-field-outline);outline:none;border-radius:22px;padding:14px 18px;color:var(--text-primary);font:400 15px/1.5 var(--font-sans);resize:none;"></textarea>
+                <textarea value="{{ log.lost }}" onChange="{{ onLost }}" rows="2" placeholder="{{ tx.lostPh }}" style="background:var(--input-field-bg);border:1px solid var(--input-field-outline);outline:none;border-radius:22px;padding:14px 18px;color:var(--text-primary);font:400 15px/1.5 var(--font-sans);resize:none;"></textarea>
               </sc-if>
             </div>
             <div style="display:flex;flex-direction:column;gap:14px;">
               <div style="display:flex;flex-direction:column;gap:6px;">
                 <div style="font:500 19px/1.3 var(--font-sans);">{{ oppQ }}</div>
-                <div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">Tendencies, strengths, weak spots</div>
+                <div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">{{ tx.oppSub }}</div>
               </div>
-              <textarea value="{{ log.on }}" onChange="{{ onOpp }}" rows="3" placeholder="Attacks every short lift, slower on the backhand side…" style="background:var(--input-field-bg);border:1px solid var(--input-field-outline);outline:none;border-radius:22px;padding:14px 18px;color:var(--text-primary);font:400 15px/1.5 var(--font-sans);resize:none;"></textarea>
+              <textarea value="{{ log.on }}" onChange="{{ onOpp }}" rows="3" placeholder="{{ tx.oppPh }}" style="background:var(--input-field-bg);border:1px solid var(--input-field-outline);outline:none;border-radius:22px;padding:14px 18px;color:var(--text-primary);font:400 15px/1.5 var(--font-sans);resize:none;"></textarea>
             </div>
             <div style="display:flex;gap:10px;align-items:flex-start;color:var(--text-secondary);">
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChartColumn" size="{{ 18 }}" hint-size="18px,18px"></x-import>
@@ -865,13 +869,13 @@ button:disabled{cursor:default !important;}
     <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Match Detail" style="display:flex;flex-direction:column;gap:22px;">
         <div style="display:flex;align-items:center;justify-content:space-between;">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="Back" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
-          <div style="font:500 17px/1 var(--font-sans);">Match Detail</div>
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" size="{{ 48 }}" label="Match actions" onClick="{{ toggleMenu }}" hint-size="48px,48px"></x-import>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
+          <div style="font:500 17px/1 var(--font-sans);">{{ tx.matchDetail }}</div>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" size="{{ 48 }}" label="{{ tx.matchActions }}" onClick="{{ toggleMenu }}" hint-size="48px,48px"></x-import>
         </div>
         <sc-if value="{{ detailLoading }}" hint-placeholder-val="{{ false }}">
           <div aria-busy="true" style="display:flex;flex-direction:column;gap:22px;">
-            <span class="sr-only" role="status">Loading match</span>
+            <span class="sr-only" role="status">{{ tx.loadingMatch }}</span>
             <div aria-hidden="true" style="display:flex;flex-direction:column;gap:14px;padding:6px 2px;">
               <div class="skel skel-bg" style="height:14px;width:55%;"></div>
               <div style="display:flex;justify-content:space-between;">
@@ -925,7 +929,7 @@ button:disabled{cursor:default !important;}
         </div>
         <div style="background:var(--surface-primary);border-radius:26px;padding:8px 20px;display:flex;flex-direction:column;">
           <div style="display:grid;grid-template-columns:1fr 64px 64px;padding:12px 0 8px;font:400 12px/1 var(--font-sans);color:var(--text-secondary);">
-            <div>Game</div><div style="text-align:center;">{{ detail.aShort }}</div><div style="text-align:center;">Opp</div>
+            <div>{{ tx.gameCol }}</div><div style="text-align:center;">{{ detail.aShort }}</div><div style="text-align:center;">{{ tx.oppCol }}</div>
           </div>
           <sc-for list="{{ detail.rows }}" as="r" hint-placeholder-count="2">
             <div style="display:grid;grid-template-columns:1fr 64px 64px;align-items:center;padding:12px 0;border-top:1px solid var(--border-default);">
@@ -937,7 +941,7 @@ button:disabled{cursor:default !important;}
         </div>
         <sc-if value="{{ detail.hasNotes }}" hint-placeholder-val="{{ true }}">
           <div style="display:flex;flex-direction:column;gap:12px;">
-            <div style="font:500 19px/1.3 var(--font-sans);">Notes</div>
+            <div style="font:500 19px/1.3 var(--font-sans);">{{ tx.notes }}</div>
             <div style="background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:18px;">
               <sc-for list="{{ detail.noteRows }}" as="n" hint-placeholder-count="3">
                 <div style="display:flex;flex-direction:column;gap:6px;">
@@ -954,17 +958,17 @@ button:disabled{cursor:default !important;}
           </div>
         </sc-if>
         <div style="display:flex;flex-direction:column;gap:12px;">
-          <div style="font:500 19px/1.3 var(--font-sans);">Head-to-Head</div>
+          <div style="font:500 19px/1.3 var(--font-sans);">{{ tx.headToHead }}</div>
           <sc-for list="{{ detail.h2h }}" as="h" hint-placeholder-count="1">
             <div onClick="{{ h.open }}" style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;">
               <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;">
-                <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">You vs {{ h.name }}</div>
+                <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ h.vsLabel }}</div>
                 <div style="font:500 32px/1 var(--font-sans);">{{ h.label }}</div>
                 <div style="font:400 12px/1.3 var(--font-sans);color:var(--text-secondary);">{{ h.sub }}</div>
               </div>
               <div style="display:flex;gap:4px;">
                 <sc-for list="{{ h.form }}" as="d" hint-placeholder-count="5">
-                  <div style="width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:600 10px/1 var(--font-sans);background: {{ d.bg }};color: {{ d.fg }};">{{ d.l }}</div>
+                  <div class="zh12" style="width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:600 10px/1 var(--font-sans);background: {{ d.bg }};color: {{ d.fg }};">{{ d.l }}</div>
                 </sc-for>
               </div>
             </div>
@@ -987,14 +991,14 @@ button:disabled{cursor:default !important;}
         <sc-if value="{{ notBlocked }}" hint-placeholder-val="{{ true }}">
         <div class="search-field-outline" style="height:52px;border-radius:99px;background:transparent;display:flex;align-items:center;gap:10px;padding:0 18px;color:var(--input-field-text-default);">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Search" size="{{ 24 }}" hint-size="24px,24px"></x-import>
-          <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="Search or type a new name" style="flex:1;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 15px/1 var(--font-sans);">
+          <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="{{ tx.searchName }}" style="flex:1;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 15px/1 var(--font-sans);">
         </div>
         <sc-if value="{{ canAddNew }}" hint-placeholder-val="{{ false }}">
           <div onClick="{{ addPlayerOnly }}" style="height:56px;border-radius:99px;border:1px dashed var(--ghost-button-outline);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;">
             <div style="width:40px;height:40px;border-radius:50%;background:transparent;border:1px solid var(--ghost-button-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;">
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import>
             </div>
-            <div style="font:500 15px/1 var(--font-sans);">Add “{{ search }}”</div>
+            <div style="font:500 15px/1 var(--font-sans);">{{ addNameLabel }}</div>
           </div>
         </sc-if>
         <div style="display:flex;flex-direction:column;gap:8px;">
@@ -1020,8 +1024,8 @@ button:disabled{cursor:default !important;}
     <sc-if value="{{ isPlayer }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Player Profile" style="display:flex;flex-direction:column;gap:22px;">
         <div style="display:flex;align-items:center;justify-content:space-between;">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="Back" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
-          <div style="font:500 17px/1 var(--font-sans);">Player</div>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
+          <div style="font:500 17px/1 var(--font-sans);">{{ tx.player }}</div>
           <div style="width:48px;"></div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
@@ -1039,7 +1043,7 @@ button:disabled{cursor:default !important;}
           </sc-for>
         </div>
         <div style="display:flex;flex-direction:column;gap:12px;">
-          <div style="font:500 19px/1.3 var(--font-sans);">Recent Matches</div>
+          <div style="font:500 19px/1.3 var(--font-sans);">{{ tx.recentMatches }}</div>
           <sc-for list="{{ profile.recent }}" as="m" hint-placeholder-count="3">
             <div onClick="{{ m.open }}" style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;cursor:pointer;">
               <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -1092,8 +1096,8 @@ button:disabled{cursor:default !important;}
     <sc-if value="{{ isMyProfile }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Profile" style="display:flex;flex-direction:column;gap:28px;">
         <div style="display:flex;align-items:center;gap:14px;">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="Back" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
-          <div style="font:600 28px/1.2 var(--font-sans);">Profile</div>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
+          <div style="font:600 28px/1.2 var(--font-sans);">{{ tx.profile }}</div>
         </div>
         <div style="display:flex;justify-content:center;">
           <div aria-hidden="true" style="width:88px;height:88px;border-radius:50%;background:var(--surface-muted);display:flex;align-items:center;justify-content:center;font:500 28px/1 var(--font-sans);color:var(--text-secondary);"><sc-if value="{{ meInitials }}" hint-placeholder-val="{{ true }}"><span style="color:var(--text-primary);">{{ meInitials }}</span></sc-if><sc-if value="{{ noInitials }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="UserRound" size="{{ 24 }}" hint-size="24px,24px"></x-import></sc-if></div>
@@ -1105,13 +1109,13 @@ button:disabled{cursor:default !important;}
           </div>
         </sc-if>
         <div style="display:flex;flex-direction:column;gap:10px;">
-          <div style="font:500 15px/1 var(--font-sans);">Name</div>
-          <div class="search-field-outline {{ nameCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="text" value="{{ meName }}" onChange="{{ onMeName }}" placeholder="Your name" autocomplete="name" aria-invalid="{{ nameInvalid }}" aria-label="Name" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
+          <div style="font:500 15px/1 var(--font-sans);">{{ tx.name }}</div>
+          <div class="search-field-outline {{ nameCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="text" value="{{ meName }}" onChange="{{ onMeName }}" placeholder="{{ tx.yourName }}" autocomplete="name" aria-invalid="{{ nameInvalid }}" aria-label="{{ tx.name }}" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
           <sc-if value="{{ nameErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--status-error);">{{ nameErr }}</div></sc-if>
         </div>
         <div style="display:flex;flex-direction:column;gap:10px;">
-          <div style="font:500 15px/1 var(--font-sans);">Skill level</div>
-          <div role="radiogroup" aria-label="Skill level" style="display:flex;flex-direction:column;gap:10px;">
+          <div style="font:500 15px/1 var(--font-sans);">{{ tx.skillLevel }}</div>
+          <div role="radiogroup" aria-label="{{ tx.skillLevel }}" style="display:flex;flex-direction:column;gap:10px;">
             <sc-for list="{{ meLevels }}" as="o" hint-placeholder-count="4">
               <button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.select }}" style="height:56px;border-radius:99px;background:var(--surface-primary);border:1.5px solid {{ o.border }};color:var(--text-primary);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 22px;cursor:pointer;" style-active="transform:scale(.98);">
                 <span>{{ o.label }}</span>
@@ -1123,8 +1127,8 @@ button:disabled{cursor:default !important;}
           </div>
         </div>
         <button onClick="{{ saveProfile }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--action-primary);color:var(--action-on-primary);" style-active="transform:scale(.97);">
-          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">Save</span></sc-if>
-          <sc-if value="{{ idleSubmit }}" hint-placeholder-val="{{ true }}">Save</sc-if>
+          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">{{ tx.save }}</span></sc-if>
+          <sc-if value="{{ idleSubmit }}" hint-placeholder-val="{{ true }}">{{ tx.save }}</sc-if>
         </button>
       </div>
     </sc-if>
@@ -1133,26 +1137,26 @@ button:disabled{cursor:default !important;}
     <sc-if value="{{ isAccount }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Account" style="display:flex;flex-direction:column;gap:20px;">
         <div style="display:flex;align-items:center;gap:14px;">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="Back" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
-          <div style="font:600 28px/1.2 var(--font-sans);">Account</div>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
+          <div style="font:600 28px/1.2 var(--font-sans);">{{ tx.account }}</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;">
           <div style="min-height:64px;border-radius:99px;background:var(--surface-primary);display:flex;align-items:center;gap:12px;padding:10px;">
             <div style="width:44px;height:44px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Mail" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
             <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;">
-              <div style="font:400 12px/1.2 var(--font-sans);color:var(--text-secondary);">Email</div>
+              <div style="font:400 12px/1.2 var(--font-sans);color:var(--text-secondary);">{{ tx.email }}</div>
               <div style="font:500 15px/1.2 var(--font-sans);overflow-wrap:anywhere;">{{ acctEmail }}</div>
             </div>
           </div>
           <button onClick="{{ changePassword }}" style="min-height:64px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);display:flex;align-items:center;gap:12px;padding:10px;cursor:pointer;text-align:left;" style-active="transform:scale(.98);">
             <div style="width:44px;height:44px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="KeyRound" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
-            <div style="font:500 15px/1.2 var(--font-sans);flex:1;min-width:0;">Change Password</div>
+            <div style="font:500 15px/1.2 var(--font-sans);flex:1;min-width:0;">{{ tx.changePassword }}</div>
             <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 24 }}" color="var(--grey-400)" style="margin-right:10px" hint-size="24px,24px"></x-import>
           </button>
         </div>
         <button onClick="{{ askDelete }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--status-error);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;" style-active="transform:scale(.98);">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Trash2" size="{{ 24 }}" hint-size="24px,24px"></x-import>
-          Delete Account
+          {{ tx.deleteAccount }}
         </button>
       </div>
     </sc-if>
@@ -1161,8 +1165,8 @@ button:disabled{cursor:default !important;}
     <sc-if value="{{ isPassword }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Change Password" style="display:flex;flex-direction:column;gap:28px;">
         <div style="display:flex;align-items:center;gap:14px;">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="Back" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
-          <div style="font:600 28px/1.2 var(--font-sans);">Change Password</div>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
+          <div style="font:600 28px/1.2 var(--font-sans);">{{ tx.changePassword }}</div>
         </div>
         <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
           <div role="alert" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:22px;background:var(--surface-muted);">
@@ -1173,21 +1177,21 @@ button:disabled{cursor:default !important;}
         <div style="display:flex;flex-direction:column;gap:20px;">
           <sc-if value="{{ needCurrent }}" hint-placeholder-val="{{ true }}">
           <div style="display:flex;flex-direction:column;gap:10px;">
-            <div style="font:500 15px/1 var(--font-sans);">Current password</div>
-            <div class="search-field-outline {{ curCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="{{ pwType }}" value="{{ pwCur }}" onChange="{{ onPwCur }}" placeholder="Current password" autocomplete="current-password" aria-invalid="{{ curInvalid }}" aria-label="Current password" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"><button onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}" style="width:32px;height:32px;border:none;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import></button></div>
+            <div style="font:500 15px/1 var(--font-sans);">{{ tx.currentPw }}</div>
+            <div class="search-field-outline {{ curCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="{{ pwType }}" value="{{ pwCur }}" onChange="{{ onPwCur }}" placeholder="{{ tx.currentPw }}" autocomplete="current-password" aria-invalid="{{ curInvalid }}" aria-label="{{ tx.currentPw }}" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"><button onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}" style="width:32px;height:32px;border:none;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import></button></div>
             <sc-if value="{{ curErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--status-error);">{{ curErr }}</div></sc-if>
           </div>
           </sc-if>
           <div style="display:flex;flex-direction:column;gap:10px;">
-            <div style="font:500 15px/1 var(--font-sans);">New password</div>
-            <div class="search-field-outline {{ passwordCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="{{ pwType }}" value="{{ pwNext }}" onChange="{{ onPwNext }}" placeholder="New password" autocomplete="new-password" aria-invalid="{{ passwordInvalid }}" aria-label="New password" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
+            <div style="font:500 15px/1 var(--font-sans);">{{ tx.newPw }}</div>
+            <div class="search-field-outline {{ passwordCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="{{ pwType }}" value="{{ pwNext }}" onChange="{{ onPwNext }}" placeholder="{{ tx.newPw }}" autocomplete="new-password" aria-invalid="{{ passwordInvalid }}" aria-label="{{ tx.newPw }}" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
             <sc-if value="{{ passwordErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--status-error);">{{ passwordErr }}</div></sc-if>
-            <sc-if value="{{ passwordHelper }}" hint-placeholder-val="{{ true }}"><div class="field-msg" style="color:var(--text-tertiary);">At least 8 characters</div></sc-if>
+            <sc-if value="{{ passwordHelper }}" hint-placeholder-val="{{ true }}"><div class="field-msg" style="color:var(--text-tertiary);">{{ tx.pwHelper }}</div></sc-if>
           </div>
         </div>
         <button onClick="{{ savePassword }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--action-primary);color:var(--action-on-primary);" style-active="transform:scale(.97);">
-          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">Update Password</span></sc-if>
-          <sc-if value="{{ idleSubmit }}" hint-placeholder-val="{{ true }}">Update Password</sc-if>
+          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">{{ tx.updatePw }}</span></sc-if>
+          <sc-if value="{{ idleSubmit }}" hint-placeholder-val="{{ true }}">{{ tx.updatePw }}</sc-if>
         </button>
       </div>
     </sc-if>
@@ -1246,11 +1250,11 @@ button:disabled{cursor:default !important;}
         <sc-if value="{{ saveErr }}" hint-placeholder-val="{{ false }}">
           <div role="alert" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:22px;background:var(--surface-muted);">
             <div style="color:var(--status-error);display:flex;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></div>
-            <div style="font:400 14px/1.45 var(--font-sans);color:var(--text-primary);">Couldn't save your match. Check your connection and try again.</div>
+            <div style="font:400 14px/1.45 var(--font-sans);color:var(--text-primary);">{{ tx.saveErr }}</div>
           </div>
         </sc-if>
         <button onClick="{{ logNext }}" aria-busy="{{ saving }}" disabled="{{ saving }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;background: {{ ctaBg }};color: {{ ctaFg }};">
-          <sc-if value="{{ saving }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">Saving match</span></sc-if>
+          <sc-if value="{{ saving }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">{{ tx.savingMatch }}</span></sc-if>
           <sc-if value="{{ notSaving }}" hint-placeholder-val="{{ true }}">{{ ctaLabel }}</sc-if>
         </button>
       </div>
@@ -1275,7 +1279,7 @@ button:disabled{cursor:default !important;}
         <img class="splash-mark" src="assets/rallywise-mark.svg" alt="" width="132" height="72" style="display:block;width:132px;height:auto;">
         <div class="splash-text" style="margin-top:36px;font:600 34px/1 var(--font-sans);letter-spacing:-.01em;color:var(--text-primary);">Rallywise</div>
       </div>
-      <div class="splash-line" style="position:absolute;left:0;right:0;bottom:64px;text-align:center;font:400 13px/1.4 var(--font-sans);color:var(--text-tertiary);">Track your game. Grow with every match.</div>
+      <div class="splash-line" style="position:absolute;left:0;right:0;bottom:64px;text-align:center;font:400 13px/1.4 var(--font-sans);color:var(--text-tertiary);">{{ tx.tagline }}</div>
     </div>
   </sc-if>
 
@@ -1309,12 +1313,12 @@ button:disabled{cursor:default !important;}
     <div onClick="{{ cancelDelete }}" style="position:absolute;inset:0;background:rgba(0,0,0,.45);"></div>
     <div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="del-title" aria-describedby="del-body" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface-primary);border-radius:34px 34px 0 0;padding:28px 20px 34px;display:flex;flex-direction:column;gap:24px;">
       <div style="display:flex;flex-direction:column;gap:8px;text-align:center;padding:0 12px;">
-        <div id="del-title" style="font:500 19px/1.35 var(--font-sans);">Delete Match?</div>
-        <div id="del-body" style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">This removes the score and notes for good.</div>
+        <div id="del-title" style="font:500 19px/1.35 var(--font-sans);">{{ tx.deleteMatchQ }}</div>
+        <div id="del-body" style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">{{ tx.deleteMatchBody }}</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:12px;">
-        <button onClick="{{ doDelete }}" style="height:56px;border:none;border-radius:99px;background:var(--status-error);color:var(--text-primary);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">Delete</button>
-        <button onClick="{{ cancelDelete }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-muted);color:var(--text-primary);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">Cancel</button>
+        <button onClick="{{ doDelete }}" style="height:56px;border:none;border-radius:99px;background:var(--status-error);color:var(--text-primary);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">{{ tx.delete }}</button>
+        <button onClick="{{ cancelDelete }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-muted);color:var(--text-primary);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">{{ tx.cancel }}</button>
       </div>
     </div>
   </sc-if>
@@ -1324,8 +1328,8 @@ button:disabled{cursor:default !important;}
     <div onClick="{{ cancelDeleteAccount }}" style="position:absolute;inset:0;background:rgba(0,0,0,.45);"></div>
     <div class="sheet" data-screen-label="Delete Account" role="alertdialog" aria-modal="true" aria-labelledby="del-acct-title" aria-describedby="del-acct-body" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface-primary);border-radius:34px 34px 0 0;padding:28px 20px 34px;display:flex;flex-direction:column;gap:24px;">
       <div style="display:flex;flex-direction:column;gap:8px;text-align:center;padding:0 12px;">
-        <div id="del-acct-title" style="font:500 19px/1.35 var(--font-sans);">Delete Account?</div>
-        <div id="del-acct-body" style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">This permanently deletes your account and all your matches, players and insights. You can't undo this.</div>
+        <div id="del-acct-title" style="font:500 19px/1.35 var(--font-sans);">{{ tx.deleteAccountQ }}</div>
+        <div id="del-acct-body" style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">{{ tx.deleteAccountBody }}</div>
       </div>
       <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
         <div role="alert" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:22px;background:var(--surface-muted);">
@@ -1335,10 +1339,10 @@ button:disabled{cursor:default !important;}
       </sc-if>
       <div style="display:flex;flex-direction:column;gap:12px;">
         <button onClick="{{ deleteAccount }}" aria-busy="{{ busyDelete }}" disabled="{{ busyAny }}" style="height:56px;border:none;border-radius:99px;background:var(--status-error);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-active="transform:scale(.98);">
-          <sc-if value="{{ busyDelete }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">Delete Account</span></sc-if>
-          <sc-if value="{{ idleDelete }}" hint-placeholder-val="{{ true }}">Delete Account</sc-if>
+          <sc-if value="{{ busyDelete }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">{{ tx.deleteAccount }}</span></sc-if>
+          <sc-if value="{{ idleDelete }}" hint-placeholder-val="{{ true }}">{{ tx.deleteAccount }}</sc-if>
         </button>
-        <button onClick="{{ cancelDeleteAccount }}" disabled="{{ busyAny }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-muted);color:var(--text-primary);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">Cancel</button>
+        <button onClick="{{ cancelDeleteAccount }}" disabled="{{ busyAny }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-muted);color:var(--text-primary);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">{{ tx.cancel }}</button>
       </div>
     </div>
   </sc-if>
@@ -1348,12 +1352,12 @@ button:disabled{cursor:default !important;}
     <div onClick="{{ consentNo }}" style="position:absolute;inset:0;background:rgba(0,0,0,.45);"></div>
     <div class="sheet" data-screen-label="Share Usage Data" role="dialog" aria-modal="true" aria-labelledby="consent-title" aria-describedby="consent-body" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface-primary);border-radius:34px 34px 0 0;padding:28px 20px 34px;display:flex;flex-direction:column;gap:24px;">
       <div style="display:flex;flex-direction:column;gap:8px;text-align:center;padding:0 12px;">
-        <div id="consent-title" style="font:500 19px/1.35 var(--font-sans);">Share Usage Data?</div>
-        <div id="consent-body" style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">Help improve the Rallywise beta with anonymous usage data, like how many matches you log. Your name, email, players and notes are never shared. You can change this anytime in Settings &gt; Privacy.</div>
+        <div id="consent-title" style="font:500 19px/1.35 var(--font-sans);">{{ tx.shareUsageQ }}</div>
+        <div id="consent-body" style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">{{ tx.consentBody }}</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:12px;">
-        <button onClick="{{ consentYes }}" style="height:56px;border:none;border-radius:99px;background:var(--action-primary);color:var(--action-on-primary);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">Share Usage Data</button>
-        <button onClick="{{ consentNo }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-muted);color:var(--text-primary);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">Not Now</button>
+        <button onClick="{{ consentYes }}" style="height:56px;border:none;border-radius:99px;background:var(--action-primary);color:var(--action-on-primary);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">{{ tx.shareUsage }}</button>
+        <button onClick="{{ consentNo }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-muted);color:var(--text-primary);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">{{ tx.notNow }}</button>
       </div>
     </div>
   </sc-if>
@@ -1373,14 +1377,16 @@ button:disabled{cursor:default !important;}
 <script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Splash&quot;,&quot;options&quot;:[&quot;Splash&quot;,&quot;Log In&quot;,&quot;Sign Up&quot;,&quot;Forgot Password&quot;,&quot;Check Email&quot;,&quot;Onboarding&quot;,&quot;Matches&quot;,&quot;Match Detail&quot;,&quot;Insights&quot;,&quot;Log Match&quot;,&quot;Settings&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;authError&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Invalid email&quot;,&quot;Incorrect email or password&quot;,&quot;Email already exists&quot;,&quot;Password too short&quot;,&quot;Network error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Normal&quot;,&quot;options&quot;:[&quot;Normal&quot;,&quot;Loading&quot;,&quot;Empty&quot;,&quot;Offline&quot;,&quot;Error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;saveMatch&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Succeeds&quot;,&quot;options&quot;:[&quot;Succeeds&quot;,&quot;Fails&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;toastPreview&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Success&quot;,&quot;Error&quot;,&quot;Info&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
 // Localization. The app language is prefs.lang ('en' | 'zh', saved with the account's other prefs), with a copy
 // on this device under LANG_KEY so the right language shows before the account loads. With neither, the device
-// language decides: zh* means Simplified Chinese, anything else English. t(key) falls back to English for any
-// key not translated yet. Only onboarding, Settings, the tabs, the menu and the main screen titles use it so far.
+// language decides: zh* means Simplified Chinese, anything else English. t(key, vars) fills {name}-style
+// placeholders and falls back to English for any key without a translation. Only product copy lives here: names,
+// scores and anything the user typed are shown as entered, and stored values (match types, tags, skill levels)
+// stay in English; only their labels are translated.
 const LANG_KEY = 'rallywise.lang';
 const LANGS = [['en', 'English'], ['zh', '简体中文']];
 const I18N = {
   en: {
     matches: 'Matches', insights: 'Insights', players: 'Players', settings: 'Settings', profile: 'Profile', logOut: 'Log Out',
-    performance: 'Performance', grow: 'Grow', back: 'Back', language: 'Language',
+    performance: 'Performance', grow: 'Grow', back: 'Back', language: 'Language', menu: 'Menu',
     obWelcomeTitle: 'Welcome to Rallywise', obWelcomeBody: 'Track your matches, understand your game, and improve over time.',
     obProfileTitle: 'Set up your profile', obProfileBody: 'This helps Rallywise make sense of your matches.',
     name: 'Name', yourName: 'Your name', skillLevel: 'Skill level',
@@ -1392,23 +1398,207 @@ const I18N = {
     shareUsage: 'Share Usage Data', shareUsageSub: 'Anonymous usage data that helps improve Rallywise',
     matchReminders: 'Match Reminders', matchRemindersSub: 'A nudge to log your match after you play',
     insightUpdates: 'Insight Updates', insightUpdatesSub: 'When new insights are ready',
-    fontFailed: "Chinese font couldn't load. Check your connection."
+    fontFailed: "Chinese font couldn't load. Check your connection.",
+    // Log in, sign up, password reset
+    welcomeBack: 'Welcome Back', loginBody: 'Log in to keep tracking your matches.', email: 'Email', password: 'Password',
+    forgotPw: 'Forgot Password?', logIn: 'Log In', or: 'Or', withApple: 'Continue with Apple', withGoogle: 'Continue with Google',
+    noAccount: "Don't have an account? ", signUp: 'Sign Up', createAccount: 'Create Account', signupBody: 'Start building your match history.',
+    pwHelper: 'At least 8 characters', agreeLabel: 'Agree to Terms and Privacy Policy',
+    agreeA: 'I agree to ', terms: 'Terms', agreeAnd: ' and ', privacyPolicy: 'Privacy Policy', agreeEnd: '.',
+    haveAccount: 'Already have an account? ',
+    forgotBody: "Enter the email you use for Rallywise and we'll send you a link to reset your password.",
+    sendReset: 'Send Reset Link', backToLogin: 'Back to Log In', checkEmail: 'Check Your Email',
+    resetBodyA: 'If an account exists for ', resetBodyB: ", you'll get a link to reset your password. It may take a minute to arrive.",
+    noEmail: "Didn't get the email?", resend: 'Resend', resendIn: 'Resend in {n}s', showPw: 'Show password', hidePw: 'Hide password',
+    // Form errors
+    emailEmpty: 'Enter your email address.', emailInvalid: 'Enter a valid email address.',
+    pwEmpty: 'Enter your password.', pwShort: 'Use at least 8 characters.', nameEmpty: 'Enter your name.',
+    incorrect: 'Incorrect email or password. Try again or reset your password.',
+    exists: 'An account with this email already exists. Log in instead.',
+    network: "Can't connect right now. Check your connection and try again.",
+    unconfirmed: 'Confirm your email first. Open the link we sent you, then log in.',
+    rate: 'Too many attempts. Wait a minute and try again.',
+    config: "Rallywise can't reach its server. Try again later.",
+    unknown: 'Something went wrong. Try again in a moment.',
+    pwWeak: 'Choose a stronger password.', pwSame: 'Use a different password from your current one.', curWrong: 'Incorrect password.',
+    curEmpty: 'Enter your current password.', nextEmpty: 'Enter a new password.',
+    // Toasts
+    tEmailConfirmed: 'Email confirmed', tSignInFailed: 'Could not finish sign-in. Try logging in.',
+    tConfirmEmail: 'Check your email to confirm your account', tResent: 'Reset link sent again',
+    tMigrated: 'Your matches are now saved to your account', tUnsaved: "Some changes couldn't be saved",
+    tSaveOffline: "Couldn't save. Check your connection.", tSaveFailed: "Couldn't save your changes",
+    tSocialOff: "{provider} sign-in isn't available yet", tMatchSaved: 'Match saved', tChangesSaved: 'Changes saved',
+    tDeleteOffline: "Couldn't delete. Check your connection.", tDeleteFailed: "Couldn't delete match", tMatchDeleted: 'Match deleted',
+    tProfileSaved: 'Profile saved', tPasswordUpdated: 'Password updated', tAccountDeleted: 'Account deleted', tPlayerAdded: 'Player added',
+    tSomethingWrong: 'Something went wrong', tNoConnection: 'No connection',
+    tagline: 'Track your game. Grow with every match.',
+    // Matches
+    loadingMatches: 'Loading matches', totalMatches: 'Total Matches', winRate: 'Win Rate', logMatch: 'Log Match', wl: '{w}–{l} W–L',
+    all: 'All', Singles: 'Singles', Doubles: 'Doubles', win: 'Win', loss: 'Loss', you: 'You', record: '{w}–{l}',
+    noMatches: 'No Matches Yet', noMatchesBody: 'Log your first match to start tracking results.',
+    noTypeMatches: 'No {type} Matches Yet', noTypeMatchesBody: '{type} matches you log will show up here.',
+    connLost: 'Connection Lost', connLostBody: 'Check your Wi-Fi or mobile data, then try again.', tryAgain: 'Try Again',
+    cantLoad: "Couldn't Load {what}", cantLoadBody: 'Something went wrong on our side. Try again in a moment.',
+    // Insights · Performance
+    loadingInsights: 'Loading insights', noInsights: 'No Insights Yet', noInsightsBody: 'Log a few matches and your trends will start to show here.',
+    vsPrev10: 'vs prev 10', form5: '5-match form', now: 'Now', matchesPlayed: 'Matches Played', last30: 'Last 30 days',
+    recentRecord: 'Recent Record', last5: 'Last 5 matches', breakdown: 'Performance Breakdown',
+    singlesWin: 'Singles Win Rate', doublesWin: 'Doubles Win Rate', closeGames: 'Close Games', avgMargin: 'Avg. Point Margin',
+    ofMatches: '{w} of {n}', ofGames: '{w} of {n}', perGame: 'per game',
+    bestPartner: 'Best Partner', toughest: 'Toughest Opponent', mostPlayed: 'Most Played With',
+    winTogether: 'Win rate together', winVs: 'Win rate vs them', matchesTogether: 'Matches together',
+    // Insights · Grow (labels around the AI coaching; the coaching itself comes from generate-grow-insights)
+    keyInsight: 'Key insight', buildNext: 'Build Next', buildNextSub: 'Top areas to improve from recent matches', tryNext: 'Try Next',
+    strengths: 'Your Strengths', strengthsSub: "What's working. Keep doing these.", keepDoing: 'Keep Doing',
+    oppPlans: 'Opponent Plans', oppPlansSub: 'How to play your toughest opponents', gamePlan: 'Game Plan',
+    doublesPlay: 'Doubles Play', doublesPlaySub: 'Patterns from your doubles matches',
+    oppRecord: "You're {w}–{l} against {name}.", notEnough: 'Not Enough Data Yet',
+    notEnoughAiBody: 'Log a few more matches and add notes about what worked, what cost points, or what you noticed.',
+    notEnoughBody: 'Tag what worked and what cost you points when you log matches, or add notes on opponents. Grow builds from those.',
+    costPoints: 'Cost you points in {n} of your last {total} tagged matches.', workingIn: 'Tagged as working in {n} of your last {total} wins.',
+    // Log Match
+    editMatch: 'Edit Match', stepOf: 'Step {n} of 4',
+    stepType: 'Singles or Doubles?', stepWho: 'Who Played?', stepScore: 'Enter Score', stepNotes: 'Match Notes',
+    singlesSub: 'You vs 1 opponent', doublesSub: 'You + partner vs 2 opponents', yourSide: 'Your Side', opponents: 'Opponents',
+    partner: 'Partner', opponent: 'Opponent', opponent1: 'Opponent 1', opponent2: 'Opponent 2', me: 'Me',
+    selectRole: 'Select {role}', chooseRole: 'Choose {role}', searchName: 'Search or type a new name', addAsNew: 'Add “{name}” as New Player',
+    together: 'Together {r}', h2h: 'H2H {r}', newPlayer: 'New',
+    noPlayersFound: 'No Players Found', noPlayersFoundLogBody: 'Check the spelling, or type a full name to add them.',
+    noPlayers: 'No Players Yet', noPlayersLogBody: 'Type a name above to add your first player.',
+    pointsPerGame: 'Points per Game', game: 'Game {n}', remove: 'Remove', weWon: 'We Won', theyWon: 'They Won', score: '{name} Score',
+    decrease: 'Decrease', increase: 'Increase', addGame: 'Add Game {n}',
+    notesIntro: 'About 30 seconds. Everything is optional.', date: 'Date',
+    whatWorked: 'What Worked?', pickUpTo3: 'Pick up to 3', workedPh: 'What specifically worked?',
+    whatCost: 'What Cost You Points?', lostPh: 'What kept happening?',
+    oppQ: 'What did you notice about {name}?', yourOpponent: 'your opponent', oppSub: 'Tendencies, strengths, weak spots',
+    oppPh: 'Attacks every short lift, slower on the backhand side…',
+    linkHint: 'Tags feed your Skill Trends and Coach. Opponent notes build your game plan for {name}.',
+    levelAt: 'Level at {r} · Add a deciding game', youWin: 'You win {r}', youLose: 'You lose {r}',
+    saveErr: "Couldn't save your match. Check your connection and try again.",
+    saveAgain: 'Save Again', saveChanges: 'Save Changes', saveMatch: 'Save Match', savingMatch: 'Saving match',
+    tag_Serve: 'Serve', tag_Return: 'Return', tag_Net: 'Net', tag_Smash: 'Smash', tag_Defence: 'Defence', tag_Footwork: 'Footwork', tag_Placement: 'Placement', tag_Other: 'Other',
+    // Match Detail
+    matchDetail: 'Match Detail', matchActions: 'Match actions', loadingMatch: 'Loading match', resultWin: 'Win', resultLoss: 'Loss',
+    gameCol: 'Game', oppCol: 'Opp', notes: 'Notes', noteWorked: 'What Worked', noteCost: 'What Cost Points', noteOn: 'On {name}',
+    headToHead: 'Head-to-Head', youVs: 'You vs {name}', h2hSub: 'Singles {s} · Doubles {d}', dotW: 'W', dotL: 'L',
+    deleteMatch: 'Delete Match', deleteMatchQ: 'Delete Match?', deleteMatchBody: 'This removes the score and notes for good.',
+    delete: 'Delete', cancel: 'Cancel',
+    // Players · Player
+    addName: 'Add “{name}”', partnerRec: 'Partner {r}', noMatchesYet: 'No matches yet',
+    noPlayersFoundBody: 'Check the spelling, or add them as a new player.', noPlayersBody: 'Players you add or play against will show up here.',
+    player: 'Player', playedTogether: '{n} matches together or against',
+    overallH2H: 'Overall H2H', singlesH2H: 'Singles H2H', doublesH2H: 'Doubles H2H', asPartner: 'As Partner',
+    pctWinRate: '{p} win rate', noMatchesShort: 'No matches', recentMatches: 'Recent Matches',
+    noTogether: 'No Matches Together Yet', noTogetherBody: 'Matches you play with or against them will show up here.',
+    // Profile · Account · Password · sheets
+    save: 'Save', deleteAccount: 'Delete Account', changePassword: 'Change Password',
+    currentPw: 'Current password', newPw: 'New password', updatePw: 'Update Password',
+    deleteAccountQ: 'Delete Account?', deleteAccountBody: "This permanently deletes your account and all your matches, players and insights. You can't undo this.",
+    shareUsageQ: 'Share Usage Data?', notNow: 'Not Now',
+    consentBody: 'Help improve the Rallywise beta with anonymous usage data, like how many matches you log. Your name, email, players and notes are never shared. You can change this anytime in Settings > Privacy.'
   },
   zh: {
     matches: '比赛', insights: '洞察', players: '球友', settings: '设置', profile: '个人资料', logOut: '退出登录',
-    performance: '表现', grow: '提升', back: '返回', language: '语言',
+    performance: '表现', grow: '提升', back: '返回', language: '语言', menu: '菜单',
     obWelcomeTitle: '欢迎来到 Rallywise', obWelcomeBody: '记录每场比赛，看懂自己的打法，慢慢变强。',
     obProfileTitle: '设置你的资料', obProfileBody: '这能帮 Rallywise 更好地理解你的比赛。',
     name: '名字', yourName: '你的名字', skillLevel: '水平',
     level_Beginner: '入门', level_Intermediate: '中级', level_Advanced: '进阶', level_Competitive: '竞技',
     obReadyTitle: '准备开打，{name}', obReadyBody: '开始记录你的比赛吧。打得越多，洞察就越准。',
     getStarted: '开始', continue: '下一步', logFirstMatch: '记录第一场比赛', goToMatches: '去看比赛',
-    account: '账户', notifications: '通知', notificationsSub: '比赛提醒和洞察更新',
+    account: '账号', notifications: '通知', notificationsSub: '比赛提醒和洞察更新',
     privacy: '隐私', privacySub: '我们如何使用你的数据',
     shareUsage: '分享使用数据', shareUsageSub: '匿名使用数据，帮助我们改进 Rallywise',
     matchReminders: '比赛提醒', matchRemindersSub: '打完球后提醒你记录比赛',
     insightUpdates: '洞察更新', insightUpdatesSub: '有新洞察时通知你',
-    fontFailed: '中文字体未能加载，请检查网络连接。'
+    fontFailed: '中文字体未能加载，请检查网络连接。',
+    welcomeBack: '欢迎回来', loginBody: '登录后继续记录你的比赛。', email: '邮箱', password: '密码',
+    forgotPw: '忘记密码？', logIn: '登录', or: '或', withApple: '通过 Apple 继续', withGoogle: '通过 Google 继续',
+    noAccount: '还没有账号？', signUp: '注册', createAccount: '创建账号', signupBody: '开始积累你的比赛记录。',
+    pwHelper: '至少 8 个字符', agreeLabel: '同意服务条款和隐私政策',
+    agreeA: '我已阅读并同意', terms: '服务条款', agreeAnd: '和', privacyPolicy: '隐私政策', agreeEnd: '',
+    haveAccount: '已有账号？',
+    forgotBody: '输入你的 Rallywise 账号邮箱，我们会发送重置密码的链接。',
+    sendReset: '发送重置链接', backToLogin: '返回登录', checkEmail: '查看你的邮箱',
+    resetBodyA: '如果 ', resetBodyB: ' 已注册，你会收到一封重置密码的邮件，可能需要一两分钟。',
+    noEmail: '没收到邮件？', resend: '重新发送', resendIn: '{n} 秒后可重新发送', showPw: '显示密码', hidePw: '隐藏密码',
+    emailEmpty: '请输入邮箱地址。', emailInvalid: '请输入有效的邮箱地址。',
+    pwEmpty: '请输入密码。', pwShort: '密码至少需要 8 个字符。', nameEmpty: '请输入你的名字。',
+    incorrect: '邮箱或密码不对，请重试或重置密码。',
+    exists: '这个邮箱已经注册过了，直接登录吧。',
+    network: '暂时无法连接，请检查网络后重试。',
+    unconfirmed: '请先确认邮箱。打开我们发给你的链接，然后再登录。',
+    rate: '尝试次数太多了，请等一分钟再试。',
+    config: '暂时连不上 Rallywise，请稍后再试。',
+    unknown: '出了点问题，请稍后再试。',
+    pwWeak: '请换一个更安全的密码。', pwSame: '新密码不能和当前密码一样。', curWrong: '密码不对。',
+    curEmpty: '请输入当前密码。', nextEmpty: '请输入新密码。',
+    tEmailConfirmed: '邮箱已确认', tSignInFailed: '登录没有完成，请重新登录。',
+    tConfirmEmail: '请查收邮件，确认你的账号', tResent: '重置链接已重新发送',
+    tMigrated: '你的比赛已保存到账号', tUnsaved: '部分修改未能保存',
+    tSaveOffline: '保存失败，请检查网络连接。', tSaveFailed: '修改未能保存',
+    tSocialOff: '暂不支持 {provider} 登录', tMatchSaved: '比赛已保存', tChangesSaved: '修改已保存',
+    tDeleteOffline: '删除失败，请检查网络连接。', tDeleteFailed: '比赛未能删除', tMatchDeleted: '比赛已删除',
+    tProfileSaved: '资料已保存', tPasswordUpdated: '密码已更新', tAccountDeleted: '账号已删除', tPlayerAdded: '球友已添加',
+    tSomethingWrong: '出了点问题', tNoConnection: '没有网络连接',
+    tagline: '记录每一场，越打越好。',
+    loadingMatches: '正在加载比赛', totalMatches: '总场次', winRate: '胜率', logMatch: '记录比赛', wl: '{w}胜 {l}负',
+    all: '全部', Singles: '单打', Doubles: '双打', win: '胜', loss: '负', you: '我', record: '{w}胜 {l}负',
+    noMatches: '还没有比赛记录', noMatchesBody: '记录第一场比赛，开始追踪你的表现。',
+    noTypeMatches: '还没有{type}比赛', noTypeMatchesBody: '你记录的{type}比赛会显示在这里。',
+    connLost: '连接中断', connLostBody: '请检查 Wi-Fi 或移动数据，然后重试。', tryAgain: '重试',
+    cantLoad: '无法加载{what}', cantLoadBody: '我们这边出了点问题，请稍后再试。',
+    loadingInsights: '正在加载洞察', noInsights: '还没有足够数据', noInsightsBody: '记录几场比赛后，你的趋势就会出现在这里。',
+    vsPrev10: '较前 10 场', form5: '近 5 场走势', now: '最近', matchesPlayed: '比赛场次', last30: '近 30 天',
+    recentRecord: '近期战绩', last5: '近 5 场', breakdown: '表现细分',
+    singlesWin: '单打胜率', doublesWin: '双打胜率', closeGames: '关键局', avgMargin: '平均分差',
+    ofMatches: '{w}/{n} 场', ofGames: '{w}/{n} 局', perGame: '每局',
+    bestPartner: '最佳搭档', toughest: '最难应对', mostPlayed: '最常同场',
+    winTogether: '搭档胜率', winVs: '交手胜率', matchesTogether: '同场场次',
+    keyInsight: '关键洞察', buildNext: '下一步提升', buildNextSub: '近期比赛里最值得练的地方', tryNext: '下次尝试',
+    strengths: '你的优势', strengthsSub: '这些打法正在奏效，继续保持。', keepDoing: '继续保持',
+    oppPlans: '对手策略', oppPlansSub: '怎么对付最难打的对手', gamePlan: '打法建议',
+    doublesPlay: '双打配合', doublesPlaySub: '从你的双打比赛里发现的规律',
+    oppRecord: '对 {name} {w}胜 {l}负', notEnough: '数据还不够',
+    notEnoughAiBody: '再记录几场比赛，写下哪里打得好、哪里丢分，或者你注意到的细节。',
+    notEnoughBody: '记录比赛时标出打得好和丢分的地方，或写下对手记录，提升页就会根据这些给出建议。',
+    costPoints: '最近 {total} 场有标签的比赛中，{n} 场在这里丢分。', workingIn: '最近 {total} 场胜利中，{n} 场标记为打得好。',
+    editMatch: '编辑比赛', stepOf: '第 {n} 步，共 4 步',
+    stepType: '单打还是双打？', stepWho: '和谁打的？', stepScore: '输入比分', stepNotes: '赛后记录',
+    singlesSub: '你 vs 1 名对手', doublesSub: '你和搭档 vs 2 名对手', yourSide: '我方', opponents: '对手',
+    partner: '搭档', opponent: '对手', opponent1: '对手 1', opponent2: '对手 2', me: '我',
+    selectRole: '选择{role}', chooseRole: '选择{role}', searchName: '搜索或输入新名字', addAsNew: '添加新球友“{name}”',
+    together: '搭档 {r}', h2h: '交手 {r}', newPlayer: '新球友',
+    noPlayersFound: '没有找到球友', noPlayersFoundLogBody: '检查一下拼写，或输入完整名字来添加。',
+    noPlayers: '还没有球友', noPlayersLogBody: '在上面输入名字，添加你的第一位球友。',
+    pointsPerGame: '每局分制', game: '第{n}局', remove: '移除', weWon: '我方胜', theyWon: '对方胜', score: '{name} 得分',
+    decrease: '减少', increase: '增加', addGame: '添加第{n}局',
+    notesIntro: '大约 30 秒，都可以跳过。', date: '日期',
+    whatWorked: '哪些地方打得不错？', pickUpTo3: '最多选 3 个', workedPh: '具体哪里打得好？',
+    whatCost: '哪些地方最容易丢分？', lostPh: '反复出现了什么问题？',
+    oppQ: '你注意到 {name} 有什么特点？', yourOpponent: '对手', oppSub: '习惯、强项、弱点',
+    oppPh: '一挑短球就杀，反手位移动偏慢……',
+    linkHint: '标签会用来分析你的技术表现，对手记录会帮你制定针对 {name} 的打法。',
+    levelAt: '{r} 战平 · 再加一局决胜', youWin: '你以 {r} 获胜', youLose: '你以 {r} 落败',
+    saveErr: '比赛未能保存，请检查网络后重试。',
+    saveAgain: '重新保存', saveChanges: '保存修改', saveMatch: '保存比赛', savingMatch: '正在保存比赛',
+    tag_Serve: '发球', tag_Return: '接发', tag_Net: '网前', tag_Smash: '杀球', tag_Defence: '防守', tag_Footwork: '步法', tag_Placement: '落点', tag_Other: '其他',
+    matchDetail: '比赛详情', matchActions: '比赛操作', loadingMatch: '正在加载比赛', resultWin: '胜利', resultLoss: '失利',
+    gameCol: '局', oppCol: '对手', notes: '赛后记录', noteWorked: '打得不错', noteCost: '丢分点', noteOn: '关于 {name}',
+    headToHead: '交手记录', youVs: '你 vs {name}', h2hSub: '单打 {s} · 双打 {d}', dotW: '胜', dotL: '负',
+    deleteMatch: '删除比赛', deleteMatchQ: '删除这场比赛？', deleteMatchBody: '比分和赛后记录会被永久删除。',
+    delete: '删除', cancel: '取消',
+    addName: '添加“{name}”', partnerRec: '搭档 {r}', noMatchesYet: '还没有比赛',
+    noPlayersFoundBody: '检查一下拼写，或把对方添加为新球友。', noPlayersBody: '你添加或交过手的球友会显示在这里。',
+    player: '球友', playedTogether: '同场 {n} 场',
+    overallH2H: '总交手', singlesH2H: '单打交手', doublesH2H: '双打交手', asPartner: '作为搭档',
+    pctWinRate: '胜率 {p}', noMatchesShort: '暂无比赛', recentMatches: '近期比赛',
+    noTogether: '还没有同场比赛', noTogetherBody: '你们同场的比赛会显示在这里。',
+    save: '保存', deleteAccount: '删除账号', changePassword: '修改密码',
+    currentPw: '当前密码', newPw: '新密码', updatePw: '更新密码',
+    deleteAccountQ: '删除账号？', deleteAccountBody: '这会永久删除你的账号，以及所有比赛、球友和洞察。删除后无法恢复。',
+    shareUsageQ: '分享使用数据？', notNow: '以后再说',
+    consentBody: '分享匿名使用数据（比如你记录了多少场比赛），帮我们改进 Rallywise 测试版。你的名字、邮箱、球友和赛后记录都不会被分享。你可以随时在“设置 > 隐私”里更改。'
   }
 };
 function deviceLang() {
@@ -1486,8 +1676,16 @@ class Component extends DCLogic {
   // True for the real app (opened on the splash); false for design previews, which show sample data.
   live() { const s = (this.props || {}).startScreen; return !s || s === 'Splash'; }
   // The app language: the account's saved choice, else this device's last choice or system language.
-  lang() { const l = this.state.prefs && this.state.prefs.lang; return l === 'en' || l === 'zh' ? l : this._deviceLang; }
-  t(k) { const L = I18N[this.lang()] || I18N.en; return L[k] != null ? L[k] : I18N.en[k] != null ? I18N.en[k] : k; }
+  lang() { const l = this.state && this.state.prefs && this.state.prefs.lang; return l === 'en' || l === 'zh' ? l : this._deviceLang; }
+  t(k, vars) {
+    const L = I18N[this.lang()] || I18N.en, str = L[k] != null ? L[k] : I18N.en[k] != null ? I18N.en[k] : k;
+    return vars ? str.replace(/\{(\w+)\}/g, (m, n) => vars[n] != null ? vars[n] : m) : str;
+  }
+  // Labels for stored English values: match type, tag. The stored value never changes.
+  typeLabel(type) { return this.t(type); }
+  tagLabel(tag) { return this.t('tag_' + tag); }
+  // A win–loss record in words: 12–8 in English, 12胜 8负 in Chinese.
+  recWords(r) { return this.t('record', { w: r.w, l: r.l }); }
   // Applies at once everywhere; saved with the account's prefs and on this device. AI insights in the other
   // language are dropped and Grow regenerates in the new one.
   setLang(l) {
@@ -1543,10 +1741,10 @@ class Component extends DCLogic {
       if (user) {
         await this.enter(user);
         if (this.state.screen === 'resetSent' || this.state.screen === 'signup') this.setState({ screen: this.state.onboarded ? 'matches' : 'onboarding', back: [] });
-        this.flash('Email confirmed');
+        this.flash(this.t('tEmailConfirmed'));
       }
     } catch (e) {
-      this.flash('Could not finish sign-in. Try logging in.', 'error');
+      this.flash(this.t('tSignInFailed'), 'error');
     } finally {
       this._handlingAppUrl = false;
     }
@@ -1613,7 +1811,7 @@ class Component extends DCLogic {
     const savedLang = a.prefs && a.prefs.lang;
     if (savedLang === 'en' || savedLang === 'zh') { this._deviceLang = savedLang; try { localStorage.setItem(LANG_KEY, savedLang); } catch (e) {} }
     if (b.insights) b.insights.cached().then(insight => { if (insight && this.user && this.user.id === user.id && this.insightLang(insight) === this.lang()) this.setState({ aiGrow: insight }); }).catch(() => {});
-    if (migrated) this.flash('Your matches are now saved to your account');
+    if (migrated) this.flash(this.t('tMigrated'));
     const A = window.RallywiseAnalytics, c = this.analyticsCtx(a.prefs);
     if (A) { A.setAccount(anonId); if (c && c.consent === 'no') A.clear(anonId); }
     if (created && !migrated) this.track('signup_completed', { method: user.provider || 'email' }, a.prefs);
@@ -1640,7 +1838,7 @@ class Component extends DCLogic {
     if (this._signingOut) return;
     this._signingOut = true; this.setState({ menu: false });
     try {
-      if (this.sync && this.sync.pending) await this.sync.push(this.dataState()).catch(() => this.flash("Some changes couldn't be saved", 'error'));
+      if (this.sync && this.sync.pending) await this.sync.push(this.dataState()).catch(() => this.flash(this.t('tUnsaved'), 'error'));
       const b = await this.api().catch(() => null);
       if (b) await b.auth.signOut();
     } finally { this.clearAccount(); this._signingOut = false; }
@@ -1651,7 +1849,7 @@ class Component extends DCLogic {
     if (!this.user || !this.sync || (d && d !== 'Normal')) return;
     if (s.players === last.players && s.matches === last.matches && s.prefs === last.prefs && s.onboarded === last.onboarded) return;
     this._saved = this.dataState(s);
-    this.sync.push(this._saved).catch(e => this.flash(e && e.code === 'network' ? "Couldn't save. Check your connection." : "Couldn't save your changes", 'error'));
+    this.sync.push(this._saved).catch(e => this.flash(this.t(e && e.code === 'network' ? 'tSaveOffline' : 'tSaveFailed'), 'error'));
   }
   // For actions with their own spinner (save match, delete match, save profile): saves the change to the
   // cloud first and throws if that fails, so the screen only changes once it is saved. In the real app it also
@@ -1764,19 +1962,8 @@ class Component extends DCLogic {
       default: return {};
     }
   }
-  get msg() { return {
-    emailEmpty: 'Enter your email address.', emailInvalid: 'Enter a valid email address.',
-    pwEmpty: 'Enter your password.', pwShort: 'Use at least 8 characters.', nameEmpty: 'Enter your name.',
-    incorrect: 'Incorrect email or password. Try again or reset your password.',
-    exists: 'An account with this email already exists. Log in instead.',
-    network: "Can't connect right now. Check your connection and try again.",
-    unconfirmed: 'Confirm your email first. Open the link we sent you, then log in.',
-    rate: 'Too many attempts. Wait a minute and try again.',
-    config: "Rallywise can't reach its server. Try again later.",
-    unknown: 'Something went wrong. Try again in a moment.',
-    pwWeak: 'Choose a stronger password.', pwSame: 'Use a different password from your current one.', curWrong: 'Incorrect password.'
-
-  }; }
+  // Form and banner messages in the current language (keys in I18N).
+  get msg() { return new Proxy({}, { get: (o, k) => this.t(k) }); }
   toAuth(screen, keep) {
     clearInterval(this._tick);
     this.setState(s => ({ screen, back: [], pwVisible: false, errors: {}, banner: null, busy: null, resendIn: 0,
@@ -1805,7 +1992,7 @@ class Component extends DCLogic {
   async social(provider) {
     if (this.state.busy) return;
     const b = await this.api().catch(() => null);
-    if (!b || !b.auth.oauthEnabled(provider)) return this.flash((provider === 'apple' ? 'Apple' : 'Google') + " sign-in isn't available yet", 'info');
+    if (!b || !b.auth.oauthEnabled(provider)) return this.flash(this.t('tSocialOff', { provider: provider === 'apple' ? 'Apple' : 'Google' }), 'info');
     this.setState({ errors: {}, banner: null, busy: provider });
     this.request(() => b.auth.oauth(provider)); // on success the page leaves for the provider's sign-in
   }
@@ -1827,8 +2014,8 @@ class Component extends DCLogic {
   componentDidUpdate(pp) {
     // "Toast preview" prop fires one example of each toast variant.
     if (pp && this.props.toastPreview !== pp.toastPreview) {
-      const ex = { Success: ['Match saved', 'success'], Error: ['Something went wrong', 'error'], Info: ['No connection', 'info'] }[this.props.toastPreview];
-      if (ex) this.flash(ex[0], ex[1]);
+      const ex = { Success: ['tMatchSaved', 'success'], Error: ['tSomethingWrong', 'error'], Info: ['tNoConnection', 'info'] }[this.props.toastPreview];
+      if (ex) this.flash(this.t(ex[0]), ex[1]);
     }
     if (pp && this.props.dataState !== pp.dataState) this.setState({ ...this.dataFor(this.props.dataState), filter: 'All', search: '' });
     if (pp && this.props.authError !== pp.authError && this.props.authError !== 'None') this.setState({ back: [], busy: null, banner: null, errors: {}, ...this.authPreset(this.props.authError) });
@@ -1845,24 +2032,25 @@ class Component extends DCLogic {
   }
 
   nm(id) { const p = this.state.players.find(x => x.id === id); return p ? p.name : ''; }
-  first(id) { return id === 'me' ? 'You' : this.nm(id).split(' ')[0]; }
+  first(id) { return id === 'me' ? this.t('you') : this.nm(id).split(' ')[0]; }
   ini(id) { return this.nm(id).split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase(); }
   res(games) { const us = games.filter(g => g[0] > g[1]).length; return { us, them: games.length - us, win: us > games.length - us }; }
   date(iso, long) {
     const d = new Date(iso + 'T12:00:00');
+    if (this.lang() === 'zh') return (long ? d.getFullYear() + '年' : '') + (d.getMonth() + 1) + '月' + d.getDate() + '日';
     const mo = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const ml = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const dd = String(d.getDate()).padStart(2, '0');
     return long ? `${dd} ${ml[d.getMonth()]} ${d.getFullYear()}` : `${dd} ${mo[d.getMonth()]}`;
   }
-  teamA(m) { return m.type === 'Doubles' ? 'You & ' + this.first(m.partner) : 'You'; }
+  teamA(m) { return m.type === 'Doubles' ? this.t('you') + ' & ' + this.first(m.partner) : this.t('you'); }
   teamB(m) { return m.type === 'Doubles' ? m.opps.map(o => this.first(o)).join(' & ') : this.nm(m.opps[0]); }
-  badge(win) { return win ? { badgeBg: 'var(--status-win)', badgeFg: 'var(--app-background)', resultLabel: 'Win' } : { badgeBg: 'var(--status-loss)', badgeFg: 'var(--app-background)', resultLabel: 'Loss' }; }
-  dot(win) { return win ? { l: 'W', bg: 'var(--status-win)', fg: 'var(--app-background)' } : { l: 'L', bg: 'var(--status-loss)', fg: 'var(--app-background)' }; }
+  badge(win) { return win ? { badgeBg: 'var(--status-win)', badgeFg: 'var(--app-background)', resultLabel: this.t('win') } : { badgeBg: 'var(--status-loss)', badgeFg: 'var(--app-background)', resultLabel: this.t('loss') }; }
+  dot(win) { return win ? { l: this.t('dotW'), bg: 'var(--status-win)', fg: 'var(--app-background)' } : { l: this.t('dotL'), bg: 'var(--status-loss)', fg: 'var(--app-background)' }; }
   card(m) {
     const r = this.res(m.games);
     return {
-      id: m.id, type: m.type, dateLabel: this.date(m.date), teamA: this.teamA(m), teamB: this.teamB(m), gamesWon: `${r.us}–${r.them}`,
+      id: m.id, type: this.typeLabel(m.type), dateLabel: this.date(m.date), teamA: this.teamA(m), teamB: this.teamB(m), gamesWon: `${r.us}–${r.them}`,
       ...this.badge(r.win),
       games: m.games.map(g => ({ s: `${g[0]}–${g[1]}`, fg: 'var(--text-secondary)' })),
       open: () => this.go('detail', { detailId: m.id })
@@ -1941,10 +2129,10 @@ class Component extends DCLogic {
     setTimeout(() => this.refreshGrow(), 0);
     if (this.state.log && this.state.log.editId) {
       this.setState(s => ({ matches, screen: 'detail', detailId: m.id, back: s.back.slice(0, -1), log: null }));
-      return this.flash('Changes saved');
+      return this.flash(this.t('tChangesSaved'));
     }
     this.setState({ matches, screen: 'detail', detailId: m.id, back: [{ screen: 'matches' }], log: null, filter: 'All' });
-    this.flash('Match saved');
+    this.flash(this.t('tMatchSaved'));
   }
   // Delete confirmation. requestDeleteMatch(id) opens the sheet for any match; Delete calls
   // deleteMatch(id), which removes it, returns to Matches and confirms with a toast.
@@ -1954,13 +2142,13 @@ class Component extends DCLogic {
     this._deleting = true;
     const matches = this.state.matches.filter(m => m.id !== id);
     try { await this.saveNow({ matches }); }
-    catch (e) { this.setState({ confirmDelete: null }); return this.flash(e && e.code === 'network' ? "Couldn't delete. Check your connection." : "Couldn't delete match", 'error'); }
+    catch (e) { this.setState({ confirmDelete: null }); return this.flash(this.t(e && e.code === 'network' ? 'tDeleteOffline' : 'tDeleteFailed'), 'error'); }
     finally { this._deleting = false; }
     const gone = this.state.matches.find(m => m.id === id), at = gone && Date.parse(gone.createdAt);
     this.track('match_deleted', { match_count: matches.length, minutes_since_logged: at ? Math.max(0, Math.round((Date.now() - at) / 6e4)) : null });
     this.setState({ matches, confirmDelete: null, screen: 'matches', back: [], detailId: null, log: null });
     setTimeout(() => this.refreshGrow(), 0);
-    this.flash('Match deleted');
+    this.flash(this.t('tMatchDeleted'));
   }
   // Settings & account. Saves reuse the auth request, so the busy spinner and network banner match.
   openForm(screen, acct) { this.go(screen, { acct: { ...this.state.acct, cur: '', next: '', ...acct }, errors: {}, banner: null, pwVisible: false }); }
@@ -1981,7 +2169,7 @@ class Component extends DCLogic {
       isMatches: s.screen === 'matches', isInsights: s.screen === 'insights', isLog: s.screen === 'log',
       isDetail: s.screen === 'detail', isPlayers: s.screen === 'players', isPlayer: s.screen === 'player',
       isLogin: s.screen === 'login', isSignup: s.screen === 'signup', isSplash: s.screen === 'splash', skipSplash: () => this.leaveSplash(),
-      pwType: s.pwVisible ? 'text' : 'password', pwIcon: s.pwVisible ? 'Eye' : 'EyeOff', pwToggleLabel: s.pwVisible ? 'Hide password' : 'Show password',
+      pwType: s.pwVisible ? 'text' : 'password', pwIcon: s.pwVisible ? 'Eye' : 'EyeOff', pwToggleLabel: this.t(s.pwVisible ? 'hidePw' : 'showPw'),
       togglePw: () => this.setState(x => ({ pwVisible: !x.pwVisible })),
       isForgot: s.screen === 'forgot', isResetSent: s.screen === 'resetSent',
       f: s.f, banner: s.banner, resetEmail: s.resetEmail, resendIn: s.resendIn, canResend: !s.resendIn, resendWait: !!s.resendIn,
@@ -1998,7 +2186,7 @@ class Component extends DCLogic {
       resend: () => { if (this.state.busy) return; this.setState({ busy: 'resend' }); this.request(async () => {
         try { await (await this.api()).auth.sendReset(this.state.resetEmail.trim().toLowerCase()); }
         catch (e) { this.flash(this.errMsg(e), 'error'); return; }
-        this.flash('Reset link sent again'); this.startResendTimer(); }); },
+        this.flash(this.t('tResent')); this.startResendTimer(); }); },
       toSignup: () => this.toAuth('signup'),
       toLogin: () => this.toAuth('login', s.screen === 'forgot' || s.screen === 'resetSent'),
       agree: s.agree, toggleAgree: () => this.setState(x => ({ agree: !x.agree })),
@@ -2016,10 +2204,10 @@ class Component extends DCLogic {
               throw e;
             }
             // Projects that require email confirmation give no session yet: log in after opening the link.
-            if (r.needsConfirm) { this.toAuth('login'); this.setState({ f: { ...this.blankForm(), email } }); return this.flash('Check your email to confirm your account', 'info'); }
+            if (r.needsConfirm) { this.toAuth('login'); this.setState({ f: { ...this.blankForm(), email } }); return this.flash(this.t('tConfirmEmail'), 'info'); }
             await this.signedIn(b, r.user); this.setState({ agree: false });
           }); },
-      tx: { ...I18N.en, ...(I18N[this.lang()] || {}) },
+      tx: { ...I18N.en, ...(I18N[this.lang()] || {}) }, resendInLabel: this.t('resendIn', { n: s.resendIn }), overallWL: this.t('wl', { w: overall.w, l: overall.l }),
       langOptions: LANGS.map(([code, label]) => { const on = this.lang() === code;
         return { label, lang: code === 'zh' ? 'zh-Hans' : 'en', on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent',
           dotBg: on ? 'var(--action-primary)' : 'transparent', dotBorder: on ? 'var(--action-primary)' : 'var(--text-secondary)', select: () => this.setLang(code) }; }),
@@ -2033,18 +2221,22 @@ class Component extends DCLogic {
       // Log Match opens only once the account's data has loaded; the loading state shows the button disabled.
       startLog: () => { if (this.dataReady()) this.go('log', { log: this.logStart('matches') }); },
       tabs: [[this.t('matches'), 'matches', 'List'], [this.t('insights'), 'insights', 'ChartColumn']].map(([label, k, icon]) => ({
-        label, icon, fg: s.screen === k ? 'var(--text-primary)' : 'var(--text-secondary)', select: () => this.setState({ screen: k, back: [], menu: false })
+        label, icon, fg: s.screen === k ? 'var(--text-primary)' : 'var(--text-secondary)', select: () => {
+          // Back to Insights on Grow with no AI insight on screen (say the language changed since): make one.
+          if (k === 'insights' && this.state.insTab === 'coach' && !this.state.aiGrow) setTimeout(() => this.refreshGrow(), 0);
+          this.setState({ screen: k, back: [], menu: false });
+        }
       })),
       menuItems: s.screen === 'detail' ? [
-        { label: 'Edit Match', icon: 'Pencil', select: () => { const m = all.find(x => x.id === s.detailId) || all[0]; this.setState({ menu: false }); if (m) this.go('log', { log: this.editLog(m) }); } },
-        { label: 'Delete Match', icon: 'Trash2', select: () => { const m = all.find(x => x.id === s.detailId) || all[0]; if (m) this.requestDeleteMatch(m.id); } }
+        { label: this.t('editMatch'), icon: 'Pencil', select: () => { const m = all.find(x => x.id === s.detailId) || all[0]; this.setState({ menu: false }); if (m) this.go('log', { log: this.editLog(m) }); } },
+        { label: this.t('deleteMatch'), icon: 'Trash2', select: () => { const m = all.find(x => x.id === s.detailId) || all[0]; if (m) this.requestDeleteMatch(m.id); } }
       ] : [
         { label: this.t('players'), icon: 'Users', select: () => this.go('players') },
         { label: this.t('profile'), icon: 'CircleUser', select: () => this.openProfile() },
         { label: this.t('settings'), icon: 'Settings', select: () => this.go('settings') },
         { label: this.t('logOut'), icon: 'LogOut', select: () => this.signOut() }
       ],
-      filters: ['All', 'Singles', 'Doubles'].map(f => ({ label: f, active: s.filter === f, select: () => this.setState({ filter: f }) })),
+      filters: ['All', 'Singles', 'Doubles'].map(f => ({ label: f === 'All' ? this.t('all') : this.typeLabel(f), active: s.filter === f, select: () => this.setState({ filter: f }) })),
       matchCards: all.filter(m => s.filter === 'All' || m.type === s.filter).map(m => this.card(m))
     };
 
@@ -2058,13 +2250,13 @@ class Component extends DCLogic {
     v.blocked = !!s.blocked; v.notBlocked = !s.blocked;
     v.loading = !s.blocked && !!s.loading; v.matchesReady = !s.blocked && !s.loading;
     v.skel2 = [1, 2]; v.skel3 = [1, 2, 3];
-    const what = { insights: 'Insights', players: 'Players' }[s.screen] || 'Matches';
+    const what = this.t({ insights: 'insights', players: 'players' }[s.screen] || 'matches');
     v.blockedState = s.blocked === 'offline'
-      ? empty('connection-lost', 'Connection Lost', 'Check your Wi-Fi or mobile data, then try again.', 'Try Again', retry)
-      : empty('error', `Couldn't Load ${what}`, 'Something went wrong on our side. Try again in a moment.', 'Try Again', retry);
+      ? empty('connection-lost', this.t('connLost'), this.t('connLostBody'), this.t('tryAgain'), retry)
+      : empty('error', this.t('cantLoad', { what }), this.t('cantLoadBody'), this.t('tryAgain'), retry);
     v.matchesEmpty = !v.matchCards.length && (all.length
-      ? empty('no-matches', `No ${s.filter} Matches Yet`, `${s.filter} matches you log will show up here.`)
-      : empty('no-matches', 'No Matches Yet', 'Log your first match to start tracking results.'));
+      ? empty('no-matches', this.t('noTypeMatches', { type: this.typeLabel(s.filter) }), this.t('noTypeMatchesBody', { type: this.typeLabel(s.filter) }))
+      : empty('no-matches', this.t('noMatches'), this.t('noMatchesBody')));
 
     for (const k of ['name', 'email', 'password']) {
       const e = s.errors[k] || null;
@@ -2092,12 +2284,12 @@ class Component extends DCLogic {
       v.onMeName = e => this.setAcct({ name: e.target.value }, 'name');
       v.meLevels = ['Beginner', 'Intermediate', 'Advanced', 'Competitive'].map(label => {
         const on = a.level === label;
-        return { label, on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent', dotBg: on ? 'var(--action-primary)' : 'transparent', dotBorder: on ? 'var(--action-primary)' : 'var(--text-secondary)', select: () => this.setAcct({ level: label }, 'level') };
+        return { label: this.t('level_' + label), on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent', dotBg: on ? 'var(--action-primary)' : 'transparent', dotBorder: on ? 'var(--action-primary)' : 'var(--text-secondary)', select: () => this.setAcct({ level: label }, 'level') };
       });
       v.saveProfile = () => this.submit({ name: name ? null : this.msg.nameEmpty }, async () => {
         const players = this.state.players.map(p => p.id === 'me' ? { ...p, name, level: this.state.acct.level } : p);
         await this.saveNow({ players });
-        this.setState({ players }); this.goBack(); this.flash('Profile saved');
+        this.setState({ players }); this.goBack(); this.flash(this.t('tProfileSaved'));
       });
     }
     if (v.isAccount) {
@@ -2113,14 +2305,14 @@ class Component extends DCLogic {
       v.curErr = s.errors.current || null; v.curInvalid = !!v.curErr; v.curCls = v.curErr ? 'field-error' : '';
       // After a reset link the current password isn't asked for (needCurrent hides that field).
       v.needCurrent = !a.recovery;
-      v.savePassword = () => this.submit({ current: a.recovery || a.cur ? null : 'Enter your current password.', password: a.next.length >= 8 ? null : a.next ? this.msg.pwShort : 'Enter a new password.' }, async () => {
+      v.savePassword = () => this.submit({ current: a.recovery || a.cur ? null : this.msg.curEmpty, password: a.next.length >= 8 ? null : a.next ? this.msg.pwShort : this.msg.nextEmpty }, async () => {
         try { await (await this.api()).auth.changePassword(this.state.email, a.cur, a.next, !!a.recovery); }
         catch (e) {
           if (e.code === 'current') return { errors: { current: this.msg.curWrong } };
           if (e.code === 'weak' || e.code === 'same') return { errors: { password: e.code === 'weak' ? this.msg.pwWeak : this.msg.pwSame } };
           throw e;
         }
-        this.goBack(); this.flash('Password updated');
+        this.goBack(); this.flash(this.t('tPasswordUpdated'));
       });
     }
     if (v.isPrefs) {
@@ -2140,7 +2332,7 @@ class Component extends DCLogic {
         await (await this.api()).auth.deleteAccount();
         if (window.RallywiseAnalytics && this.user && this.user.anonId) window.RallywiseAnalytics.clear(this.user.anonId); // the server deleted its sent events too
         try { localStorage.removeItem('rallywise.v1.user.' + this.state.email); } catch (e) {} // any pre-cloud copy on this device
-        this.clearAccount(); this.flash('Account deleted');
+        this.clearAccount(); this.flash(this.t('tAccountDeleted'));
       });
     };
     // The one-time Share Usage Data prompt: right after onboarding, over whichever screen it led to.
@@ -2151,7 +2343,7 @@ class Component extends DCLogic {
 
     v.insLoading = v.loading;
     v.insHasData = !s.blocked && !s.loading && all.length > 0;
-    v.insState = s.blocked ? v.blockedState : !s.loading && !all.length && empty('no-insights', 'No Insights Yet', 'Log a few matches and your trends will start to show here.', 'Log Match', () => this.go('log', { log: this.logStart('insights_empty') }));
+    v.insState = s.blocked ? v.blockedState : !s.loading && !all.length && empty('no-insights', this.t('noInsights'), this.t('noInsightsBody'), this.t('logMatch'), () => this.go('log', { log: this.logStart('insights_empty') }));
     if (v.isInsights && v.insHasData) {
       // Oldest first. all is newest first, so reversing keeps same-day matches in the order they were logged.
       const chron = all.slice().reverse().sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
@@ -2191,16 +2383,16 @@ class Component extends DCLogic {
           deltaIcon: dl > 0 ? 'ArrowUpRight' : dl < 0 ? 'ArrowDownRight' : 'Minus',
           deltaFg: dl > 0 ? 'var(--status-win)' : dl < 0 ? 'var(--status-loss)' : 'var(--text-secondary)',
           played: String(all.filter(m => m.date >= cutoff).length), record: last5.label.replace('–', ' – '),
-          rows: [row('Singles Win Rate', sg, `${sg.w} of ${sg.n}`), row('Doubles Win Rate', db, `${db.w} of ${db.n}`),
-            row('Close Games', { pct: cg.length ? cw / cg.length : 0, pctStr: (cg.length ? pct(cw / cg.length) : 0) + '%' }, `${cw} of ${cg.length}`),
-            { label: 'Avg. Point Margin', value: (mg >= 0 ? '+' : '') + mg.toFixed(1), sub: 'per game', l: mg >= 0 ? '50%' : (50 - mw) + '%', w: mw + '%', mid: 1 }],
-          people: [bp && person('Best Partner', bp.id, bp.r.pctStr, 'Win rate together', 'var(--status-win)'),
-            tf && person('Toughest Opponent', tf.id, tf.r.pctStr, 'Win rate vs them', 'var(--text-primary)'),
-            mp && person('Most Played With', mp.id, String(mp.n), 'Matches together', 'var(--text-primary)')].filter(Boolean) };
+          rows: [row(this.t('singlesWin'), sg, this.t('ofMatches', { w: sg.w, n: sg.n })), row(this.t('doublesWin'), db, this.t('ofMatches', { w: db.w, n: db.n })),
+            row(this.t('closeGames'), { pct: cg.length ? cw / cg.length : 0, pctStr: (cg.length ? pct(cw / cg.length) : 0) + '%' }, this.t('ofGames', { w: cw, n: cg.length })),
+            { label: this.t('avgMargin'), value: (mg >= 0 ? '+' : '') + mg.toFixed(1), sub: this.t('perGame'), l: mg >= 0 ? '50%' : (50 - mw) + '%', w: mw + '%', mid: 1 }],
+          people: [bp && person(this.t('bestPartner'), bp.id, bp.r.pctStr, this.t('winTogether'), 'var(--status-win)'),
+            tf && person(this.t('toughest'), tf.id, tf.r.pctStr, this.t('winVs'), 'var(--text-primary)'),
+            mp && person(this.t('mostPlayed'), mp.id, String(mp.n), this.t('matchesTogether'), 'var(--text-primary)')].filter(Boolean) };
       }
       {
         const n6 = chron.filter(m => m.wt.length || m.lt.length).slice(-6), dh = n6.filter(m => m.lt.includes('Defence')).length;
-        const recOf = id => { const r = this.vs(id); return `You're ${r.w}–${r.l} against ${this.first(id)}.`; };
+        const recOf = id => { const r = this.vs(id); return this.t('oppRecord', { w: r.w, l: r.l, name: this.first(id) }); };
         const op = (id, plan) => ({ name: this.nm(id), initials: this.ini(id), record: recOf(id), plan, open: () => this.go('player', { playerId: id }) });
         const sample = {
           build: [
@@ -2216,8 +2408,8 @@ class Component extends DCLogic {
             op('leo', 'Raise the pace early and attack the first short lift. Keep rallies short.')
           ],
           doubles: [
-            { name: 'Rotation', pattern: 'You lose more points when both players stay side-by-side.', label: 'Try Next', labelFg: 'var(--status-win)', action: 'After an attack, recover to front-back earlier.' },
-            { name: 'Front Court Play', pattern: 'You win more when you stay aggressive at the net.', label: 'Keep Doing', labelFg: 'var(--text-secondary)', action: "Hold front court pressure after your partner's serve." }
+            { name: 'Rotation', pattern: 'You lose more points when both players stay side-by-side.', label: this.t('tryNext'), labelFg: 'var(--status-win)', action: 'After an attack, recover to front-back earlier.' },
+            { name: 'Front Court Play', pattern: 'You win more when you stay aggressive at the net.', label: this.t('keepDoing'), labelFg: 'var(--text-secondary)', action: "Hold front court pressure after your partner's serve." }
           ]
         };
         // Design previews keep the sample coaching above. Real accounts only see what their own matches back up:
@@ -2230,7 +2422,8 @@ class Component extends DCLogic {
             const id = x.player_id;
             return id && this.nm(id) ? op(id, x.plan) : null;
           }).filter(Boolean);
-          const doubles = (ai.doublesPlay || []).map(x => ({ ...x, labelFg: x.label === 'Try Next' ? 'var(--status-win)' : 'var(--text-secondary)' }));
+          // label is the schema's "Try Next" / "Keep Doing" enum; only what is shown is translated.
+          const doubles = (ai.doublesPlay || []).map(x => ({ ...x, label: this.t(x.label === 'Try Next' ? 'tryNext' : 'keepDoing'), labelFg: x.label === 'Try Next' ? 'var(--status-win)' : 'var(--text-secondary)' }));
           const build = ai.buildNext || [], strengths = ai.strengths || [], key = ai.keyInsight || null;
           v.grow = {
             keyTitle: key ? key.title : '', keyBody: key ? key.body : '',
@@ -2240,18 +2433,18 @@ class Component extends DCLogic {
             build, strengths, opps, doubles,
             showKey: !!key, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: !!doubles.length,
             empty: !key && !build.length && !strengths.length && !opps.length && !doubles.length &&
-              empty('no-insights', 'Not Enough Data Yet', 'Log a few more matches and add notes about what worked, what cost points, or what you noticed.')
+              empty('no-insights', this.t('notEnough'), this.t('notEnoughAiBody'))
           };
         } else {
           const tagged = chron.filter(m => m.wt.length || m.lt.length).slice(-6), wins = chron.filter(m => m.wt.length && this.res(m.games).win).slice(-6);
           const top = (list, k) => Object.entries(list.flatMap(m => m[k]).filter(t => t !== 'Other').reduce((c, t) => ({ ...c, [t]: (c[t] || 0) + 1 }), {}))
             .filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]).slice(0, 2);
-          const build = top(tagged, 'lt').map(([t, n]) => ({ name: t, evidence: `Cost you points in ${n} of your last ${tagged.length} tagged matches.`, action: '' }));
-          const strengths = top(wins, 'wt').map(([t, n]) => ({ name: t, signal: `Tagged as working in ${n} of your last ${wins.length} wins.`, action: '' }));
+          const build = top(tagged, 'lt').map(([t, n]) => ({ name: this.tagLabel(t), evidence: this.t('costPoints', { n, total: tagged.length }), action: '' }));
+          const strengths = top(wins, 'wt').map(([t, n]) => ({ name: this.tagLabel(t), signal: this.t('workingIn', { n, total: wins.length }), action: '' }));
           const opps = [...new Set(all.flatMap(m => m.opps))].map(id => ({ id, r: this.vs(id), note: all.find(m => m.on && m.opps.includes(id)) }))
             .filter(o => o.note && this.nm(o.id)).sort((a, b) => a.r.pct - b.r.pct || b.r.n - a.r.n).slice(0, 2).map(o => op(o.id, o.note.on));
           v.grow = { keyTitle: '', keyBody: '', keyCurrent: '0%', keyPrevious: '0%', showKeyChart: false, build, strengths, opps, doubles: [], showKey: false, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: false,
-            empty: !build.length && !strengths.length && !opps.length && empty('no-insights', 'Not Enough Data Yet', 'Tag what worked and what cost you points when you log matches, or add notes on opponents. Grow builds from those.') };
+            empty: !build.length && !strengths.length && !opps.length && empty('no-insights', this.t('notEnough'), this.t('notEnoughBody')) };
         }
       }
     }
@@ -2280,64 +2473,65 @@ class Component extends DCLogic {
       const log = s.log, st = log.step;
       v.log = log; v.step1 = st === 1; v.step2 = st === 2; v.step3 = st === 3; v.step4 = st === 4;
       v.logBackIcon = st === 1 ? 'X' : 'ChevronLeft';
-      v.isEdit = !!log.editId; v.logTitle = v.isEdit ? 'Edit Match' : 'Log Match';
+      v.isEdit = !!log.editId; v.logTitle = this.t(v.isEdit ? 'editMatch' : 'logMatch'); v.stepOf = this.t('stepOf', { n: st });
       v.onDate = e => this.setLog({ date: e.target.value || log.date });
       v.logBack = () => st === 1 ? (v.isEdit ? this.goBack() : this.setState({ screen: 'matches', log: null, back: [] })) : this.setLog({ step: st - 1 });
       v.stepBar = [1, 2, 3, 4].map(i => ({ bg: i <= st ? 'var(--progress-active)' : 'var(--progress-inactive)' }));
-      v.stepTitle = ['Singles or Doubles?', 'Who Played?', 'Enter Score', 'Match Notes'][st - 1];
+      v.stepTitle = this.t(['stepType', 'stepWho', 'stepScore', 'stepNotes'][st - 1]);
       v.showLogCta = st > 1;
       const ok = this.canNext(log);
-      v.ctaLabel = st === 4 ? (log.saveErr ? 'Save Again' : v.isEdit ? 'Save Changes' : 'Save Match') : 'Continue';
+      v.ctaLabel = this.t(st === 4 ? (log.saveErr ? 'saveAgain' : v.isEdit ? 'saveChanges' : 'saveMatch') : 'continue');
       v.saving = !!log.saving; v.notSaving = !log.saving; v.saveErr = st === 4 && !!log.saveErr;
       v.ctaBg = ok ? A : 'var(--surface-muted)'; v.ctaFg = ok ? 'var(--action-on-primary)' : 'var(--text-tertiary)';
       v.logNext = () => { if (!this.canNext(this.state.log)) return; st === 4 ? this.save() : this.setLog({ step: st + 1 }); };
-      v.typeOptions = [['Singles', 'You vs 1 opponent', 'User'], ['Doubles', 'You + partner vs 2 opponents', 'Users']].map(([label, sub, icon]) => ({
-        label, sub, icon, border: log.editId && log.type === label ? 'var(--ghost-button-outline-highlight)' : 'transparent',
+      v.typeOptions = [['Singles', this.t('singlesSub'), 'User'], ['Doubles', this.t('doublesSub'), 'Users']].map(([label, sub, icon]) => ({
+        label: this.typeLabel(label), sub, icon, border: log.editId && log.type === label ? 'var(--ghost-button-outline-highlight)' : 'transparent',
         select: () => this.setLog(l => { if (l.editId && l.type === label) return { step: 2 }; const n = { ...l, type: label, step: 2, partner: null, opp1: null, opp2: null }; n.active = label === 'Singles' ? 'opp1' : null; return n; })
       }));
-      const roles = { partner: 'Partner', opp1: log.type === 'Doubles' ? 'Opponent 1' : 'Opponent', opp2: 'Opponent 2' };
+      const roles = { partner: this.t('partner'), opp1: this.t(log.type === 'Doubles' ? 'opponent1' : 'opponent'), opp2: this.t('opponent2') };
       const slot = k => {
         const id = log[k], act = log.active === k;
-        return { role: roles[k], name: id ? this.nm(id) : 'Select ' + roles[k], initials: id ? this.ini(id) : '', empty: !id, fg: id ? 'var(--text-primary)' : 'var(--text-secondary)',
+        return { role: roles[k], name: id ? this.nm(id) : this.t('selectRole', { role: roles[k] }), initials: id ? this.ini(id) : '', empty: !id, fg: id ? 'var(--text-primary)' : 'var(--text-secondary)',
           avBg: id ? 'var(--border-default)' : 'transparent', avFg: id ? 'var(--text-primary)' : 'var(--text-secondary)', border: act ? 'var(--ghost-button-outline-highlight)' : 'transparent',
           select: () => this.setLog({ active: k }) };
       };
-      const me = { role: 'Me', name: this.nm('me'), initials: this.ini('me'), fg: 'var(--text-primary)', avBg: A, avFg: 'var(--action-on-primary)', border: 'transparent', select: () => {} };
+      const me = { role: this.t('me'), name: this.nm('me'), initials: this.ini('me'), fg: 'var(--text-primary)', avBg: A, avFg: 'var(--action-on-primary)', border: 'transparent', select: () => {} };
       v.sideA = log.type === 'Doubles' ? [me, slot('partner')] : [me];
       v.sideB = log.type === 'Doubles' ? [slot('opp1'), slot('opp2')] : [slot('opp1')];
-      v.hasActiveSlot = !!log.active; v.activeSlotLabel = log.active ? roles[log.active] : '';
+      v.hasActiveSlot = !!log.active; v.chooseSlot = log.active ? this.t('chooseRole', { role: roles[log.active] }) : '';
+      v.addNewLabel = this.t('addAsNew', { name: s.search.trim() });
       const chosen = ['partner', 'opp1', 'opp2'].map(k => log[k]).filter(Boolean);
       v.pickList = s.players.filter(p => p.id !== 'me' && !chosen.includes(p.id) && p.name.toLowerCase().includes(q)).map(p => {
         const r = log.active === 'partner' ? this.with(p.id) : this.vs(p.id);
-        return { name: p.name, initials: this.ini(p.id), sub: r.n ? (log.active === 'partner' ? 'Together ' : 'H2H ') + r.label : 'New', pick: () => this.pick(p.id) };
+        return { name: p.name, initials: this.ini(p.id), sub: r.n ? this.t(log.active === 'partner' ? 'together' : 'h2h', { r: this.recWords(r) }) : this.t('newPlayer'), pick: () => this.pick(p.id) };
       });
       v.pickEmpty = !v.pickList.length && !v.canAddNew && (q
-        ? empty('no-results', 'No Players Found', 'Check the spelling, or type a full name to add them.')
-        : empty('no-players', 'No Players Yet', 'Type a name above to add your first player.'));
+        ? empty('no-results', this.t('noPlayersFound'), this.t('noPlayersFoundLogBody'))
+        : empty('no-players', this.t('noPlayers'), this.t('noPlayersLogBody')));
       if (v.pickEmpty) v.pickEmpty.style = { padding: '16px 16px 8px' };
       v.addNew = () => { const id = this.addPlayer(s.search.trim(), 'log_match'); this.pick(id); };
       const t = log.format, cap = this.cap(t);
       v.formats = [21, 15, 11].map(f => ({ label: String(f), bg: 'var(--filter-pill-bg)', fg: f === t ? 'var(--filter-pill-text-selected)' : 'var(--filter-pill-text-default)', border: f === t ? 'var(--filter-pill-border-selected)' : 'transparent',
         select: () => this.setLog(l => ({ format: f, games: l.games.map(g => ({ ...g, l: f - 6 })) })) }));
-      const aName = log.type === 'Doubles' ? 'You & ' + (log.partner ? this.first(log.partner) : 'Partner') : 'You';
-      const bName = log.type === 'Doubles' ? [log.opp1, log.opp2].map(o => o ? this.first(o) : '—').join(' & ') : (log.opp1 ? this.first(log.opp1) : 'Opponent');
+      const aName = log.type === 'Doubles' ? this.t('you') + ' & ' + (log.partner ? this.first(log.partner) : this.t('partner')) : this.t('you');
+      const bName = log.type === 'Doubles' ? [log.opp1, log.opp2].map(o => o ? this.first(o) : '—').join(' & ') : (log.opp1 ? this.first(log.opp1) : this.t('opponent'));
       const upd = (i, fn) => this.setLog(l => ({ games: l.games.map((g, j) => j === i ? fn(g) : g) }));
       v.gameRows = log.games.map((g, i) => {
         const [a, b] = this.scoreOf(g, t), us = g.w === 'us';
-        return { label: 'Game ' + (i + 1), a: String(a), b: String(b), aName, bName,
+        return { label: this.t('game', { n: i + 1 }), a: String(a), b: String(b), aName, bName,
           aFg: a > b ? 'var(--text-primary)' : 'var(--text-secondary)', bFg: b > a ? 'var(--text-primary)' : 'var(--text-secondary)',
-          usLabel: 'We Won', themLabel: 'They Won',
+          usLabel: this.t('weWon'), themLabel: this.t('theyWon'),
           usBg: 'transparent', usFg: us ? 'var(--text-primary)' : 'var(--text-secondary)', usBorder: us ? 'var(--ghost-button-outline-highlight)' : 'transparent',
           themBg: 'transparent', themFg: !us ? 'var(--text-primary)' : 'var(--text-secondary)', themBorder: !us ? 'var(--ghost-button-outline-highlight)' : 'transparent',
-          loserLabel: (us ? bName : aName) + ' Score',
+          loserLabel: this.t('score', { name: us ? bName : aName }),
           setUs: () => upd(i, x => ({ ...x, w: 'us' })), setThem: () => upd(i, x => ({ ...x, w: 'them' })),
           dec: () => upd(i, x => ({ ...x, l: Math.max(0, x.l - 1) })), inc: () => upd(i, x => ({ ...x, l: Math.min(cap - 1, x.l + 1) })),
           canRemove: i > 0 && i === log.games.length - 1, remove: () => this.setLog(l => ({ games: l.games.slice(0, -1) })) };
       });
-      v.canAddGame = log.games.length < 3; v.nextGameNo = String(log.games.length + 1);
+      v.canAddGame = log.games.length < 3; v.addGameLabel = this.t('addGame', { n: log.games.length + 1 });
       v.addGame = () => this.setLog(l => ({ games: [...l.games, { w: l.games[l.games.length - 1].w === 'us' ? 'them' : 'us', l: l.format - 6 }] }));
       const dr = this.res(this.draftGames(log));
-      v.liveResult = dr.us === dr.them ? `Level at ${dr.us}–${dr.them} · Add a deciding game` : (dr.win ? `You win ${dr.us}–${dr.them}` : `You lose ${dr.us}–${dr.them}`);
+      v.liveResult = this.t(dr.us === dr.them ? 'levelAt' : dr.win ? 'youWin' : 'youLose', { r: `${dr.us}–${dr.them}` });
       v.liveResultColor = dr.us === dr.them ? 'var(--text-secondary)' : dr.win ? 'var(--status-win)' : 'var(--status-loss)';
       const dm = { type: log.type, partner: log.partner, opps: [log.opp1, log.opp2].filter(Boolean) };
       v.draft = { teamA: log.type ? this.teamA(dm) : '', teamB: dm.opps.length ? this.teamB(dm) : '', scoreLine: this.draftGames(log).map(g => g.join('–')).join('  ·  '), ...this.badge(dr.win) };
@@ -2346,15 +2540,15 @@ class Component extends DCLogic {
       const TAGS = ['Serve', 'Return', 'Net', 'Smash', 'Defence', 'Footwork', 'Placement', 'Other'];
       const tagRow = (k, selBg, selFg) => TAGS.map(t => {
         const sel = log[k].includes(t), full = log[k].length >= 3 && !sel;
-        return { label: t, bg: sel ? selBg : 'var(--filter-pill-bg)', fg: sel ? selFg : full ? 'var(--text-tertiary)' : 'var(--filter-pill-text-default)',
+        return { label: this.tagLabel(t), bg: sel ? selBg : 'var(--filter-pill-bg)', fg: sel ? selFg : full ? 'var(--text-tertiary)' : 'var(--filter-pill-text-default)',
           toggle: () => this.setLog(l => ({ [k]: l[k].includes(t) ? l[k].filter(x => x !== t) : l[k].length >= 3 ? l[k] : [...l[k], t] })) };
       });
       v.workedTags = tagRow('wt', A, 'var(--action-on-primary)'); v.lostTags = tagRow('lt', 'var(--text-primary)', 'var(--text-inverse)');
       v.hasWt = log.wt.length > 0; v.hasLt = log.lt.length > 0;
-      const oppName = [log.opp1, log.opp2].filter(Boolean).map(o => this.first(o)).join(' & ') || 'your opponent';
-      v.oppQ = 'What did you notice about ' + oppName + '?';
+      const oppName = [log.opp1, log.opp2].filter(Boolean).map(o => this.first(o)).join(' & ') || this.t('yourOpponent');
+      v.oppQ = this.t('oppQ', { name: oppName });
       v.onOpp = e => this.setLog({ on: e.target.value });
-      v.linkHint = 'Tags feed your Skill Trends and Coach. Opponent notes build your game plan for ' + oppName + '.';
+      v.linkHint = this.t('linkHint', { name: oppName });
     }
 
     v.confirmDelete = !!s.confirmDelete;
@@ -2366,22 +2560,22 @@ class Component extends DCLogic {
       const r = this.res(m.games);
       const openP = id => () => this.go('player', { playerId: id });
       v.detail = {
-        dateLong: this.date(m.date, true), type: m.type, resultWord: r.win ? 'Win' : 'Loss', gamesWon: `${r.us}–${r.them}`,
-        sideA: [{ name: 'You · ' + this.nm('me'), initials: this.ini('me'), avBg: A, avFg: 'var(--action-on-primary)' }]
+        dateLong: this.date(m.date, true), type: this.typeLabel(m.type), resultWord: this.t(r.win ? 'resultWin' : 'resultLoss'), gamesWon: `${r.us}–${r.them}`,
+        sideA: [{ name: this.t('you') + ' · ' + this.nm('me'), initials: this.ini('me'), avBg: A, avFg: 'var(--action-on-primary)' }]
           .concat(m.partner ? [{ name: this.nm(m.partner), initials: this.ini(m.partner), avBg: 'var(--border-default)', avFg: 'var(--text-primary)' }] : []),
         sideB: m.opps.map(id => ({ name: this.nm(id), initials: this.ini(id), open: openP(id) })),
-        aShort: m.partner ? 'You & ' + this.first(m.partner).slice(0, 1) : 'You',
-        rows: m.games.map((g, i) => ({ label: 'Game ' + (i + 1), a: String(g[0]), b: String(g[1]), aFg: g[0] > g[1] ? 'var(--text-primary)' : 'var(--text-secondary)', bFg: g[1] > g[0] ? 'var(--text-primary)' : 'var(--text-secondary)' })),
+        aShort: m.partner ? this.t('you') + ' & ' + this.first(m.partner).slice(0, 1) : this.t('you'),
+        rows: m.games.map((g, i) => ({ label: this.t('game', { n: i + 1 }), a: String(g[0]), b: String(g[1]), aFg: g[0] > g[1] ? 'var(--text-primary)' : 'var(--text-secondary)', bFg: g[1] > g[0] ? 'var(--text-primary)' : 'var(--text-secondary)' })),
         hasNotes: !!(m.wt.length || m.lt.length || m.worked || m.lost || m.on),
         noteRows: [
-          (m.wt.length || m.worked) && { label: 'What Worked', labelFg: 'var(--text-secondary)', tags: m.wt.join(' · '), text: m.worked },
-          (m.lt.length || m.lost) && { label: 'What Cost Points', labelFg: 'var(--text-secondary)', tags: m.lt.join(' · '), text: m.lost },
-          m.on && { label: 'On ' + this.teamB(m), labelFg: 'var(--text-secondary)', tags: '', text: m.on }
+          (m.wt.length || m.worked) && { label: this.t('noteWorked'), labelFg: 'var(--text-secondary)', tags: m.wt.map(t => this.tagLabel(t)).join(' · '), text: m.worked },
+          (m.lt.length || m.lost) && { label: this.t('noteCost'), labelFg: 'var(--text-secondary)', tags: m.lt.map(t => this.tagLabel(t)).join(' · '), text: m.lost },
+          m.on && { label: this.t('noteOn', { name: this.teamB(m) }), labelFg: 'var(--text-secondary)', tags: '', text: m.on }
         ].filter(Boolean),
         h2h: m.opps.map(id => {
           const tot = this.vs(id), si = this.vs(id, 'Singles'), du = this.vs(id, 'Doubles');
           const recent = all.filter(x => x.opps.includes(id)).slice(0, 5).reverse();
-          return { name: this.nm(id), label: tot.label, sub: `Singles ${si.label} · Doubles ${du.label}`, form: recent.map(x => this.dot(this.res(x.games).win)), open: openP(id) };
+          return { name: this.nm(id), vsLabel: this.t('youVs', { name: this.nm(id) }), label: tot.label, sub: this.t('h2hSub', { s: this.recWords(si), d: this.recWords(du) }), form: recent.map(x => this.dot(this.res(x.games).win)), open: openP(id) };
         })
       };
     }
@@ -2389,23 +2583,24 @@ class Component extends DCLogic {
     if (v.isPlayers) {
       v.playerList = s.players.filter(p => p.id !== 'me' && p.name.toLowerCase().includes(q)).map(p => {
         const o = this.vs(p.id), w = this.with(p.id);
-        const parts = [o.n ? 'H2H ' + o.label : null, w.n ? 'Partner ' + w.label : null].filter(Boolean);
-        return { name: p.name, initials: this.ini(p.id), sub: parts.join(' · ') || 'No matches yet', open: () => this.go('player', { playerId: p.id }) };
+        const parts = [o.n ? this.t('h2h', { r: this.recWords(o) }) : null, w.n ? this.t('partnerRec', { r: this.recWords(w) }) : null].filter(Boolean);
+        return { name: p.name, initials: this.ini(p.id), sub: parts.join(' · ') || this.t('noMatchesYet'), open: () => this.go('player', { playerId: p.id }) };
       });
       v.playersEmpty = !v.playerList.length && (q
-        ? empty('no-results', 'No Players Found', 'Check the spelling, or add them as a new player.')
-        : empty('no-players', 'No Players Yet', 'Players you add or play against will show up here.'));
-      v.addPlayerOnly = () => { this.addPlayer(s.search.trim(), 'players'); this.setState({ search: '' }); this.flash('Player added'); };
+        ? empty('no-results', this.t('noPlayersFound'), this.t('noPlayersFoundBody'))
+        : empty('no-players', this.t('noPlayers'), this.t('noPlayersBody')));
+      v.addNameLabel = this.t('addName', { name: s.search.trim() });
+      v.addPlayerOnly = () => { this.addPlayer(s.search.trim(), 'players'); this.setState({ search: '' }); this.flash(this.t('tPlayerAdded')); };
     }
 
     if (v.isPlayer) {
       const id = s.playerId, o = this.vs(id), si = this.vs(id, 'Singles'), du = this.vs(id, 'Doubles'), w = this.with(id);
       const inv = all.filter(m => m.opps.includes(id) || m.partner === id);
-      const st = (label, r) => ({ label, value: r.n ? r.label : '—', sub: r.n ? r.pctStr + ' win rate' : 'No matches', fg: 'var(--text-primary)' });
-      v.profile = { name: this.nm(id), initials: this.ini(id), sub: `${inv.length} matches together or against`,
-        stats: [st('Overall H2H', o), st('Singles H2H', si), st('Doubles H2H', du), st('As Partner', w)],
+      const st = (label, r) => ({ label, value: r.n ? r.label : '—', sub: r.n ? this.t('pctWinRate', { p: r.pctStr }) : this.t('noMatchesShort'), fg: 'var(--text-primary)' });
+      v.profile = { name: this.nm(id), initials: this.ini(id), sub: this.t('playedTogether', { n: inv.length }),
+        stats: [st(this.t('overallH2H'), o), st(this.t('singlesH2H'), si), st(this.t('doublesH2H'), du), st(this.t('asPartner'), w)],
         recent: inv.slice(0, 5).map(m => this.card(m)),
-        recentEmpty: !inv.length && { ...empty('no-matches', 'No Matches Together Yet', 'Matches you play with or against them will show up here.'), style: { padding: '8px 16px' } } };
+        recentEmpty: !inv.length && { ...empty('no-matches', this.t('noTogether'), this.t('noTogetherBody')), style: { padding: '8px 16px' } } };
     }
     if (s.toast) {
       const t = s.toast, K = { success: ['CircleCheck', 'var(--action-primary)'], error: ['CircleAlert', 'var(--status-error)'], info: ['Info', 'var(--text-inverse)'] }[t.kind] || [];
