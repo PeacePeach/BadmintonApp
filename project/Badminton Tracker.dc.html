@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script src="./support.js"></script>
 </head>
 <body>
@@ -21,6 +21,14 @@
 <script src="rallywise-config.js"></script>
 <script src="rallywise-backend.js"></script>
 <script src="rallywise-analytics.js"></script>
+<script>
+/* Native Capacitor shell: use the physical device as the frame, never the desktop preview chrome. */
+try {
+  if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+    document.documentElement.classList.add('native-app');
+  }
+} catch (e) {}
+</script>
 <style>
 body{margin:0;background:var(--bg-primary);font-family:"Poppins",system-ui,sans-serif;}
 *{box-sizing:border-box;}
@@ -30,6 +38,11 @@ input,textarea,button{font-family:inherit;}
 input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
 .search-field-outline{border:1px solid var(--ghost-button-outline);}
 .search-field-outline:focus-within{border-color:var(--ghost-button-outline-highlight);}
+/* Native shell: the real iPhone supplies the device corners. Never render the desktop preview frame in Capacitor. */
+html.native-app,html.native-app body,html.native-app x-dc{width:100%;height:100%;min-height:100%;overflow:hidden;background:var(--bg-primary);}
+html.native-app .stage{width:100%;height:100%;min-height:100% !important;padding:0 !important;}
+html.native-app .phone{width:100% !important;height:100% !important;border-radius:0 !important;box-shadow:none !important;}
+html.native-app .fake-status{display:none !important;}
 /* Phone preview: on a real phone, drop the device frame and fill the screen. */
 @media (max-width:500px){
 .stage{padding:0 !important;min-height:100vh !important;}
