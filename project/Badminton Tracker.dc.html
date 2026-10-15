@@ -297,7 +297,7 @@ button:disabled{cursor:default !important;}
                 </div>
               </sc-for>
             </div>
-            <button onClick="{{ startLog }}" style="height:60px;border:none;border-radius:999px;background:var(--action-primary);color:var(--action-on-primary);font:600 17px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;" style-active="transform:scale(.97);">
+            <button disabled="{{ true }}" style="height:60px;border:none;border-radius:999px;background:var(--surface-muted);color:var(--text-tertiary);font:600 17px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;">
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import>
               Log Match
             </button>
@@ -446,7 +446,7 @@ button:disabled{cursor:default !important;}
                 <div style="display:flex;flex-direction:column;gap:10px;">
                   <div style="font:500 52px/.95 var(--font-sans);letter-spacing:-.03em;">{{ pf.win }}</div>
                   <div style="display:flex;align-items:center;gap:6px;font:400 13px/1 var(--font-sans);color:var(--text-secondary);">
-                    <div style="display:flex;align-items:center;gap:3px;font-weight:600;color:var(--status-win);"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ArrowUpRight" size="{{ 15 }}" hint-size="15px,15px"></x-import>{{ pf.delta }}</div>
+                    <div style="display:flex;align-items:center;gap:3px;font-weight:600;color: {{ pf.deltaFg }};"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pf.deltaIcon }}" size="{{ 15 }}" hint-size="15px,15px"></x-import>{{ pf.delta }}</div>
                     vs prev 10
                   </div>
                 </div>
@@ -516,6 +516,10 @@ button:disabled{cursor:default !important;}
 
         <sc-if value="{{ insCoach }}" hint-placeholder-val="{{ false }}">
           <div data-screen-label="Grow" style="display:flex;flex-direction:column;gap:44px;padding-top:6px;">
+            <sc-if value="{{ grow.empty }}" hint-placeholder-val="{{ false }}">
+              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ grow.empty.illustration }}" title="{{ grow.empty.title }}" body="{{ grow.empty.body }}" hint-size="350px,300px"></x-import>
+            </sc-if>
+            <sc-if value="{{ grow.showKey }}" hint-placeholder-val="{{ true }}">
             <div style="background:var(--surface-primary);border-radius:26px;padding:24px;display:flex;flex-direction:column;gap:14px;">
               <div style="display:flex;align-items:center;gap:8px;font:400 14px/1 var(--font-sans);color:var(--neutral-600);"><div style="width:6px;height:6px;border-radius:50%;background:var(--status-win);"></div>Key insight</div>
               <div style="font:500 22px/1.3 var(--font-sans);text-wrap:balance;">Your net game is getting stronger.</div>
@@ -526,7 +530,9 @@ button:disabled{cursor:default !important;}
                 <div style="position:absolute;left:54%;top:-4px;bottom:-4px;width:2px;margin-left:-1px;border-radius:2px;background:var(--text-primary);"></div>
               </div>
             </div>
+            </sc-if>
 
+            <sc-if value="{{ grow.showBuild }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;flex-direction:column;gap:16px;">
               <div style="display:flex;flex-direction:column;gap:6px;"><div style="font:500 19px/1.2 var(--font-sans);">Build Next</div><div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">Top areas to improve from recent matches</div></div>
               <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;">
@@ -536,16 +542,20 @@ button:disabled{cursor:default !important;}
                       <div style="font:500 16px/1.25 var(--font-sans);">{{ b.name }}</div>
                       <div style="font:400 13px/1.4 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">{{ b.evidence }}</div>
                     </div>
+                    <sc-if value="{{ b.action }}" hint-placeholder-val="{{ true }}">
                     <div style="height:1px;background:var(--surface-muted);"></div>
                     <div style="display:flex;flex-direction:column;gap:6px;">
                       <div style="font:400 12px/1 var(--font-sans);color:var(--status-win);">Try Next</div>
                       <div style="font:400 14px/1.4 var(--font-sans);text-wrap:pretty;">{{ b.action }}</div>
                     </div>
+                    </sc-if>
                   </div>
                 </sc-for>
               </div>
             </div>
+            </sc-if>
 
+            <sc-if value="{{ grow.showStrengths }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;flex-direction:column;gap:16px;">
               <div style="display:flex;flex-direction:column;gap:6px;"><div style="font:500 19px/1.2 var(--font-sans);">Your Strengths</div><div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">What's working. Keep doing these.</div></div>
               <sc-for list="{{ grow.strengths }}" as="k" hint-placeholder-count="2">
@@ -557,15 +567,19 @@ button:disabled{cursor:default !important;}
                       <div style="font:400 13px/1.35 var(--font-sans);color:var(--text-secondary);">{{ k.signal }}</div>
                     </div>
                   </div>
+                  <sc-if value="{{ k.action }}" hint-placeholder-val="{{ true }}">
                   <div style="height:1px;background:var(--surface-muted);"></div>
                   <div style="display:flex;flex-direction:column;gap:6px;">
                     <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);">Keep Doing</div>
                     <div style="font:400 15px/1.45 var(--font-sans);text-wrap:pretty;">{{ k.action }}</div>
                   </div>
+                  </sc-if>
                 </div>
               </sc-for>
             </div>
+            </sc-if>
 
+            <sc-if value="{{ grow.showOpps }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;flex-direction:column;gap:16px;">
               <div style="display:flex;flex-direction:column;gap:6px;"><div style="font:500 19px/1.2 var(--font-sans);">Opponent Plans</div><div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">How to play your toughest opponents</div></div>
               <sc-for list="{{ grow.opps }}" as="o" hint-placeholder-count="2">
@@ -586,7 +600,9 @@ button:disabled{cursor:default !important;}
                 </div>
               </sc-for>
             </div>
+            </sc-if>
 
+            <sc-if value="{{ grow.showDoubles }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;flex-direction:column;gap:16px;">
               <div style="display:flex;flex-direction:column;gap:6px;"><div style="font:500 19px/1.2 var(--font-sans);">Doubles Play</div><div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">Patterns from your doubles matches</div></div>
               <sc-for list="{{ grow.doubles }}" as="d" hint-placeholder-count="2">
@@ -606,6 +622,7 @@ button:disabled{cursor:default !important;}
                 </div>
               </sc-for>
             </div>
+            </sc-if>
           </div>
         </sc-if>
       </div>
@@ -1364,6 +1381,12 @@ class Component extends DCLogic {
     const d = new Date();
     return new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
   }
+  // True for the real app (opened on the splash); false for design previews, which show sample data.
+  live() { const s = (this.props || {}).startScreen; return !s || s === 'Splash'; }
+  // A "Data state" preview (anything but Normal) never saves.
+  previewData() { const d = (this.props || {}).dataState; return !!(d && d !== 'Normal'); }
+  // The account's data is on screen and can be saved: not loading, not blocked, and (in the real app) signed in.
+  dataReady() { const s = this.state; return !s.loading && !s.blocked && (!this.live() || this.previewData() || !!(this.user && this.sync)); }
 
   // Accounts and data live in Supabase, behind rallywise-backend.js. this.user is the signed-in
   // { id, email, name }, and this.sync saves that user's data to the cloud, sending only what changed.
@@ -1462,10 +1485,13 @@ class Component extends DCLogic {
     this.sync.push(this._saved).catch(e => this.flash(e && e.code === 'network' ? "Couldn't save. Check your connection." : "Couldn't save your changes", 'error'));
   }
   // For actions with their own spinner (save match, delete match, save profile): saves the change to the
-  // cloud first and throws if that fails, so the screen only changes once it is saved.
+  // cloud first and throws if that fails, so the screen only changes once it is saved. In the real app it also
+  // throws while the account isn't open yet (still loading), so nothing is reported saved that never was.
   async saveNow(patch) {
-    const next = { ...this.dataState(), ...patch }, d = this.props.dataState;
-    if (this.user && this.sync && !(d && d !== 'Normal')) { await this.sync.push(next); this._saved = next; }
+    const next = { ...this.dataState(), ...patch };
+    if (this.previewData() || !this.live()) return next;
+    if (!this.user || !this.sync || this.state.loading) throw { code: 'unknown' };
+    await this.sync.push(next); this._saved = next;
     return next;
   }
   // Back online: retry anything that didn't save.
@@ -1811,7 +1837,8 @@ class Component extends DCLogic {
       toggleMenu: () => this.setState(x => ({ menu: !x.menu })),
       goBack: this.goBack,
       onSearch: e => this.setState({ search: e.target.value }),
-      startLog: () => this.go('log', { log: this.logStart('matches') }),
+      // Log Match opens only once the account's data has loaded; the loading state shows the button disabled.
+      startLog: () => { if (this.dataReady()) this.go('log', { log: this.logStart('matches') }); },
       tabs: [['Matches', 'matches', 'List'], ['Insights', 'insights', 'ChartColumn']].map(([label, k, icon]) => ({
         label, icon, fg: s.screen === k ? 'var(--text-primary)' : 'var(--text-secondary)', select: () => this.setState({ screen: k, back: [], menu: false })
       })),
@@ -1932,7 +1959,8 @@ class Component extends DCLogic {
     v.insHasData = !s.blocked && !s.loading && all.length > 0;
     v.insState = s.blocked ? v.blockedState : !s.loading && !all.length && empty('no-insights', 'No Insights Yet', 'Log a few matches and your trends will start to show here.', 'Log Match', () => this.go('log', { log: this.logStart('insights_empty') }));
     if (v.isInsights && v.insHasData) {
-      const chron = all.slice().sort((a, b) => a.date < b.date ? -1 : 1);
+      // Oldest first. all is newest first, so reversing keeps same-day matches in the order they were logged.
+      const chron = all.slice().reverse().sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
       const span = chron.slice(-20), half = Math.floor(span.length / 2);
       const prev = span.slice(0, span.length - half), recent = span.slice(-half);
       const rr = this.rec(recent), pr = this.rec(prev);
@@ -1960,7 +1988,11 @@ class Component extends DCLogic {
         const others = s.players.filter(p => p.id !== 'me' && (!bp || p.id !== bp.id) && (!tf || p.id !== tf.id)).map(p => ({ id: p.id, n: all.filter(m => m.partner === p.id || m.opps.includes(p.id)).length })).filter(o => o.n).sort((a, b) => b.n - a.n);
         const mp = others[0];
         const person = (role, id, value, sub, vFg) => ({ role, name: this.nm(id), initials: this.ini(id), value, sub, vFg, open: () => this.go('player', { playerId: id }) });
-        v.pf = { win: rr.pctStr, delta: (dl >= 0 ? '+' : '') + dl + '%', bars,
+        // The headline Win Rate is the overall record, the same as Matches. The change compares the newer half of the
+        // last 20 matches with the older half, and its arrow and colour follow the sign.
+        v.pf = { win: this.rec(all).pctStr, delta: (dl > 0 ? '+' : '') + dl + '%', bars,
+          deltaIcon: dl > 0 ? 'ArrowUpRight' : dl < 0 ? 'ArrowDownRight' : 'Minus',
+          deltaFg: dl > 0 ? 'var(--status-win)' : dl < 0 ? 'var(--status-loss)' : 'var(--text-secondary)',
           played: String(all.filter(m => m.date >= cutoff).length), record: last5.label.replace('–', ' – '),
           rows: [row('Singles Win Rate', sg, `${sg.w} of ${sg.n}`), row('Doubles Win Rate', db, `${db.w} of ${db.n}`),
             row('Close Games', { pct: cg.length ? cw / cg.length : 0, pctStr: (cg.length ? pct(cw / cg.length) : 0) + '%' }, `${cw} of ${cg.length}`),
@@ -1973,7 +2005,7 @@ class Component extends DCLogic {
         const n6 = chron.filter(m => m.wt.length || m.lt.length).slice(-6), dh = n6.filter(m => m.lt.includes('Defence')).length;
         const recOf = id => { const r = this.vs(id); return `You're ${r.w}–${r.l} against ${this.first(id)}.`; };
         const op = (id, plan) => ({ name: this.nm(id), initials: this.ini(id), record: recOf(id), plan, open: () => this.go('player', { playerId: id }) });
-        v.grow = {
+        const sample = {
           build: [
             { name: 'Backhand Defence', evidence: `Lost points in ${dh} of your last ${n6.length} matches.`, action: 'Keep your racket higher during flat exchanges.' },
             { name: 'Serve Return', evidence: 'Won 38% of return points, lower than usual.', action: 'Return deeper and higher to slow their attack.' }
@@ -1991,6 +2023,21 @@ class Component extends DCLogic {
             { name: 'Front Court Play', pattern: 'You win more when you stay aggressive at the net.', label: 'Keep Doing', labelFg: 'var(--text-secondary)', action: "Hold front court pressure after your partner's serve." }
           ]
         };
+        // Design previews keep the sample coaching above. Real accounts only see what their own matches back up:
+        // tags they picked (2 or more times), and their own notes on opponents. The key insight and Doubles Play are
+        // sample-only until they can be worked out from real data.
+        if (!this.live()) v.grow = { ...sample, showKey: true, showBuild: true, showStrengths: true, showOpps: true, showDoubles: true, empty: null };
+        else {
+          const tagged = chron.filter(m => m.wt.length || m.lt.length).slice(-6), wins = chron.filter(m => m.wt.length && this.res(m.games).win).slice(-6);
+          const top = (list, k) => Object.entries(list.flatMap(m => m[k]).filter(t => t !== 'Other').reduce((c, t) => ({ ...c, [t]: (c[t] || 0) + 1 }), {}))
+            .filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]).slice(0, 2);
+          const build = top(tagged, 'lt').map(([t, n]) => ({ name: t, evidence: `Cost you points in ${n} of your last ${tagged.length} tagged matches.`, action: '' }));
+          const strengths = top(wins, 'wt').map(([t, n]) => ({ name: t, signal: `Tagged as working in ${n} of your last ${wins.length} wins.`, action: '' }));
+          const opps = [...new Set(all.flatMap(m => m.opps))].map(id => ({ id, r: this.vs(id), note: all.find(m => m.on && m.opps.includes(id)) }))
+            .filter(o => o.note && this.nm(o.id)).sort((a, b) => a.r.pct - b.r.pct || b.r.n - a.r.n).slice(0, 2).map(o => op(o.id, o.note.on));
+          v.grow = { build, strengths, opps, doubles: [], showKey: false, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: false,
+            empty: !build.length && !strengths.length && !opps.length && empty('no-insights', 'Not Enough Data Yet', 'Tag what worked and what cost you points when you log matches, or add notes on opponents. Grow builds from those.') };
+        }
       }
     }
 
