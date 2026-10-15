@@ -537,11 +537,13 @@ button:disabled{cursor:default !important;}
               <div style="display:flex;align-items:center;gap:8px;font:400 14px/1 var(--font-sans);color:var(--neutral-600);"><div style="width:6px;height:6px;border-radius:50%;background:var(--status-win);"></div>Key insight</div>
               <div style="font:500 22px/1.3 var(--font-sans);text-wrap:balance;">{{ grow.keyTitle }}</div>
               <div style="font:400 15px/1.5 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">{{ grow.keyBody }}</div>
+              <sc-if value="{{ grow.showKeyChart }}" hint-placeholder-val="{{ true }}">
               <div style="position:relative;height:10px;display:flex;gap:6px;margin-top:10px;">
-                <div style="width:72%;flex-shrink:0;border-radius:99px;background:var(--progress-active);"></div>
+                <div style="width: {{ grow.keyCurrent }};flex-shrink:0;border-radius:99px;background:var(--progress-active);"></div>
                 <div style="flex:1;border-radius:99px;background:repeating-linear-gradient(-60deg,var(--border-default) 0 1.5px,transparent 1.5px 5px);"></div>
-                <div style="position:absolute;left:54%;top:-4px;bottom:-4px;width:2px;margin-left:-1px;border-radius:2px;background:var(--text-primary);"></div>
+                <div style="position:absolute;left: {{ grow.keyPrevious }};top:-4px;bottom:-4px;width:2px;margin-left:-1px;border-radius:2px;background:var(--text-primary);"></div>
               </div>
+              </sc-if>
             </div>
             </sc-if>
 
@@ -2057,7 +2059,7 @@ class Component extends DCLogic {
         // Design previews keep the sample coaching above. Real accounts only see what their own matches back up:
         // tags they picked (2 or more times), and their own notes on opponents. The key insight and Doubles Play are
         // sample-only until they can be worked out from real data.
-        if (!this.live()) v.grow = { ...sample, keyTitle: 'Your net game is getting stronger.', keyBody: "You've won a higher share of net points in your last 6 matches.", showKey: true, showBuild: true, showStrengths: true, showOpps: true, showDoubles: true, empty: null };
+        if (!this.live()) v.grow = { ...sample, keyTitle: 'Your net game is getting stronger.', keyBody: "Net worked in 3 of your last 3 matches, up from 2 of the previous 3.", keyCurrent: '100%', keyPrevious: '67%', showKeyChart: true, showKey: true, showBuild: true, showStrengths: true, showOpps: true, showDoubles: true, empty: null };
         else if (s.aiGrow) {
           const ai = s.aiGrow;
           const opps = (ai.opponentPlans || []).map(x => {
@@ -2068,6 +2070,9 @@ class Component extends DCLogic {
           const build = ai.buildNext || [], strengths = ai.strengths || [], key = ai.keyInsight || null;
           v.grow = {
             keyTitle: key ? key.title : '', keyBody: key ? key.body : '',
+            keyCurrent: key && key.chart ? Math.max(0, Math.min(100, key.chart.current_percent)) + '%' : '0%',
+            keyPrevious: key && key.chart ? Math.max(0, Math.min(100, key.chart.previous_percent)) + '%' : '0%',
+            showKeyChart: !!(key && key.chart),
             build, strengths, opps, doubles,
             showKey: !!key, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: !!doubles.length,
             empty: !key && !build.length && !strengths.length && !opps.length && !doubles.length &&
@@ -2081,7 +2086,7 @@ class Component extends DCLogic {
           const strengths = top(wins, 'wt').map(([t, n]) => ({ name: t, signal: `Tagged as working in ${n} of your last ${wins.length} wins.`, action: '' }));
           const opps = [...new Set(all.flatMap(m => m.opps))].map(id => ({ id, r: this.vs(id), note: all.find(m => m.on && m.opps.includes(id)) }))
             .filter(o => o.note && this.nm(o.id)).sort((a, b) => a.r.pct - b.r.pct || b.r.n - a.r.n).slice(0, 2).map(o => op(o.id, o.note.on));
-          v.grow = { keyTitle: '', keyBody: '', build, strengths, opps, doubles: [], showKey: false, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: false,
+          v.grow = { keyTitle: '', keyBody: '', keyCurrent: '0%', keyPrevious: '0%', showKeyChart: false, build, strengths, opps, doubles: [], showKey: false, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: false,
             empty: !build.length && !strengths.length && !opps.length && empty('no-insights', 'Not Enough Data Yet', 'Tag what worked and what cost you points when you log matches, or add notes on opponents. Grow builds from those.') };
         }
       }
