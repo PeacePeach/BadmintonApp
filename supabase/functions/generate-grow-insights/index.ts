@@ -154,7 +154,11 @@ Do not mention AI. Keep copy compact for mobile cards.`;
         text:{format:{type:"json_schema",name:"rallywise_grow",strict:true,schema}}
       })
     });
-    if (!ai.ok) return Response.json({error:"ai_failed"},{status:502,headers:CORS});
+    if (!ai.ok) {
+      const detail = await ai.text();
+      console.error("OpenAI request failed", ai.status, detail.slice(0, 2000));
+      return Response.json({error:"ai_failed",upstream_status:ai.status},{status:502,headers:CORS});
+    }
     const parsed = JSON.parse(readOutput(await ai.json()));
 
     const {error:ce} = await sb.from("ai_insights").upsert({
