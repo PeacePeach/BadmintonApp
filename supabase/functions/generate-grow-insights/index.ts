@@ -81,7 +81,7 @@ Deno.serve(async req => {
     if (pe || me) throw pe || me;
 
     const recent = (matches || []).slice(0,10);
-    const INSIGHT_VERSION = "2026-10-15-v4";
+    const INSIGHT_VERSION = "2026-10-15-v5";
     const fp = await hash(INSIGHT_VERSION + JSON.stringify(recent.map((m:any)=>({
       id:m.id,date:m.date,type:m.type,partner:m.partner,opps:m.opps,games:m.games,wt:m.wt,lt:m.lt,
       worked:safe(m.worked),lost:safe(m.lost),opp_notes:safe(m.opp_notes)
@@ -167,6 +167,7 @@ VOICE AND TONE:
 - Be natural, concise, supportive, and encouraging while staying grounded in evidence.
 - Encourage progress without generic praise. Never invent improvement or compliment the player unless the facts support it.
 - When something is improving, acknowledge the progress naturally: "This is starting to pay off", "You're getting more consistent here", or equivalent.
+- When a metric is improving, lead the headline with the progress first, then mention the remaining opportunity if needed. Avoid negative-first headlines for positive trends.
 - When something needs work, be constructive rather than judgmental. Prefer "still costing you points", "worth focusing on next", or "could be steadier" over "weak", "poor", "bad", or "failing".
 - Lead with the useful interpretation, not the raw statistic. Use statistics as evidence, not as the voice of the sentence.
 - Recommendations should sound like practical coaching: one clear thing to try next, in human language.
@@ -187,6 +188,7 @@ COPY LENGTH — hard limits:
 KEY INSIGHT:
 - Make it a synthesized coaching insight, not a restatement of raw tags.
 - Think of the card as: title = interpretation; body = quantitative evidence; chart = visualization of exactly that same evidence.
+- For improving trends, the title should frame the progress positively (for example, "Returns are getting steadier") rather than leading with the remaining problem (for example, "Return errors remain costly"). The body can then acknowledge what still needs attention.
 - If using the chart, choose exactly one metric_id from key_metrics.
 - When metric_id is non-empty, the body MUST explicitly name what is being measured, include BOTH current_percent and previous_percent, and make the comparison window understandable when possible.
 - The numbers in the body MUST exactly match the selected key_metrics entry. Never round them differently, substitute different values, or describe a different metric.
