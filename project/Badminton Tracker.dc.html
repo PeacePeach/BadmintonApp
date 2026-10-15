@@ -1533,29 +1533,23 @@ button:disabled{cursor:default !important;}
   <!-- Focus sheet: New Focus (+), Add to Focus (Grow's Build Next) and Edit Focus. -->
   <sc-if value="{{ hasSheet }}" hint-placeholder-val="{{ false }}">
     <div onClick="{{ sh.close }}" style="position:absolute;inset:0;background:rgba(0,0,0,.55);"></div>
-    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="focus-sheet-title" data-screen-label="{{ sh.heading }}" style="position:absolute;left:0;right:0;bottom:0;max-height:90%;overflow-y:auto;background:var(--surface-primary);border-radius:34px 34px 0 0;padding:12px 20px 34px;display:flex;flex-direction:column;gap:26px;">
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="focus-sheet-title" data-screen-label="{{ sh.heading }}" style="position:absolute;left:0;right:0;bottom:0;max-height:90%;overflow-y:auto;background:var(--bg-primary);border-radius:34px 34px 0 0;padding:12px 20px 34px;display:flex;flex-direction:column;gap:26px;">
       <div aria-hidden="true" style="width:40px;height:5px;border-radius:99px;background:var(--border-default);align-self:center;"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-top:-8px;">
-        <div id="focus-sheet-title" style="font:500 17px/1 var(--font-sans);">{{ sh.heading }}</div>
+        <h2 id="focus-sheet-title" style="margin:0;font:600 28px/1.2 var(--font-sans);">{{ sh.heading }}</h2>
         <button onClick="{{ sh.close }}" aria-label="{{ tx.close }}" style="width:44px;height:44px;padding:0;border:none;border-radius:50%;background:var(--surface-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--neutral-600);"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="X" size="{{ 24 }}" hint-size="24px,24px"></x-import></button>
       </div>
       <sc-if value="{{ sh.isGrow }}" hint-placeholder-val="{{ true }}">
         <div style="display:flex;flex-direction:column;gap:8px;">
-          <div style="font:600 26px/1.2 var(--font-sans);overflow-wrap:anywhere;">{{ sh.title }}</div>
+          <div style="font:600 22px/1.25 var(--font-sans);overflow-wrap:anywhere;">{{ sh.title }}</div>
           <div style="font:400 13px/1.4 var(--font-sans);color:var(--text-secondary);">{{ sh.goal }}</div>
         </div>
       </sc-if>
       <sc-if value="{{ sh.isNew }}" hint-placeholder-val="{{ false }}">
-        <div style="display:flex;flex-direction:column;gap:22px;">
-          <label style="display:flex;flex-direction:column;gap:12px;">
-            <span style="font:500 15px/1.3 var(--font-sans);">{{ sh.nameQ }}</span>
-            <span class="search-field-outline" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;padding:0 22px;"><input type="text" value="{{ sh.title }}" onChange="{{ sh.onTitle }}" maxlength="120" placeholder="{{ tx.focusNamePh }}" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:500 17px/1 var(--font-sans);"></span>
-          </label>
-          <label style="display:flex;flex-direction:column;gap:12px;">
-            <span style="font:500 15px/1.3 var(--font-sans);">{{ tx.workOnLabel }} <span style="color:var(--text-secondary);font-weight:400;">{{ tx.optional }}</span></span>
-            <textarea value="{{ sh.goal }}" onChange="{{ sh.onGoal }}" rows="2" maxlength="1000" placeholder="{{ tx.workOnPh }}" style="background:var(--input-field-bg);border:1px solid var(--input-field-outline);outline:none;border-radius:22px;padding:14px 18px;color:var(--text-primary);font:400 15px/1.5 var(--font-sans);resize:none;"></textarea>
-          </label>
-        </div>
+        <label style="display:flex;flex-direction:column;gap:12px;">
+          <span style="font:500 15px/1.3 var(--font-sans);">{{ sh.nameQ }}</span>
+          <textarea value="{{ sh.title }}" onChange="{{ sh.onTitle }}" rows="3" maxlength="120" placeholder="{{ tx.focusNamePh }}" style="background:var(--input-field-bg);border:1px solid var(--input-field-outline);outline:none;border-radius:22px;padding:14px 18px;color:var(--text-primary);font:400 15px/1.5 var(--font-sans);resize:none;"></textarea>
+        </label>
       </sc-if>
       <div style="display:flex;flex-direction:column;gap:12px;">
         <div id="focus-how" style="font:500 15px/1.3 var(--font-sans);">{{ tx.howQ }}</div>
@@ -1760,7 +1754,7 @@ const I18N = {
     // Focus
     focus: 'Focus', focusSub: "What you're working on right now.", focusActive: 'Active', focusCompletedN: 'Completed · {n}', focusCompleted: 'Completed',
     fromGrow: 'From Grow', sessionsThisWeek: '{n} of {t} sessions this week', matchesSub: 'Next {t} matches · {n} complete', noSchedule: 'No schedule',
-    noFocus: 'Nothing in Focus Yet', noFocusBody: 'Pick one thing to improve and track it here. You can also add one from Grow.', newFocus: 'New Focus',
+    noFocus: 'Nothing in Focus Yet', noFocusBody: 'Pick one thing to improve and track it here. You can also add one from Grow.', newFocus: 'New Focus', createFocus: 'Create New Focus',
     createdByYou: 'Created by you', addedFromGrow: 'Added from Grow', planPractice: 'Practice', perWeek: '{n}× / week', weeksN: '{n} weeks', oneWeek: '1 week',
     ongoing: 'Ongoing', planMatches: 'Matches', nextN: 'Next {n}', thisWeek: 'This Week', weekOf: 'Week {n} of {t}', weekN: 'Week {n}',
     thisPlan: 'This Plan', nMatches: '{n} matches', hintStart: 'Tap a session when you finish it.', hintUndo: 'Tap again to undo.',
@@ -1772,7 +1766,7 @@ const I18N = {
     tFocusAdded: 'Added to Focus', tFocusUpdated: 'Focus updated', tFocusDeleted: 'Focus deleted', tFocusDeleteFailed: "Couldn't delete focus",
     tFocusCompleted: 'Marked complete', tFocusReopened: 'Moved back to Active',
     addToFocus: 'Add to Focus', inFocus: 'In Focus', close: 'Close', improveQ: 'What do you want to improve?', focusName: 'Name', focusNamePh: 'Backhand clear',
-    workOnLabel: 'What to work on', optional: 'Optional', workOnPh: 'Turn your shoulder fully before contact.', howQ: 'How will you work on it?',
+    optional: 'Optional', howQ: 'How will you work on it?',
     optPractice: 'Practice sessions', optMatches: 'Next matches', optNone: 'No schedule', howOften: 'How often?', howLong: 'For how long?',
     howManyMatches: 'For how many matches?', noneHint: "You decide when it's done. Mark it complete any time."
   },
@@ -1880,7 +1874,7 @@ const I18N = {
     consentBody: '分享匿名使用数据（比如你记录了多少场比赛），帮我们改进 Rallywise 测试版。你的名字、邮箱、球友和赛后记录都不会被分享。你可以随时在“设置 > 隐私”里更改。',
     focus: '重点', focusSub: '你正在努力提升的地方。', focusActive: '进行中', focusCompletedN: '已完成 · {n}', focusCompleted: '已完成',
     fromGrow: '来自提升页', sessionsThisWeek: '本周 {n}/{t} 次', matchesSub: '接下来 {t} 场 · 已完成 {n} 场', noSchedule: '不设计划',
-    noFocus: '还没有重点', noFocusBody: '选一件想提升的事，在这里跟进。也可以从提升页添加。', newFocus: '新建重点',
+    noFocus: '还没有重点', noFocusBody: '选一件想提升的事，在这里跟进。也可以从提升页添加。', newFocus: '新建重点', createFocus: '创建新重点',
     createdByYou: '由你创建', addedFromGrow: '来自提升页', planPractice: '练习', perWeek: '每周 {n} 次', weeksN: '{n} 周', oneWeek: '1 周',
     ongoing: '长期', planMatches: '比赛', nextN: '接下来 {n} 场', thisWeek: '本周', weekOf: '第 {n} 周，共 {t} 周', weekN: '第 {n} 周',
     thisPlan: '本次计划', nMatches: '{n} 场', hintStart: '练完一次，就点一下。', hintUndo: '再点一次可撤销。',
@@ -1892,7 +1886,7 @@ const I18N = {
     tFocusAdded: '已加入重点', tFocusUpdated: '重点已更新', tFocusDeleted: '重点已删除', tFocusDeleteFailed: '重点未能删除',
     tFocusCompleted: '已标记为完成', tFocusReopened: '已移回进行中',
     addToFocus: '加入重点', inFocus: '已加入重点', close: '关闭', improveQ: '你想提升什么？', focusName: '名称', focusNamePh: '反手高远球',
-    workOnLabel: '练习要点', optional: '选填', workOnPh: '击球前充分转肩。', howQ: '打算怎么练？',
+    optional: '选填', howQ: '打算怎么练？',
     optPractice: '专项练习', optMatches: '接下来的比赛', optNone: '不设计划', howOften: '多久练一次？', howLong: '练多久？',
     howManyMatches: '跟进几场比赛？', noneHint: '什么时候完成由你决定，随时可以标记完成。'
   }
@@ -3192,8 +3186,8 @@ class Component extends DCLogic {
       const types = [['practice', 'optPractice', 'Repeat'], ['match', 'optMatches', 'Trophy']].concat(isGrow ? [] : [['manual', 'optNone', 'Circle']]);
       // Edit can't shorten a running plan to end before this week; those lengths are disabled.
       const minW = isEdit && sh.type === 'practice' && sh.type === (FS.find(x => x.id === sh.editId) || {}).type ? sh.minWeeks || 0 : 0;
-      v.sh = { heading: this.t(isEdit ? 'editFocus' : isGrow ? 'addToFocus' : 'newFocus'), isGrow, isNew: !isGrow, nameQ: this.t(isEdit ? 'focusName' : 'improveQ'),
-        title: sh.title, goal: sh.goal, onTitle: e => this.setSheet({ title: e.target.value }), onGoal: e => this.setSheet({ goal: e.target.value }),
+      v.sh = { heading: this.t(isEdit ? 'editFocus' : isGrow ? 'addToFocus' : 'createFocus'), isGrow, isNew: !isGrow, nameQ: this.t(isEdit ? 'focusName' : 'improveQ'),
+        title: sh.title, goal: sh.goal, onTitle: e => this.setSheet({ title: e.target.value.replace(/\s*\n\s*/g, ' ') }),
         close: () => this.setState({ sheet: null }),
         types: types.map(([k, label, icon]) => { const on = sh.type === k; return { label: this.t(label), icon, on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent',
           dotBg: on ? 'var(--action-primary)' : 'transparent', dotBorder: on ? 'var(--action-primary)' : 'var(--text-secondary)', select: () => this.setSheet({ type: k }) }; }),
