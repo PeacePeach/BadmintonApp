@@ -1,3 +1,5 @@
+> **Branching:** `main` = release, `develop` = next version. See [DEVELOPMENT.md](DEVELOPMENT.md).
+
 # CODING AGENTS: READ THIS FIRST
 
 This is a **handoff bundle** from Claude Design (claude.ai/design).
