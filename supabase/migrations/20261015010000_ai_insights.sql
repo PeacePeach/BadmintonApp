@@ -7,6 +7,9 @@ create table if not exists public.ai_insights (
 
 alter table public.ai_insights enable row level security;
 
+revoke all on public.ai_insights from anon;
+grant select, insert, update, delete on public.ai_insights to authenticated;
+
 create policy "Users can read own AI insights"
 on public.ai_insights for select using (auth.uid() = user_id);
 
