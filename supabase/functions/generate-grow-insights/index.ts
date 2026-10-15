@@ -81,7 +81,7 @@ Deno.serve(async req => {
     if (pe || me) throw pe || me;
 
     const recent = (matches || []).slice(0,10);
-    const INSIGHT_VERSION = "2026-10-15-v3";
+    const INSIGHT_VERSION = "2026-10-15-v4";
     const fp = await hash(INSIGHT_VERSION + JSON.stringify(recent.map((m:any)=>({
       id:m.id,date:m.date,type:m.type,partner:m.partner,opps:m.opps,games:m.games,wt:m.wt,lt:m.lt,
       worked:safe(m.worked),lost:safe(m.lost),opp_notes:safe(m.opp_notes)
@@ -162,6 +162,20 @@ Use only supplied verified facts and player notes. Never invent scores, counts, 
 Numbers are already computed; do not recalculate or contradict them. Treat notes as observations, not objective facts.
 Find recurring themes across tags and free text, including Other. Prefer fewer strong insights over filler.
 
+VOICE AND TONE:
+- Write like a thoughtful badminton coach who noticed something useful, not like a dashboard, analyst, or performance report.
+- Be natural, concise, supportive, and encouraging while staying grounded in evidence.
+- Encourage progress without generic praise. Never invent improvement or compliment the player unless the facts support it.
+- When something is improving, acknowledge the progress naturally: "This is starting to pay off", "You're getting more consistent here", or equivalent.
+- When something needs work, be constructive rather than judgmental. Prefer "still costing you points", "worth focusing on next", or "could be steadier" over "weak", "poor", "bad", or "failing".
+- Lead with the useful interpretation, not the raw statistic. Use statistics as evidence, not as the voice of the sentence.
+- Recommendations should sound like practical coaching: one clear thing to try next, in human language.
+- Avoid corporate/analytics phrasing such as "data indicates", "statistically", "metric", "rate increased/decreased", "according to your records", or implementation language.
+- Do not overstate conclusions. Use measured language such as "looks more stable lately", "is starting to improve", or "still seems inconsistent" when appropriate.
+- For Chinese output, write natural modern Simplified Chinese used by badminton players, not literal translations or formal report language. Avoid stiff phrases such as "数据显示", "表现有所提升", "值得优先改善", "执行该策略", or "保持此行为".
+- For English output, avoid KPI/dashboard language. It should read like a smart coach giving a quick observation after a few matches.
+- Do not add encouragement to every sentence; keep it subtle and credible.
+
 COPY LENGTH — hard limits:
 - Key Insight title: max 5 words and max 34 characters. Aim for one line; never exceed two lines on a 390px mobile screen.
 - Key Insight body: max 16 words and max 90 characters. Aim for two short lines on a 390px mobile screen.
@@ -171,21 +185,31 @@ COPY LENGTH — hard limits:
 - Doubles pattern/action: max 14 words each.
 
 KEY INSIGHT:
-- Make it a synthesized insight, not a restatement of raw tags.
-- If using the chart, choose exactly one metric_id from key_metrics and make the body explicitly explain that comparison in plain player-facing language.
-- metric_id is internal metadata only. NEVER expose metric_id, field names, tag syntax, parentheses such as "(cost:Footwork)", or implementation language in any visible copy.
-- If no key_metrics candidate genuinely supports the insight, set metric_id to "" and do not imply a numeric trend.
+- Make it a synthesized coaching insight, not a restatement of raw tags.
+- Think of the card as: title = interpretation; body = quantitative evidence; chart = visualization of exactly that same evidence.
+- If using the chart, choose exactly one metric_id from key_metrics.
+- When metric_id is non-empty, the body MUST explicitly name what is being measured, include BOTH current_percent and previous_percent, and make the comparison window understandable when possible.
+- The numbers in the body MUST exactly match the selected key_metrics entry. Never round them differently, substitute different values, or describe a different metric.
+- Example: title "Your net game is getting stronger"; body "62% in your last 3 matches, up from 47% in the previous 3."
+- Chinese example: title "网前正在变得更稳定"; body "最近3场网前发挥率62%，此前3场为47%。"
+- If no key_metrics candidate genuinely supports a clear quantitative insight, set metric_id to "" and do not imply a numeric trend. In that case no chart will be shown.
+- metric_id is internal metadata only. NEVER expose metric_id, field names, tag syntax, parentheses such as "(cost:Footwork)", or implementation language in visible copy.
 
 BUILD NEXT / STRENGTHS:
-- Evidence must explain WHY the card exists using compact data language and should fit in about two lines on mobile.
-- Prefer forms like "Cost points in 4 of your last 6 tagged matches." or "Worked in 3 of your last 5 wins."
+- Evidence must explain WHY the card exists, but phrase it conversationally rather than like a report.
+- Prefer human coaching language such as "Movement has still been costing you points lately" over "Cost points in 4 of your last 6 tagged matches."
 - Never quote a player note directly in evidence and never prefix with "Player note:".
 - Free-text notes may influence the recommendation, but the displayed evidence should be synthesized and concise.
 - Recommendations must be one concrete action, not a drill paragraph and not multiple clauses.
+- Strengths should acknowledge what is working without exaggerating it.
 
 OPPONENT PLANS:
 - Return only the plan text. Never start with the opponent's name, a colon, or "Against [name]".
-- Convert observations into one concise tactical instruction.
+- Convert observations into one concise tactical instruction that sounds like advice from a coach.
+
+DOUBLES PLAY:
+- Describe the pattern naturally, then give one practical adjustment or habit to keep.
+- Avoid mechanical labels or report-style wording.
 
 Do not mention AI. Keep every card scannable on a phone.`
 
