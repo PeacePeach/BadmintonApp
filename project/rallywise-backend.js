@@ -226,11 +226,16 @@
     }
   };
 
-  // Beta analytics (rallywise-analytics.js decides what and when). Insert only: the table can't be read back.
-  // Rows carry their own ids and duplicates are ignored, so a batch that is sent twice is stored once.
+  // Beta analytics (rallywise-analytics.js decides what and when). Insert only: the table can't be read back,
+  // so there is no upsert. Rows carry their own ids; if a batch holds one the server already has (an earlier send
+  // landed but its answer was lost), the rows go one at a time and the ones already stored are skipped.
   const analytics = {
     async send(rows) {
-      await run(sb().from('analytics_events').upsert(rows, { onConflict: 'id', ignoreDuplicates: true }));
+      const ins = list => sb().from('analytics_events').insert(list);
+      const r = await ins(rows);
+      if (!r.error) return;
+      if (r.error.code !== '23505') throw dataFail(r.error);
+      for (const row of rows) { const one = await ins([row]); if (one.error && one.error.code !== '23505') throw dataFail(one.error); }
     }
   };
 

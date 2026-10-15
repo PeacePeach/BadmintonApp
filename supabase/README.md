@@ -36,6 +36,17 @@ Before turning one on, enable it under **Authentication > Providers**:
   `user_id`; signed-out requests get nothing.
 - `delete_account()`: deletes the caller's auth user, which cascades to all of their rows.
 
+## Beta analytics
+
+`20261014020000_analytics_events.sql` adds `analytics_events`, the store for the ten beta events in the
+Rallywise Beta Analytics Plan. The app only sends events when Share Usage Data is on.
+
+- Each row: `id` (made by the app), `anon_id` (from `profiles`, never the auth id), `event`, `ts`, `session_id`,
+  `app_version`, `platform`, `props` (JSON), `received_at`.
+- Signed-in clients may only insert, and only under their own `anon_id`. They can't read, change or delete rows.
+- `delete_account()` also deletes the caller's events.
+- Read events in the SQL Editor, e.g. `select event, count(*) from analytics_events group by 1 order by 2 desc;`
+
 ## Local development
 
 `supabase start` (needs Docker) runs the whole stack locally and applies the migration. Point

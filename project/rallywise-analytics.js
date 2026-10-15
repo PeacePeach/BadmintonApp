@@ -8,7 +8,7 @@
 //   and goes when the connection returns.
 // - 'ask': the event is held in memory only, then sent if the player says yes, or dropped if they say no.
 // - 'no': nothing is kept.
-// Each event gets its own id when it happens and the server ignores an id it already has, so a retried batch
+// Each event gets its own id when it happens and the server skips an id it already has, so a retried batch
 // never stores an event twice.
 (function () {
   if (window.RallywiseAnalytics) return;

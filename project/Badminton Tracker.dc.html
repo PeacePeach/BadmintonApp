@@ -1998,7 +1998,8 @@ class Component extends DCLogic {
       const ob = s.ob, st = ob.step, ok = st !== 2 || (ob.name.trim() && ob.level);
       const setOb = patch => this.setState(x => ({ ob: { ...x.ob, ...patch } }));
       // Save the profile onto the "me" player, then leave onboarding for good.
-      const finish = (exit, extra) => (this.track('onboarding_completed', { level: ob.level, exit }), this.setState(x => ({ screen: 'matches', back: [], ob: this.newOb(), onboarded: true, players: x.players.map(p => p.id === 'me' ? { ...p, name: x.ob.name.trim(), level: x.ob.level } : p), ...extra })));
+      // exit is onboarding_completed's exit; then() gives the screen to land on (it may track match_log_started).
+      const finish = (exit, then) => { this.track('onboarding_completed', { level: ob.level, exit }); const extra = then && then(); this.setState(x => ({ screen: 'matches', back: [], ob: this.newOb(), onboarded: true, players: x.players.map(p => p.id === 'me' ? { ...p, name: x.ob.name.trim(), level: x.ob.level } : p), ...extra })); };
       v.obWelcome = st === 1; v.obProfile = st === 2; v.obReady = st === 3;
       v.obName = ob.name; v.onObName = e => setOb({ name: e.target.value });
       v.obBack = () => setOb({ step: 1 });
@@ -2009,7 +2010,7 @@ class Component extends DCLogic {
       v.obReadyTitle = `Ready to play, ${ob.name.trim().split(/\s+/)[0]}`;
       v.obCtaLabel = ['Get started', 'Continue', 'Log your first match'][st - 1];
       v.obCtaBg = ok ? A : 'var(--surface-muted)'; v.obCtaFg = ok ? 'var(--action-on-primary)' : 'var(--text-tertiary)';
-      v.obNext = () => { if (!ok) return; st < 3 ? setOb({ step: st + 1 }) : finish('log_first_match', { screen: 'log', log: this.logStart('onboarding') }); };
+      v.obNext = () => { if (!ok) return; st < 3 ? setOb({ step: st + 1 }) : finish('log_first_match', () => ({ screen: 'log', log: this.logStart('onboarding') })); };
       v.obToMatches = () => finish('skip');
     }
 
