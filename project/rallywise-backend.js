@@ -51,6 +51,15 @@
   const userOf = u => u && { id: u.id, email: (u.email || '').toLowerCase(), name: (u.user_metadata && u.user_metadata.name) || '',
     provider: (u.app_metadata && u.app_metadata.provider) || 'email' };
 
+  // Native builds use a custom URL scheme so email confirmation/reset can return to the app.
+  // Web builds keep using the current HTTPS page.
+  function authRedirect() {
+    try {
+      if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) return 'rallywise://auth/callback';
+    } catch (e) {}
+    return here();
+  }
+
   // ---- Auth ----
   const auth = {
     configured,
@@ -70,7 +79,7 @@
     // Returns { user, needsConfirm }. needsConfirm is true when the project requires email confirmation:
     // there is no session until the link in the email is opened.
     async signUp(email, password, name) {
-      const { data, error } = await sb().auth.signUp({ email, password, options: { data: { name }, emailRedirectTo: here() } });
+      const { data, error } = await sb().auth.signUp({ email, password, options: { data: { name }, emailRedirectTo: authRedirect() } });
       if (error) throw authFail(error);
       // With confirmations on, an existing email comes back as a user with no identities instead of an error.
       if (data.user && Array.isArray(data.user.identities) && !data.user.identities.length) throw fail('exists');
@@ -79,7 +88,7 @@
     // Ends this device's session only; other devices stay signed in and the cloud data stays.
     async signOut() { if (client) await client.auth.signOut({ scope: 'local' }).catch(() => {}); },
     async sendReset(email) {
-      const { error } = await sb().auth.resetPasswordForEmail(email, { redirectTo: here() });
+      const { error } = await sb().auth.resetPasswordForEmail(email, { redirectTo: authRedirect() });
       if (error) throw authFail(error);
     },
     // Checks the current password by signing in with it, then sets the new one. After a reset link
@@ -96,7 +105,7 @@
     // provider and back, and the returning page restores the session like any other reopen.
     async oauth(provider) {
       if (!configured() || !auth.oauthEnabled(provider)) throw fail('unavailable');
-      const { error } = await sb().auth.signInWithOAuth({ provider, options: { redirectTo: here() } });
+      const { error } = await sb().auth.signInWithOAuth({ provider, options: { redirectTo: authRedirect() } });
       if (error) throw authFail(error);
     },
     // Deletes the auth user server-side; their profile, players and matches go with it (on delete cascade).
@@ -104,6 +113,30 @@
       const { error } = await sb().rpc('delete_account');
       if (error) throw dataFail(error);
       await auth.signOut();
+    },
+    async consumeCallback(url) {
+      if (!url) return null;
+      let parsed;
+      try { parsed = new URL(url); } catch (e) { return null; }
+      if (parsed.protocol !== 'rallywise:' || parsed.host !== 'auth' || parsed.pathname !== '/callback') return null;
+
+      const hash = new URLSearchParams((parsed.hash || '').replace(/^#/, ''));
+      const query = parsed.searchParams;
+      const accessToken = hash.get('access_token') || query.get('access_token');
+      const refreshToken = hash.get('refresh_token') || query.get('refresh_token');
+      const code = query.get('code');
+
+      if (accessToken && refreshToken) {
+        const { data, error } = await sb().auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+        if (error) throw authFail(error);
+        return data.session ? userOf(data.session.user) : null;
+      }
+      if (code) {
+        const { data, error } = await sb().auth.exchangeCodeForSession(code);
+        if (error) throw authFail(error);
+        return data.session ? userOf(data.session.user) : null;
+      }
+      return null;
     },
     // cb(event, user): 'SIGNED_OUT' when the session ends elsewhere (another tab, revoked token),
     // 'PASSWORD_RECOVERY' when the page opened from a reset link.
