@@ -72,6 +72,10 @@ Deno.serve(async req => {
     const { data:u } = await sb.auth.getUser();
     if (!u.user) return Response.json({error:"unauthorized"},{status:401,headers:CORS});
     const uid = u.user.id;
+    // App language. Insights are written in it, and it is part of the cache fingerprint, so a cached insight
+    // is only ever returned in the language it was written in. English keeps the fingerprint it had before.
+    const reqBody = await req.json().catch(() => ({}));
+    const lang = reqBody && reqBody.lang === "zh" ? "zh" : "en";
 
     const [{data:players,error:pe},{data:matches,error:me}] = await Promise.all([
       sb.from("players").select("id,name,level").order("created_at"),
@@ -82,7 +86,7 @@ Deno.serve(async req => {
 
     const recent = (matches || []).slice(0,10);
     const INSIGHT_VERSION = "2026-10-15-v5";
-    const fp = await hash(INSIGHT_VERSION + JSON.stringify(recent.map((m:any)=>({
+    const fp = await hash(INSIGHT_VERSION + (lang === "zh" ? ":zh" : "") + JSON.stringify(recent.map((m:any)=>({
       id:m.id,date:m.date,type:m.type,partner:m.partner,opps:m.opps,games:m.games,wt:m.wt,lt:m.lt,
       worked:safe(m.worked),lost:safe(m.lost),opp_notes:safe(m.opp_notes)
     }))));
@@ -213,7 +217,9 @@ DOUBLES PLAY:
 - Describe the pattern naturally, then give one practical adjustment or habit to keep.
 - Avoid mechanical labels or report-style wording.
 
-Do not mention AI. Keep every card scannable on a phone.`
+Do not mention AI. Keep every card scannable on a phone.
+
+OUTPUT LANGUAGE: write every visible string in ${lang === "zh" ? "natural Simplified Chinese" : "English"}. Keep JSON keys, metric_id, player_id and the doublesPlay label values ("Try Next" / "Keep Doing") exactly as specified.`
 
     const ai = await fetch("https://api.openai.com/v1/responses",{
       method:"POST",
@@ -230,6 +236,7 @@ Do not mention AI. Keep every card scannable on a phone.`
       return Response.json({error:"ai_failed",upstream_status:ai.status},{status:502,headers:CORS});
     }
     const parsed = JSON.parse(readOutput(await ai.json()));
+    parsed.lang = lang;
 
     if (parsed.keyInsight) {
       const chosen = key_metrics.find((m:any) => m.metric_id === parsed.keyInsight.metric_id);

@@ -78,6 +78,11 @@ button:disabled{cursor:default !important;}
 .toast{animation:toast-in .22s var(--ease-out) both;}
 .toast.toast-out{animation:toast-out .2s ease-in both;}
 @media (prefers-reduced-motion:reduce){.toast,.toast.toast-out{animation:none;}}
+/* Simplified Chinese: Poppins stays first, so English, numbers, scores, dates and initials keep Poppins and only
+   Chinese glyphs use Noto Sans SC (loaded on demand, see ensureNoto). Also applies to a single element marked
+   lang="zh-Hans", such as the 简体中文 option shown in English. */
+:root[lang="zh-Hans"],[lang="zh-Hans"]{--font-sans:"Poppins","Noto Sans SC",sans-serif;}
+:root[lang="zh-Hans"] body{font-family:"Poppins","Noto Sans SC",sans-serif;}
 </style>
 </helmet>
 <div class="stage" style="width:100%;height:100vh;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:0;">
@@ -244,26 +249,38 @@ button:disabled{cursor:default !important;}
         <div data-screen-label="Onboarding · Welcome" style="min-height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:28px;text-align:center;padding:0 12px 40px;">
           <img src="assets/rallywise-mark.svg" alt="" width="88" height="48" style="display:block;width:88px;height:auto;">
           <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
-            <div style="font:600 30px/1.2 var(--font-sans);">Welcome to Rallywise</div>
-            <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">Track your matches, understand your game, and improve over time.</div>
+            <div style="font:600 30px/1.2 var(--font-sans);">{{ tx.obWelcomeTitle }}</div>
+            <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">{{ tx.obWelcomeBody }}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:340px;text-align:left;">
+            <div role="radiogroup" aria-label="{{ tx.language }}" style="display:flex;flex-direction:column;gap:10px;">
+              <sc-for list="{{ langOptions }}" as="o" hint-placeholder-count="2">
+                <button role="radio" aria-checked="{{ o.on }}" lang="{{ o.lang }}" onClick="{{ o.select }}" style="height:56px;border-radius:99px;background:var(--surface-primary);border:1.5px solid {{ o.border }};color:var(--text-primary);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 22px;cursor:pointer;" style-active="transform:scale(.98);">
+                  <span>{{ o.label }}</span>
+                  <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:1.5px solid {{ o.dotBorder }};color:var(--action-on-primary);">
+                    <sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 14 }}" hint-size="14px,14px"></x-import></sc-if>
+                  </span>
+                </button>
+              </sc-for>
+            </div>
           </div>
         </div>
       </sc-if>
 
       <sc-if value="{{ obProfile }}" hint-placeholder-val="{{ false }}">
         <div data-screen-label="Onboarding · Profile" style="display:flex;flex-direction:column;gap:28px;">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="Back" onClick="{{ obBack }}" hint-size="48px,48px"></x-import>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="{{ tx.back }}" onClick="{{ obBack }}" hint-size="48px,48px"></x-import>
           <div style="display:flex;flex-direction:column;gap:10px;">
-            <div style="font:600 30px/1.25 var(--font-sans);">Set up your profile</div>
-            <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">This helps Rallywise make sense of your matches.</div>
+            <div style="font:600 30px/1.25 var(--font-sans);">{{ tx.obProfileTitle }}</div>
+            <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">{{ tx.obProfileBody }}</div>
           </div>
           <div style="display:flex;flex-direction:column;gap:10px;">
-            <div style="font:500 15px/1 var(--font-sans);">Name</div>
-            <div class="search-field-outline" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="text" value="{{ obName }}" onChange="{{ onObName }}" placeholder="Your name" autocomplete="name" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
+            <div style="font:500 15px/1 var(--font-sans);">{{ tx.name }}</div>
+            <div class="search-field-outline" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="text" value="{{ obName }}" onChange="{{ onObName }}" placeholder="{{ tx.yourName }}" autocomplete="name" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
           </div>
           <div style="display:flex;flex-direction:column;gap:10px;">
-            <div style="font:500 15px/1 var(--font-sans);">Skill level</div>
-            <div role="radiogroup" aria-label="Skill level" style="display:flex;flex-direction:column;gap:10px;">
+            <div style="font:500 15px/1 var(--font-sans);">{{ tx.skillLevel }}</div>
+            <div role="radiogroup" aria-label="{{ tx.skillLevel }}" style="display:flex;flex-direction:column;gap:10px;">
               <sc-for list="{{ obLevels }}" as="o" hint-placeholder-count="4">
                 <button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.select }}" style="height:56px;border-radius:99px;background:var(--surface-primary);border:1.5px solid {{ o.border }};color:var(--text-primary);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 22px;cursor:pointer;" style-active="transform:scale(.98);">
                   <span>{{ o.label }}</span>
@@ -282,7 +299,7 @@ button:disabled{cursor:default !important;}
           <div style="width:64px;height:64px;border-radius:50%;background:var(--surface-primary);color:var(--status-win);display:flex;align-items:center;justify-content:center;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
           <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
             <div style="font:600 30px/1.2 var(--font-sans);">{{ obReadyTitle }}</div>
-            <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">Start logging your matches. Your insights will build over time as you play.</div>
+            <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">{{ tx.obReadyBody }}</div>
           </div>
         </div>
       </sc-if>
@@ -292,7 +309,7 @@ button:disabled{cursor:default !important;}
     <sc-if value="{{ isMatches }}" hint-placeholder-val="{{ true }}">
       <div data-screen-label="Matches" style="display:flex;flex-direction:column;gap:22px;">
         <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="font:600 32px/1.2 var(--font-sans);">Matches</div>
+          <div style="font:600 32px/1.2 var(--font-sans);">{{ tx.matches }}</div>
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" size="{{ 48 }}" label="Menu" onClick="{{ toggleMenu }}" hint-size="48px,48px"></x-import>
         </div>
         <sc-if value="{{ blocked }}" hint-placeholder-val="{{ false }}">
@@ -393,7 +410,7 @@ button:disabled{cursor:default !important;}
       <div data-screen-label="Insights" style="display:flex;flex-direction:column;gap:28px;">
         <div style="display:flex;flex-direction:column;gap:20px;">
           <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div style="font:600 32px/1.2 var(--font-sans);">Insights</div>
+            <div style="font:600 32px/1.2 var(--font-sans);">{{ tx.insights }}</div>
             <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" size="{{ 48 }}" label="Menu" onClick="{{ toggleMenu }}" hint-size="48px,48px"></x-import>
           </div>
           <sc-if value="{{ insHasData }}" hint-placeholder-val="{{ true }}">
@@ -961,8 +978,8 @@ button:disabled{cursor:default !important;}
     <sc-if value="{{ isPlayers }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Players" style="display:flex;flex-direction:column;gap:20px;">
         <div style="display:flex;align-items:center;gap:14px;">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="Back" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
-          <div style="font:600 28px/1.2 var(--font-sans);">Players</div>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
+          <div style="font:600 28px/1.2 var(--font-sans);">{{ tx.players }}</div>
         </div>
         <sc-if value="{{ blocked }}" hint-placeholder-val="{{ false }}">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ blockedState.illustration }}" title="{{ blockedState.title }}" body="{{ blockedState.body }}" actionLabel="{{ blockedState.actionLabel }}" onAction="{{ blockedState.onAction }}" hint-size="350px,330px"></x-import>
@@ -1049,8 +1066,8 @@ button:disabled{cursor:default !important;}
     <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Settings" style="display:flex;flex-direction:column;gap:20px;">
         <div style="display:flex;align-items:center;gap:14px;">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="Back" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
-          <div style="font:600 28px/1.2 var(--font-sans);">Settings</div>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
+          <div style="font:600 28px/1.2 var(--font-sans);">{{ tx.settings }}</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;">
           <sc-for list="{{ settingsRows }}" as="r" hint-placeholder-count="4">
@@ -1066,7 +1083,7 @@ button:disabled{cursor:default !important;}
         </div>
         <button onClick="{{ logOut }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;" style-active="transform:scale(.98);">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LogOut" size="{{ 24 }}" hint-size="24px,24px"></x-import>
-          Log Out
+          {{ tx.logOut }}
         </button>
       </div>
     </sc-if>
@@ -1179,7 +1196,7 @@ button:disabled{cursor:default !important;}
     <sc-if value="{{ isPrefs }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="{{ prefTitle }}" style="display:flex;flex-direction:column;gap:20px;">
         <div style="display:flex;align-items:center;gap:14px;">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="Back" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
           <div style="font:600 28px/1.2 var(--font-sans);">{{ prefTitle }}</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;">
@@ -1191,6 +1208,26 @@ button:disabled{cursor:default !important;}
               </div>
               <span style="width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ r.bg }};border:1.5px solid {{ r.border }};color:var(--action-on-primary);">
                 <sc-if value="{{ r.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 16 }}" hint-size="16px,16px"></x-import></sc-if>
+              </span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- LANGUAGE -->
+    <sc-if value="{{ isLanguage }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Language" style="display:flex;flex-direction:column;gap:20px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
+          <div style="font:600 28px/1.2 var(--font-sans);">{{ tx.language }}</div>
+        </div>
+        <div role="radiogroup" aria-label="{{ tx.language }}" style="display:flex;flex-direction:column;gap:10px;">
+          <sc-for list="{{ langOptions }}" as="o" hint-placeholder-count="2">
+            <button role="radio" aria-checked="{{ o.on }}" lang="{{ o.lang }}" onClick="{{ o.select }}" style="height:56px;border-radius:99px;background:var(--surface-primary);border:1.5px solid {{ o.border }};color:var(--text-primary);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 22px;cursor:pointer;" style-active="transform:scale(.98);">
+              <span>{{ o.label }}</span>
+              <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:1.5px solid {{ o.dotBorder }};color:var(--action-on-primary);">
+                <sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 14 }}" hint-size="14px,14px"></x-import></sc-if>
               </span>
             </button>
           </sc-for>
@@ -1225,7 +1262,7 @@ button:disabled{cursor:default !important;}
     <div style="position:absolute;left:0;right:0;bottom:0;padding:14px 20px 34px;background:var(--bg-primary);display:flex;flex-direction:column;gap:12px;">
       <button onClick="{{ obNext }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;background: {{ obCtaBg }};color: {{ obCtaFg }};" style-active="transform:scale(.97);">{{ obCtaLabel }}</button>
       <sc-if value="{{ obReady }}" hint-placeholder-val="{{ false }}">
-        <button onClick="{{ obToMatches }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;background:var(--surface-primary);color:var(--text-primary);" style-active="transform:scale(.97);">Go to Matches</button>
+        <button onClick="{{ obToMatches }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;background:var(--surface-primary);color:var(--text-primary);" style-active="transform:scale(.97);">{{ tx.goToMatches }}</button>
       </sc-if>
     </div>
   </sc-if>
@@ -1334,6 +1371,55 @@ button:disabled{cursor:default !important;}
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Splash&quot;,&quot;options&quot;:[&quot;Splash&quot;,&quot;Log In&quot;,&quot;Sign Up&quot;,&quot;Forgot Password&quot;,&quot;Check Email&quot;,&quot;Onboarding&quot;,&quot;Matches&quot;,&quot;Match Detail&quot;,&quot;Insights&quot;,&quot;Log Match&quot;,&quot;Settings&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;authError&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Invalid email&quot;,&quot;Incorrect email or password&quot;,&quot;Email already exists&quot;,&quot;Password too short&quot;,&quot;Network error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Normal&quot;,&quot;options&quot;:[&quot;Normal&quot;,&quot;Loading&quot;,&quot;Empty&quot;,&quot;Offline&quot;,&quot;Error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;saveMatch&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Succeeds&quot;,&quot;options&quot;:[&quot;Succeeds&quot;,&quot;Fails&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;toastPreview&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Success&quot;,&quot;Error&quot;,&quot;Info&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
+// Localization. The app language is prefs.lang ('en' | 'zh', saved with the account's other prefs), with a copy
+// on this device under LANG_KEY so the right language shows before the account loads. With neither, the device
+// language decides: zh* means Simplified Chinese, anything else English. t(key) falls back to English for any
+// key not translated yet. Only onboarding, Settings, the tabs, the menu and the main screen titles use it so far.
+const LANG_KEY = 'rallywise.lang';
+const LANGS = [['en', 'English'], ['zh', '简体中文']];
+const I18N = {
+  en: {
+    matches: 'Matches', insights: 'Insights', players: 'Players', settings: 'Settings', profile: 'Profile', logOut: 'Log Out',
+    performance: 'Performance', grow: 'Grow', back: 'Back', language: 'Language',
+    obWelcomeTitle: 'Welcome to Rallywise', obWelcomeBody: 'Track your matches, understand your game, and improve over time.',
+    obProfileTitle: 'Set up your profile', obProfileBody: 'This helps Rallywise make sense of your matches.',
+    name: 'Name', yourName: 'Your name', skillLevel: 'Skill level',
+    level_Beginner: 'Beginner', level_Intermediate: 'Intermediate', level_Advanced: 'Advanced', level_Competitive: 'Competitive',
+    obReadyTitle: 'Ready to play, {name}', obReadyBody: 'Start logging your matches. Your insights will build over time as you play.',
+    getStarted: 'Get started', continue: 'Continue', logFirstMatch: 'Log your first match', goToMatches: 'Go to Matches',
+    account: 'Account', notifications: 'Notifications', notificationsSub: 'Match reminders and insight updates',
+    privacy: 'Privacy', privacySub: 'How your data is used',
+    shareUsage: 'Share Usage Data', shareUsageSub: 'Anonymous usage data that helps improve Rallywise',
+    matchReminders: 'Match Reminders', matchRemindersSub: 'A nudge to log your match after you play',
+    insightUpdates: 'Insight Updates', insightUpdatesSub: 'When new insights are ready',
+    fontFailed: "Chinese font couldn't load. Check your connection."
+  },
+  zh: {
+    matches: '比赛', insights: '洞察', players: '球友', settings: '设置', profile: '个人资料', logOut: '退出登录',
+    performance: '表现', grow: '提升', back: '返回', language: '语言',
+    obWelcomeTitle: '欢迎来到 Rallywise', obWelcomeBody: '记录每场比赛，看懂自己的打法，慢慢变强。',
+    obProfileTitle: '设置你的资料', obProfileBody: '这能帮 Rallywise 更好地理解你的比赛。',
+    name: '名字', yourName: '你的名字', skillLevel: '水平',
+    level_Beginner: '入门', level_Intermediate: '中级', level_Advanced: '进阶', level_Competitive: '竞技',
+    obReadyTitle: '准备开打，{name}', obReadyBody: '开始记录你的比赛吧。打得越多，洞察就越准。',
+    getStarted: '开始', continue: '下一步', logFirstMatch: '记录第一场比赛', goToMatches: '去看比赛',
+    account: '账户', notifications: '通知', notificationsSub: '比赛提醒和洞察更新',
+    privacy: '隐私', privacySub: '我们如何使用你的数据',
+    shareUsage: '分享使用数据', shareUsageSub: '匿名使用数据，帮助我们改进 Rallywise',
+    matchReminders: '比赛提醒', matchRemindersSub: '打完球后提醒你记录比赛',
+    insightUpdates: '洞察更新', insightUpdatesSub: '有新洞察时通知你',
+    fontFailed: '中文字体未能加载，请检查网络连接。'
+  }
+};
+function deviceLang() {
+  try {
+    const saved = localStorage.getItem(LANG_KEY);
+    if (saved === 'en' || saved === 'zh') return saved;
+  } catch (e) {}
+  const sys = (navigator.languages && navigator.languages[0]) || navigator.language || '';
+  return /^zh/i.test(sys) ? 'zh' : 'en';
+}
+
 class Component extends DCLogic {
   scrollRef = React.createRef();
   state = this.seed();
@@ -1374,6 +1460,7 @@ class Component extends DCLogic {
   seed() {
     const p = this.props || {};
     const start = p.startScreen;
+    this._deviceLang = deviceLang();
     // Reopening the app (it starts on the splash) restores the signed-in account; see restore().
     this._restoring = !start || start === 'Splash';
     const { players, matches } = this.demoData();
@@ -1398,6 +1485,38 @@ class Component extends DCLogic {
   }
   // True for the real app (opened on the splash); false for design previews, which show sample data.
   live() { const s = (this.props || {}).startScreen; return !s || s === 'Splash'; }
+  // The app language: the account's saved choice, else this device's last choice or system language.
+  lang() { const l = this.state.prefs && this.state.prefs.lang; return l === 'en' || l === 'zh' ? l : this._deviceLang; }
+  t(k) { const L = I18N[this.lang()] || I18N.en; return L[k] != null ? L[k] : I18N.en[k] != null ? I18N.en[k] : k; }
+  // Applies at once everywhere; saved with the account's prefs and on this device. AI insights in the other
+  // language are dropped and Grow regenerates in the new one.
+  setLang(l) {
+    if (l !== 'en' && l !== 'zh') return;
+    const changed = l !== this.lang();
+    this._deviceLang = l;
+    try { localStorage.setItem(LANG_KEY, l); } catch (e) {}
+    this.setState(x => ({ prefs: { ...x.prefs, lang: l }, ...(changed ? { aiGrow: null } : {}) }));
+    if (changed && this.state.screen === 'insights' && this.state.insTab === 'coach') setTimeout(() => this.refreshGrow(), 0);
+  }
+  // Insights made before languages existed carry no lang; they are English.
+  insightLang(i) { return (i && i.lang) || 'en'; }
+  // Sets the page language (which switches the font stack, see the :root[lang] CSS) and loads Noto Sans SC when
+  // Chinese is on screen: in Chinese, or wherever the 简体中文 option is shown.
+  applyLang() {
+    const l = this.lang(), s = this.state, html = document.documentElement, want = l === 'zh' ? 'zh-Hans' : 'en';
+    if (html.lang !== want) html.lang = want;
+    if (l === 'zh' || s.screen === 'language' || (s.screen === 'onboarding' && s.ob && s.ob.step === 1)) this.ensureNoto();
+  }
+  ensureNoto() {
+    if (this._noto) return;
+    const link = this._noto = document.createElement('link');
+    link.rel = 'stylesheet'; link.href = 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&display=swap';
+    // No silent fallback: if Noto Sans SC can't load, say so.
+    const failed = () => { console.error('[rallywise] Noto Sans SC failed to load'); if (this.lang() === 'zh') this.flash(this.t('fontFailed'), 'error'); };
+    link.onload = () => document.fonts.load('400 16px "Noto Sans SC"', '比赛洞察').then(f => { if (!f.length) failed(); }).catch(failed);
+    link.onerror = failed;
+    document.head.appendChild(link);
+  }
   // A "Data state" preview (anything but Normal) never saves.
   previewData() { const d = (this.props || {}).dataState; return !!(d && d !== 'Normal'); }
   // The account's data is on screen and can be saved: not loading, not blocked, and (in the real app) signed in.
@@ -1437,9 +1556,12 @@ class Component extends DCLogic {
     this.setState({ growBusy: true });
     try {
       const b = await this.api();
-      const insight = await b.insights.generate();
-      if (insight) this.setState({ aiGrow: insight, growBusy: false });
+      const lang = this.lang();
+      const insight = await b.insights.generate(lang);
+      if (insight && this.insightLang(insight) === this.lang()) this.setState({ aiGrow: insight, growBusy: false });
       else this.setState({ growBusy: false });
+      // The language changed while this was generating: make the other one now.
+      if (lang !== this.lang()) setTimeout(() => this.refreshGrow(), 0);
     } catch (e) {
       this.setState({ growBusy: false });
     }
@@ -1488,7 +1610,9 @@ class Component extends DCLogic {
       ob: { ...this.newOb(), name: me.name || '' }, filter: 'All', search: '', detailId: null, playerId: null, log: null, blocked: null, loading: false });
     // What was just loaded is already saved; set last, so nothing on screen from before is saved under this account.
     this._saved = this.dataState(a); this.sync = sync; this.user = { ...user, anonId }; this._retryUser = null;
-    if (b.insights) b.insights.cached().then(insight => { if (insight && this.user && this.user.id === user.id) this.setState({ aiGrow: insight }); }).catch(() => {});
+    const savedLang = a.prefs && a.prefs.lang;
+    if (savedLang === 'en' || savedLang === 'zh') { this._deviceLang = savedLang; try { localStorage.setItem(LANG_KEY, savedLang); } catch (e) {} }
+    if (b.insights) b.insights.cached().then(insight => { if (insight && this.user && this.user.id === user.id && this.insightLang(insight) === this.lang()) this.setState({ aiGrow: insight }); }).catch(() => {});
     if (migrated) this.flash('Your matches are now saved to your account');
     const A = window.RallywiseAnalytics, c = this.analyticsCtx(a.prefs);
     if (A) { A.setAccount(anonId); if (c && c.consent === 'no') A.clear(anonId); }
@@ -1605,6 +1729,7 @@ class Component extends DCLogic {
   componentDidMount() {
     if (this.state.screen === 'splash') this._splash = setTimeout(() => this.leaveSplash(), 2200);
     if (this._restoring) this.restore();
+    this.applyLang();
     window.addEventListener('online', this.onOnline);
     document.addEventListener('visibilitychange', this.onVisibility);
 
@@ -1708,6 +1833,7 @@ class Component extends DCLogic {
     if (pp && this.props.dataState !== pp.dataState) this.setState({ ...this.dataFor(this.props.dataState), filter: 'All', search: '' });
     if (pp && this.props.authError !== pp.authError && this.props.authError !== 'None') this.setState({ back: [], busy: null, banner: null, errors: {}, ...this.authPreset(this.props.authError) });
     this.persist();
+    this.applyLang();
     // insights_viewed: once per visit to Insights, once its data (or No Insights Yet) is on screen.
     const cs = this.state;
     if (cs.screen !== 'insights') this._insSeen = false;
@@ -1893,6 +2019,11 @@ class Component extends DCLogic {
             if (r.needsConfirm) { this.toAuth('login'); this.setState({ f: { ...this.blankForm(), email } }); return this.flash('Check your email to confirm your account', 'info'); }
             await this.signedIn(b, r.user); this.setState({ agree: false });
           }); },
+      tx: { ...I18N.en, ...(I18N[this.lang()] || {}) },
+      langOptions: LANGS.map(([code, label]) => { const on = this.lang() === code;
+        return { label, lang: code === 'zh' ? 'zh-Hans' : 'en', on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent',
+          dotBg: on ? 'var(--action-primary)' : 'transparent', dotBorder: on ? 'var(--action-primary)' : 'var(--text-secondary)', select: () => this.setLang(code) }; }),
+      isLanguage: s.screen === 'language',
       isOnboarding: s.screen === 'onboarding',
       showTabs: s.screen === 'matches' || s.screen === 'insights', menuOpen: s.menu,
       hasToast: !!s.toast, search: s.search, canAddNew: q.length > 1 && !exists,
@@ -1901,17 +2032,17 @@ class Component extends DCLogic {
       onSearch: e => this.setState({ search: e.target.value }),
       // Log Match opens only once the account's data has loaded; the loading state shows the button disabled.
       startLog: () => { if (this.dataReady()) this.go('log', { log: this.logStart('matches') }); },
-      tabs: [['Matches', 'matches', 'List'], ['Insights', 'insights', 'ChartColumn']].map(([label, k, icon]) => ({
+      tabs: [[this.t('matches'), 'matches', 'List'], [this.t('insights'), 'insights', 'ChartColumn']].map(([label, k, icon]) => ({
         label, icon, fg: s.screen === k ? 'var(--text-primary)' : 'var(--text-secondary)', select: () => this.setState({ screen: k, back: [], menu: false })
       })),
       menuItems: s.screen === 'detail' ? [
         { label: 'Edit Match', icon: 'Pencil', select: () => { const m = all.find(x => x.id === s.detailId) || all[0]; this.setState({ menu: false }); if (m) this.go('log', { log: this.editLog(m) }); } },
         { label: 'Delete Match', icon: 'Trash2', select: () => { const m = all.find(x => x.id === s.detailId) || all[0]; if (m) this.requestDeleteMatch(m.id); } }
       ] : [
-        { label: 'Players', icon: 'Users', select: () => this.go('players') },
-        { label: 'Profile', icon: 'CircleUser', select: () => this.openProfile() },
-        { label: 'Settings', icon: 'Settings', select: () => this.go('settings') },
-        { label: 'Log Out', icon: 'LogOut', select: () => this.signOut() }
+        { label: this.t('players'), icon: 'Users', select: () => this.go('players') },
+        { label: this.t('profile'), icon: 'CircleUser', select: () => this.openProfile() },
+        { label: this.t('settings'), icon: 'Settings', select: () => this.go('settings') },
+        { label: this.t('logOut'), icon: 'LogOut', select: () => this.signOut() }
       ],
       filters: ['All', 'Singles', 'Doubles'].map(f => ({ label: f, active: s.filter === f, select: () => this.setState({ filter: f }) })),
       matchCards: all.filter(m => s.filter === 'All' || m.type === s.filter).map(m => this.card(m))
@@ -1947,10 +2078,11 @@ class Component extends DCLogic {
     if (v.isSettings) {
       const me = s.players.find(p => p.id === 'me') || {};
       v.settingsRows = [
-        ['Profile', [me.name, me.level].filter(Boolean).join(' · '), 'CircleUser', () => this.openProfile()],
-        ['Account', s.email, 'UserRound', () => this.go('account')],
-        ['Notifications', 'Match reminders and insight updates', 'Bell', () => this.go('notifications')],
-        ['Privacy', 'How your data is used', 'Shield', () => this.go('privacy')]
+        [this.t('profile'), [me.name, me.level && this.t('level_' + me.level)].filter(Boolean).join(' · '), 'CircleUser', () => this.openProfile()],
+        [this.t('account'), s.email, 'UserRound', () => this.go('account')],
+        [this.t('language'), (LANGS.find(([c]) => c === this.lang()) || LANGS[0])[1], 'Languages', () => this.go('language')],
+        [this.t('notifications'), this.t('notificationsSub'), 'Bell', () => this.go('notifications')],
+        [this.t('privacy'), this.t('privacySub'), 'Shield', () => this.go('privacy')]
       ].map(([label, sub, icon, open]) => ({ label, sub, icon, open }));
       v.logOut = () => this.signOut();
     }
@@ -1994,10 +2126,10 @@ class Component extends DCLogic {
     if (v.isPrefs) {
       const row = (k, label, sub) => { const on = !!s.prefs[k];
         return { label, sub, on, bg: on ? A : 'transparent', border: on ? A : 'var(--text-secondary)', select: () => k === 'usage' ? this.setUsage(!this.state.prefs.usage) : this.setState(x => ({ prefs: { ...x.prefs, [k]: !x.prefs[k] } })) }; };
-      v.prefTitle = s.screen === 'privacy' ? 'Privacy' : 'Notifications';
+      v.prefTitle = this.t(s.screen === 'privacy' ? 'privacy' : 'notifications');
       v.prefRows = s.screen === 'privacy'
-        ? [row('usage', 'Share Usage Data', 'Anonymous usage data that helps improve Rallywise')]
-        : [row('reminders', 'Match Reminders', 'A nudge to log your match after you play'), row('insights', 'Insight Updates', 'When new insights are ready')];
+        ? [row('usage', this.t('shareUsage'), this.t('shareUsageSub'))]
+        : [row('reminders', this.t('matchReminders'), this.t('matchRemindersSub')), row('insights', this.t('insightUpdates'), this.t('insightUpdatesSub'))];
     }
     v.confirmDeleteAccount = s.confirmDeleteAccount; v.busyDelete = s.busy === 'delete'; v.idleDelete = s.busy !== 'delete';
     v.cancelDeleteAccount = () => { if (!this.state.busy) this.setState({ confirmDeleteAccount: false, banner: null }); };
@@ -2029,7 +2161,7 @@ class Component extends DCLogic {
       const pct = x => Math.round(x * 100);
       const dl = pct(rr.pct) - pct(pr.pct);
       v.insProgress = s.insTab !== 'coach'; v.insCoach = !v.insProgress;
-      v.insTabs = [['Performance', 'progress'], ['Grow', 'coach']].map(([label, k]) => { const on = (s.insTab || 'progress') === k; return { label,
+      v.insTabs = [[this.t('performance'), 'progress'], [this.t('grow'), 'coach']].map(([label, k]) => { const on = (s.insTab || 'progress') === k; return { label,
         bg: on ? 'var(--text-primary)' : 'transparent', fg: on ? 'var(--text-inverse)' : 'var(--filter-pill-text-default)', select: () => {
         if (k === 'coach' && this.state.insTab !== 'coach') {
           this.track('grow_viewed', { match_count: this.state.matches.length });
@@ -2129,16 +2261,16 @@ class Component extends DCLogic {
       const setOb = patch => this.setState(x => ({ ob: { ...x.ob, ...patch } }));
       // Save the profile onto the "me" player, then leave onboarding for good.
       // exit is onboarding_completed's exit; then() gives the screen to land on (it may track match_log_started).
-      const finish = (exit, then) => { this.track('onboarding_completed', { level: ob.level, exit }); const extra = then && then(); this.setState(x => ({ screen: 'matches', back: [], ob: this.newOb(), onboarded: true, players: x.players.map(p => p.id === 'me' ? { ...p, name: x.ob.name.trim(), level: x.ob.level } : p), ...extra })); };
+      const finish = (exit, then) => { this.track('onboarding_completed', { level: ob.level, exit }); const extra = then && then(); this.setState(x => ({ screen: 'matches', back: [], ob: this.newOb(), onboarded: true, prefs: { ...x.prefs, lang: this.lang() }, players: x.players.map(p => p.id === 'me' ? { ...p, name: x.ob.name.trim(), level: x.ob.level } : p), ...extra })); };
       v.obWelcome = st === 1; v.obProfile = st === 2; v.obReady = st === 3;
       v.obName = ob.name; v.onObName = e => setOb({ name: e.target.value });
       v.obBack = () => setOb({ step: 1 });
       v.obLevels = ['Beginner', 'Intermediate', 'Advanced', 'Competitive'].map(label => {
         const on = ob.level === label;
-        return { label, on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent', dotBg: on ? 'var(--action-primary)' : 'transparent', dotBorder: on ? 'var(--action-primary)' : 'var(--text-secondary)', select: () => setOb({ level: label }) };
+        return { label: this.t('level_' + label), on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent', dotBg: on ? 'var(--action-primary)' : 'transparent', dotBorder: on ? 'var(--action-primary)' : 'var(--text-secondary)', select: () => setOb({ level: label }) };
       });
-      v.obReadyTitle = `Ready to play, ${ob.name.trim().split(/\s+/)[0]}`;
-      v.obCtaLabel = ['Get started', 'Continue', 'Log your first match'][st - 1];
+      v.obReadyTitle = this.t('obReadyTitle').replace('{name}', ob.name.trim().split(/\s+/)[0]);
+      v.obCtaLabel = this.t(['getStarted', 'continue', 'logFirstMatch'][st - 1]);
       v.obCtaBg = ok ? A : 'var(--surface-muted)'; v.obCtaFg = ok ? 'var(--action-on-primary)' : 'var(--text-tertiary)';
       v.obNext = () => { if (!ok) return; st < 3 ? setOb({ step: st + 1 }) : finish('log_first_match', () => ({ screen: 'log', log: this.logStart('onboarding') })); };
       v.obToMatches = () => finish('skip');

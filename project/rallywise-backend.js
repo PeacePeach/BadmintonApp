@@ -273,11 +273,13 @@
   };
 
   const insights = {
-    async generate() {
-      const { data, error } = await sb().functions.invoke('generate-grow-insights', { body: {} });
+    // lang is the app language ('en' | 'zh'): insights are written, cached and returned in that language.
+    async generate(lang) {
+      const { data, error } = await sb().functions.invoke('generate-grow-insights', { body: { lang: lang === 'zh' ? 'zh' : 'en' } });
       if (error) throw dataFail(error);
       return data && data.insight ? data.insight : null;
     },
+    // The one cached insight, in whichever language it was last made: check .lang (none means English).
     async cached() {
       const row = await run(sb().from('ai_insights').select('insight_json,generated_at').maybeSingle());
       return row ? row.insight_json : null;
