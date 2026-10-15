@@ -1415,6 +1415,23 @@ class Component extends DCLogic {
     return b;
   }
   dataState(s) { s = s || this.state; return { onboarded: s.onboarded, players: s.players, matches: s.matches, prefs: s.prefs }; }
+  async handleAppUrl(url) {
+    if (!url || this._handlingAppUrl) return;
+    this._handlingAppUrl = true;
+    try {
+      const b = await this.api();
+      const user = b.auth.consumeCallback ? await b.auth.consumeCallback(url) : null;
+      if (user) {
+        await this.enter(user);
+        if (this.state.screen === 'resetSent' || this.state.screen === 'signup') this.setState({ screen: this.state.onboarded ? 'matches' : 'onboarding', back: [] });
+        this.flash('Email confirmed');
+      }
+    } catch (e) {
+      this.flash('Could not finish sign-in. Try logging in.', 'error');
+    } finally {
+      this._handlingAppUrl = false;
+    }
+  }
   async refreshGrow() {
     if (!this.live() || !this.user || this.state.growBusy) return;
     this.setState({ growBusy: true });
@@ -1590,8 +1607,23 @@ class Component extends DCLogic {
     if (this._restoring) this.restore();
     window.addEventListener('online', this.onOnline);
     document.addEventListener('visibilitychange', this.onVisibility);
+
+    // Capacitor custom URL callback: rallywise://auth/callback
+    // Used by email confirmation/password reset so Gmail/Safari can hand the user back to the app.
+    try {
+      const App = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+      if (App && App.addListener) {
+        Promise.resolve(App.addListener('appUrlOpen', e => this.handleAppUrl(e && e.url))).then(h => { this._appUrlListener = h; }).catch(() => {});
+      }
+    } catch (e) {}
   }
-  componentWillUnmount() { if (this._unsub) this._unsub(); window.removeEventListener('online', this.onOnline); document.removeEventListener('visibilitychange', this.onVisibility); clearTimeout(this._t); clearTimeout(this._tOut); clearTimeout(this._splash); clearInterval(this._tick); clearTimeout(this._load); }
+  componentWillUnmount() {
+    if (this._unsub) this._unsub();
+    if (this._appUrlListener && this._appUrlListener.remove) this._appUrlListener.remove();
+    window.removeEventListener('online', this.onOnline);
+    document.removeEventListener('visibilitychange', this.onVisibility);
+    clearTimeout(this._t); clearTimeout(this._tOut); clearTimeout(this._splash); clearInterval(this._tick); clearTimeout(this._load);
+  }
 
   // Auth. Requests go to the backend (rallywise-backend.js). The "Auth error" prop previews each
   // error, and "Incorrect email or password" / "Network error" keep failing until it is set back to None.
