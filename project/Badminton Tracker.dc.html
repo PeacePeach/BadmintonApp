@@ -389,8 +389,8 @@ button:disabled{cursor:default !important;}
               </div>
               <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;">
                 <div style="display:flex;flex-direction:column;gap:3px;min-width:0;">
-                  <div style="font:500 16px/1.3 var(--font-sans);">{{ m.teamA }}</div>
-                  <div style="font:400 15px/1.3 var(--font-sans);color:var(--neutral-600);">vs {{ m.teamB }}</div>
+                  <div style="font:500 16px/1.3 var(--font-sans);overflow-wrap:anywhere;">{{ m.teamA }}</div>
+                  <div style="font:400 15px/1.3 var(--font-sans);color:var(--neutral-600);overflow-wrap:anywhere;">vs {{ m.teamB }}</div>
                 </div>
                 <div style="font:500 28px/1 var(--font-sans);flex-shrink:0;">{{ m.gamesWon }}</div>
               </div>
@@ -724,7 +724,7 @@ button:disabled{cursor:default !important;}
                 <div style="font:500 17px/1.3 var(--font-sans);">{{ chooseSlot }}</div>
                 <div class="search-field-outline" style="height:52px;border-radius:99px;background:transparent;display:flex;align-items:center;gap:10px;padding:0 18px;color:var(--input-field-text-default);">
                   <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Search" size="{{ 24 }}" hint-size="24px,24px"></x-import>
-                  <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="{{ tx.searchName }}" style="flex:1;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 15px/1 var(--font-sans);">
+                  <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="{{ tx.searchName }}" style="flex:1;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);">
                 </div>
                 <sc-if value="{{ canAddNew }}" hint-placeholder-val="{{ false }}">
                   <div onClick="{{ addNew }}" style="height:56px;border-radius:99px;border:1px dashed var(--ghost-button-outline);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;">
@@ -810,7 +810,7 @@ button:disabled{cursor:default !important;}
             <sc-if value="{{ isEdit }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:14px;">
                 <div style="font:500 19px/1.3 var(--font-sans);">{{ tx.date }}</div>
-                <input type="date" value="{{ log.date }}" onChange="{{ onDate }}" style="height:52px;background:var(--input-field-bg);border:1px solid var(--input-field-outline);outline:none;border-radius:99px;padding:0 18px;color:var(--text-primary);font:400 15px/1 var(--font-sans);color-scheme:dark;">
+                <input type="date" value="{{ log.date }}" onChange="{{ onDate }}" style="height:52px;background:var(--input-field-bg);border:1px solid var(--input-field-outline);outline:none;border-radius:99px;padding:0 18px;color:var(--text-primary);font:400 16px/1 var(--font-sans);color-scheme:dark;">
               </div>
             </sc-if>
             <div style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;">
@@ -831,7 +831,7 @@ button:disabled{cursor:default !important;}
                 </sc-for>
               </div>
               <sc-if value="{{ hasWt }}" hint-placeholder-val="{{ false }}">
-                <textarea value="{{ log.worked }}" onChange="{{ onWorked }}" rows="2" placeholder="{{ tx.workedPh }}" style="background:var(--input-field-bg);border:1px solid var(--input-field-outline);outline:none;border-radius:22px;padding:14px 18px;color:var(--text-primary);font:400 15px/1.5 var(--font-sans);resize:none;"></textarea>
+                <textarea value="{{ log.worked }}" onChange="{{ onWorked }}" rows="2" placeholder="{{ tx.workedPh }}" style="background:var(--input-field-bg);border:1px solid var(--input-field-outline);outline:none;border-radius:22px;padding:14px 18px;color:var(--text-primary);font:400 16px/1.5 var(--font-sans);resize:none;"></textarea>
               </sc-if>
             </div>
             <div style="display:flex;flex-direction:column;gap:14px;">
@@ -845,7 +845,7 @@ button:disabled{cursor:default !important;}
                 </sc-for>
               </div>
               <sc-if value="{{ hasLt }}" hint-placeholder-val="{{ false }}">
-                <textarea value="{{ log.lost }}" onChange="{{ onLost }}" rows="2" placeholder="{{ tx.lostPh }}" style="background:var(--input-field-bg);border:1px solid var(--input-field-outline);outline:none;border-radius:22px;padding:14px 18px;color:var(--text-primary);font:400 15px/1.5 var(--font-sans);resize:none;"></textarea>
+                <textarea value="{{ log.lost }}" onChange="{{ onLost }}" rows="2" placeholder="{{ tx.lostPh }}" style="background:var(--input-field-bg);border:1px solid var(--input-field-outline);outline:none;border-radius:22px;padding:14px 18px;color:var(--text-primary);font:400 16px/1.5 var(--font-sans);resize:none;"></textarea>
               </sc-if>
             </div>
             <div style="display:flex;flex-direction:column;gap:14px;">
@@ -853,7 +853,7 @@ button:disabled{cursor:default !important;}
                 <div style="font:500 19px/1.3 var(--font-sans);">{{ oppQ }}</div>
                 <div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">{{ tx.oppSub }}</div>
               </div>
-              <textarea value="{{ log.on }}" onChange="{{ onOpp }}" rows="3" placeholder="{{ tx.oppPh }}" style="background:var(--input-field-bg);border:1px solid var(--input-field-outline);outline:none;border-radius:22px;padding:14px 18px;color:var(--text-primary);font:400 15px/1.5 var(--font-sans);resize:none;"></textarea>
+              <textarea value="{{ log.on }}" onChange="{{ onOpp }}" rows="3" placeholder="{{ tx.oppPh }}" style="background:var(--input-field-bg);border:1px solid var(--input-field-outline);outline:none;border-radius:22px;padding:14px 18px;color:var(--text-primary);font:400 16px/1.5 var(--font-sans);resize:none;"></textarea>
             </div>
             <div style="display:flex;gap:10px;align-items:flex-start;color:var(--text-secondary);">
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChartColumn" size="{{ 18 }}" hint-size="18px,18px"></x-import>
@@ -915,14 +915,14 @@ button:disabled{cursor:default !important;}
           <sc-for list="{{ detail.sideA }}" as="p" hint-placeholder-count="1">
             <div style="display:flex;align-items:center;gap:12px;">
               <div style="width:40px;height:40px;border-radius:50%;background: {{ p.avBg }};color: {{ p.avFg }};display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
-              <div style="font:500 16px/1 var(--font-sans);">{{ p.name }}</div>
+              <div style="font:500 16px/1 var(--font-sans);overflow-wrap:anywhere;">{{ p.name }}</div>
             </div>
           </sc-for>
           <div style="height:1px;background:var(--border-default);margin:4px 0;"></div>
           <sc-for list="{{ detail.sideB }}" as="p" hint-placeholder-count="1">
             <div onClick="{{ p.open }}" style="display:flex;align-items:center;gap:12px;cursor:pointer;">
               <div style="width:40px;height:40px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
-              <div style="font:500 16px/1 var(--font-sans);flex:1;">{{ p.name }}</div>
+              <div style="font:500 16px/1 var(--font-sans);flex:1;overflow-wrap:anywhere;">{{ p.name }}</div>
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 24 }}" color="var(--grey-400)" hint-size="24px,24px"></x-import>
             </div>
           </sc-for>
@@ -950,7 +950,7 @@ button:disabled{cursor:default !important;}
                     <div style="font:500 15px/1.4 var(--font-sans);">{{ n.tags }}</div>
                   </sc-if>
                   <sc-if value="{{ n.text }}" hint-placeholder-val="{{ true }}">
-                    <div style="font:400 15px/1.5 var(--font-sans);color:var(--neutral-600);">{{ n.text }}</div>
+                    <div style="font:400 15px/1.5 var(--font-sans);color:var(--neutral-600);overflow-wrap:anywhere;">{{ n.text }}</div>
                   </sc-if>
                 </div>
               </sc-for>
@@ -991,7 +991,7 @@ button:disabled{cursor:default !important;}
         <sc-if value="{{ notBlocked }}" hint-placeholder-val="{{ true }}">
         <div class="search-field-outline" style="height:52px;border-radius:99px;background:transparent;display:flex;align-items:center;gap:10px;padding:0 18px;color:var(--input-field-text-default);">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Search" size="{{ 24 }}" hint-size="24px,24px"></x-import>
-          <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="{{ tx.searchName }}" style="flex:1;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 15px/1 var(--font-sans);">
+          <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="{{ tx.searchName }}" style="flex:1;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);">
         </div>
         <sc-if value="{{ canAddNew }}" hint-placeholder-val="{{ false }}">
           <div onClick="{{ addPlayerOnly }}" style="height:56px;border-radius:99px;border:1px dashed var(--ghost-button-outline);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;">
@@ -1052,8 +1052,8 @@ button:disabled{cursor:default !important;}
               </div>
               <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;">
                 <div style="display:flex;flex-direction:column;gap:3px;min-width:0;">
-                  <div style="font:500 16px/1.3 var(--font-sans);">{{ m.teamA }}</div>
-                  <div style="font:400 15px/1.3 var(--font-sans);color:var(--neutral-600);">vs {{ m.teamB }}</div>
+                  <div style="font:500 16px/1.3 var(--font-sans);overflow-wrap:anywhere;">{{ m.teamA }}</div>
+                  <div style="font:400 15px/1.3 var(--font-sans);color:var(--neutral-600);overflow-wrap:anywhere;">vs {{ m.teamB }}</div>
                 </div>
                 <div style="font:500 28px/1 var(--font-sans);flex-shrink:0;">{{ m.gamesWon }}</div>
               </div>
