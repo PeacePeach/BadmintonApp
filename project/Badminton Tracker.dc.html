@@ -1457,7 +1457,7 @@ const I18N = {
     notEnoughBody: 'Tag what worked and what cost you points when you log matches, or add notes on opponents. Grow builds from those.',
     costPoints: 'Cost you points in {n} of your last {total} tagged matches.', workingIn: 'Tagged as working in {n} of your last {total} wins.',
     // Log Match
-    editMatch: 'Edit Match', stepOf: 'Step {n} of 4',
+    editMatch: 'Edit Match', stepOf: 'Step {n} of {total}',
     stepType: 'Singles or Doubles?', stepWho: 'Who Played?', stepScore: 'Enter Score', stepNotes: 'Match Notes',
     singlesSub: 'You vs 1 opponent', doublesSub: 'You + partner vs 2 opponents', yourSide: 'Your Side', opponents: 'Opponents',
     partner: 'Partner', opponent: 'Opponent', opponent1: 'Opponent 1', opponent2: 'Opponent 2', me: 'Me',
@@ -1465,7 +1465,7 @@ const I18N = {
     together: 'Together {r}', h2h: 'H2H {r}', newPlayer: 'New',
     noPlayersFound: 'No Players Found', noPlayersFoundLogBody: 'Check the spelling, or type a full name to add them.',
     noPlayers: 'No Players Yet', noPlayersLogBody: 'Type a name above to add your first player.',
-    pointsPerGame: 'Points per Game', game: 'Game {n}', remove: 'Remove', weWon: 'We Won', theyWon: 'They Won', score: '{name} Score',
+    pointsPerGame: 'Points per Game', game: 'Game {n}', remove: 'Remove', iWon: 'I Won', weWon: 'We Won', theyWon: 'They Won', score: '{name} Score',
     decrease: 'Decrease', increase: 'Increase', addGame: 'Add Game {n}',
     notesIntro: 'About 30 seconds. Everything is optional.', date: 'Date',
     whatWorked: 'What Worked?', pickUpTo3: 'Pick up to 3', workedPh: 'What specifically worked?',
@@ -1563,7 +1563,7 @@ const I18N = {
     notEnoughAiBody: '再记录几场比赛，写下哪里打得好、哪里丢分，或者你注意到的细节。',
     notEnoughBody: '记录比赛时标出打得好和丢分的地方，或写下对手记录，提升页就会根据这些给出建议。',
     costPoints: '最近 {total} 场有标签的比赛中，{n} 场在这里丢分。', workingIn: '最近 {total} 场胜利中，{n} 场标记为打得好。',
-    editMatch: '编辑比赛', stepOf: '第 {n} 步，共 4 步',
+    editMatch: '编辑比赛', stepOf: '第 {n} 步，共 {total} 步',
     stepType: '单打还是双打？', stepWho: '和谁打的？', stepScore: '输入比分', stepNotes: '赛后记录',
     singlesSub: '你 vs 1 名对手', doublesSub: '你和搭档 vs 2 名对手', yourSide: '我方', opponents: '对手',
     partner: '搭档', opponent: '对手', opponent1: '对手 1', opponent2: '对手 2', me: '我',
@@ -1571,7 +1571,7 @@ const I18N = {
     together: '搭档 {r}', h2h: '交手 {r}', newPlayer: '新球友',
     noPlayersFound: '没有找到球友', noPlayersFoundLogBody: '检查一下拼写，或输入完整名字来添加。',
     noPlayers: '还没有球友', noPlayersLogBody: '在上面输入名字，添加你的第一位球友。',
-    pointsPerGame: '每局分制', game: '第{n}局', remove: '移除', weWon: '我方胜', theyWon: '对方胜', score: '{name} 得分',
+    pointsPerGame: '每局分制', game: '第{n}局', remove: '移除', iWon: '我胜', weWon: '我方胜', theyWon: '对方胜', score: '{name} 得分',
     decrease: '减少', increase: '增加', addGame: '添加第{n}局',
     notesIntro: '大约 30 秒，都可以跳过。', date: '日期',
     whatWorked: '哪些地方打得不错？', pickUpTo3: '最多选 3 个', workedPh: '具体哪里打得好？',
@@ -1918,7 +1918,8 @@ class Component extends DCLogic {
   // Edit reuses the Log Match flow: the draft is the match turned back into log fields.
   editLog(m) {
     const t = [21, 15, 11].find(f => m.games.every(g => { const w = g[0] > g[1] ? 'us' : 'them', l = Math.min(g[0], g[1]); return this.scoreOf({ w, l }, f).join() === g.join(); })) || this.fmt();
-    return { step: 1, editId: m.id, date: m.date, type: m.type, partner: m.partner, opp1: m.opps[0], opp2: m.opps[1] || null, active: null, format: t,
+    // Edit starts at Who Played: the match type is fixed once logged, so the type step is skipped.
+    return { step: 2, editId: m.id, date: m.date, type: m.type, partner: m.partner, opp1: m.opps[0], opp2: m.opps[1] || null, active: null, format: t,
       games: m.games.map(g => ({ w: g[0] > g[1] ? 'us' : 'them', l: Math.min(g[0], g[1]) })), wt: m.wt.slice(), lt: m.lt.slice(), worked: m.worked, lost: m.lost, on: m.on };
   }
 
@@ -2109,9 +2110,10 @@ class Component extends DCLogic {
     if (this.props.saveMatch === 'Fails' || offline) { await new Promise(r => setTimeout(r, 900)); return this.setLog({ saving: false, saveErr: true }); }
     const log = this.state.log;
     const prev = log.editId && this.state.matches.find(x => x.id === log.editId);
-    // createdAt is when the match was first logged; edits keep it. Sample matches have none.
-    const m = { id: log.editId || 'n' + Date.now(), createdAt: prev ? prev.createdAt : new Date().toISOString(), date: log.date || this.today(), type: log.type, partner: log.type === 'Doubles' ? log.partner : null,
-      opps: log.type === 'Doubles' ? [log.opp1, log.opp2] : [log.opp1], games: this.draftGames(log), wt: log.wt, lt: log.lt, worked: log.worked.trim(), lost: log.lost.trim(), on: log.on.trim() };
+    // Edits keep the original match type; createdAt is when the match was first logged. Sample matches have none.
+    const type = prev ? prev.type : log.type;
+    const m = { id: log.editId || 'n' + Date.now(), createdAt: prev ? prev.createdAt : new Date().toISOString(), date: log.date || this.today(), type, partner: type === 'Doubles' ? log.partner : null,
+      opps: type === 'Doubles' ? [log.opp1, log.opp2] : [log.opp1], games: this.draftGames(log), wt: log.wt, lt: log.lt, worked: log.worked.trim(), lost: log.lost.trim(), on: log.on.trim() };
     const matches = log.editId
       ? this.state.matches.map(x => x.id === m.id ? m : x).sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0)
       : [m, ...this.state.matches];
@@ -2471,12 +2473,13 @@ class Component extends DCLogic {
 
     if (v.isLog && s.log) {
       const log = s.log, st = log.step;
-      v.log = log; v.step1 = st === 1; v.step2 = st === 2; v.step3 = st === 3; v.step4 = st === 4;
-      v.logBackIcon = st === 1 ? 'X' : 'ChevronLeft';
-      v.isEdit = !!log.editId; v.logTitle = this.t(v.isEdit ? 'editMatch' : 'logMatch'); v.stepOf = this.t('stepOf', { n: st });
+      v.log = log; v.step1 = st === 1 && !log.editId; v.step2 = st === 2; v.step3 = st === 3; v.step4 = st === 4;
+      v.isEdit = !!log.editId; const first = v.isEdit ? 2 : 1;
+      v.logBackIcon = st === first ? 'X' : 'ChevronLeft';
+      v.logTitle = this.t(v.isEdit ? 'editMatch' : 'logMatch'); v.stepOf = this.t('stepOf', { n: st - first + 1, total: 5 - first });
       v.onDate = e => this.setLog({ date: e.target.value || log.date });
-      v.logBack = () => st === 1 ? (v.isEdit ? this.goBack() : this.setState({ screen: 'matches', log: null, back: [] })) : this.setLog({ step: st - 1 });
-      v.stepBar = [1, 2, 3, 4].map(i => ({ bg: i <= st ? 'var(--progress-active)' : 'var(--progress-inactive)' }));
+      v.logBack = () => st === first ? (v.isEdit ? this.goBack() : this.setState({ screen: 'matches', log: null, back: [] })) : this.setLog({ step: st - 1 });
+      v.stepBar = [1, 2, 3, 4].slice(first - 1).map(i => ({ bg: i <= st ? 'var(--progress-active)' : 'var(--progress-inactive)' }));
       v.stepTitle = this.t(['stepType', 'stepWho', 'stepScore', 'stepNotes'][st - 1]);
       v.showLogCta = st > 1;
       const ok = this.canNext(log);
@@ -2520,7 +2523,7 @@ class Component extends DCLogic {
         const [a, b] = this.scoreOf(g, t), us = g.w === 'us';
         return { label: this.t('game', { n: i + 1 }), a: String(a), b: String(b), aName, bName,
           aFg: a > b ? 'var(--text-primary)' : 'var(--text-secondary)', bFg: b > a ? 'var(--text-primary)' : 'var(--text-secondary)',
-          usLabel: this.t('weWon'), themLabel: this.t('theyWon'),
+          usLabel: this.t(log.type === 'Doubles' ? 'weWon' : 'iWon'), themLabel: this.t('theyWon'),
           usBg: 'transparent', usFg: us ? 'var(--text-primary)' : 'var(--text-secondary)', usBorder: us ? 'var(--ghost-button-outline-highlight)' : 'transparent',
           themBg: 'transparent', themFg: !us ? 'var(--text-primary)' : 'var(--text-secondary)', themBorder: !us ? 'var(--ghost-button-outline-highlight)' : 'transparent',
           loserLabel: this.t('score', { name: us ? bName : aName }),
