@@ -167,6 +167,9 @@
   --icon-badge-fg: var(--neutral-600);
   /* Outline of an unselected control: ghost buttons (+ / −), radio circles, checkboxes. Same colour and weight everywhere. */
   --control-outline: var(--ghost-button-outline);
+  /* Selected radio / checkbox: off-white fill with a dark check (same pair as a selected chip). */
+  --control-selected-bg: var(--text-primary);
+  --control-selected-fg: var(--text-inverse);
   --border-strong: var(--white);
 
   /* Action */

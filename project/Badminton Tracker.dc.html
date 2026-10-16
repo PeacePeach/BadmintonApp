@@ -175,7 +175,7 @@ button:disabled{cursor:default !important;}
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:12px;">
-          <button onClick="{{ toggleAgree }}" aria-label="{{ tx.agreeLabel }}" style="width:24px;height:24px;border-radius:7px;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;background: {{ agreeBg }};border:var(--control-outline-width) solid {{ agreeBorder }};color:var(--action-on-primary);">
+          <button onClick="{{ toggleAgree }}" aria-label="{{ tx.agreeLabel }}" style="width:24px;height:24px;border-radius:7px;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;background: {{ agreeBg }};border:var(--control-outline-width) solid {{ agreeBorder }};color:var(--control-selected-fg);">
             <sc-if value="{{ agree }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 16 }}" hint-size="16px,16px"></x-import></sc-if>
           </button>
           <div style="font:400 15px/1.4 var(--font-sans);">{{ tx.agreeA }}<span style="color:var(--status-win);font-weight:600;">{{ tx.terms }}</span>{{ tx.agreeAnd }}<span style="color:var(--status-win);font-weight:600;">{{ tx.privacyPolicy }}</span>{{ tx.agreeEnd }}</div>
@@ -261,7 +261,7 @@ button:disabled{cursor:default !important;}
               <sc-for list="{{ langOptions }}" as="o" hint-placeholder-count="2">
                 <button role="radio" aria-checked="{{ o.on }}" lang="{{ o.lang }}" onClick="{{ o.select }}" style="height:56px;border-radius:99px;background:var(--surface-primary);border:1.5px solid {{ o.border }};color:var(--text-primary);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 22px;cursor:pointer;" style-active="transform:scale(.98);">
                   <span>{{ o.label }}</span>
-                  <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:var(--control-outline-width) solid {{ o.dotBorder }};color:var(--action-on-primary);">
+                  <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:var(--control-outline-width) solid {{ o.dotBorder }};color:var(--control-selected-fg);">
                     <sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 14 }}" hint-size="14px,14px"></x-import></sc-if>
                   </span>
                 </button>
@@ -288,7 +288,7 @@ button:disabled{cursor:default !important;}
               <sc-for list="{{ obLevels }}" as="o" hint-placeholder-count="4">
                 <button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.select }}" style="height:56px;border-radius:99px;background:var(--surface-primary);border:1.5px solid {{ o.border }};color:var(--text-primary);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 22px;cursor:pointer;" style-active="transform:scale(.98);">
                   <span>{{ o.label }}</span>
-                  <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:var(--control-outline-width) solid {{ o.dotBorder }};color:var(--action-on-primary);">
+                  <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:var(--control-outline-width) solid {{ o.dotBorder }};color:var(--control-selected-fg);">
                     <sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 14 }}" hint-size="14px,14px"></x-import></sc-if>
                   </span>
                 </button>
@@ -1287,7 +1287,7 @@ button:disabled{cursor:default !important;}
             <sc-for list="{{ meLevels }}" as="o" hint-placeholder-count="4">
               <button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.select }}" style="height:56px;border-radius:99px;background:var(--surface-primary);border:1.5px solid {{ o.border }};color:var(--text-primary);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 22px;cursor:pointer;" style-active="transform:scale(.98);">
                 <span>{{ o.label }}</span>
-                <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:var(--control-outline-width) solid {{ o.dotBorder }};color:var(--action-on-primary);">
+                <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:var(--control-outline-width) solid {{ o.dotBorder }};color:var(--control-selected-fg);">
                   <sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 14 }}" hint-size="14px,14px"></x-import></sc-if>
                 </span>
               </button>
@@ -1378,7 +1378,7 @@ button:disabled{cursor:default !important;}
                 <div style="font:500 15px/1.2 var(--font-sans);">{{ r.label }}</div>
                 <div style="font:400 12px/1.3 var(--font-sans);color:var(--text-secondary);">{{ r.sub }}</div>
               </div>
-              <span style="width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ r.bg }};border:var(--control-outline-width) solid {{ r.border }};color:var(--action-on-primary);">
+              <span style="width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ r.bg }};border:var(--control-outline-width) solid {{ r.border }};color:var(--control-selected-fg);">
                 <sc-if value="{{ r.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 16 }}" hint-size="16px,16px"></x-import></sc-if>
               </span>
             </button>
@@ -1398,7 +1398,7 @@ button:disabled{cursor:default !important;}
           <sc-for list="{{ langOptions }}" as="o" hint-placeholder-count="2">
             <button role="radio" aria-checked="{{ o.on }}" lang="{{ o.lang }}" onClick="{{ o.select }}" style="height:56px;border-radius:99px;background:var(--surface-primary);border:1.5px solid {{ o.border }};color:var(--text-primary);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 22px;cursor:pointer;" style-active="transform:scale(.98);">
               <span>{{ o.label }}</span>
-              <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:var(--control-outline-width) solid {{ o.dotBorder }};color:var(--action-on-primary);">
+              <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:var(--control-outline-width) solid {{ o.dotBorder }};color:var(--control-selected-fg);">
                 <sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 14 }}" hint-size="14px,14px"></x-import></sc-if>
               </span>
             </button>
@@ -1558,7 +1558,7 @@ button:disabled{cursor:default !important;}
             <button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.select }}" style="height:60px;border-radius:99px;background:var(--surface-primary);border:1.5px solid {{ o.border }};color:var(--text-primary);display:flex;align-items:center;gap:12px;padding:0 18px 0 10px;cursor:pointer;" style-active="transform:scale(.98);">
               <span style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--icon-badge-fg);"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ o.icon }}" size="{{ 18 }}" hint-size="18px,18px"></x-import></span>
               <span style="flex:1;text-align:left;font:500 15px/1 var(--font-sans);">{{ o.label }}</span>
-              <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:var(--control-outline-width) solid {{ o.dotBorder }};color:var(--action-on-primary);">
+              <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:var(--control-outline-width) solid {{ o.dotBorder }};color:var(--control-selected-fg);">
                 <sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 14 }}" hint-size="14px,14px"></x-import></sc-if>
               </span>
             </button>
@@ -2669,7 +2669,7 @@ class Component extends DCLogic {
       toSignup: () => this.toAuth('signup'),
       toLogin: () => this.toAuth('login', s.screen === 'forgot' || s.screen === 'resetSent'),
       agree: s.agree, toggleAgree: () => this.setState(x => ({ agree: !x.agree })),
-      agreeBg: s.agree ? 'var(--action-primary)' : 'transparent', agreeBorder: s.agree ? 'var(--action-primary)' : 'var(--control-outline)',
+      agreeBg: s.agree ? 'var(--control-selected-bg)' : 'transparent', agreeBorder: s.agree ? 'var(--control-selected-bg)' : 'var(--control-outline)',
       signupBg: s.agree ? 'var(--action-primary)' : 'var(--surface-muted)', signupFg: s.agree ? 'var(--action-on-primary)' : 'var(--text-tertiary)',
       signUp: () => { if (!this.state.agree) return; const f = this.state.f;
         this.submit({ name: f.name.trim() ? null : this.msg.nameEmpty, email: this.emailErr(f.email), password: f.password.length >= 8 ? null : f.password ? this.msg.pwShort : this.msg.pwEmpty },
@@ -2689,7 +2689,7 @@ class Component extends DCLogic {
       tx: { ...I18N.en, ...(I18N[this.lang()] || {}) }, resendInLabel: this.t('resendIn', { n: s.resendIn }), overallWL: this.t('wl', { w: overall.w, l: overall.l }),
       langOptions: LANGS.map(([code, label]) => { const on = this.lang() === code;
         return { label, lang: code === 'zh' ? 'zh-Hans' : 'en', on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent',
-          dotBg: on ? 'var(--action-primary)' : 'transparent', dotBorder: on ? 'var(--action-primary)' : 'var(--control-outline)', select: () => this.setLang(code) }; }),
+          dotBg: on ? 'var(--control-selected-bg)' : 'transparent', dotBorder: on ? 'var(--control-selected-bg)' : 'var(--control-outline)', select: () => this.setLang(code) }; }),
       isLanguage: s.screen === 'language',
       isOnboarding: s.screen === 'onboarding',
       showTabs: s.screen === 'matches' || s.screen === 'insights' || s.screen === 'focus', menuOpen: s.menu,
@@ -2763,7 +2763,7 @@ class Component extends DCLogic {
       v.onMeName = e => this.setAcct({ name: e.target.value }, 'name');
       v.meLevels = ['Beginner', 'Intermediate', 'Advanced', 'Competitive'].map(label => {
         const on = a.level === label;
-        return { label: this.t('level_' + label), on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent', dotBg: on ? 'var(--action-primary)' : 'transparent', dotBorder: on ? 'var(--action-primary)' : 'var(--control-outline)', select: () => this.setAcct({ level: label }, 'level') };
+        return { label: this.t('level_' + label), on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent', dotBg: on ? 'var(--control-selected-bg)' : 'transparent', dotBorder: on ? 'var(--control-selected-bg)' : 'var(--control-outline)', select: () => this.setAcct({ level: label }, 'level') };
       });
       v.saveProfile = () => this.submit({ name: name ? null : this.msg.nameEmpty }, async () => {
         const players = this.state.players.map(p => p.id === 'me' ? { ...p, name, level: this.state.acct.level } : p);
@@ -2796,7 +2796,7 @@ class Component extends DCLogic {
     }
     if (v.isPrefs) {
       const row = (k, label, sub) => { const on = !!s.prefs[k];
-        return { label, sub, on, bg: on ? A : 'transparent', border: on ? A : 'var(--control-outline)', select: () => k === 'usage' ? this.setUsage(!this.state.prefs.usage) : this.setState(x => ({ prefs: { ...x.prefs, [k]: !x.prefs[k] } })) }; };
+        return { label, sub, on, bg: on ? 'var(--control-selected-bg)' : 'transparent', border: on ? 'var(--control-selected-bg)' : 'var(--control-outline)', select: () => k === 'usage' ? this.setUsage(!this.state.prefs.usage) : this.setState(x => ({ prefs: { ...x.prefs, [k]: !x.prefs[k] } })) }; };
       v.prefTitle = this.t(s.screen === 'privacy' ? 'privacy' : 'notifications');
       v.prefRows = s.screen === 'privacy'
         ? [row('usage', this.t('shareUsage'), this.t('shareUsageSub'))]
@@ -2939,7 +2939,7 @@ class Component extends DCLogic {
       v.obBack = () => setOb({ step: 1 });
       v.obLevels = ['Beginner', 'Intermediate', 'Advanced', 'Competitive'].map(label => {
         const on = ob.level === label;
-        return { label: this.t('level_' + label), on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent', dotBg: on ? 'var(--action-primary)' : 'transparent', dotBorder: on ? 'var(--action-primary)' : 'var(--control-outline)', select: () => setOb({ level: label }) };
+        return { label: this.t('level_' + label), on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent', dotBg: on ? 'var(--control-selected-bg)' : 'transparent', dotBorder: on ? 'var(--control-selected-bg)' : 'var(--control-outline)', select: () => setOb({ level: label }) };
       });
       v.obReadyTitle = this.t('obReadyTitle').replace('{name}', ob.name.trim().split(/\s+/)[0]);
       v.obCtaLabel = this.t(['getStarted', 'continue', 'logFirstMatch'][st - 1]);
@@ -3199,7 +3199,7 @@ class Component extends DCLogic {
         title: sh.title, goal: sh.goal, onTitle: e => this.setSheet({ title: e.target.value.replace(/\s*\n\s*/g, ' ') }),
         close: () => this.setState({ sheet: null }),
         types: types.map(([k, label, icon]) => { const on = sh.type === k; return { label: this.t(label), icon, on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent',
-          dotBg: on ? 'var(--action-primary)' : 'transparent', dotBorder: on ? 'var(--action-primary)' : 'var(--control-outline)', select: () => this.setSheet({ type: k }) }; }),
+          dotBg: on ? 'var(--control-selected-bg)' : 'transparent', dotBorder: on ? 'var(--control-selected-bg)' : 'var(--control-outline)', select: () => this.setSheet({ type: k }) }; }),
         isPractice: sh.type === 'practice', isMatch: sh.type === 'match', isNone: sh.type === 'manual',
         freqLabel: this.t('perWeek', { n: sh.perWeek }), notDec: sh.perWeek <= 1, notInc: sh.perWeek >= 7, decOp: sh.perWeek <= 1 ? .4 : 1, incOp: sh.perWeek >= 7 ? .4 : 1,
         dec: () => this.setSheet({ perWeek: Math.max(1, sh.perWeek - 1) }), inc: () => this.setSheet({ perWeek: Math.min(7, sh.perWeek + 1) }),
