@@ -235,7 +235,7 @@ button:disabled{cursor:default !important;}
     <sc-if value="{{ isResetSent }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Check Email" style="display:flex;flex-direction:column;gap:32px;padding-top:56px;">
         <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:0 12px;">
-          <div style="width:64px;height:64px;border-radius:50%;background:var(--icon-button-bg);color:var(--text-primary);display:flex;align-items:center;justify-content:center;margin-bottom:14px;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="MailCheck" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></div>
+          <div style="width:64px;height:64px;border-radius:50%;background:var(--icon-button-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;margin-bottom:14px;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="MailCheck" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></div>
           <div style="font:600 30px/1.2 var(--font-sans);">{{ tx.checkEmail }}</div>
           <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">{{ tx.resetBodyA }}<span style="color:var(--text-primary);font-weight:500;overflow-wrap:anywhere;">{{ resetEmail }}</span>{{ tx.resetBodyB }}</div>
         </div>
@@ -300,7 +300,7 @@ button:disabled{cursor:default !important;}
 
       <sc-if value="{{ obReady }}" hint-placeholder-val="{{ false }}">
         <div data-screen-label="Onboarding · Ready" style="min-height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:28px;text-align:center;padding:0 12px 100px;">
-          <div style="width:64px;height:64px;border-radius:50%;background:var(--surface-primary);color:var(--status-win);display:flex;align-items:center;justify-content:center;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
+          <div style="width:64px;height:64px;border-radius:50%;background:var(--surface-primary);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
           <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
             <div style="font:600 30px/1.2 var(--font-sans);">{{ obReadyTitle }}</div>
             <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">{{ tx.obReadyBody }}</div>
@@ -475,7 +475,7 @@ button:disabled{cursor:default !important;}
               <div style="background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:14px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                   <div class="tl zh12" style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);padding-top:6px;">{{ tx.winRate }}</div>
-                  <div style="width:36px;height:36px;border-radius:50%;background:var(--surface-muted);display:flex;align-items:center;justify-content:center;color:var(--neutral-600);flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Trophy" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
+                  <div style="width:36px;height:36px;border-radius:50%;background:var(--icon-badge-bg);display:flex;align-items:center;justify-content:center;color:var(--icon-badge-fg);flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Trophy" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
                 </div>
                 <div style="display:flex;flex-direction:column;gap:10px;">
                   <div style="font:500 52px/.95 var(--font-sans);letter-spacing:-.03em;">{{ pf.win }}</div>
@@ -495,7 +495,7 @@ button:disabled{cursor:default !important;}
                 <div style="flex:1;background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;">
                   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
                     <div class="tl zh12" style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);line-height:1.4;">{{ tx.matchesPlayed }}</div>
-                    <div style="width:36px;height:36px;border-radius:50%;background:var(--surface-muted);display:flex;align-items:center;justify-content:center;color:var(--neutral-600);flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Calendar" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
+                    <div style="width:36px;height:36px;border-radius:50%;background:var(--icon-badge-bg);display:flex;align-items:center;justify-content:center;color:var(--icon-badge-fg);flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Calendar" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
                   </div>
                   <div style="display:flex;flex-direction:column;gap:6px;">
                     <div style="font:500 40px/1 var(--font-sans);">{{ pf.played }}</div>
@@ -505,7 +505,7 @@ button:disabled{cursor:default !important;}
                 <div style="flex:1;background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;">
                   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
                     <div class="tl zh12" style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);line-height:1.4;">{{ tx.recentRecord }}</div>
-                    <div style="width:36px;height:36px;border-radius:50%;background:var(--surface-muted);display:flex;align-items:center;justify-content:center;color:var(--neutral-600);flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ListChecks" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
+                    <div style="width:36px;height:36px;border-radius:50%;background:var(--icon-badge-bg);display:flex;align-items:center;justify-content:center;color:var(--icon-badge-fg);flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ListChecks" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
                   </div>
                   <div style="display:flex;flex-direction:column;gap:6px;">
                     <div style="font:500 40px/1 var(--font-sans);">{{ pf.record }}</div>
@@ -534,7 +534,7 @@ button:disabled{cursor:default !important;}
 
             <sc-for list="{{ pf.people }}" as="p" hint-placeholder-count="3">
                 <div onClick="{{ p.open }}" style="background:var(--surface-primary);border-radius:26px;display:flex;align-items:center;gap:14px;padding:16px 20px 16px 16px;cursor:pointer;">
-                  <div style="width:44px;height:44px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;font:500 14px/1 var(--font-sans);flex-shrink:0;">{{ p.initials }}</div>
+                  <div style="width:44px;height:44px;border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 14px/1 var(--font-sans);flex-shrink:0;">{{ p.initials }}</div>
                   <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;">
                     <div class="tl zh12" style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);">{{ p.role }}</div>
                     <div style="font:500 16px/1.1 var(--font-sans);">{{ p.name }}</div>
@@ -579,7 +579,7 @@ button:disabled{cursor:default !important;}
                       <div style="font:400 13px/1.4 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">{{ b.evidence }}</div>
                     </div>
                     <sc-if value="{{ b.action }}" hint-placeholder-val="{{ true }}">
-                    <div style="height:1px;background:var(--surface-muted);"></div>
+                    <div style="height:1px;background:var(--divider);"></div>
                     <div style="display:flex;flex-direction:column;gap:6px;">
                       <div style="font:400 12px/1 var(--font-sans);color:var(--status-win);">{{ tx.tryNext }}</div>
                       <div style="font:400 14px/1.4 var(--font-sans);text-wrap:pretty;">{{ b.action }}</div>
@@ -600,14 +600,14 @@ button:disabled{cursor:default !important;}
               <sc-for list="{{ grow.strengths }}" as="k" hint-placeholder-count="2">
                 <div style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;">
                   <div style="display:flex;align-items:center;gap:14px;">
-                    <div style="width:40px;height:40px;border-radius:50%;background:var(--surface-muted);color:var(--status-win);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
+                    <div style="width:40px;height:40px;border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
                     <div style="display:flex;flex-direction:column;gap:5px;min-width:0;">
                       <div style="font:500 16px/1.2 var(--font-sans);">{{ k.name }}</div>
                       <div style="font:400 13px/1.35 var(--font-sans);color:var(--text-secondary);">{{ k.signal }}</div>
                     </div>
                   </div>
                   <sc-if value="{{ k.action }}" hint-placeholder-val="{{ true }}">
-                  <div style="height:1px;background:var(--surface-muted);"></div>
+                  <div style="height:1px;background:var(--divider);"></div>
                   <div style="display:flex;flex-direction:column;gap:6px;">
                     <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.keepDoing }}</div>
                     <div style="font:400 15px/1.45 var(--font-sans);text-wrap:pretty;">{{ k.action }}</div>
@@ -624,14 +624,14 @@ button:disabled{cursor:default !important;}
               <sc-for list="{{ grow.opps }}" as="o" hint-placeholder-count="2">
                 <div onClick="{{ o.open }}" style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;cursor:pointer;">
                   <div style="display:flex;align-items:center;gap:14px;">
-                    <div style="width:40px;height:40px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);flex-shrink:0;">{{ o.initials }}</div>
+                    <div style="width:40px;height:40px;border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);flex-shrink:0;">{{ o.initials }}</div>
                     <div style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:0;">
                       <div style="font:500 16px/1.2 var(--font-sans);">{{ o.name }}</div>
                       <div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">{{ o.record }}</div>
                     </div>
                     <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 24 }}" color="var(--text-secondary)" hint-size="24px,24px"></x-import>
                   </div>
-                  <div style="height:1px;background:var(--surface-muted);"></div>
+                  <div style="height:1px;background:var(--divider);"></div>
                   <div style="display:flex;flex-direction:column;gap:6px;">
                     <div style="font:400 12px/1 var(--font-sans);color:var(--status-win);">{{ tx.gamePlan }}</div>
                     <div style="font:400 15px/1.45 var(--font-sans);text-wrap:pretty;">{{ o.plan }}</div>
@@ -647,13 +647,13 @@ button:disabled{cursor:default !important;}
               <sc-for list="{{ grow.doubles }}" as="d" hint-placeholder-count="2">
                 <div style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;">
                   <div style="display:flex;align-items:flex-start;gap:14px;">
-                    <div style="width:40px;height:40px;border-radius:50%;background:var(--surface-muted);color:var(--neutral-600);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Users" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
+                    <div style="width:40px;height:40px;border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Users" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
                     <div style="display:flex;flex-direction:column;gap:5px;min-width:0;">
                       <div style="font:500 16px/1.2 var(--font-sans);">{{ d.name }}</div>
                       <div style="font:400 13px/1.4 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">{{ d.pattern }}</div>
                     </div>
                   </div>
-                  <div style="height:1px;background:var(--surface-muted);"></div>
+                  <div style="height:1px;background:var(--divider);"></div>
                   <div style="display:flex;flex-direction:column;gap:6px;">
                     <div style="font:400 12px/1 var(--font-sans);color: {{ d.labelFg }};">{{ d.label }}</div>
                     <div style="font:400 15px/1.45 var(--font-sans);text-wrap:pretty;">{{ d.action }}</div>
@@ -730,7 +730,7 @@ button:disabled{cursor:default !important;}
             <sc-if value="{{ fl.showDone }}" hint-placeholder-val="{{ false }}">
               <sc-for list="{{ fl.done }}" as="it" hint-placeholder-count="1">
                 <button onClick="{{ it.open }}" style="width:100%;text-align:left;min-height:60px;border:none;border-radius:99px;background:var(--surface-primary);display:flex;align-items:center;gap:12px;padding:10px 20px 10px 10px;cursor:pointer;color:var(--text-primary);">
-                  <div style="width:40px;height:40px;border-radius:50%;background:var(--border-default);color:var(--text-secondary);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
+                  <div style="width:40px;height:40px;border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
                   <div style="flex:1;min-width:0;font:400 15px/1.3 var(--font-sans);color:var(--neutral-600);overflow-wrap:anywhere;">{{ it.title }}</div>
                   <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.focusCompleted }}</div>
                 </button>
@@ -853,7 +853,7 @@ button:disabled{cursor:default !important;}
           <div style="display:flex;flex-direction:column;gap:12px;">
             <sc-for list="{{ typeOptions }}" as="o" hint-placeholder-count="2">
               <div onClick="{{ o.select }}" style="background:var(--surface-primary);border-radius:26px;padding:24px 22px;display:flex;align-items:center;gap:18px;cursor:pointer;border:1.5px solid {{ o.border }};">
-                <div style="width:60px;height:60px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;">
+                <div style="width:60px;height:60px;border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;">
                   <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ o.icon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import>
                 </div>
                 <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
@@ -905,7 +905,7 @@ button:disabled{cursor:default !important;}
                 <div style="display:flex;flex-direction:column;gap:8px;">
                   <sc-for list="{{ pickList }}" as="p" hint-placeholder-count="5">
                     <div onClick="{{ p.pick }}" style="height:60px;border-radius:99px;background:var(--surface-primary);display:flex;align-items:center;gap:12px;padding:0 10px;cursor:pointer;" style-active="transform:scale(.98);">
-                      <div style="width:42px;height:42px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
+                      <div style="width:42px;height:42px;border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
                       <div style="flex:1;font:500 15px/1 var(--font-sans);">{{ p.name }}</div>
                       <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding-right:12px;">{{ p.sub }}</div>
                     </div>
@@ -1062,7 +1062,7 @@ button:disabled{cursor:default !important;}
             <div aria-hidden="true" style="background:var(--surface-primary);border-radius:26px;padding:8px 20px;display:flex;flex-direction:column;">
               <div style="padding:12px 0 8px;"><div class="skel" style="height:12px;width:30%;"></div></div>
               <sc-for list="{{ skel3 }}" as="k" hint-placeholder-count="3">
-                <div style="display:grid;grid-template-columns:1fr 64px 64px;align-items:center;padding:12px 0;border-top:1px solid var(--border-default);">
+                <div style="display:grid;grid-template-columns:1fr 64px 64px;align-items:center;padding:12px 0;border-top:1px solid var(--divider);">
                   <div class="skel" style="height:15px;width:40%;"></div>
                   <div class="skel" style="height:24px;width:32px;justify-self:center;"></div>
                   <div class="skel" style="height:24px;width:32px;justify-self:center;"></div>
@@ -1086,10 +1086,10 @@ button:disabled{cursor:default !important;}
               <div style="font:500 16px/1 var(--font-sans);">{{ p.name }}</div>
             </div>
           </sc-for>
-          <div style="height:1px;background:var(--border-default);margin:4px 0;"></div>
+          <div style="height:1px;background:var(--divider);margin:4px 0;"></div>
           <sc-for list="{{ detail.sideB }}" as="p" hint-placeholder-count="1">
             <div onClick="{{ p.open }}" style="display:flex;align-items:center;gap:12px;cursor:pointer;">
-              <div style="width:40px;height:40px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
+              <div style="width:40px;height:40px;border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
               <div style="font:500 16px/1 var(--font-sans);flex:1;">{{ p.name }}</div>
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 24 }}" color="var(--grey-400)" hint-size="24px,24px"></x-import>
             </div>
@@ -1100,7 +1100,7 @@ button:disabled{cursor:default !important;}
             <div>{{ tx.gameCol }}</div><div style="text-align:center;">{{ detail.aShort }}</div><div style="text-align:center;">{{ tx.oppCol }}</div>
           </div>
           <sc-for list="{{ detail.rows }}" as="r" hint-placeholder-count="2">
-            <div style="display:grid;grid-template-columns:1fr 64px 64px;align-items:center;padding:12px 0;border-top:1px solid var(--border-default);">
+            <div style="display:grid;grid-template-columns:1fr 64px 64px;align-items:center;padding:12px 0;border-top:1px solid var(--divider);">
               <div style="font:400 15px/1 var(--font-sans);color:var(--neutral-600);">{{ r.label }}</div>
               <div style="text-align:center;font:500 24px/1 var(--font-sans);color: {{ r.aFg }};">{{ r.a }}</div>
               <div style="text-align:center;font:500 24px/1 var(--font-sans);color: {{ r.bFg }};">{{ r.b }}</div>
@@ -1172,7 +1172,7 @@ button:disabled{cursor:default !important;}
         <div style="display:flex;flex-direction:column;gap:8px;">
           <sc-for list="{{ playerList }}" as="p" hint-placeholder-count="6">
             <div onClick="{{ p.open }}" style="min-height:64px;border-radius:99px;background:var(--surface-primary);display:flex;align-items:center;gap:12px;padding:10px;cursor:pointer;">
-              <div style="width:44px;height:44px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;font:500 14px/1 var(--font-sans);flex-shrink:0;">{{ p.initials }}</div>
+              <div style="width:44px;height:44px;border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 14px/1 var(--font-sans);flex-shrink:0;">{{ p.initials }}</div>
               <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;">
                 <div style="font:500 15px/1.2 var(--font-sans);">{{ p.name }}</div>
                 <div style="font:400 12px/1.2 var(--font-sans);color:var(--text-secondary);">{{ p.sub }}</div>
@@ -1197,7 +1197,7 @@ button:disabled{cursor:default !important;}
           <div style="width:48px;"></div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
-          <div style="width:88px;height:88px;border-radius:50%;background:var(--surface-muted);display:flex;align-items:center;justify-content:center;font:500 28px/1 var(--font-sans);">{{ profile.initials }}</div>
+          <div style="width:88px;height:88px;border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 28px/1 var(--font-sans);">{{ profile.initials }}</div>
           <div style="font:600 26px/1.2 var(--font-sans);">{{ profile.name }}</div>
           <div style="font:400 14px/1 var(--font-sans);color:var(--text-secondary);">{{ profile.sub }}</div>
         </div>
@@ -1244,7 +1244,7 @@ button:disabled{cursor:default !important;}
         <div style="display:flex;flex-direction:column;gap:8px;">
           <sc-for list="{{ settingsRows }}" as="r" hint-placeholder-count="4">
             <button onClick="{{ r.open }}" style="min-height:64px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);display:flex;align-items:center;gap:12px;padding:10px;cursor:pointer;text-align:left;" style-active="transform:scale(.98);">
-              <div style="width:44px;height:44px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ r.icon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
+              <div style="width:44px;height:44px;border-radius:50%;background:var(--icon-badge-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--icon-badge-fg);"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ r.icon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
               <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;">
                 <div style="font:500 15px/1.2 var(--font-sans);">{{ r.label }}</div>
                 <div style="font:400 12px/1.2 var(--font-sans);color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.sub }}</div>
@@ -1268,7 +1268,7 @@ button:disabled{cursor:default !important;}
           <div style="font:600 28px/1.2 var(--font-sans);">{{ tx.profile }}</div>
         </div>
         <div style="display:flex;justify-content:center;">
-          <div aria-hidden="true" style="width:88px;height:88px;border-radius:50%;background:var(--surface-muted);display:flex;align-items:center;justify-content:center;font:500 28px/1 var(--font-sans);color:var(--text-secondary);"><sc-if value="{{ meInitials }}" hint-placeholder-val="{{ true }}"><span style="color:var(--text-primary);">{{ meInitials }}</span></sc-if><sc-if value="{{ noInitials }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="UserRound" size="{{ 24 }}" hint-size="24px,24px"></x-import></sc-if></div>
+          <div aria-hidden="true" style="width:88px;height:88px;border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 28px/1 var(--font-sans);color:var(--text-secondary);"><sc-if value="{{ meInitials }}" hint-placeholder-val="{{ true }}"><span style="color:var(--text-primary);">{{ meInitials }}</span></sc-if><sc-if value="{{ noInitials }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="UserRound" size="{{ 24 }}" hint-size="24px,24px"></x-import></sc-if></div>
         </div>
         <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
           <div role="alert" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:22px;background:var(--surface-muted);">
@@ -1310,14 +1310,14 @@ button:disabled{cursor:default !important;}
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;">
           <div style="min-height:64px;border-radius:99px;background:var(--surface-primary);display:flex;align-items:center;gap:12px;padding:10px;">
-            <div style="width:44px;height:44px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Mail" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
+            <div style="width:44px;height:44px;border-radius:50%;background:var(--icon-badge-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--icon-badge-fg);"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Mail" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
             <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;">
               <div style="font:400 12px/1.2 var(--font-sans);color:var(--text-secondary);">{{ tx.email }}</div>
               <div style="font:500 15px/1.2 var(--font-sans);overflow-wrap:anywhere;">{{ acctEmail }}</div>
             </div>
           </div>
           <button onClick="{{ changePassword }}" style="min-height:64px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);display:flex;align-items:center;gap:12px;padding:10px;cursor:pointer;text-align:left;" style-active="transform:scale(.98);">
-            <div style="width:44px;height:44px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="KeyRound" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
+            <div style="width:44px;height:44px;border-radius:50%;background:var(--icon-badge-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--icon-badge-fg);"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="KeyRound" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
             <div style="font:500 15px/1.2 var(--font-sans);flex:1;min-width:0;">{{ tx.changePassword }}</div>
             <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 24 }}" color="var(--grey-400)" style="margin-right:10px" hint-size="24px,24px"></x-import>
           </button>
@@ -1555,8 +1555,8 @@ button:disabled{cursor:default !important;}
         <div id="focus-how" style="font:500 15px/1.3 var(--font-sans);">{{ tx.howQ }}</div>
         <div role="radiogroup" aria-labelledby="focus-how" style="display:flex;flex-direction:column;gap:8px;">
           <sc-for list="{{ sh.types }}" as="o" hint-placeholder-count="3">
-            <button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.select }}" style="height:60px;border-radius:99px;background:var(--surface-muted);border:1.5px solid {{ o.border }};color:var(--text-primary);display:flex;align-items:center;gap:12px;padding:0 18px 0 10px;cursor:pointer;" style-active="transform:scale(.98);">
-              <span style="width:40px;height:40px;border-radius:50%;background:var(--surface-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ o.icon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import></span>
+            <button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.select }}" style="height:60px;border-radius:99px;background:var(--surface-primary);border:1.5px solid {{ o.border }};color:var(--text-primary);display:flex;align-items:center;gap:12px;padding:0 18px 0 10px;cursor:pointer;" style-active="transform:scale(.98);">
+              <span style="width:40px;height:40px;border-radius:50%;background:var(--icon-badge-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--icon-badge-fg);"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ o.icon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import></span>
               <span style="flex:1;text-align:left;font:500 15px/1 var(--font-sans);">{{ o.label }}</span>
               <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:1.5px solid {{ o.dotBorder }};color:var(--action-on-primary);">
                 <sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 14 }}" hint-size="14px,14px"></x-import></sc-if>
@@ -1569,7 +1569,7 @@ button:disabled{cursor:default !important;}
         <div style="display:flex;flex-direction:column;gap:22px;">
           <div style="display:flex;flex-direction:column;gap:12px;">
             <div style="font:500 15px/1.3 var(--font-sans);">{{ tx.howOften }}</div>
-            <div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface-muted);border-radius:99px;padding:6px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface-primary);border-radius:99px;padding:6px;">
               <button onClick="{{ sh.dec }}" aria-label="{{ tx.decrease }}" disabled="{{ sh.notDec }}" style="width:48px;height:48px;border-radius:50%;background:transparent;border:1px solid var(--ghost-button-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;opacity: {{ sh.decOp }};"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Minus" size="{{ 24 }}" hint-size="24px,24px"></x-import></button>
               <div aria-live="polite" style="font:500 20px/1 var(--font-sans);">{{ sh.freqLabel }}</div>
               <button onClick="{{ sh.inc }}" aria-label="{{ tx.increase }}" disabled="{{ sh.notInc }}" style="width:48px;height:48px;border-radius:50%;background:transparent;border:1px solid var(--ghost-button-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;opacity: {{ sh.incOp }};"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import></button>
@@ -2971,7 +2971,7 @@ class Component extends DCLogic {
       const slot = k => {
         const id = log[k], act = log.active === k;
         return { role: roles[k], name: id ? this.nm(id) : this.t('selectRole', { role: roles[k] }), initials: id ? this.ini(id) : '', empty: !id, fg: id ? 'var(--text-primary)' : 'var(--text-secondary)',
-          avBg: id ? 'var(--border-default)' : 'transparent', avFg: id ? 'var(--text-primary)' : 'var(--text-secondary)', border: act ? 'var(--ghost-button-outline-highlight)' : 'transparent',
+          avBg: id ? 'var(--icon-badge-bg)' : 'transparent', avFg: id ? 'var(--icon-badge-fg)' : 'var(--text-secondary)', border: act ? 'var(--ghost-button-outline-highlight)' : 'transparent',
           select: () => this.setLog({ active: k }) };
       };
       const me = { role: this.t('me'), name: this.nm('me'), initials: this.ini('me'), fg: 'var(--text-primary)', avBg: A, avFg: 'var(--action-on-primary)', border: 'transparent', select: () => {} };
@@ -3041,7 +3041,7 @@ class Component extends DCLogic {
       v.detail = {
         dateLong: this.date(m.date, true), type: this.typeLabel(m.type), resultWord: this.t(r.win ? 'resultWin' : 'resultLoss'), gamesWon: `${r.us}–${r.them}`,
         sideA: [{ name: this.t('you') + ' · ' + this.nm('me'), initials: this.ini('me'), avBg: A, avFg: 'var(--action-on-primary)' }]
-          .concat(m.partner ? [{ name: this.nm(m.partner), initials: this.ini(m.partner), avBg: 'var(--border-default)', avFg: 'var(--text-primary)' }] : []),
+          .concat(m.partner ? [{ name: this.nm(m.partner), initials: this.ini(m.partner), avBg: 'var(--icon-badge-bg)', avFg: 'var(--icon-badge-fg)' }] : []),
         sideB: m.opps.map(id => ({ name: this.nm(id), initials: this.ini(id), open: openP(id) })),
         aShort: m.partner ? this.t('you') + ' & ' + this.first(m.partner).slice(0, 1) : this.t('you'),
         rows: m.games.map((g, i) => ({ label: this.t('game', { n: i + 1 }), a: String(g[0]), b: String(g[1]), aFg: g[0] > g[1] ? 'var(--text-primary)' : 'var(--text-secondary)', bFg: g[1] > g[0] ? 'var(--text-primary)' : 'var(--text-secondary)' })),
