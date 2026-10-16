@@ -165,6 +165,8 @@
   /* Round icon badge (avatar-style circle) inside a tile or row: one fill and one soft-white icon everywhere. */
   --icon-badge-bg: var(--surface-muted);
   --icon-badge-fg: var(--neutral-600);
+  /* Outline of an unselected control: ghost buttons (+ / −), radio circles, checkboxes. Same colour and weight everywhere. */
+  --control-outline: var(--ghost-button-outline);
   --border-strong: var(--white);
 
   /* Action */
