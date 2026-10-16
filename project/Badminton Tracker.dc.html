@@ -1533,7 +1533,7 @@ button:disabled{cursor:default !important;}
   <!-- Focus sheet: New Focus (+), Add to Focus (Grow's Build Next) and Edit Focus. -->
   <sc-if value="{{ hasSheet }}" hint-placeholder-val="{{ false }}">
     <div onClick="{{ sh.close }}" style="position:absolute;inset:0;background:rgba(0,0,0,.55);"></div>
-    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="focus-sheet-title" data-screen-label="{{ sh.heading }}" style="position:absolute;left:0;right:0;bottom:0;max-height:90%;overflow-y:auto;background:var(--bg-primary);border-radius:34px 34px 0 0;padding:12px 20px 34px;display:flex;flex-direction:column;gap:26px;">
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="focus-sheet-title" data-screen-label="{{ sh.heading }}" style="position:absolute;left:0;right:0;bottom:0;max-height:90%;overflow-y:auto;background:var(--bg-primary);border-radius:34px 34px 0 0;padding:12px 20px 34px;display:flex;flex-direction:column;gap:32px;">
       <div aria-hidden="true" style="width:40px;height:5px;border-radius:99px;background:var(--border-default);align-self:center;"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-top:-8px;">
         <h2 id="focus-sheet-title" style="margin:0;font:600 28px/1.2 var(--font-sans);">{{ sh.heading }}</h2>
@@ -1566,7 +1566,7 @@ button:disabled{cursor:default !important;}
         </div>
       </div>
       <sc-if value="{{ sh.isPractice }}" hint-placeholder-val="{{ true }}">
-        <div style="display:flex;flex-direction:column;gap:22px;">
+        <div style="display:flex;flex-direction:column;gap:32px;">
           <div style="display:flex;flex-direction:column;gap:12px;">
             <div style="font:500 15px/1.3 var(--font-sans);">{{ tx.howOften }}</div>
             <div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface-primary);border-radius:99px;padding:6px;">
@@ -1576,7 +1576,7 @@ button:disabled{cursor:default !important;}
             </div>
           </div>
           <div style="display:flex;flex-direction:column;gap:12px;">
-            <div id="focus-long" style="font:500 15px/1.3 var(--font-sans);">{{ tx.howLong }} <span style="color:var(--text-secondary);font-weight:400;">{{ tx.optional }}</span></div>
+            <div id="focus-long" style="font:500 15px/1.3 var(--font-sans);">{{ tx.howLong }}</div>
             <div role="radiogroup" aria-labelledby="focus-long" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;">
               <sc-for list="{{ sh.weekOpts }}" as="c" hint-placeholder-count="4">
                 <button role="radio" aria-checked="{{ c.on }}" aria-disabled="{{ c.off }}" onClick="{{ c.select }}" style="height:var(--size-chip);padding:0 6px;border-radius:var(--radius-pill);font:400 15px/1 var(--font-sans);white-space:nowrap;cursor:pointer;transition:all var(--dur-base) var(--ease-out);background:var(--filter-pill-bg);color: {{ c.fg }};border:1px solid {{ c.border }};">{{ c.label }}</button>
@@ -1766,7 +1766,7 @@ const I18N = {
     tFocusAdded: 'Added to Focus', tFocusUpdated: 'Focus updated', tFocusDeleted: 'Focus deleted', tFocusDeleteFailed: "Couldn't delete focus",
     tFocusCompleted: 'Marked complete', tFocusReopened: 'Moved back to Active',
     addToFocus: 'Add to Focus', inFocus: 'In Focus', close: 'Close', improveQ: 'What do you want to improve?', focusName: 'Name', focusNamePh: 'Backhand clear',
-    optional: 'Optional', howQ: 'How will you work on it?',
+    howQ: 'How will you work on it?',
     optPractice: 'Practice sessions', optMatches: 'Next matches', optNone: 'No schedule', howOften: 'How often?', howLong: 'For how long?',
     howManyMatches: 'For how many matches?', noneHint: "You decide when it's done. Mark it complete any time."
   },
@@ -1886,7 +1886,7 @@ const I18N = {
     tFocusAdded: '已加入重点', tFocusUpdated: '重点已更新', tFocusDeleted: '重点已删除', tFocusDeleteFailed: '重点未能删除',
     tFocusCompleted: '已标记为完成', tFocusReopened: '已移回进行中',
     addToFocus: '加入重点', inFocus: '已加入重点', close: '关闭', improveQ: '你想提升什么？', focusName: '名称', focusNamePh: '反手高远球',
-    optional: '选填', howQ: '打算怎么练？',
+    howQ: '打算怎么练？',
     optPractice: '专项练习', optMatches: '接下来的比赛', optNone: '不设计划', howOften: '多久练一次？', howLong: '练多久？',
     howManyMatches: '跟进几场比赛？', noneHint: '什么时候完成由你决定，随时可以标记完成。'
   }
