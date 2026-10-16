@@ -585,8 +585,8 @@ button:disabled{cursor:default !important;}
                       <div style="font:400 14px/1.4 var(--font-sans);text-wrap:pretty;">{{ b.action }}</div>
                     </div>
                     </sc-if>
-                    <button onClick="{{ b.focus }}" style="height:44px;border:1px solid {{ b.fBorder }};border-radius:99px;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 8px;font:500 13px/1 var(--font-sans);white-space:nowrap;cursor:pointer;background: {{ b.fBg }};color: {{ b.fFg }};" style-active="transform:scale(.96);">
-                      <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ b.fIcon }}" size="{{ 20 }}" hint-size="20px,20px"></x-import>{{ b.fLabel }}
+                    <button onClick="{{ b.focus }}" style="height:44px;border:1px solid {{ b.fBorder }};border-radius:99px;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 16px 0 12px;font:500 12px/1 var(--font-sans);white-space:nowrap;cursor:pointer;background: {{ b.fBg }};color: {{ b.fFg }};" style-active="transform:scale(.96);">
+                      <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ b.fIcon }}" size="{{ 16 }}" hint-size="16px,16px"></x-import>{{ b.fLabel }}
                     </button>
                   </div>
                 </sc-for>
