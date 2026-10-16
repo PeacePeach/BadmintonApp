@@ -1537,7 +1537,7 @@ button:disabled{cursor:default !important;}
       <div aria-hidden="true" style="width:40px;height:5px;border-radius:99px;background:var(--border-default);align-self:center;"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-top:-8px;">
         <h2 id="focus-sheet-title" style="margin:0;font:600 28px/1.2 var(--font-sans);">{{ sh.heading }}</h2>
-        <button onClick="{{ sh.close }}" aria-label="{{ tx.close }}" style="width:44px;height:44px;padding:0;border:none;border-radius:50%;background:var(--surface-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--neutral-600);"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="X" size="{{ 24 }}" hint-size="24px,24px"></x-import></button>
+        <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="X" size="{{ 48 }}" label="{{ tx.close }}" onClick="{{ sh.close }}" hint-size="48px,48px"></x-import>
       </div>
       <sc-if value="{{ sh.isGrow }}" hint-placeholder-val="{{ true }}">
         <div style="display:flex;flex-direction:column;gap:8px;">
