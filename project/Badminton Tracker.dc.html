@@ -1955,9 +1955,18 @@ class Component extends DCLogic {
     return { players, matches, focuses, focusPeriods };
   }
 
+  // The "Start screen" design prop. A shared preview link can pick one too, e.g. ?preview=grow or ?preview=focus,
+  // to show the sample data without the design editor. Only on branch preview links (…-git-….vercel.app) and localhost.
+  startScreen() {
+    const p = (this.props || {}).startScreen;
+    if (p && p !== 'Splash') return p;
+    if (typeof location === 'undefined' || !/-git-.*\.vercel\.app$|^localhost$|^127\.0\.0\.1$/.test(location.hostname)) return p;
+    const q = (new URLSearchParams(location.search).get('preview') || '').toLowerCase();
+    return { grow: 'Insights', insights: 'Insights', matches: 'Matches', focus: 'Focus', 'focus-detail': 'Focus Detail' }[q] || p;
+  }
   seed() {
     const p = this.props || {};
-    const start = p.startScreen;
+    const start = this.startScreen();
     this._deviceLang = deviceLang();
     // Reopening the app (it starts on the splash) restores the signed-in account; see restore().
     this._restoring = !start || start === 'Splash';
@@ -1967,7 +1976,7 @@ class Component extends DCLogic {
       screen: screens[start] || 'matches', pwVisible: false, agree: false, ob: this.newOb(),
       f: this.blankForm(), errors: {}, banner: null, busy: null, resetEmail: 'sam@rallywise.app', resendIn: 0,
       ...this.authPreset(p.authError),
-      insTab: 'progress', aiGrow: null, growBusy: false, back: start === 'Match Detail' ? [{ screen: 'matches' }] : start === 'Focus Detail' ? [{ screen: 'focus' }] : [], filter: 'All', menu: false, confirmDelete: null, detailId: null, playerId: null, search: '', toast: null,
+      insTab: /[?&]preview=grow\b/i.test(typeof location === 'undefined' ? '' : location.search) && start === 'Insights' ? 'coach' : 'progress', aiGrow: null, growBusy: false, back: start === 'Match Detail' ? [{ screen: 'matches' }] : start === 'Focus Detail' ? [{ screen: 'focus' }] : [], filter: 'All', menu: false, confirmDelete: null, detailId: null, playerId: null, search: '', toast: null,
       ...this.dataFor(p.dataState, players, matches, focuses, focusPeriods), log: start === 'Log Match' ? this.newLog() : null,
       focusId: start === 'Focus Detail' ? 'f0' : null, showDone: false, sheet: null, confirmDeleteFocus: null, day: null,
       email: 'sam@rallywise.app', acct: { name: '', level: null, cur: '', next: '' }, prefs: this.newPrefs(),
@@ -1977,13 +1986,13 @@ class Component extends DCLogic {
   newPrefs() { return { reminders: true, insights: true, usage: false }; }
   // Today as YYYY-MM-DD on this device's clock. Design previews keep the sample data's day.
   today() {
-    const s = (this.props || {}).startScreen;
+    const s = this.startScreen();
     if (s && s !== 'Splash') return '2026-09-22';
     const d = new Date();
     return new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
   }
   // True for the real app (opened on the splash); false for design previews, which show sample data.
-  live() { const s = (this.props || {}).startScreen; return !s || s === 'Splash'; }
+  live() { const s = this.startScreen(); return !s || s === 'Splash'; }
   // The app language: the account's saved choice, else this device's last choice or system language.
   lang() { const l = this.state && this.state.prefs && this.state.prefs.lang; return l === 'en' || l === 'zh' ? l : this._deviceLang; }
   t(k, vars) {
@@ -2182,7 +2191,7 @@ class Component extends DCLogic {
   analyticsCtx(prefs) {
     const p = this.props || {}, u = this.user, pr = prefs || this.state.prefs || {};
     if (!u || !u.anonId || u.email === 'sam@rallywise.app') return null;
-    if ((p.startScreen && p.startScreen !== 'Splash') || (p.dataState && p.dataState !== 'Normal')) return null;
+    if (!this.live() || (p.dataState && p.dataState !== 'Normal')) return null;
     return { anonId: u.anonId, consent: pr.usage ? 'yes' : pr.consentAsked ? 'no' : 'ask' };
   }
   track(event, props, prefs) { const c = this.analyticsCtx(prefs), A = window.RallywiseAnalytics; if (c && A) A.track(event, props || {}, c); }
