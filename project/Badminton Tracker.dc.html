@@ -3135,7 +3135,7 @@ class Component extends DCLogic {
         if (n >= 6) wrapW = (4 * size + 3 * gap) + 'px';
         markers = cur.marks.map((m, i) => ({ done: m, open: !m, n: String(i + 1), size: size + 'px', gap,
           aria: this.t(m ? 'sessionDone' : 'sessionOpen', { n: i + 1 }), pressed: m, disabled: false,
-          bg: m ? 'var(--progress-active)' : 'var(--border-default)', fg: m ? 'var(--text-inverse)' : 'var(--neutral-600)', cursor: 'pointer',
+          bg: m ? 'var(--progress-active)' : 'var(--border-default)', fg: m ? 'var(--text-primary)' : 'var(--neutral-600)', cursor: 'pointer',
           toggle: () => this.toggleSession(f.id, cur.start, i) }));
         hint = this.t(d >= n ? 'hintWeekDone' : d ? 'hintUndo' : 'hintStart'); if (d >= n) hintFg = 'var(--neutral-600)';
         periodPos = f.plan.periods ? this.t('weekOf', { n: k + 1, t: f.plan.periods }) : this.t('weekN', { n: k + 1 });
@@ -3143,7 +3143,7 @@ class Component extends DCLogic {
         const md = Math.min(this.matchesDone(f), f.plan.target);
         markers = Array.from({ length: f.plan.target }, (_, i) => { const m = i < md; return { done: m, open: !m, n: String(i + 1), size: '48px', gap: 12,
           aria: this.t(m ? 'matchDone' : 'matchOpen', { n: i + 1 }), pressed: null, disabled: true,
-          bg: m ? 'var(--progress-active)' : 'var(--border-default)', fg: m ? 'var(--text-inverse)' : 'var(--text-secondary)', cursor: 'default', toggle: () => {} }; });
+          bg: m ? 'var(--progress-active)' : 'var(--border-default)', fg: m ? 'var(--text-primary)' : 'var(--text-secondary)', cursor: 'default', toggle: () => {} }; });
         hint = this.t('hintMatch'); periodPos = this.t('nMatches', { n: f.plan.target });
       }
       // Overall Progress: every week of the plan. Past and current weeks show their own recorded target and
