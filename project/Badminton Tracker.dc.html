@@ -3025,7 +3025,7 @@ class Component extends DCLogic {
         return { label: this.tagLabel(t), bg: sel ? selBg : 'var(--filter-pill-bg)', fg: sel ? selFg : full ? 'var(--text-tertiary)' : 'var(--filter-pill-text-default)',
           toggle: () => this.setLog(l => ({ [k]: l[k].includes(t) ? l[k].filter(x => x !== t) : l[k].length >= 3 ? l[k] : [...l[k], t] })) };
       });
-      v.workedTags = tagRow('wt', A, 'var(--action-on-primary)'); v.lostTags = tagRow('lt', 'var(--text-primary)', 'var(--text-inverse)');
+      v.workedTags = tagRow('wt', 'var(--control-selected-bg)', 'var(--control-selected-fg)'); v.lostTags = tagRow('lt', 'var(--control-selected-bg)', 'var(--control-selected-fg)');
       v.hasWt = log.wt.length > 0; v.hasLt = log.lt.length > 0;
       const oppName = [log.opp1, log.opp2].filter(Boolean).map(o => this.first(o)).join(' & ') || this.t('yourOpponent');
       v.oppQ = this.t('oppQ', { name: oppName });
