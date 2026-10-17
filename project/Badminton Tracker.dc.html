@@ -709,7 +709,7 @@ button:disabled{cursor:default !important;}
                     <div style="font:500 17px/1.25 var(--font-sans);overflow-wrap:anywhere;">{{ it.title }}</div>
                     <div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">{{ it.sub }}</div>
                     <sc-if value="{{ it.fromGrow }}" hint-placeholder-val="{{ false }}">
-                      <div style="display:flex;align-items:center;gap:6px;font:400 12px/1 var(--font-sans);color:var(--neutral-600);"><div style="width:6px;height:6px;border-radius:50%;background:var(--action-primary);"></div>{{ tx.fromGrow }}</div>
+                      <div style="display:flex;align-items:center;gap:6px;font:400 12px/1 var(--font-sans);color:var(--neutral-600);"><div style="width:6px;height:6px;border-radius:50%;background:var(--progress-active);"></div>{{ tx.fromGrow }}</div>
                     </sc-if>
                   </div>
                   <div aria-hidden="true" style="display:flex;gap:5px;flex-shrink:0;">
@@ -769,7 +769,7 @@ button:disabled{cursor:default !important;}
             <div style="display:flex;flex-wrap:wrap;gap:12px;max-width: {{ fd.wrapW }};">
               <sc-for list="{{ fd.markers }}" as="m" hint-placeholder-count="3">
                 <button onClick="{{ m.toggle }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.pressed }}" disabled="{{ m.disabled }}" style="width: {{ m.size }};height: {{ m.size }};padding:0;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;transition:background var(--dur-base) var(--ease-out),transform var(--dur-fast) var(--ease-out);font:500 15px/1 var(--font-sans);background: {{ m.bg }};color: {{ m.fg }};cursor: {{ m.cursor }};" style-active="transform:scale(.92);">
-                  <sc-if value="{{ m.done }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></sc-if>
+                  <sc-if value="{{ m.done }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 20 }}" strokeWidth="{{ 2 }}" hint-size="20px,20px"></x-import></sc-if>
                   <sc-if value="{{ m.open }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true">{{ m.n }}</span></sc-if>
                 </button>
               </sc-for>
@@ -791,7 +791,7 @@ button:disabled{cursor:default !important;}
             </div>
             <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;">
               <sc-for list="{{ fd.weeks }}" as="w" hint-placeholder-count="2">
-                <li aria-label="{{ w.aria }}" style="display:grid;grid-template-columns:76px 1fr auto;align-items:center;gap:12px;min-height:52px;">
+                <li aria-label="{{ w.aria }}" style="display:grid;grid-template-columns:76px 1fr auto;align-items:center;gap:12px;min-height:40px;">
                   <div aria-hidden="true" style="font:400 14px/1 var(--font-sans);color: {{ w.labelFg }};">{{ w.label }}</div>
                   <div aria-hidden="true" style="display:flex;gap:6px;">
                     <sc-for list="{{ w.dots }}" as="d" hint-placeholder-count="3"><div style="width:10px;height:10px;border-radius:50%;background: {{ d.bg }};"></div></sc-for>
@@ -3102,7 +3102,7 @@ class Component extends DCLogic {
       const dots = f => {
         const n = f.type === 'practice' ? f.plan.target : f.type === 'match' ? f.plan.target : 0;
         const d = f.type === 'practice' ? doneIn(weekNow(f)) : f.type === 'match' ? Math.min(this.matchesDone(f), f.plan.target) : 0;
-        return Array.from({ length: n }, (_, i) => ({ bg: i < d ? 'var(--action-primary)' : 'var(--border-default)' }));
+        return Array.from({ length: n }, (_, i) => ({ bg: i < d ? 'var(--progress-active)' : 'var(--border-default)' }));
       };
       const sub = f => {
         if (f.status === 'completed') return this.t('focusCompleted');
@@ -3130,20 +3130,20 @@ class Component extends DCLogic {
       const cur = P && !done ? weekNow(f) : null;
       if (cur) {
         const n = cur.target, d = doneIn(cur), k = this.weekIndex(f, day);
-        // 1–4 markers: 64px; 5: 52px on one row; 6–7: 52px over two rows, so every marker stays an easy tap.
-        const size = n <= 4 ? 64 : 52, gap = n === 5 ? 10 : 12;
+        // Markers are 48px, the size of the app's IconButton: 1–5 on one row, 6–7 over two rows.
+        const size = 48, gap = 12;
         if (n >= 6) wrapW = (4 * size + 3 * gap) + 'px';
         markers = cur.marks.map((m, i) => ({ done: m, open: !m, n: String(i + 1), size: size + 'px', gap,
           aria: this.t(m ? 'sessionDone' : 'sessionOpen', { n: i + 1 }), pressed: m, disabled: false,
-          bg: m ? 'var(--action-primary)' : 'var(--border-default)', fg: m ? 'var(--action-on-primary)' : 'var(--neutral-600)', cursor: 'pointer',
+          bg: m ? 'var(--progress-active)' : 'var(--border-default)', fg: m ? 'var(--text-inverse)' : 'var(--neutral-600)', cursor: 'pointer',
           toggle: () => this.toggleSession(f.id, cur.start, i) }));
         hint = this.t(d >= n ? 'hintWeekDone' : d ? 'hintUndo' : 'hintStart'); if (d >= n) hintFg = 'var(--neutral-600)';
         periodPos = f.plan.periods ? this.t('weekOf', { n: k + 1, t: f.plan.periods }) : this.t('weekN', { n: k + 1 });
       } else if (Mt && !done) {
         const md = Math.min(this.matchesDone(f), f.plan.target);
-        markers = Array.from({ length: f.plan.target }, (_, i) => { const m = i < md; return { done: m, open: !m, n: String(i + 1), size: '56px', gap: 12,
+        markers = Array.from({ length: f.plan.target }, (_, i) => { const m = i < md; return { done: m, open: !m, n: String(i + 1), size: '48px', gap: 12,
           aria: this.t(m ? 'matchDone' : 'matchOpen', { n: i + 1 }), pressed: null, disabled: true,
-          bg: m ? 'var(--action-primary)' : 'var(--border-default)', fg: m ? 'var(--action-on-primary)' : 'var(--text-secondary)', cursor: 'default', toggle: () => {} }; });
+          bg: m ? 'var(--progress-active)' : 'var(--border-default)', fg: m ? 'var(--text-inverse)' : 'var(--text-secondary)', cursor: 'default', toggle: () => {} }; });
         hint = this.t('hintMatch'); periodPos = this.t('nMatches', { n: f.plan.target });
       }
       // Overall Progress: every week of the plan. Past and current weeks show their own recorded target and
@@ -3158,10 +3158,10 @@ class Component extends DCLogic {
           const tag = isCur ? this.t('tagNow') : r && r.status === 'skipped' ? this.t('tagSkipped') : past && dd >= target ? this.t('tagDone') : '';
           return { label: this.t('weekN', { n: k + 1 }), labelFg: isCur ? 'var(--text-primary)' : past ? 'var(--neutral-600)' : 'var(--text-secondary)',
             aria: this.t('weekRow', { n: k + 1, d: dd, t: target }) + (tag ? ' · ' + tag : ''),
-            dots: marks.map(m => ({ bg: m ? 'var(--action-primary)' : 'var(--border-default)' })), hasTag: !!tag, tag };
+            dots: marks.map(m => ({ bg: m ? 'var(--progress-active)' : 'var(--border-default)' })), hasTag: !!tag, tag };
         });
       }
-      v.fd = { title: f.title, source: this.t(f.source === 'grow' ? 'addedFromGrow' : 'createdByYou'), srcDot: f.source === 'grow' ? 'var(--action-primary)' : 'var(--text-secondary)',
+      v.fd = { title: f.title, source: this.t(f.source === 'grow' ? 'addedFromGrow' : 'createdByYou'), srcDot: f.source === 'grow' ? 'var(--progress-active)' : 'var(--text-secondary)',
         summary: parts.map((t, i) => ({ t, sep: i > 0 })),
         hasPeriod: markers.length > 0, isMatch: Mt, periodLabel: this.t(P ? 'thisWeek' : 'thisPlan'), periodPos, markers, wrapW, hint, hintFg,
         hasOverall: P && (weeks.length > 1 || !f.plan.periods), weeks, overallMeta: f.plan.periods ? (f.plan.periods === 1 ? this.t('oneWeek') : this.t('weeksN', { n: f.plan.periods })) : this.t('ongoing'),
