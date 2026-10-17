@@ -5,5 +5,9 @@
 --stack-gap:12px;
 --radius-sm:10px;--radius-md:20px;--radius-lg:26px;--radius-xl:34px;--radius-pill:999px;
 --size-icon-btn:56px;--size-action:50px;--size-chip:44px;--size-avatar:58px;
+/* Round icon badge / initials avatar inside tiles and rows: one size, icon 18px inside. */
+--size-icon-badge:40px;
+/* Stroke of an unselected control outline (see --control-outline). */
+--control-outline-width:1px;
 --screen-w:390px;
 }

@@ -88,6 +88,18 @@
       <rect x="62" y="102" width="36" height="14" rx="5" ${f}/>
       <path d="M72 109h16" ${d}/>`,
 
+    // Target with a shuttlecock in the centre
+    'no-focus': () => `
+      <circle cx="76" cy="84" r="34" ${o}/>
+      <circle cx="76" cy="84" r="22" ${o}/>
+      <circle cx="76" cy="84" r="10" ${f}/>
+      <g transform="translate(80 80) rotate(45)">
+        <path d="M-7 0L-12 -24H12L7 0Z" ${o}/>
+        <path d="M-2.5 -1L-4 -23M2.5 -1L4 -23M-9.5 -11H9.5" fill="none" stroke="${LINE}" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M-7 0a7 7 0 0 0 14 0Z" ${f}/>
+      </g>
+      <path d="M118 44l4-4M122 58h5M109 37l1-5" ${l}/>`,
+
     // Signal arcs with a break through them
     'connection-lost': (id) => `
       <mask id="${id}-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="160" height="160">

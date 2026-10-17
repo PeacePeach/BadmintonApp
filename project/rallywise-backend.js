@@ -2,8 +2,10 @@
 // everything Supabase-specific stays in this file.
 //
 // Data shape is the app's own: { onboarded, prefs, players: [{ id, name, level }], matches: [{ id, date, type,
-// partner, opps, games, wt, lt, worked, lost, on }] }. It is stored as rows in profiles / players / matches,
-// each keyed by the signed-in user's id; row-level security keeps every user to their own rows.
+// partner, opps, games, wt, lt, worked, lost, on }], focuses: [Focus], focusPeriods: [FocusPeriod] } (Focus and
+// FocusPeriod are described in the app, above addDays). It is stored as rows in profiles / players / matches /
+// focus_items / focus_periods, each keyed by the signed-in user's id; row-level security keeps every user to their
+// own rows.
 (function () {
   // The page can run its helmet scripts twice. A second copy would make a second Supabase client on the same
   // session storage, and the two would race each other refreshing the token, so keep the first.
@@ -159,6 +161,21 @@
   const fromPlayerRow = r => r.id === 'me' ? { id: r.id, name: r.name, level: r.level } : (r.level ? { id: r.id, name: r.name, level: r.level } : { id: r.id, name: r.name });
   const fromMatchRow = r => ({ id: r.id, date: r.date, type: r.type, partner: r.partner, opps: r.opps || [], games: r.games || [],
     wt: r.wt || [], lt: r.lt || [], worked: r.worked || '', lost: r.lost || '', on: r.opp_notes || '', createdAt: r.created_at });
+  const toFocusRow = (uid, f) => ({ user_id: uid, id: String(f.id), title: String(f.title || '').slice(0, 120), source: f.source === 'grow' ? 'grow' : 'manual',
+    type: f.type, status: f.status === 'completed' ? 'completed' : 'active', completed_by: f.status === 'completed' ? (f.completedBy === 'plan' ? 'plan' : 'user') : null,
+    completed_at: f.status === 'completed' ? f.completedAt || null : null, goal: f.goal || '', cues: f.cues || [],
+    period_type: f.plan.periodType, target_per_period: f.plan.target || 0, total_periods: f.plan.periods || 0, plan_start: f.plan.start,
+    plan_started_at: f.plan.startedAt, ...(f.createdAt ? { created_at: f.createdAt } : {}) });
+  const fromFocusRow = r => ({ id: r.id, title: r.title, source: r.source, type: r.type, status: r.status, completedBy: r.completed_by || null,
+    completedAt: r.completed_at || null, goal: r.goal || '', cues: r.cues || [], createdAt: r.created_at,
+    plan: { periodType: r.period_type, target: r.target_per_period, periods: r.total_periods, start: r.plan_start, startedAt: r.plan_started_at } });
+  const toPeriodRow = (uid, p) => ({ user_id: uid, id: String(p.id), focus_id: String(p.focusId), period_start: p.start, period_end: p.end, target: p.target,
+    marks: p.marks || [], completed: (p.marks || []).filter(Boolean).length, status: p.status });
+  const fromPeriodRow = r => ({ id: r.id, focusId: r.focus_id, start: r.period_start, end: r.period_end, target: r.target,
+    marks: Array.isArray(r.marks) ? r.marks.map(Boolean) : [], status: r.status });
+  // Focus is new; until its migration (20261016000000_focus.sql) is applied, its tables don't exist. The rest of
+  // the app keeps working, and Focus changes stay on this page instead of failing every save.
+  const missingTable = e => !!e && (e.code === 'PGRST205' || e.code === '42P01' || /focus_(items|periods)/.test(String(e.message || '')) && /does not exist|schema cache/i.test(String(e.message || '')));
   const newPrefs = () => ({ reminders: true, insights: true, usage: false });
 
   // What the cloud holds, as JSON strings per row, so a sync sends only what changed.
@@ -167,14 +184,17 @@
     return {
       profile: state ? JSON.stringify({ onboarded: !!state.onboarded, prefs: state.prefs || {} }) : null,
       players: by(state && state.players, p => toPlayerRow('', p)),
-      matches: by(state && state.matches, m => toMatchRow('', m))
+      matches: by(state && state.matches, m => toMatchRow('', m)),
+      focus_items: by(state && state.focuses, f => toFocusRow('', f)),
+      focus_periods: by(state && state.focusPeriods, p => toPeriodRow('', p))
     };
   }
 
   // One per signed-in user. push(state) saves the app's whole data state, sending only the rows that differ from
   // what was last saved. Pushes are serialised; the newest state always wins, and a failed push is retried by
   // the next one because nothing is marked saved until the server accepts it.
-  function createSync(uid, saved) {
+  // Focus items go before their periods (periods reference them); deleting an item also deletes its periods.
+  function createSync(uid, saved, focusReady) {
     const s = { synced: snapshot(saved), want: null, running: null };
     async function apply(state) {
       const db = sb(), next = snapshot(state), cur = s.synced;
@@ -182,7 +202,9 @@
         await run(db.from('profiles').upsert({ user_id: uid, onboarded: !!state.onboarded, prefs: state.prefs || {} }, { onConflict: 'user_id' }));
         cur.profile = next.profile;
       }
-      for (const [table, list, toRow] of [['players', state.players, toPlayerRow], ['matches', state.matches, toMatchRow]]) {
+      const tables = [['players', state.players, toPlayerRow], ['matches', state.matches, toMatchRow]];
+      if (focusReady) tables.push(['focus_items', state.focuses, toFocusRow], ['focus_periods', state.focusPeriods, toPeriodRow]);
+      for (const [table, list, toRow] of tables) {
         const want = next[table], have = cur[table];
         const changed = (list || []).filter(x => want[String(x.id)] !== have[String(x.id)]);
         const gone = Object.keys(have).filter(id => !(id in want));
@@ -210,7 +232,9 @@
         return s.running;
       },
       // True while there are changes the server hasn't accepted yet.
-      get pending() { return !!(s.pending || s.want || s.running); }
+      get pending() { return !!(s.pending || s.want || s.running); },
+      // False when the Focus tables aren't on the server yet (see missingTable).
+      focusReady: !!focusReady
     };
   }
 
@@ -239,19 +263,26 @@
     // (its first sign-in). anonId is the account's analytics id (never the auth id).
     async load(user) {
       const db = sb(), uid = user.id;
-      const [profile, players, matches] = await Promise.all([
+      // Focus rows load alongside; if their tables aren't there yet, Focus starts empty and isn't synced.
+      const focus = async q => { const r = await q; if (r.error && missingTable(r.error)) return null; if (r.error) throw dataFail(r.error); return r.data; };
+      const [profile, players, matches, focusItems, focusPeriods] = await Promise.all([
         run(db.from('profiles').select('onboarded, prefs, anon_id').eq('user_id', uid).maybeSingle()),
         run(db.from('players').select('id, name, level').eq('user_id', uid).order('created_at')),
-        run(db.from('matches').select('*').eq('user_id', uid).order('date', { ascending: false }).order('created_at', { ascending: false }))
+        run(db.from('matches').select('*').eq('user_id', uid).order('date', { ascending: false }).order('created_at', { ascending: false })),
+        focus(db.from('focus_items').select('*').eq('user_id', uid).order('created_at', { ascending: false })),
+        focus(db.from('focus_periods').select('*').eq('user_id', uid).order('period_start'))
       ]);
+      const focusReady = !!(focusItems && focusPeriods);
+      if (!focusReady) console.warn('[rallywise] Focus tables not found; apply supabase/migrations/20261016000000_focus.sql. Focus changes are not saved.');
+      const focuses = focusReady ? focusItems.map(fromFocusRow) : [], periods = focusReady ? focusPeriods.map(fromPeriodRow) : [];
       if (profile) {
-        const state = { onboarded: !!profile.onboarded, prefs: { ...newPrefs(), ...(profile.prefs || {}) }, players: players.map(fromPlayerRow), matches: matches.map(fromMatchRow) };
+        const state = { onboarded: !!profile.onboarded, prefs: { ...newPrefs(), ...(profile.prefs || {}) }, players: players.map(fromPlayerRow), matches: matches.map(fromMatchRow), focuses, focusPeriods: periods };
         if (!state.players.some(p => p.id === 'me')) state.players.unshift({ id: 'me', name: user.name, level: null });
-        return { state, sync: createSync(uid, { onboarded: state.onboarded, prefs: profile.prefs || {}, players: players.map(fromPlayerRow), matches: state.matches }), migrated: false, created: false, anonId: profile.anon_id };
+        return { state, sync: createSync(uid, { onboarded: state.onboarded, prefs: profile.prefs || {}, players: players.map(fromPlayerRow), matches: state.matches, focuses, focusPeriods: periods }, focusReady), migrated: false, created: false, anonId: profile.anon_id };
       }
       const old = legacy(user.email);
-      const state = old || { onboarded: false, prefs: newPrefs(), players: [{ id: 'me', name: user.name, level: null }], matches: [] };
-      const sync = createSync(uid, null);
+      const state = { focuses: [], focusPeriods: [], ...(old || { onboarded: false, prefs: newPrefs(), players: [{ id: 'me', name: user.name, level: null }], matches: [] }) };
+      const sync = createSync(uid, null, focusReady);
       await sync.push(state);
       if (old) try { localStorage.removeItem(LEGACY(user.email)); } catch (e) {}
       const p = await run(db.from('profiles').select('anon_id').eq('user_id', uid).maybeSingle());

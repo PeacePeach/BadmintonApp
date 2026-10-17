@@ -36,7 +36,7 @@ body{margin:0;background:var(--bg-primary);font-family:"Poppins",system-ui,sans-
 a{color:var(--action-primary);} a:hover{color:var(--text-primary);}
 input,textarea,button{font-family:inherit;}
 input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
-.search-field-outline{border:1px solid var(--ghost-button-outline);}
+.search-field-outline{border:var(--control-outline-width) solid var(--control-outline);}
 .search-field-outline:focus-within{border-color:var(--ghost-button-outline-highlight);}
 /* App shell is full-screen by default. The physical iPhone supplies the device corners. */
 html,body,#dc-root,#dc-root>.sc-host{width:100%;height:100%;min-height:100%;background:var(--bg-primary);}
@@ -175,7 +175,7 @@ button:disabled{cursor:default !important;}
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:12px;">
-          <button onClick="{{ toggleAgree }}" aria-label="{{ tx.agreeLabel }}" style="width:24px;height:24px;border-radius:7px;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;background: {{ agreeBg }};border:1.5px solid {{ agreeBorder }};color:var(--action-on-primary);">
+          <button onClick="{{ toggleAgree }}" aria-label="{{ tx.agreeLabel }}" style="width:24px;height:24px;border-radius:7px;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;background: {{ agreeBg }};border:var(--control-outline-width) solid {{ agreeBorder }};color:var(--control-selected-fg);">
             <sc-if value="{{ agree }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 16 }}" hint-size="16px,16px"></x-import></sc-if>
           </button>
           <div style="font:400 15px/1.4 var(--font-sans);">{{ tx.agreeA }}<span style="color:var(--status-win);font-weight:600;">{{ tx.terms }}</span>{{ tx.agreeAnd }}<span style="color:var(--status-win);font-weight:600;">{{ tx.privacyPolicy }}</span>{{ tx.agreeEnd }}</div>
@@ -235,7 +235,7 @@ button:disabled{cursor:default !important;}
     <sc-if value="{{ isResetSent }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Check Email" style="display:flex;flex-direction:column;gap:32px;padding-top:56px;">
         <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:0 12px;">
-          <div style="width:64px;height:64px;border-radius:50%;background:var(--icon-button-bg);color:var(--text-primary);display:flex;align-items:center;justify-content:center;margin-bottom:14px;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="MailCheck" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></div>
+          <div style="width:64px;height:64px;border-radius:50%;background:var(--icon-button-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;margin-bottom:14px;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="MailCheck" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></div>
           <div style="font:600 30px/1.2 var(--font-sans);">{{ tx.checkEmail }}</div>
           <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">{{ tx.resetBodyA }}<span style="color:var(--text-primary);font-weight:500;overflow-wrap:anywhere;">{{ resetEmail }}</span>{{ tx.resetBodyB }}</div>
         </div>
@@ -261,7 +261,7 @@ button:disabled{cursor:default !important;}
               <sc-for list="{{ langOptions }}" as="o" hint-placeholder-count="2">
                 <button role="radio" aria-checked="{{ o.on }}" lang="{{ o.lang }}" onClick="{{ o.select }}" style="height:56px;border-radius:99px;background:var(--surface-primary);border:1.5px solid {{ o.border }};color:var(--text-primary);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 22px;cursor:pointer;" style-active="transform:scale(.98);">
                   <span>{{ o.label }}</span>
-                  <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:1.5px solid {{ o.dotBorder }};color:var(--action-on-primary);">
+                  <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:var(--control-outline-width) solid {{ o.dotBorder }};color:var(--control-selected-fg);">
                     <sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 14 }}" hint-size="14px,14px"></x-import></sc-if>
                   </span>
                 </button>
@@ -288,7 +288,7 @@ button:disabled{cursor:default !important;}
               <sc-for list="{{ obLevels }}" as="o" hint-placeholder-count="4">
                 <button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.select }}" style="height:56px;border-radius:99px;background:var(--surface-primary);border:1.5px solid {{ o.border }};color:var(--text-primary);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 22px;cursor:pointer;" style-active="transform:scale(.98);">
                   <span>{{ o.label }}</span>
-                  <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:1.5px solid {{ o.dotBorder }};color:var(--action-on-primary);">
+                  <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:var(--control-outline-width) solid {{ o.dotBorder }};color:var(--control-selected-fg);">
                     <sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 14 }}" hint-size="14px,14px"></x-import></sc-if>
                   </span>
                 </button>
@@ -300,7 +300,7 @@ button:disabled{cursor:default !important;}
 
       <sc-if value="{{ obReady }}" hint-placeholder-val="{{ false }}">
         <div data-screen-label="Onboarding · Ready" style="min-height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:28px;text-align:center;padding:0 12px 100px;">
-          <div style="width:64px;height:64px;border-radius:50%;background:var(--surface-primary);color:var(--status-win);display:flex;align-items:center;justify-content:center;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
+          <div style="width:64px;height:64px;border-radius:50%;background:var(--surface-primary);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
           <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
             <div style="font:600 30px/1.2 var(--font-sans);">{{ obReadyTitle }}</div>
             <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">{{ tx.obReadyBody }}</div>
@@ -475,7 +475,7 @@ button:disabled{cursor:default !important;}
               <div style="background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:14px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                   <div class="tl zh12" style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);padding-top:6px;">{{ tx.winRate }}</div>
-                  <div style="width:36px;height:36px;border-radius:50%;background:var(--surface-muted);display:flex;align-items:center;justify-content:center;color:var(--neutral-600);flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Trophy" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
+                  <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);display:flex;align-items:center;justify-content:center;color:var(--icon-badge-fg);flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Trophy" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
                 </div>
                 <div style="display:flex;flex-direction:column;gap:10px;">
                   <div style="font:500 52px/.95 var(--font-sans);letter-spacing:-.03em;">{{ pf.win }}</div>
@@ -495,7 +495,7 @@ button:disabled{cursor:default !important;}
                 <div style="flex:1;background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;">
                   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
                     <div class="tl zh12" style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);line-height:1.4;">{{ tx.matchesPlayed }}</div>
-                    <div style="width:36px;height:36px;border-radius:50%;background:var(--surface-muted);display:flex;align-items:center;justify-content:center;color:var(--neutral-600);flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Calendar" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
+                    <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);display:flex;align-items:center;justify-content:center;color:var(--icon-badge-fg);flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Calendar" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
                   </div>
                   <div style="display:flex;flex-direction:column;gap:6px;">
                     <div style="font:500 40px/1 var(--font-sans);">{{ pf.played }}</div>
@@ -505,7 +505,7 @@ button:disabled{cursor:default !important;}
                 <div style="flex:1;background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;">
                   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
                     <div class="tl zh12" style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);line-height:1.4;">{{ tx.recentRecord }}</div>
-                    <div style="width:36px;height:36px;border-radius:50%;background:var(--surface-muted);display:flex;align-items:center;justify-content:center;color:var(--neutral-600);flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ListChecks" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
+                    <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);display:flex;align-items:center;justify-content:center;color:var(--icon-badge-fg);flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ListChecks" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
                   </div>
                   <div style="display:flex;flex-direction:column;gap:6px;">
                     <div style="font:500 40px/1 var(--font-sans);">{{ pf.record }}</div>
@@ -534,7 +534,7 @@ button:disabled{cursor:default !important;}
 
             <sc-for list="{{ pf.people }}" as="p" hint-placeholder-count="3">
                 <div onClick="{{ p.open }}" style="background:var(--surface-primary);border-radius:26px;display:flex;align-items:center;gap:14px;padding:16px 20px 16px 16px;cursor:pointer;">
-                  <div style="width:44px;height:44px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;font:500 14px/1 var(--font-sans);flex-shrink:0;">{{ p.initials }}</div>
+                  <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);flex-shrink:0;">{{ p.initials }}</div>
                   <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;">
                     <div class="tl zh12" style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);">{{ p.role }}</div>
                     <div style="font:500 16px/1.1 var(--font-sans);">{{ p.name }}</div>
@@ -579,12 +579,15 @@ button:disabled{cursor:default !important;}
                       <div style="font:400 13px/1.4 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">{{ b.evidence }}</div>
                     </div>
                     <sc-if value="{{ b.action }}" hint-placeholder-val="{{ true }}">
-                    <div style="height:1px;background:var(--surface-muted);"></div>
+                    <div style="height:1px;background:var(--divider);"></div>
                     <div style="display:flex;flex-direction:column;gap:6px;">
                       <div style="font:400 12px/1 var(--font-sans);color:var(--status-win);">{{ tx.tryNext }}</div>
                       <div style="font:400 14px/1.4 var(--font-sans);text-wrap:pretty;">{{ b.action }}</div>
                     </div>
                     </sc-if>
+                    <button onClick="{{ b.focus }}" style="height:44px;border:1px solid {{ b.fBorder }};border-radius:99px;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 16px 0 12px;font:500 12px/1 var(--font-sans);white-space:nowrap;cursor:pointer;background: {{ b.fBg }};color: {{ b.fFg }};" style-active="transform:scale(.96);">
+                      <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ b.fIcon }}" size="{{ 16 }}" hint-size="16px,16px"></x-import>{{ b.fLabel }}
+                    </button>
                   </div>
                 </sc-for>
               </div>
@@ -597,14 +600,14 @@ button:disabled{cursor:default !important;}
               <sc-for list="{{ grow.strengths }}" as="k" hint-placeholder-count="2">
                 <div style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;">
                   <div style="display:flex;align-items:center;gap:14px;">
-                    <div style="width:40px;height:40px;border-radius:50%;background:var(--surface-muted);color:var(--status-win);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
+                    <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
                     <div style="display:flex;flex-direction:column;gap:5px;min-width:0;">
                       <div style="font:500 16px/1.2 var(--font-sans);">{{ k.name }}</div>
                       <div style="font:400 13px/1.35 var(--font-sans);color:var(--text-secondary);">{{ k.signal }}</div>
                     </div>
                   </div>
                   <sc-if value="{{ k.action }}" hint-placeholder-val="{{ true }}">
-                  <div style="height:1px;background:var(--surface-muted);"></div>
+                  <div style="height:1px;background:var(--divider);"></div>
                   <div style="display:flex;flex-direction:column;gap:6px;">
                     <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.keepDoing }}</div>
                     <div style="font:400 15px/1.45 var(--font-sans);text-wrap:pretty;">{{ k.action }}</div>
@@ -621,14 +624,14 @@ button:disabled{cursor:default !important;}
               <sc-for list="{{ grow.opps }}" as="o" hint-placeholder-count="2">
                 <div onClick="{{ o.open }}" style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;cursor:pointer;">
                   <div style="display:flex;align-items:center;gap:14px;">
-                    <div style="width:40px;height:40px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);flex-shrink:0;">{{ o.initials }}</div>
+                    <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);flex-shrink:0;">{{ o.initials }}</div>
                     <div style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:0;">
                       <div style="font:500 16px/1.2 var(--font-sans);">{{ o.name }}</div>
                       <div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">{{ o.record }}</div>
                     </div>
                     <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 24 }}" color="var(--text-secondary)" hint-size="24px,24px"></x-import>
                   </div>
-                  <div style="height:1px;background:var(--surface-muted);"></div>
+                  <div style="height:1px;background:var(--divider);"></div>
                   <div style="display:flex;flex-direction:column;gap:6px;">
                     <div style="font:400 12px/1 var(--font-sans);color:var(--status-win);">{{ tx.gamePlan }}</div>
                     <div style="font:400 15px/1.45 var(--font-sans);text-wrap:pretty;">{{ o.plan }}</div>
@@ -644,13 +647,13 @@ button:disabled{cursor:default !important;}
               <sc-for list="{{ grow.doubles }}" as="d" hint-placeholder-count="2">
                 <div style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;">
                   <div style="display:flex;align-items:flex-start;gap:14px;">
-                    <div style="width:40px;height:40px;border-radius:50%;background:var(--surface-muted);color:var(--neutral-600);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Users" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
+                    <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Users" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
                     <div style="display:flex;flex-direction:column;gap:5px;min-width:0;">
                       <div style="font:500 16px/1.2 var(--font-sans);">{{ d.name }}</div>
                       <div style="font:400 13px/1.4 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">{{ d.pattern }}</div>
                     </div>
                   </div>
-                  <div style="height:1px;background:var(--surface-muted);"></div>
+                  <div style="height:1px;background:var(--divider);"></div>
                   <div style="display:flex;flex-direction:column;gap:6px;">
                     <div style="font:400 12px/1 var(--font-sans);color: {{ d.labelFg }};">{{ d.label }}</div>
                     <div style="font:400 15px/1.45 var(--font-sans);text-wrap:pretty;">{{ d.action }}</div>
@@ -660,6 +663,171 @@ button:disabled{cursor:default !important;}
             </div>
             </sc-if>
           </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- FOCUS -->
+    <sc-if value="{{ isFocus }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Focus" style="display:flex;flex-direction:column;gap:30px;">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="font:600 32px/1.2 var(--font-sans);">{{ tx.focus }}</div>
+            <div style="display:flex;gap:8px;">
+              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Plus" size="{{ 48 }}" label="{{ tx.newFocus }}" onClick="{{ newFocus }}" hint-size="48px,48px"></x-import>
+              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" size="{{ 48 }}" label="{{ tx.menu }}" onClick="{{ toggleMenu }}" hint-size="48px,48px"></x-import>
+            </div>
+          </div>
+          <div style="font:400 15px/1.4 var(--font-sans);color:var(--text-secondary);">{{ tx.focusSub }}</div>
+        </div>
+        <sc-if value="{{ blocked }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ blockedState.illustration }}" title="{{ blockedState.title }}" body="{{ blockedState.body }}" actionLabel="{{ blockedState.actionLabel }}" onAction="{{ blockedState.onAction }}" hint-size="350px,330px"></x-import>
+        </sc-if>
+        <sc-if value="{{ fl.loading }}" hint-placeholder-val="{{ false }}">
+          <div aria-busy="true" style="display:flex;flex-direction:column;gap:10px;">
+            <sc-for list="{{ skel2 }}" as="k" hint-placeholder-count="2">
+              <div aria-hidden="true" style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:10px;">
+                <div class="skel" style="height:17px;width:55%;"></div>
+                <div class="skel" style="height:13px;width:40%;"></div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ fl.empty }}" hint-placeholder-val="{{ false }}">
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ fl.empty.illustration }}" title="{{ fl.empty.title }}" body="{{ fl.empty.body }}" actionLabel="{{ fl.empty.actionLabel }}" onAction="{{ fl.empty.onAction }}" hint-size="350px,330px"></x-import>
+        </sc-if>
+        <sc-if value="{{ fl.hasActive }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;">
+              <div style="font:500 19px/1.2 var(--font-sans);">{{ tx.focusActive }}</div>
+              <div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">{{ fl.activeCount }}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <sc-for list="{{ fl.active }}" as="it" hint-placeholder-count="3">
+                <button onClick="{{ it.open }}" style="width:100%;text-align:left;border:none;color:var(--text-primary);background:var(--surface-primary);border-radius:26px;padding:18px 16px 18px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;" style-active="transform:scale(.985);">
+                  <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-width:0;">
+                    <div style="font:500 17px/1.25 var(--font-sans);overflow-wrap:anywhere;">{{ it.title }}</div>
+                    <div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">{{ it.sub }}</div>
+                    <sc-if value="{{ it.fromGrow }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;align-items:center;gap:6px;font:400 12px/1 var(--font-sans);color:var(--neutral-600);"><div style="width:6px;height:6px;border-radius:50%;background:var(--progress-active);"></div>{{ tx.fromGrow }}</div>
+                    </sc-if>
+                  </div>
+                  <div aria-hidden="true" style="display:flex;gap:5px;flex-shrink:0;">
+                    <sc-for list="{{ it.dots }}" as="d" hint-placeholder-count="3"><div style="width:9px;height:9px;border-radius:50%;background: {{ d.bg }};"></div></sc-for>
+                  </div>
+                  <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 24 }}" color="var(--text-secondary)" hint-size="24px,24px"></x-import>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ fl.hasDone }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <button onClick="{{ fl.toggleDone }}" aria-expanded="{{ fl.showDone }}" style="height:48px;border:none;background:transparent;padding:0;display:flex;align-items:center;justify-content:space-between;cursor:pointer;color:var(--text-secondary);">
+              <span style="font:500 15px/1 var(--font-sans);">{{ fl.doneLabel }}</span>
+              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ fl.doneIcon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import>
+            </button>
+            <sc-if value="{{ fl.showDone }}" hint-placeholder-val="{{ false }}">
+              <sc-for list="{{ fl.done }}" as="it" hint-placeholder-count="1">
+                <button onClick="{{ it.open }}" style="width:100%;text-align:left;min-height:60px;border:none;border-radius:99px;background:var(--surface-primary);display:flex;align-items:center;gap:12px;padding:10px 20px 10px 10px;cursor:pointer;color:var(--text-primary);">
+                  <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
+                  <div style="flex:1;min-width:0;font:400 15px/1.3 var(--font-sans);color:var(--neutral-600);overflow-wrap:anywhere;">{{ it.title }}</div>
+                  <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.focusCompleted }}</div>
+                </button>
+              </sc-for>
+            </sc-if>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- FOCUS DETAIL: act on the current period, see the overall plan. -->
+    <sc-if value="{{ fd }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Focus Detail" style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;flex-direction:column;gap:22px;margin-bottom:20px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
+            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" size="{{ 48 }}" label="{{ tx.focusActions }}" onClick="{{ toggleMenu }}" hint-size="48px,48px"></x-import>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:center;gap:6px;font:400 13px/1 var(--font-sans);color:var(--text-secondary);"><div style="width:6px;height:6px;border-radius:50%;background: {{ fd.srcDot }};"></div>{{ fd.source }}</div>
+            <h1 style="margin:0;font:600 32px/1.2 var(--font-sans);text-wrap:balance;overflow-wrap:anywhere;">{{ fd.title }}</h1>
+            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;font:400 15px/1.3 var(--font-sans);color:var(--neutral-600);">
+              <sc-for list="{{ fd.summary }}" as="p" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:8px;"><sc-if value="{{ p.sep }}" hint-placeholder-val="{{ false }}"><div aria-hidden="true" style="width:3px;height:3px;border-radius:50%;background:var(--text-secondary);"></div></sc-if>{{ p.t }}</div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <sc-if value="{{ fd.hasPeriod }}" hint-placeholder-val="{{ true }}">
+          <section data-screen-label="Current Period" aria-labelledby="fd-period" style="background:var(--surface-primary);border-radius:26px;padding:24px 22px;display:flex;flex-direction:column;gap:24px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+              <h2 id="fd-period" style="margin:0;font:500 19px/1.2 var(--font-sans);">{{ fd.periodLabel }}</h2>
+              <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ fd.periodPos }}</div>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:12px;max-width: {{ fd.wrapW }};">
+              <sc-for list="{{ fd.markers }}" as="m" hint-placeholder-count="3">
+                <button onClick="{{ m.toggle }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.pressed }}" disabled="{{ m.disabled }}" style="width: {{ m.size }};height: {{ m.size }};padding:0;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;transition:background var(--dur-base) var(--ease-out),transform var(--dur-fast) var(--ease-out);font:500 15px/1 var(--font-sans);background: {{ m.bg }};color: {{ m.fg }};cursor: {{ m.cursor }};" style-active="transform:scale(.92);">
+                  <sc-if value="{{ m.done }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 20 }}" strokeWidth="{{ 2 }}" hint-size="20px,20px"></x-import></sc-if>
+                  <sc-if value="{{ m.open }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true">{{ m.n }}</span></sc-if>
+                </button>
+              </sc-for>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:20px;">
+              <div aria-live="polite" style="font:400 13px/1.35 var(--font-sans);color: {{ fd.hintFg }};">{{ fd.hint }}</div>
+              <sc-if value="{{ fd.isMatch }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ fd.logMatch }}" style="height:44px;padding:0 18px;border:none;border-radius:99px;background:var(--border-default);color:var(--text-primary);font:500 13px/1 var(--font-sans);cursor:pointer;flex-shrink:0;" style-active="transform:scale(.97);">{{ tx.logMatch }}</button>
+              </sc-if>
+            </div>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{ fd.hasOverall }}" hint-placeholder-val="{{ true }}">
+          <section data-screen-label="Overall Progress" aria-labelledby="fd-overall" style="background:var(--surface-primary);border-radius:26px;padding:22px 22px 10px;display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;">
+              <h2 id="fd-overall" style="margin:0;font:500 19px/1.2 var(--font-sans);">{{ tx.overallProgress }}</h2>
+              <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ fd.overallMeta }}</div>
+            </div>
+            <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;padding:4px 0 12px;">
+              <sc-for list="{{ fd.weeks }}" as="w" hint-placeholder-count="2">
+                <li aria-label="{{ w.aria }}" style="display:grid;grid-template-columns:76px 1fr auto;align-items:center;gap:12px;min-height:28px;">
+                  <div aria-hidden="true" style="font:400 14px/1 var(--font-sans);color: {{ w.labelFg }};">{{ w.label }}</div>
+                  <div aria-hidden="true" style="display:flex;gap:6px;">
+                    <sc-for list="{{ w.dots }}" as="d" hint-placeholder-count="3"><div style="width:10px;height:10px;border-radius:50%;background: {{ d.bg }};"></div></sc-for>
+                  </div>
+                  <div aria-hidden="true" style="min-width:44px;display:flex;justify-content:flex-end;">
+                    <sc-if value="{{ w.hasTag }}" hint-placeholder-val="{{ false }}">
+                      <div class="zh12" style="height:24px;padding:0 10px;border-radius:99px;display:flex;align-items:center;font:500 11px/1 var(--font-sans);background:var(--border-default);color:var(--neutral-600);">{{ w.tag }}</div>
+                    </sc-if>
+                  </div>
+                </li>
+              </sc-for>
+            </ul>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{ fd.hasCues }}" hint-placeholder-val="{{ true }}">
+          <section data-screen-label="What to Work On" aria-labelledby="fd-work" style="background:var(--surface-primary);border-radius:26px;padding:22px;display:flex;flex-direction:column;gap:14px;">
+            <h2 id="fd-work" style="margin:0;font:500 19px/1.2 var(--font-sans);">{{ tx.whatToWorkOn }}</h2>
+            <sc-if value="{{ fd.hasGoal }}" hint-placeholder-val="{{ true }}">
+              <div style="font:400 15px/1.5 var(--font-sans);color:var(--neutral-600);text-wrap:pretty;white-space:pre-line;">{{ fd.goal }}</div>
+            </sc-if>
+            <sc-if value="{{ fd.hasCueList }}" hint-placeholder-val="{{ true }}">
+            <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;">
+              <sc-for list="{{ fd.cues }}" as="c" hint-placeholder-count="2">
+                <li style="display:flex;align-items:flex-start;gap:12px;">
+                  <div aria-hidden="true" style="width:5px;height:5px;border-radius:50%;background:var(--text-secondary);margin-top:9px;flex-shrink:0;"></div>
+                  <div style="font:400 15px/1.45 var(--font-sans);color:var(--neutral-600);">{{ c.t }}</div>
+                </li>
+              </sc-for>
+            </ul>
+            </sc-if>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{ fd.showComplete }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ fd.complete }}" style="align-self:center;margin-top:12px;height:52px;padding:0 28px;border:var(--control-outline-width) solid var(--control-outline);border-radius:999px;background:transparent;color:var(--text-primary);font:500 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.97);">{{ tx.markComplete }}</button>
         </sc-if>
       </div>
     </sc-if>
@@ -685,8 +853,8 @@ button:disabled{cursor:default !important;}
           <div style="display:flex;flex-direction:column;gap:12px;">
             <sc-for list="{{ typeOptions }}" as="o" hint-placeholder-count="2">
               <div onClick="{{ o.select }}" style="background:var(--surface-primary);border-radius:26px;padding:24px 22px;display:flex;align-items:center;gap:18px;cursor:pointer;border:1.5px solid {{ o.border }};">
-                <div style="width:60px;height:60px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;">
-                  <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ o.icon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import>
+                <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;">
+                  <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ o.icon }}" size="{{ 18 }}" hint-size="18px,18px"></x-import>
                 </div>
                 <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
                   <div style="font:500 22px/1.2 var(--font-sans);">{{ o.label }}</div>
@@ -728,7 +896,7 @@ button:disabled{cursor:default !important;}
                 </div>
                 <sc-if value="{{ canAddNew }}" hint-placeholder-val="{{ false }}">
                   <div onClick="{{ addNew }}" style="height:56px;border-radius:99px;border:1px dashed var(--ghost-button-outline);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;">
-                    <div style="width:40px;height:40px;border-radius:50%;background:transparent;border:1px solid var(--ghost-button-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;">
+                    <div style="width:40px;height:40px;border-radius:50%;background:transparent;border:var(--control-outline-width) solid var(--control-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;">
                       <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import>
                     </div>
                     <div style="font:500 15px/1 var(--font-sans);">{{ addNewLabel }}</div>
@@ -737,7 +905,7 @@ button:disabled{cursor:default !important;}
                 <div style="display:flex;flex-direction:column;gap:8px;">
                   <sc-for list="{{ pickList }}" as="p" hint-placeholder-count="5">
                     <div onClick="{{ p.pick }}" style="height:60px;border-radius:99px;background:var(--surface-primary);display:flex;align-items:center;gap:12px;padding:0 10px;cursor:pointer;" style-active="transform:scale(.98);">
-                      <div style="width:42px;height:42px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
+                      <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
                       <div style="flex:1;font:500 15px/1 var(--font-sans);">{{ p.name }}</div>
                       <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding-right:12px;">{{ p.sub }}</div>
                     </div>
@@ -785,18 +953,18 @@ button:disabled{cursor:default !important;}
                   </div>
                 </div>
                 <div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface-muted);border-radius:99px;padding:6px;">
-                  <button onClick="{{ g.dec }}" aria-label="{{ tx.decrease }}" style="width:52px;height:52px;border-radius:50%;background:transparent;border:1px solid var(--ghost-button-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;">
+                  <button onClick="{{ g.dec }}" aria-label="{{ tx.decrease }}" style="width:52px;height:52px;border-radius:50%;background:transparent;border:var(--control-outline-width) solid var(--control-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;">
                     <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Minus" size="{{ 24 }}" hint-size="24px,24px"></x-import>
                   </button>
                   <div style="font:400 13px/1.3 var(--font-sans);color:var(--neutral-600);text-align:center;">{{ g.loserLabel }}</div>
-                  <button onClick="{{ g.inc }}" aria-label="{{ tx.increase }}" style="width:52px;height:52px;border-radius:50%;background:transparent;border:1px solid var(--ghost-button-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;">
+                  <button onClick="{{ g.inc }}" aria-label="{{ tx.increase }}" style="width:52px;height:52px;border-radius:50%;background:transparent;border:var(--control-outline-width) solid var(--control-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;">
                     <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import>
                   </button>
                 </div>
               </div>
             </sc-for>
             <sc-if value="{{ canAddGame }}" hint-placeholder-val="{{ true }}">
-              <button onClick="{{ addGame }}" style="height:56px;border-radius:99px;background:transparent;border:1px solid var(--ghost-button-outline);color:var(--text-primary);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;">
+              <button onClick="{{ addGame }}" style="height:56px;border-radius:99px;background:transparent;border:var(--control-outline-width) solid var(--control-outline);color:var(--text-primary);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;">
                 <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 18 }}" hint-size="18px,18px"></x-import>
                 {{ addGameLabel }}
               </button>
@@ -894,7 +1062,7 @@ button:disabled{cursor:default !important;}
             <div aria-hidden="true" style="background:var(--surface-primary);border-radius:26px;padding:8px 20px;display:flex;flex-direction:column;">
               <div style="padding:12px 0 8px;"><div class="skel" style="height:12px;width:30%;"></div></div>
               <sc-for list="{{ skel3 }}" as="k" hint-placeholder-count="3">
-                <div style="display:grid;grid-template-columns:1fr 64px 64px;align-items:center;padding:12px 0;border-top:1px solid var(--border-default);">
+                <div style="display:grid;grid-template-columns:1fr 64px 64px;align-items:center;padding:12px 0;border-top:1px solid var(--divider);">
                   <div class="skel" style="height:15px;width:40%;"></div>
                   <div class="skel" style="height:24px;width:32px;justify-self:center;"></div>
                   <div class="skel" style="height:24px;width:32px;justify-self:center;"></div>
@@ -918,10 +1086,10 @@ button:disabled{cursor:default !important;}
               <div style="font:500 16px/1 var(--font-sans);overflow-wrap:anywhere;">{{ p.name }}</div>
             </div>
           </sc-for>
-          <div style="height:1px;background:var(--border-default);margin:4px 0;"></div>
+          <div style="height:1px;background:var(--divider);margin:4px 0;"></div>
           <sc-for list="{{ detail.sideB }}" as="p" hint-placeholder-count="1">
             <div onClick="{{ p.open }}" style="display:flex;align-items:center;gap:12px;cursor:pointer;">
-              <div style="width:40px;height:40px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
+              <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
               <div style="font:500 16px/1 var(--font-sans);flex:1;overflow-wrap:anywhere;">{{ p.name }}</div>
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 24 }}" color="var(--grey-400)" hint-size="24px,24px"></x-import>
             </div>
@@ -932,7 +1100,7 @@ button:disabled{cursor:default !important;}
             <div>{{ tx.gameCol }}</div><div style="text-align:center;">{{ detail.aShort }}</div><div style="text-align:center;">{{ tx.oppCol }}</div>
           </div>
           <sc-for list="{{ detail.rows }}" as="r" hint-placeholder-count="2">
-            <div style="display:grid;grid-template-columns:1fr 64px 64px;align-items:center;padding:12px 0;border-top:1px solid var(--border-default);">
+            <div style="display:grid;grid-template-columns:1fr 64px 64px;align-items:center;padding:12px 0;border-top:1px solid var(--divider);">
               <div style="font:400 15px/1 var(--font-sans);color:var(--neutral-600);">{{ r.label }}</div>
               <div style="text-align:center;font:500 24px/1 var(--font-sans);color: {{ r.aFg }};">{{ r.a }}</div>
               <div style="text-align:center;font:500 24px/1 var(--font-sans);color: {{ r.bFg }};">{{ r.b }}</div>
@@ -995,7 +1163,7 @@ button:disabled{cursor:default !important;}
         </div>
         <sc-if value="{{ canAddNew }}" hint-placeholder-val="{{ false }}">
           <div onClick="{{ addPlayerOnly }}" style="height:56px;border-radius:99px;border:1px dashed var(--ghost-button-outline);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;">
-            <div style="width:40px;height:40px;border-radius:50%;background:transparent;border:1px solid var(--ghost-button-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;">
+            <div style="width:40px;height:40px;border-radius:50%;background:transparent;border:var(--control-outline-width) solid var(--control-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;">
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import>
             </div>
             <div style="font:500 15px/1 var(--font-sans);">{{ addNameLabel }}</div>
@@ -1004,7 +1172,7 @@ button:disabled{cursor:default !important;}
         <div style="display:flex;flex-direction:column;gap:8px;">
           <sc-for list="{{ playerList }}" as="p" hint-placeholder-count="6">
             <div onClick="{{ p.open }}" style="min-height:64px;border-radius:99px;background:var(--surface-primary);display:flex;align-items:center;gap:12px;padding:10px;cursor:pointer;">
-              <div style="width:44px;height:44px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;font:500 14px/1 var(--font-sans);flex-shrink:0;">{{ p.initials }}</div>
+              <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 14px/1 var(--font-sans);flex-shrink:0;">{{ p.initials }}</div>
               <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;">
                 <div style="font:500 15px/1.2 var(--font-sans);">{{ p.name }}</div>
                 <div style="font:400 12px/1.2 var(--font-sans);color:var(--text-secondary);">{{ p.sub }}</div>
@@ -1029,7 +1197,7 @@ button:disabled{cursor:default !important;}
           <div style="width:48px;"></div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
-          <div style="width:88px;height:88px;border-radius:50%;background:var(--surface-muted);display:flex;align-items:center;justify-content:center;font:500 28px/1 var(--font-sans);">{{ profile.initials }}</div>
+          <div style="width:88px;height:88px;border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 28px/1 var(--font-sans);">{{ profile.initials }}</div>
           <div style="font:600 26px/1.2 var(--font-sans);">{{ profile.name }}</div>
           <div style="font:400 14px/1 var(--font-sans);color:var(--text-secondary);">{{ profile.sub }}</div>
         </div>
@@ -1076,7 +1244,7 @@ button:disabled{cursor:default !important;}
         <div style="display:flex;flex-direction:column;gap:8px;">
           <sc-for list="{{ settingsRows }}" as="r" hint-placeholder-count="4">
             <button onClick="{{ r.open }}" style="min-height:64px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);display:flex;align-items:center;gap:12px;padding:10px;cursor:pointer;text-align:left;" style-active="transform:scale(.98);">
-              <div style="width:44px;height:44px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ r.icon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
+              <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--icon-badge-fg);"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ r.icon }}" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
               <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;">
                 <div style="font:500 15px/1.2 var(--font-sans);">{{ r.label }}</div>
                 <div style="font:400 12px/1.2 var(--font-sans);color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.sub }}</div>
@@ -1100,7 +1268,7 @@ button:disabled{cursor:default !important;}
           <div style="font:600 28px/1.2 var(--font-sans);">{{ tx.profile }}</div>
         </div>
         <div style="display:flex;justify-content:center;">
-          <div aria-hidden="true" style="width:88px;height:88px;border-radius:50%;background:var(--surface-muted);display:flex;align-items:center;justify-content:center;font:500 28px/1 var(--font-sans);color:var(--text-secondary);"><sc-if value="{{ meInitials }}" hint-placeholder-val="{{ true }}"><span style="color:var(--text-primary);">{{ meInitials }}</span></sc-if><sc-if value="{{ noInitials }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="UserRound" size="{{ 24 }}" hint-size="24px,24px"></x-import></sc-if></div>
+          <div aria-hidden="true" style="width:88px;height:88px;border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 28px/1 var(--font-sans);color:var(--text-secondary);"><sc-if value="{{ meInitials }}" hint-placeholder-val="{{ true }}"><span style="color:var(--text-primary);">{{ meInitials }}</span></sc-if><sc-if value="{{ noInitials }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="UserRound" size="{{ 24 }}" hint-size="24px,24px"></x-import></sc-if></div>
         </div>
         <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
           <div role="alert" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:22px;background:var(--surface-muted);">
@@ -1119,7 +1287,7 @@ button:disabled{cursor:default !important;}
             <sc-for list="{{ meLevels }}" as="o" hint-placeholder-count="4">
               <button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.select }}" style="height:56px;border-radius:99px;background:var(--surface-primary);border:1.5px solid {{ o.border }};color:var(--text-primary);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 22px;cursor:pointer;" style-active="transform:scale(.98);">
                 <span>{{ o.label }}</span>
-                <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:1.5px solid {{ o.dotBorder }};color:var(--action-on-primary);">
+                <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:var(--control-outline-width) solid {{ o.dotBorder }};color:var(--control-selected-fg);">
                   <sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 14 }}" hint-size="14px,14px"></x-import></sc-if>
                 </span>
               </button>
@@ -1142,14 +1310,14 @@ button:disabled{cursor:default !important;}
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;">
           <div style="min-height:64px;border-radius:99px;background:var(--surface-primary);display:flex;align-items:center;gap:12px;padding:10px;">
-            <div style="width:44px;height:44px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Mail" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
+            <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--icon-badge-fg);"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Mail" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
             <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;">
               <div style="font:400 12px/1.2 var(--font-sans);color:var(--text-secondary);">{{ tx.email }}</div>
               <div style="font:500 15px/1.2 var(--font-sans);overflow-wrap:anywhere;">{{ acctEmail }}</div>
             </div>
           </div>
           <button onClick="{{ changePassword }}" style="min-height:64px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);display:flex;align-items:center;gap:12px;padding:10px;cursor:pointer;text-align:left;" style-active="transform:scale(.98);">
-            <div style="width:44px;height:44px;border-radius:50%;background:var(--border-default);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="KeyRound" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
+            <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--icon-badge-fg);"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="KeyRound" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
             <div style="font:500 15px/1.2 var(--font-sans);flex:1;min-width:0;">{{ tx.changePassword }}</div>
             <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 24 }}" color="var(--grey-400)" style="margin-right:10px" hint-size="24px,24px"></x-import>
           </button>
@@ -1210,7 +1378,7 @@ button:disabled{cursor:default !important;}
                 <div style="font:500 15px/1.2 var(--font-sans);">{{ r.label }}</div>
                 <div style="font:400 12px/1.3 var(--font-sans);color:var(--text-secondary);">{{ r.sub }}</div>
               </div>
-              <span style="width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ r.bg }};border:1.5px solid {{ r.border }};color:var(--action-on-primary);">
+              <span style="width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ r.bg }};border:var(--control-outline-width) solid {{ r.border }};color:var(--control-selected-fg);">
                 <sc-if value="{{ r.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 16 }}" hint-size="16px,16px"></x-import></sc-if>
               </span>
             </button>
@@ -1230,7 +1398,7 @@ button:disabled{cursor:default !important;}
           <sc-for list="{{ langOptions }}" as="o" hint-placeholder-count="2">
             <button role="radio" aria-checked="{{ o.on }}" lang="{{ o.lang }}" onClick="{{ o.select }}" style="height:56px;border-radius:99px;background:var(--surface-primary);border:1.5px solid {{ o.border }};color:var(--text-primary);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 22px;cursor:pointer;" style-active="transform:scale(.98);">
               <span>{{ o.label }}</span>
-              <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:1.5px solid {{ o.dotBorder }};color:var(--action-on-primary);">
+              <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:var(--control-outline-width) solid {{ o.dotBorder }};color:var(--control-selected-fg);">
                 <sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 14 }}" hint-size="14px,14px"></x-import></sc-if>
               </span>
             </button>
@@ -1285,8 +1453,8 @@ button:disabled{cursor:default !important;}
 
   <!-- Tabs -->
   <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
-    <div style="position:absolute;left:0;right:0;bottom:0;height:92px;padding:10px 40px 28px;background:var(--bg-primary);border-top:1px solid var(--bottom-nav-outline);display:grid;grid-template-columns:1fr 1fr;">
-      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="2">
+    <div style="position:absolute;left:0;right:0;bottom:0;height:92px;padding:10px 16px 28px;background:var(--bg-primary);border-top:1px solid var(--bottom-nav-outline);display:grid;grid-template-columns:1fr 1fr 1fr;">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
         <div onClick="{{ t.select }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;color: {{ t.fg }};">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ t.icon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import>
           <div style="font:500 12px/1 var(--font-sans);">{{ t.label }}</div>
@@ -1362,6 +1530,93 @@ button:disabled{cursor:default !important;}
     </div>
   </sc-if>
 
+  <!-- Focus sheet: New Focus (+), Add to Focus (Grow's Build Next) and Edit Focus. -->
+  <sc-if value="{{ hasSheet }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ sh.close }}" style="position:absolute;inset:0;background:rgba(0,0,0,.55);"></div>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="focus-sheet-title" data-screen-label="{{ sh.heading }}" style="position:absolute;left:0;right:0;bottom:0;max-height:90%;overflow-y:auto;background:var(--bg-primary);border-radius:34px 34px 0 0;padding:12px 20px 34px;display:flex;flex-direction:column;gap:32px;">
+      <div aria-hidden="true" style="width:40px;height:5px;border-radius:99px;background:var(--border-default);align-self:center;"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:-8px;">
+        <h2 id="focus-sheet-title" style="margin:0;font:600 28px/1.2 var(--font-sans);">{{ sh.heading }}</h2>
+        <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="X" size="{{ 48 }}" label="{{ tx.close }}" onClick="{{ sh.close }}" hint-size="48px,48px"></x-import>
+      </div>
+      <sc-if value="{{ sh.isGrow }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="font:500 15px/1.3 var(--font-sans);overflow-wrap:anywhere;">{{ sh.title }}</div>
+          <div style="font:400 13px/1.4 var(--font-sans);color:var(--text-secondary);">{{ sh.goal }}</div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ sh.isNew }}" hint-placeholder-val="{{ false }}">
+        <label style="display:flex;flex-direction:column;gap:12px;">
+          <span style="font:500 15px/1.3 var(--font-sans);">{{ sh.nameQ }}</span>
+          <textarea value="{{ sh.title }}" onChange="{{ sh.onTitle }}" rows="3" maxlength="120" placeholder="{{ tx.focusNamePh }}" style="background:var(--input-field-bg);border:1px solid var(--input-field-outline);outline:none;border-radius:22px;padding:14px 18px;color:var(--text-primary);font:400 15px/1.5 var(--font-sans);resize:none;"></textarea>
+        </label>
+      </sc-if>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div id="focus-how" style="font:500 15px/1.3 var(--font-sans);">{{ tx.howQ }}</div>
+        <div role="radiogroup" aria-labelledby="focus-how" style="display:flex;flex-direction:column;gap:8px;">
+          <sc-for list="{{ sh.types }}" as="o" hint-placeholder-count="3">
+            <button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.select }}" style="height:60px;border-radius:99px;background:var(--surface-primary);border:1.5px solid {{ o.border }};color:var(--text-primary);display:flex;align-items:center;gap:12px;padding:0 18px 0 10px;cursor:pointer;" style-active="transform:scale(.98);">
+              <span style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--icon-badge-fg);"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ o.icon }}" size="{{ 18 }}" hint-size="18px,18px"></x-import></span>
+              <span style="flex:1;text-align:left;font:500 15px/1 var(--font-sans);">{{ o.label }}</span>
+              <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:var(--control-outline-width) solid {{ o.dotBorder }};color:var(--control-selected-fg);">
+                <sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 14 }}" hint-size="14px,14px"></x-import></sc-if>
+              </span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+      <sc-if value="{{ sh.isPractice }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:32px;">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="font:500 15px/1.3 var(--font-sans);">{{ tx.howOften }}</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface-primary);border-radius:99px;padding:6px;">
+              <button onClick="{{ sh.dec }}" aria-label="{{ tx.decrease }}" disabled="{{ sh.notDec }}" style="width:48px;height:48px;border-radius:50%;background:transparent;border:var(--control-outline-width) solid var(--control-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;opacity: {{ sh.decOp }};"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Minus" size="{{ 24 }}" hint-size="24px,24px"></x-import></button>
+              <div aria-live="polite" style="font:500 20px/1 var(--font-sans);">{{ sh.freqLabel }}</div>
+              <button onClick="{{ sh.inc }}" aria-label="{{ tx.increase }}" disabled="{{ sh.notInc }}" style="width:48px;height:48px;border-radius:50%;background:transparent;border:var(--control-outline-width) solid var(--control-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;opacity: {{ sh.incOp }};"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import></button>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div id="focus-long" style="font:500 15px/1.3 var(--font-sans);">{{ tx.howLong }}</div>
+            <div role="radiogroup" aria-labelledby="focus-long" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;">
+              <sc-for list="{{ sh.weekOpts }}" as="c" hint-placeholder-count="4">
+                <button role="radio" aria-checked="{{ c.on }}" aria-disabled="{{ c.off }}" onClick="{{ c.select }}" style="height:var(--size-chip);padding:0 6px;border-radius:var(--radius-pill);font:400 15px/1 var(--font-sans);white-space:nowrap;cursor:pointer;transition:all var(--dur-base) var(--ease-out);background:var(--filter-pill-bg);color: {{ c.fg }};border:1px solid {{ c.border }};">{{ c.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ sh.isMatch }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div id="focus-matches" style="font:500 15px/1.3 var(--font-sans);">{{ tx.howManyMatches }}</div>
+          <div role="radiogroup" aria-labelledby="focus-matches" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;">
+            <sc-for list="{{ sh.matchOpts }}" as="c" hint-placeholder-count="4">
+              <button role="radio" aria-checked="{{ c.on }}" onClick="{{ c.select }}" style="height:var(--size-chip);padding:0 6px;border-radius:var(--radius-pill);font:400 15px/1 var(--font-sans);cursor:pointer;transition:all var(--dur-base) var(--ease-out);background:var(--filter-pill-bg);color: {{ c.fg }};border:1px solid {{ c.border }};">{{ c.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ sh.isNone }}" hint-placeholder-val="{{ false }}">
+        <div style="font:400 13px/1.4 var(--font-sans);color:var(--text-secondary);">{{ tx.noneHint }}</div>
+      </sc-if>
+      <button onClick="{{ sh.save }}" aria-disabled="{{ sh.notOk }}" style="height:60px;flex-shrink:0;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;background: {{ sh.ctaBg }};color: {{ sh.ctaFg }};" style-active="transform:scale(.97);">{{ sh.ctaLabel }}</button>
+    </div>
+  </sc-if>
+
+  <!-- Delete Focus confirmation -->
+  <sc-if value="{{ confirmDeleteFocus }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ cancelDeleteFocus }}" style="position:absolute;inset:0;background:rgba(0,0,0,.45);"></div>
+    <div class="sheet" data-screen-label="Delete Focus" role="alertdialog" aria-modal="true" aria-labelledby="del-focus-title" aria-describedby="del-focus-body" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface-primary);border-radius:34px 34px 0 0;padding:28px 20px 34px;display:flex;flex-direction:column;gap:24px;">
+      <div style="display:flex;flex-direction:column;gap:8px;text-align:center;padding:0 12px;">
+        <div id="del-focus-title" style="font:500 19px/1.35 var(--font-sans);">{{ tx.deleteFocusQ }}</div>
+        <div id="del-focus-body" style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">{{ delFocusBody }}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <button onClick="{{ doDeleteFocus }}" style="height:56px;border:none;border-radius:99px;background:var(--status-error);color:var(--text-primary);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">{{ tx.delete }}</button>
+        <button onClick="{{ cancelDeleteFocus }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-muted);color:var(--text-primary);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">{{ tx.cancel }}</button>
+      </div>
+    </div>
+  </sc-if>
+
   <!-- Toast: the one global feedback message. Call flash(text, 'success' | 'error' | 'info') from anywhere. -->
   <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
     <div role="{{ toast.role }}" aria-live="{{ toast.live }}" style="position:absolute;left:20px;right:20px;top:calc(48px + env(safe-area-inset-top, 0px));display:flex;justify-content:center;pointer-events:none;">
@@ -1374,7 +1629,7 @@ button:disabled{cursor:default !important;}
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Splash&quot;,&quot;options&quot;:[&quot;Splash&quot;,&quot;Log In&quot;,&quot;Sign Up&quot;,&quot;Forgot Password&quot;,&quot;Check Email&quot;,&quot;Onboarding&quot;,&quot;Matches&quot;,&quot;Match Detail&quot;,&quot;Insights&quot;,&quot;Log Match&quot;,&quot;Settings&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;authError&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Invalid email&quot;,&quot;Incorrect email or password&quot;,&quot;Email already exists&quot;,&quot;Password too short&quot;,&quot;Network error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Normal&quot;,&quot;options&quot;:[&quot;Normal&quot;,&quot;Loading&quot;,&quot;Empty&quot;,&quot;Offline&quot;,&quot;Error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;saveMatch&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Succeeds&quot;,&quot;options&quot;:[&quot;Succeeds&quot;,&quot;Fails&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;toastPreview&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Success&quot;,&quot;Error&quot;,&quot;Info&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Splash&quot;,&quot;options&quot;:[&quot;Splash&quot;,&quot;Log In&quot;,&quot;Sign Up&quot;,&quot;Forgot Password&quot;,&quot;Check Email&quot;,&quot;Onboarding&quot;,&quot;Matches&quot;,&quot;Match Detail&quot;,&quot;Insights&quot;,&quot;Log Match&quot;,&quot;Settings&quot;,&quot;Focus&quot;,&quot;Focus Detail&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;authError&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Invalid email&quot;,&quot;Incorrect email or password&quot;,&quot;Email already exists&quot;,&quot;Password too short&quot;,&quot;Network error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Normal&quot;,&quot;options&quot;:[&quot;Normal&quot;,&quot;Loading&quot;,&quot;Empty&quot;,&quot;Offline&quot;,&quot;Error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;saveMatch&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Succeeds&quot;,&quot;options&quot;:[&quot;Succeeds&quot;,&quot;Fails&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;toastPreview&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Success&quot;,&quot;Error&quot;,&quot;Info&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
 // Localization. The app language is prefs.lang ('en' | 'zh', saved with the account's other prefs), with a copy
 // on this device under LANG_KEY so the right language shows before the account loads. With neither, the device
 // language decides: zh* means Simplified Chinese, anything else English. t(key, vars) fills {name}-style
@@ -1495,7 +1750,25 @@ const I18N = {
     currentPw: 'Current password', newPw: 'New password', updatePw: 'Update Password',
     deleteAccountQ: 'Delete Account?', deleteAccountBody: "This permanently deletes your account and all your matches, players and insights. You can't undo this.",
     shareUsageQ: 'Share Usage Data?', notNow: 'Not Now',
-    consentBody: 'Help improve the Rallywise beta with anonymous usage data, like how many matches you log. Your name, email, players and notes are never shared. You can change this anytime in Settings > Privacy.'
+    consentBody: 'Help improve the Rallywise beta with anonymous usage data, like how many matches you log. Your name, email, players and notes are never shared. You can change this anytime in Settings > Privacy.',
+    // Focus
+    focus: 'Focus', focusSub: "What you're working on right now.", focusActive: 'Active', focusCompletedN: 'Completed · {n}', focusCompleted: 'Completed',
+    fromGrow: 'From Grow', sessionsThisWeek: '{n} of {t} sessions this week', matchesSub: 'Next {t} matches · {n} complete', noSchedule: 'No schedule',
+    noFocus: 'Nothing in Focus Yet', noFocusBody: 'Pick one thing to improve and track it here. You can also add one from Grow.', newFocus: 'New Focus', createFocus: 'Create New Focus',
+    createdByYou: 'Created by you', addedFromGrow: 'Added from Grow', planPractice: 'Practice', perWeek: '{n}× / week', weeksN: '{n} weeks', oneWeek: '1 week',
+    ongoing: 'Ongoing', planMatches: 'Matches', nextN: 'Next {n}', thisWeek: 'This Week', weekOf: 'Week {n} of {t}', weekN: 'Week {n}',
+    thisPlan: 'This Plan', nMatches: '{n} matches', hintStart: 'Tap a session when you finish it.', hintUndo: 'Tap again to undo.',
+    hintWeekDone: 'Week complete. Tap a session to undo.', hintMatch: 'Fills in when you log a match.',
+    sessionDone: 'Session {n}, done', sessionOpen: 'Session {n}, not done', matchDone: 'Match {n}, logged', matchOpen: 'Match {n}, not logged yet',
+    overallProgress: 'Overall Progress', tagNow: 'Now', tagDone: 'Done', tagSkipped: 'Skipped', weekRow: 'Week {n}: {d} of {t} sessions',
+    whatToWorkOn: 'What to Work On', focusActions: 'Focus actions', editFocus: 'Edit Focus', deleteFocus: 'Delete Focus', markComplete: 'Mark Complete',
+    markActive: 'Move Back to Active', deleteFocusQ: 'Delete Focus?', deleteFocusBody: 'This removes “{title}” and its progress. Your matches and insights stay.',
+    tFocusAdded: 'Added to Focus', tFocusUpdated: 'Focus updated', tFocusDeleted: 'Focus deleted', tFocusDeleteFailed: "Couldn't delete focus",
+    tFocusCompleted: 'Marked complete', tFocusReopened: 'Moved back to Active',
+    addToFocus: 'Add to Focus', inFocus: 'In Focus', close: 'Close', improveQ: 'What do you want to improve?', focusName: 'Name', focusNamePh: 'Backhand clear',
+    howQ: 'How will you work on it?',
+    optPractice: 'Practice sessions', optMatches: 'Next matches', optNone: 'No schedule', howOften: 'How often?', howLong: 'For how long?',
+    howManyMatches: 'For how many matches?', noneHint: "You decide when it's done. Mark it complete any time."
   },
   zh: {
     matches: '比赛', insights: '洞察', players: '球友', settings: '设置', profile: '个人资料', logOut: '退出登录',
@@ -1598,7 +1871,24 @@ const I18N = {
     currentPw: '当前密码', newPw: '新密码', updatePw: '更新密码',
     deleteAccountQ: '删除账号？', deleteAccountBody: '这会永久删除你的账号，以及所有比赛、球友和洞察。删除后无法恢复。',
     shareUsageQ: '分享使用数据？', notNow: '以后再说',
-    consentBody: '分享匿名使用数据（比如你记录了多少场比赛），帮我们改进 Rallywise 测试版。你的名字、邮箱、球友和赛后记录都不会被分享。你可以随时在“设置 > 隐私”里更改。'
+    consentBody: '分享匿名使用数据（比如你记录了多少场比赛），帮我们改进 Rallywise 测试版。你的名字、邮箱、球友和赛后记录都不会被分享。你可以随时在“设置 > 隐私”里更改。',
+    focus: '重点', focusSub: '你正在努力提升的地方。', focusActive: '进行中', focusCompletedN: '已完成 · {n}', focusCompleted: '已完成',
+    fromGrow: '来自提升页', sessionsThisWeek: '本周 {n}/{t} 次', matchesSub: '接下来 {t} 场 · 已完成 {n} 场', noSchedule: '不设计划',
+    noFocus: '还没有重点', noFocusBody: '选一件想提升的事，在这里跟进。也可以从提升页添加。', newFocus: '新建重点', createFocus: '创建新重点',
+    createdByYou: '由你创建', addedFromGrow: '来自提升页', planPractice: '练习', perWeek: '每周 {n} 次', weeksN: '{n} 周', oneWeek: '1 周',
+    ongoing: '长期', planMatches: '比赛', nextN: '接下来 {n} 场', thisWeek: '本周', weekOf: '第 {n} 周，共 {t} 周', weekN: '第 {n} 周',
+    thisPlan: '本次计划', nMatches: '{n} 场', hintStart: '练完一次，就点一下。', hintUndo: '再点一次可撤销。',
+    hintWeekDone: '本周已完成。点一下可撤销。', hintMatch: '记录比赛后会自动更新。',
+    sessionDone: '第 {n} 次，已完成', sessionOpen: '第 {n} 次，未完成', matchDone: '第 {n} 场，已记录', matchOpen: '第 {n} 场，尚未记录',
+    overallProgress: '整体进度', tagNow: '当前', tagDone: '完成', tagSkipped: '已跳过', weekRow: '第 {n} 周：{d}/{t} 次',
+    whatToWorkOn: '练习要点', focusActions: '重点操作', editFocus: '编辑重点', deleteFocus: '删除重点', markComplete: '标记为完成',
+    markActive: '移回进行中', deleteFocusQ: '删除这个重点？', deleteFocusBody: '会删除“{title}”和它的进度，你的比赛和洞察不受影响。',
+    tFocusAdded: '已加入重点', tFocusUpdated: '重点已更新', tFocusDeleted: '重点已删除', tFocusDeleteFailed: '重点未能删除',
+    tFocusCompleted: '已标记为完成', tFocusReopened: '已移回进行中',
+    addToFocus: '加入重点', inFocus: '已加入重点', close: '关闭', improveQ: '你想提升什么？', focusName: '名称', focusNamePh: '反手高远球',
+    howQ: '打算怎么练？',
+    optPractice: '专项练习', optMatches: '接下来的比赛', optNone: '不设计划', howOften: '多久练一次？', howLong: '练多久？',
+    howManyMatches: '跟进几场比赛？', noneHint: '什么时候完成由你决定，随时可以标记完成。'
   }
 };
 function deviceLang() {
@@ -1644,23 +1934,51 @@ class Component extends DCLogic {
       M('m19', '2026-07-19', 'Doubles', 'priya', ['leo', 'mei'], [[21, 19], [19, 21], [21, 17]], ['Serve', 'Net'], ['Defence'], '', '', ''),
       M('m20', '2026-07-16', 'Singles', null, ['jordan'], [[21, 13], [21, 16]], ['Placement'], [], '', '', '')
     ];
-    return { players, matches };
+    // Focus samples, as of the previews' day (22 September 2026).
+    const F = (id, title, source, type, target, periods, start, goal, cues, done) => ({ id, title, source, type, goal, cues, createdAt: start + 'T09:00:00.000Z',
+      status: done ? 'completed' : 'active', completedBy: done ? 'plan' : null, completedAt: done ? '2026-09-15T00:00:00.000Z' : null,
+      plan: { periodType: { practice: 'week', match: 'matches', manual: 'none' }[type], target, periods, start, startedAt: start + 'T09:00:00.000Z' } });
+    const focuses = [
+      F('f0', 'Smash', 'manual', 'practice', 3, 2, '2026-09-22', 'Focus on steep placement and recovering quickly after each smash.', ['Hit at the highest point, in front of your body', 'Recover to base before the reply']),
+      F('f1', 'Return consistency', 'grow', 'practice', 3, 2, '2026-09-15', 'Get more first returns back under control.', ['Keep your racket head higher', 'Take the shuttle earlier']),
+      F('f2', 'Backhand clear', 'manual', 'practice', 2, 0, '2026-09-08', 'Reach the back line from the rear backhand corner.', ['Turn your shoulder fully before contact']),
+      F('f3', 'Net positioning', 'grow', 'match', 4, 1, '2026-09-16', 'Stay closer to the net after a tight net shot.', ['Follow your net shot in', 'Racket up, in front of your body']),
+      F('f4', 'Footwork recovery', 'grow', 'practice', 3, 2, '2026-09-01', 'Get back to base faster after rear-court shots.', ['Push off the back foot'], true)
+    ];
+    const W = (focusId, start, marks, status) => ({ id: focusId + '@' + start, focusId, start, end: this.addDays(start, 6), target: marks.length, marks, status });
+    const focusPeriods = [
+      W('f0', '2026-09-22', [true, true, false], 'open'),
+      W('f1', '2026-09-15', [true, true, true], 'complete'), W('f1', '2026-09-22', [true, false, false], 'open'),
+      W('f2', '2026-09-08', [true, true], 'complete'), W('f2', '2026-09-15', [true, false], 'partial'), W('f2', '2026-09-22', [false, false], 'open'),
+      W('f4', '2026-09-01', [true, true, true], 'complete'), W('f4', '2026-09-08', [true, true, true], 'complete')
+    ];
+    return { players, matches, focuses, focusPeriods };
   }
 
+  // The "Start screen" design prop. A shared preview link can pick one too, e.g. ?preview=grow or ?preview=focus,
+  // to show the sample data without the design editor. Only on branch preview links (…-git-….vercel.app) and localhost.
+  startScreen() {
+    const p = (this.props || {}).startScreen;
+    if (p && p !== 'Splash') return p;
+    if (typeof location === 'undefined' || !/-git-.*\.vercel\.app$|^localhost$|^127\.0\.0\.1$/.test(location.hostname)) return p;
+    const q = (new URLSearchParams(location.search).get('preview') || '').toLowerCase();
+    return { grow: 'Insights', insights: 'Insights', matches: 'Matches', focus: 'Focus', 'focus-detail': 'Focus Detail' }[q] || p;
+  }
   seed() {
     const p = this.props || {};
-    const start = p.startScreen;
+    const start = this.startScreen();
     this._deviceLang = deviceLang();
     // Reopening the app (it starts on the splash) restores the signed-in account; see restore().
     this._restoring = !start || start === 'Splash';
-    const { players, matches } = this.demoData();
-    const screens = { 'Splash': 'splash', 'Log In': 'login', 'Sign Up': 'signup', 'Forgot Password': 'forgot', 'Check Email': 'resetSent', 'Onboarding': 'onboarding', 'Match Detail': 'detail', 'Insights': 'insights', 'Log Match': 'log', 'Settings': 'settings' };
+    const { players, matches, focuses, focusPeriods } = this.demoData();
+    const screens = { 'Splash': 'splash', 'Log In': 'login', 'Sign Up': 'signup', 'Forgot Password': 'forgot', 'Check Email': 'resetSent', 'Onboarding': 'onboarding', 'Match Detail': 'detail', 'Insights': 'insights', 'Log Match': 'log', 'Settings': 'settings', 'Focus': 'focus', 'Focus Detail': 'focusDetail' };
     return {
       screen: screens[start] || 'matches', pwVisible: false, agree: false, ob: this.newOb(),
       f: this.blankForm(), errors: {}, banner: null, busy: null, resetEmail: 'sam@rallywise.app', resendIn: 0,
       ...this.authPreset(p.authError),
-      insTab: 'progress', aiGrow: null, growBusy: false, back: start === 'Match Detail' ? [{ screen: 'matches' }] : [], filter: 'All', menu: false, confirmDelete: null, detailId: null, playerId: null, search: '', toast: null,
-      ...this.dataFor(p.dataState, players, matches), log: start === 'Log Match' ? this.newLog() : null,
+      insTab: /[?&]preview=grow\b/i.test(typeof location === 'undefined' ? '' : location.search) && start === 'Insights' ? 'coach' : 'progress', aiGrow: null, growBusy: false, back: start === 'Match Detail' ? [{ screen: 'matches' }] : start === 'Focus Detail' ? [{ screen: 'focus' }] : [], filter: 'All', menu: false, confirmDelete: null, detailId: null, playerId: null, search: '', toast: null,
+      ...this.dataFor(p.dataState, players, matches, focuses, focusPeriods), log: start === 'Log Match' ? this.newLog() : null,
+      focusId: start === 'Focus Detail' ? 'f0' : null, showDone: false, sheet: null, confirmDeleteFocus: null, day: null,
       email: 'sam@rallywise.app', acct: { name: '', level: null, cur: '', next: '' }, prefs: this.newPrefs(),
       onboarded: true, confirmDeleteAccount: false
     };
@@ -1668,13 +1986,13 @@ class Component extends DCLogic {
   newPrefs() { return { reminders: true, insights: true, usage: false }; }
   // Today as YYYY-MM-DD on this device's clock. Design previews keep the sample data's day.
   today() {
-    const s = (this.props || {}).startScreen;
+    const s = this.startScreen();
     if (s && s !== 'Splash') return '2026-09-22';
     const d = new Date();
     return new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
   }
   // True for the real app (opened on the splash); false for design previews, which show sample data.
-  live() { const s = (this.props || {}).startScreen; return !s || s === 'Splash'; }
+  live() { const s = this.startScreen(); return !s || s === 'Splash'; }
   // The app language: the account's saved choice, else this device's last choice or system language.
   lang() { const l = this.state && this.state.prefs && this.state.prefs.lang; return l === 'en' || l === 'zh' ? l : this._deviceLang; }
   t(k, vars) {
@@ -1731,7 +2049,7 @@ class Component extends DCLogic {
     await b.ready();
     return b;
   }
-  dataState(s) { s = s || this.state; return { onboarded: s.onboarded, players: s.players, matches: s.matches, prefs: s.prefs }; }
+  dataState(s) { s = s || this.state; return { onboarded: s.onboarded, players: s.players, matches: s.matches, prefs: s.prefs, focuses: s.focuses || [], focusPeriods: s.focusPeriods || [] }; }
   async handleAppUrl(url) {
     if (!url || this._handlingAppUrl) return;
     this._handlingAppUrl = true;
@@ -1793,7 +2111,7 @@ class Component extends DCLogic {
     try { await this.enter(user); }
     catch (e) {
       if (this._retryUser !== user) return;
-      this.setState({ screen: this.state.screen === 'splash' ? 'splash' : 'matches', back: [], email: user.email, players: [], matches: [], onboarded: true,
+      this.setState({ screen: this.state.screen === 'splash' ? 'splash' : 'matches', back: [], email: user.email, players: [], matches: [], focuses: [], focusPeriods: [], onboarded: true,
         loading: false, blocked: e && e.code === 'network' ? 'offline' : 'error' });
     }
   }
@@ -1805,9 +2123,10 @@ class Component extends DCLogic {
     if (this.state.screen !== 'splash') this.toAuth(a.onboarded ? 'matches' : 'onboarding');
     const me = a.players.find(x => x.id === 'me') || {};
     this.setState({ email: user.email, players: a.players, matches: a.matches, prefs: a.prefs || this.newPrefs(), onboarded: !!a.onboarded,
+      focuses: a.focuses || [], focusPeriods: a.focusPeriods || [], focusId: null, sheet: null, confirmDeleteFocus: null,
       ob: { ...this.newOb(), name: me.name || '' }, filter: 'All', search: '', detailId: null, playerId: null, log: null, blocked: null, loading: false });
     // What was just loaded is already saved; set last, so nothing on screen from before is saved under this account.
-    this._saved = this.dataState(a); this.sync = sync; this.user = { ...user, anonId }; this._retryUser = null;
+    this._saved = this.dataState({ ...a, focuses: a.focuses || [], focusPeriods: a.focusPeriods || [] }); this.sync = sync; this.user = { ...user, anonId }; this._retryUser = null;
     const savedLang = a.prefs && a.prefs.lang;
     if (savedLang === 'en' || savedLang === 'zh') { this._deviceLang = savedLang; try { localStorage.setItem(LANG_KEY, savedLang); } catch (e) {} }
     if (b.insights) b.insights.cached().then(insight => { if (insight && this.user && this.user.id === user.id && this.insightLang(insight) === this.lang()) this.setState({ aiGrow: insight }); }).catch(() => {});
@@ -1830,7 +2149,7 @@ class Component extends DCLogic {
     this._enterToken = null; this.user = null; this.sync = null; this._saved = null; this._retryUser = null; this._recovery = false;
     if (window.RallywiseAnalytics) window.RallywiseAnalytics.setAccount(null);
     this.toAuth('login');
-    this.setState({ email: '', players: [], matches: [], prefs: this.newPrefs(), onboarded: true, detailId: null, playerId: null, log: null, menu: false,
+    this.setState({ email: '', players: [], matches: [], focuses: [], focusPeriods: [], focusId: null, sheet: null, confirmDeleteFocus: null, prefs: this.newPrefs(), onboarded: true, detailId: null, playerId: null, log: null, menu: false,
       blocked: null, loading: false, aiGrow: null, growBusy: false, confirmDelete: null, confirmDeleteAccount: false });
   }
   // Log Out: saves anything still unsaved if it can, ends this device's session and clears the screen.
@@ -1847,7 +2166,8 @@ class Component extends DCLogic {
   persist() {
     const s = this.state, d = this.props.dataState, last = this._saved || {};
     if (!this.user || !this.sync || (d && d !== 'Normal')) return;
-    if (s.players === last.players && s.matches === last.matches && s.prefs === last.prefs && s.onboarded === last.onboarded) return;
+    if (s.players === last.players && s.matches === last.matches && s.prefs === last.prefs && s.onboarded === last.onboarded &&
+      s.focuses === last.focuses && s.focusPeriods === last.focusPeriods) return;
     this._saved = this.dataState(s);
     this.sync.push(this._saved).catch(e => this.flash(this.t(e && e.code === 'network' ? 'tSaveOffline' : 'tSaveFailed'), 'error'));
   }
@@ -1871,7 +2191,7 @@ class Component extends DCLogic {
   analyticsCtx(prefs) {
     const p = this.props || {}, u = this.user, pr = prefs || this.state.prefs || {};
     if (!u || !u.anonId || u.email === 'sam@rallywise.app') return null;
-    if ((p.startScreen && p.startScreen !== 'Splash') || (p.dataState && p.dataState !== 'Normal')) return null;
+    if (!this.live() || (p.dataState && p.dataState !== 'Normal')) return null;
     return { anonId: u.anonId, consent: pr.usage ? 'yes' : pr.consentAsked ? 'no' : 'ask' };
   }
   track(event, props, prefs) { const c = this.analyticsCtx(prefs), A = window.RallywiseAnalytics; if (c && A) A.track(event, props || {}, c); }
@@ -1885,6 +2205,7 @@ class Component extends DCLogic {
   // Back after 30 minutes or more away counts as a new visit (app_opened resume, with a new session id).
   onVisibility = () => {
     if (document.visibilityState === 'hidden') { this._hiddenAt = Date.now(); return; }
+    this.setState({ day: this.today() }); // back after midnight: Focus moves to the new week
     const away = this._hiddenAt ? Date.now() - this._hiddenAt : 0; this._hiddenAt = null;
     if (away < 30 * 60e3 || !this.user) return;
     if (window.RallywiseAnalytics) window.RallywiseAnalytics.newSession();
@@ -1903,12 +2224,12 @@ class Component extends DCLogic {
   }
 
   // "Data state" prop previews the loading, empty, offline and error states without touching the seed data.
-  dataFor(kind, players, matches) {
-    if (players) this._seed = { players, matches };
+  dataFor(kind, players, matches, focuses, focusPeriods) {
+    if (players) this._seed = { players, matches, focuses, focusPeriods };
     const d = (this.user && this._saved) || this._seed;
     clearTimeout(this._load);
-    if (kind === 'Empty') return { players: d.players.filter(x => x.id === 'me'), matches: [], blocked: null, loading: false };
-    return { players: d.players, matches: d.matches, blocked: kind === 'Offline' ? 'offline' : kind === 'Error' ? 'error' : null, loading: kind === 'Loading' };
+    if (kind === 'Empty') return { players: d.players.filter(x => x.id === 'me'), matches: [], focuses: [], focusPeriods: [], blocked: null, loading: false };
+    return { players: d.players, matches: d.matches, focuses: d.focuses || [], focusPeriods: d.focusPeriods || [], blocked: kind === 'Offline' ? 'offline' : kind === 'Error' ? 'error' : null, loading: kind === 'Loading' };
   }
 
   fmt() { return parseInt((this.props && this.props.defaultFormat) || '21', 10); }
@@ -1929,6 +2250,8 @@ class Component extends DCLogic {
     if (this.state.screen === 'splash') this._splash = setTimeout(() => this.leaveSplash(), 2200);
     if (this._restoring) this.restore();
     this.applyLang();
+    this.dayTick();
+    this.syncFocus();
     window.addEventListener('online', this.onOnline);
     document.addEventListener('visibilitychange', this.onVisibility);
 
@@ -1946,7 +2269,7 @@ class Component extends DCLogic {
     if (this._appUrlListener && this._appUrlListener.remove) this._appUrlListener.remove();
     window.removeEventListener('online', this.onOnline);
     document.removeEventListener('visibilitychange', this.onVisibility);
-    clearTimeout(this._t); clearTimeout(this._tOut); clearTimeout(this._splash); clearInterval(this._tick); clearTimeout(this._load);
+    clearTimeout(this._t); clearTimeout(this._tOut); clearTimeout(this._splash); clearInterval(this._tick); clearTimeout(this._load); clearTimeout(this._dayT);
   }
 
   // Auth. Requests go to the backend (rallywise-backend.js). The "Auth error" prop previews each
@@ -2007,7 +2330,7 @@ class Component extends DCLogic {
   leaveSplash() {
     clearTimeout(this._splash); this._splashDone = true;
     if (this.state.screen !== 'splash' || (this._restoring && !this._retryUser)) return;
-    if (this._restoring) return this.setState({ screen: 'matches', back: [], loading: true, blocked: null, players: [], matches: [] });
+    if (this._restoring) return this.setState({ screen: 'matches', back: [], loading: true, blocked: null, players: [], matches: [], focuses: [], focusPeriods: [] });
     this.setState(s => ({ screen: this.user ? (s.onboarded ? 'matches' : 'onboarding') : this._retryUser ? 'matches' : 'login' }));
     setTimeout(() => this.afterEnter(), 0);
   }
@@ -2021,13 +2344,14 @@ class Component extends DCLogic {
     if (pp && this.props.dataState !== pp.dataState) this.setState({ ...this.dataFor(this.props.dataState), filter: 'All', search: '' });
     if (pp && this.props.authError !== pp.authError && this.props.authError !== 'None') this.setState({ back: [], busy: null, banner: null, errors: {}, ...this.authPreset(this.props.authError) });
     this.persist();
+    this.syncFocus();
     this.applyLang();
     // insights_viewed: once per visit to Insights, once its data (or No Insights Yet) is on screen.
     const cs = this.state;
     if (cs.screen !== 'insights') this._insSeen = false;
     else if (!this._insSeen && !cs.loading && !cs.blocked) { this._insSeen = true; this.track('insights_viewed', { has_data: cs.matches.length > 0, match_count: cs.matches.length }); }
     // The runtime passes only prevProps here, so the last scroll key is kept on the instance.
-    const k = this.state.screen + (this.state.log ? this.state.log.step : '') + this.state.detailId + this.state.playerId;
+    const k = this.state.screen + (this.state.log ? this.state.log.step : '') + this.state.detailId + this.state.playerId + this.state.focusId;
     if (k !== this._scrollKey && this.scrollRef.current) this.scrollRef.current.scrollTop = 0;
     this._scrollKey = k;
   }
@@ -2065,11 +2389,11 @@ class Component extends DCLogic {
   with(pid) { return this.rec(this.state.matches.filter(m => m.partner === pid)); }
 
   go(screen, extra) {
-    this.setState(s => ({ back: [...s.back, { screen: s.screen, detailId: s.detailId, playerId: s.playerId }], screen, menu: false, search: '', ...(extra || {}) }));
+    this.setState(s => ({ back: [...s.back, { screen: s.screen, detailId: s.detailId, playerId: s.playerId, focusId: s.focusId }], screen, menu: false, search: '', ...(extra || {}) }));
   }
   goBack = () => this.setState(s => {
     const b = s.back.slice(); const prev = b.pop() || { screen: 'matches' };
-    return { back: b, search: '', screen: prev.screen === 'log' ? 'matches' : prev.screen, detailId: prev.detailId, playerId: prev.playerId };
+    return { back: b, search: '', screen: prev.screen === 'log' ? 'matches' : prev.screen, detailId: prev.detailId, playerId: prev.playerId, focusId: prev.focusId };
   });
   // Global toast. kind is 'success' (default), 'error' or 'info'; it auto-dismisses after ~2.5s.
   flash(text, kind) {
@@ -2160,6 +2484,161 @@ class Component extends DCLogic {
     this.track('player_added', { source, player_count: this.state.players.filter(p => p.id !== 'me').length + 1 });
     const id = 'p' + Date.now(); this.setState(s => ({ players: [...s.players, { id, name }] })); return id; }
 
+  // ---- Focus ----
+  // A Focus is one thing the user is improving. Users act on the current period and see the whole plan.
+  //   Focus { id, title, source: 'manual' | 'grow', type: 'practice' | 'match' | 'manual', status: 'active' | 'completed',
+  //     completedBy: 'plan' | 'user' | null, completedAt, goal, cues: [], createdAt,
+  //     plan: { periodType: 'week' | 'matches' | 'none', target, periods, start, startedAt } }
+  //   practice: target sessions per week for `periods` weeks (0 = ongoing). Week n runs seven days from
+  //     start + 7(n-1), on local dates, and each week that has begun has a FocusPeriod row:
+  //   FocusPeriod { id: focusId@start, focusId, start, end, target, marks: boolean[target], status }
+  //     status is 'open' for the current week; a finished week is 'complete', 'partial' or 'missed' from its own
+  //     marks, or 'skipped' (kept as is; nothing in the app sets it yet).
+  //   match: the next `target` matches logged from plan.startedAt. Progress is counted from Matches, never stored.
+  //   manual: no schedule; the user marks it complete.
+  // A plan change applies from now on: rows already made keep their target and marks. Changing the type starts a
+  // new plan today; the old rows stay as history.
+  addDays(iso, n) { const d = new Date(Date.parse(iso + 'T00:00:00Z') + n * 864e5); return d.toISOString().slice(0, 10); }
+  dayDiff(a, b) { return Math.round((Date.parse(b + 'T00:00:00Z') - Date.parse(a + 'T00:00:00Z')) / 864e5); }
+  // 0-based week of a practice plan that `day` falls in.
+  weekIndex(f, day) { return Math.max(0, Math.floor(this.dayDiff(f.plan.start, day) / 7)); }
+  weekStart(f, k) { return this.addDays(f.plan.start, 7 * k); }
+  closedStatus(row) { if (row.status === 'skipped') return 'skipped'; const d = row.marks.filter(Boolean).length; return d >= row.target ? 'complete' : d ? 'partial' : 'missed'; }
+  matchesDone(f, matches) {
+    const from = Date.parse(f.plan.startedAt), start = f.plan.start;
+    return (matches || this.state.matches).filter(m => m.createdAt ? Date.parse(m.createdAt) >= from : m.date >= start).length;
+  }
+  // True once the plan has run its course: every week of a fixed practice plan is over, or enough matches are in.
+  planEnded(f, day, matches) {
+    if (f.type === 'practice') return !!f.plan.periods && this.weekIndex(f, day) >= f.plan.periods;
+    if (f.type === 'match') return this.matchesDone(f, matches) >= f.plan.target;
+    return false;
+  }
+  // The practice weeks that exist on `day`: 0 … the current week (or the last week, once the plan is over, or the
+  // week it was marked complete).
+  lastWeek(f, day) {
+    let k = this.weekIndex(f, day);
+    if (f.plan.periods) k = Math.min(k, f.plan.periods - 1);
+    if (f.status === 'completed' && f.completedBy === 'user' && f.completedAt) k = Math.min(k, this.weekIndex(f, this.localDay(f.completedAt)));
+    return k;
+  }
+  localDay(iso) { const d = new Date(iso); return new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10); }
+  // The row a marker tap writes to: this week's, only while the Focus is an active practice plan.
+  currentWeek(f, day) {
+    if (f.type !== 'practice' || f.status !== 'active' || this.planEnded(f, day)) return null;
+    const k = this.weekIndex(f, day), start = this.weekStart(f, k);
+    return { k, start, id: f.id + '@' + start };
+  }
+  newWeekRow(f, k) { const start = this.weekStart(f, k); return { id: f.id + '@' + start, focusId: f.id, start, end: this.addDays(start, 6), target: f.plan.target, marks: Array(f.plan.target).fill(false), status: 'open' }; }
+  // Brings Focus up to date with the calendar: makes the rows for weeks that have begun (a week nobody opened the
+  // app in is kept as 0 of target), closes finished weeks with their real result, and completes a plan that has run
+  // its course (or reopens one an edit extended). Returns the changed lists, or null when nothing changed.
+  reconcileFocus(focuses, periods, day, matches) {
+    let rows = periods.slice(), changed = false;
+    const byId = new Map(rows.map((r, i) => [r.id, i]));
+    const put = r => { const i = byId.get(r.id); if (i == null) { byId.set(r.id, rows.length); rows.push(r); } else rows[i] = r; changed = true; };
+    const next = focuses.map(f0 => {
+      let f = f0;
+      const ended = this.planEnded(f, day, matches);
+      if (f.status === 'active' && ended) f = { ...f, status: 'completed', completedBy: 'plan', completedAt: new Date().toISOString() };
+      else if (f.status === 'completed' && f.completedBy === 'plan' && !ended) f = { ...f, status: 'active', completedBy: null, completedAt: null };
+      if (f.type === 'practice') for (let k = 0; k <= this.lastWeek(f, day); k++) {
+        const r = this.newWeekRow(f, k);
+        if (!byId.has(r.id)) put(r);
+      }
+      const cur = this.currentWeek(f, day);
+      for (const r of rows.filter(x => x.focusId === f.id)) {
+        const status = cur && r.id === cur.id ? 'open' : this.closedStatus(r);
+        if (r.status !== status) put({ ...r, status });
+      }
+      if (f !== f0) changed = true;
+      return f;
+    });
+    return changed ? { focuses: next, focusPeriods: rows } : null;
+  }
+  syncFocus() {
+    const s = this.state;
+    if (s.loading || s.blocked || !s.focuses || !s.focusPeriods) return;
+    const day = this.today(), r = this.reconcileFocus(s.focuses, s.focusPeriods, day, s.matches);
+    if (r) this.setState(r);
+  }
+  // Re-renders at local midnight so the current week, and what a marker tap writes to, follow the calendar.
+  dayTick() {
+    clearTimeout(this._dayT);
+    const now = new Date(), next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 1);
+    this._dayT = setTimeout(() => { this.setState({ day: this.today() }); this.dayTick(); }, Math.min(next - now, 6 * 3600e3));
+  }
+  // Marker tap: completes session i of this week, or undoes it. `start` is the week the marker was drawn for; if the
+  // week has turned over since, nothing is written and the screen redraws on the new week.
+  toggleSession(fid, start, i) {
+    const day = this.today(), f = this.state.focuses.find(x => x.id === fid), cur = f && this.currentWeek(f, day);
+    if (!cur || cur.start !== start) return this.setState({ day });
+    this.setState(s => {
+      const have = s.focusPeriods.find(r => r.id === cur.id) || this.newWeekRow(f, cur.k);
+      if (i < 0 || i >= have.target) return null;
+      const marks = have.marks.slice(); marks[i] = !marks[i];
+      const row = { ...have, marks, status: 'open' };
+      return { focusPeriods: s.focusPeriods.some(r => r.id === row.id) ? s.focusPeriods.map(r => r.id === row.id ? row : r) : [...s.focusPeriods, row] };
+    });
+  }
+  // Resizes this week's markers to a new per-week target. Done sessions are kept: in place where they fit, and
+  // any that no longer fit move into the first free markers, up to the new target.
+  resizeMarks(marks, target) {
+    const out = Array.from({ length: target }, (_, j) => !!marks[j]);
+    let extra = Math.min(marks.filter(Boolean).length, target) - out.filter(Boolean).length;
+    for (let j = 0; j < target && extra > 0; j++) if (!out[j]) { out[j] = true; extra--; }
+    return out;
+  }
+  planFor(sh, now) {
+    const type = sh.type, start = this.today();
+    return { periodType: { practice: 'week', match: 'matches', manual: 'none' }[type], target: type === 'practice' ? sh.perWeek : type === 'match' ? sh.matches : 0,
+      periods: type === 'practice' ? sh.weeks : type === 'match' ? 1 : 0, start, startedAt: now };
+  }
+  // New Focus, Add to Focus (from Grow) and Edit Focus all save through here.
+  saveFocusSheet() {
+    const sh = this.state.sheet, title = sh.title.trim(), now = new Date().toISOString(), day = this.today();
+    if (title.length < 2) return;
+    if (sh.mode === 'edit') {
+      const f = this.state.focuses.find(x => x.id === sh.editId);
+      if (!f) return this.setState({ sheet: null });
+      let plan = f.plan, rows = this.state.focusPeriods;
+      if (sh.type !== f.type) plan = this.planFor(sh, now); // a different kind of plan starts today
+      else if (f.type === 'practice') plan = { ...f.plan, target: sh.perWeek, periods: sh.weeks };
+      else if (f.type === 'match') plan = { ...f.plan, target: sh.matches };
+      const next = { ...f, title, goal: sh.goal.trim(), type: sh.type, plan };
+      // This week takes the new per-week target; earlier weeks keep theirs.
+      const cur = next.type === 'practice' && next.status === 'active' && next.id + '@' + this.weekStart(next, this.weekIndex(next, day));
+      if (cur) rows = rows.map(r => r.id === cur ? { ...r, target: sh.perWeek, marks: this.resizeMarks(r.marks, sh.perWeek) } : r);
+      this.setState(s => ({ focuses: s.focuses.map(x => x.id === f.id ? next : x), focusPeriods: rows, sheet: null }));
+      return this.flash(this.t('tFocusUpdated'));
+    }
+    const f = { id: 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8), title, source: sh.mode === 'grow' ? 'grow' : 'manual', type: sh.type, status: 'active', completedBy: null, completedAt: null,
+      goal: sh.goal.trim(), cues: sh.cues || [], createdAt: now, plan: this.planFor(sh, now) };
+    this.setState(s => ({ focuses: [f, ...s.focuses], sheet: null, ...(sh.mode === 'new' ? { screen: 'focusDetail', focusId: f.id, back: [{ screen: 'focus' }] } : {}) }));
+    this.flash(this.t('tFocusAdded'));
+  }
+  openFocusSheet(o) { this.setState({ menu: false, sheet: { mode: 'new', title: '', goal: '', cues: [], type: 'practice', perWeek: 3, weeks: 2, matches: 4, ...o } }); }
+  setSheet(p) { this.setState(s => ({ sheet: { ...s.sheet, ...p } })); }
+  // Mark Complete / Move Back to Active, for any type. A fixed plan that has ended can't be moved back; Edit
+  // can lengthen it instead.
+  setFocusDone(id, done) {
+    this.setState(s => ({ menu: false, focuses: s.focuses.map(f => f.id !== id ? f : done
+      ? { ...f, status: 'completed', completedBy: 'user', completedAt: new Date().toISOString() }
+      : { ...f, status: 'active', completedBy: null, completedAt: null }) }));
+    this.flash(this.t(done ? 'tFocusCompleted' : 'tFocusReopened'));
+  }
+  // Deletes the Focus and its weeks, nothing else. Like Delete Match, the screen changes once the cloud has it.
+  async deleteFocus(id) {
+    if (this._deletingFocus) return;
+    this._deletingFocus = true;
+    const focuses = this.state.focuses.filter(f => f.id !== id), focusPeriods = this.state.focusPeriods.filter(r => r.focusId !== id);
+    try { await this.saveNow({ focuses, focusPeriods }); }
+    catch (e) { this.setState({ confirmDeleteFocus: null }); return this.flash(this.t(e && e.code === 'network' ? 'tDeleteOffline' : 'tFocusDeleteFailed'), 'error'); }
+    finally { this._deletingFocus = false; }
+    this.setState({ focuses, focusPeriods, confirmDeleteFocus: null, screen: 'focus', back: [], focusId: null, menu: false });
+    this.flash(this.t('tFocusDeleted'));
+  }
+
   renderVals() {
     const s = this.state, A = 'var(--action-primary)';
     const all = s.matches;
@@ -2192,7 +2671,7 @@ class Component extends DCLogic {
       toSignup: () => this.toAuth('signup'),
       toLogin: () => this.toAuth('login', s.screen === 'forgot' || s.screen === 'resetSent'),
       agree: s.agree, toggleAgree: () => this.setState(x => ({ agree: !x.agree })),
-      agreeBg: s.agree ? 'var(--action-primary)' : 'transparent', agreeBorder: s.agree ? 'var(--action-primary)' : 'var(--text-secondary)',
+      agreeBg: s.agree ? 'var(--control-selected-bg)' : 'transparent', agreeBorder: s.agree ? 'var(--control-selected-bg)' : 'var(--control-outline)',
       signupBg: s.agree ? 'var(--action-primary)' : 'var(--surface-muted)', signupFg: s.agree ? 'var(--action-on-primary)' : 'var(--text-tertiary)',
       signUp: () => { if (!this.state.agree) return; const f = this.state.f;
         this.submit({ name: f.name.trim() ? null : this.msg.nameEmpty, email: this.emailErr(f.email), password: f.password.length >= 8 ? null : f.password ? this.msg.pwShort : this.msg.pwEmpty },
@@ -2212,17 +2691,17 @@ class Component extends DCLogic {
       tx: { ...I18N.en, ...(I18N[this.lang()] || {}) }, resendInLabel: this.t('resendIn', { n: s.resendIn }), overallWL: this.t('wl', { w: overall.w, l: overall.l }),
       langOptions: LANGS.map(([code, label]) => { const on = this.lang() === code;
         return { label, lang: code === 'zh' ? 'zh-Hans' : 'en', on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent',
-          dotBg: on ? 'var(--action-primary)' : 'transparent', dotBorder: on ? 'var(--action-primary)' : 'var(--text-secondary)', select: () => this.setLang(code) }; }),
+          dotBg: on ? 'var(--control-selected-bg)' : 'transparent', dotBorder: on ? 'var(--control-selected-bg)' : 'var(--control-outline)', select: () => this.setLang(code) }; }),
       isLanguage: s.screen === 'language',
       isOnboarding: s.screen === 'onboarding',
-      showTabs: s.screen === 'matches' || s.screen === 'insights', menuOpen: s.menu,
+      showTabs: s.screen === 'matches' || s.screen === 'insights' || s.screen === 'focus', menuOpen: s.menu,
       hasToast: !!s.toast, search: s.search, canAddNew: q.length > 1 && !exists,
       toggleMenu: () => this.setState(x => ({ menu: !x.menu })),
       goBack: this.goBack,
       onSearch: e => this.setState({ search: e.target.value }),
       // Log Match opens only once the account's data has loaded; the loading state shows the button disabled.
       startLog: () => { if (this.dataReady()) this.go('log', { log: this.logStart('matches') }); },
-      tabs: [[this.t('matches'), 'matches', 'List'], [this.t('insights'), 'insights', 'ChartColumn']].map(([label, k, icon]) => ({
+      tabs: [[this.t('matches'), 'matches', 'List'], [this.t('insights'), 'insights', 'ChartColumn'], [this.t('focus'), 'focus', 'Target']].map(([label, k, icon]) => ({
         label, icon, fg: s.screen === k ? 'var(--text-primary)' : 'var(--text-secondary)', select: () => {
           // Back to Insights on Grow with no AI insight on screen (say the language changed since): make one.
           if (k === 'insights' && this.state.insTab === 'coach' && !this.state.aiGrow) setTimeout(() => this.refreshGrow(), 0);
@@ -2286,7 +2765,7 @@ class Component extends DCLogic {
       v.onMeName = e => this.setAcct({ name: e.target.value }, 'name');
       v.meLevels = ['Beginner', 'Intermediate', 'Advanced', 'Competitive'].map(label => {
         const on = a.level === label;
-        return { label: this.t('level_' + label), on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent', dotBg: on ? 'var(--action-primary)' : 'transparent', dotBorder: on ? 'var(--action-primary)' : 'var(--text-secondary)', select: () => this.setAcct({ level: label }, 'level') };
+        return { label: this.t('level_' + label), on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent', dotBg: on ? 'var(--control-selected-bg)' : 'transparent', dotBorder: on ? 'var(--control-selected-bg)' : 'var(--control-outline)', select: () => this.setAcct({ level: label }, 'level') };
       });
       v.saveProfile = () => this.submit({ name: name ? null : this.msg.nameEmpty }, async () => {
         const players = this.state.players.map(p => p.id === 'me' ? { ...p, name, level: this.state.acct.level } : p);
@@ -2319,7 +2798,7 @@ class Component extends DCLogic {
     }
     if (v.isPrefs) {
       const row = (k, label, sub) => { const on = !!s.prefs[k];
-        return { label, sub, on, bg: on ? A : 'transparent', border: on ? A : 'var(--text-secondary)', select: () => k === 'usage' ? this.setUsage(!this.state.prefs.usage) : this.setState(x => ({ prefs: { ...x.prefs, [k]: !x.prefs[k] } })) }; };
+        return { label, sub, on, bg: on ? 'var(--control-selected-bg)' : 'transparent', border: on ? 'var(--control-selected-bg)' : 'var(--control-outline)', select: () => k === 'usage' ? this.setUsage(!this.state.prefs.usage) : this.setState(x => ({ prefs: { ...x.prefs, [k]: !x.prefs[k] } })) }; };
       v.prefTitle = this.t(s.screen === 'privacy' ? 'privacy' : 'notifications');
       v.prefRows = s.screen === 'privacy'
         ? [row('usage', this.t('shareUsage'), this.t('shareUsageSub'))]
@@ -2462,7 +2941,7 @@ class Component extends DCLogic {
       v.obBack = () => setOb({ step: 1 });
       v.obLevels = ['Beginner', 'Intermediate', 'Advanced', 'Competitive'].map(label => {
         const on = ob.level === label;
-        return { label: this.t('level_' + label), on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent', dotBg: on ? 'var(--action-primary)' : 'transparent', dotBorder: on ? 'var(--action-primary)' : 'var(--text-secondary)', select: () => setOb({ level: label }) };
+        return { label: this.t('level_' + label), on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent', dotBg: on ? 'var(--control-selected-bg)' : 'transparent', dotBorder: on ? 'var(--control-selected-bg)' : 'var(--control-outline)', select: () => setOb({ level: label }) };
       });
       v.obReadyTitle = this.t('obReadyTitle').replace('{name}', ob.name.trim().split(/\s+/)[0]);
       v.obCtaLabel = this.t(['getStarted', 'continue', 'logFirstMatch'][st - 1]);
@@ -2495,7 +2974,7 @@ class Component extends DCLogic {
       const slot = k => {
         const id = log[k], act = log.active === k;
         return { role: roles[k], name: id ? this.nm(id) : this.t('selectRole', { role: roles[k] }), initials: id ? this.ini(id) : '', empty: !id, fg: id ? 'var(--text-primary)' : 'var(--text-secondary)',
-          avBg: id ? 'var(--border-default)' : 'transparent', avFg: id ? 'var(--text-primary)' : 'var(--text-secondary)', border: act ? 'var(--ghost-button-outline-highlight)' : 'transparent',
+          avBg: id ? 'var(--icon-badge-bg)' : 'transparent', avFg: id ? 'var(--icon-badge-fg)' : 'var(--text-secondary)', border: act ? 'var(--ghost-button-outline-highlight)' : 'transparent',
           select: () => this.setLog({ active: k }) };
       };
       const me = { role: this.t('me'), name: this.nm('me'), initials: this.ini('me'), fg: 'var(--text-primary)', avBg: A, avFg: 'var(--action-on-primary)', border: 'transparent', select: () => {} };
@@ -2565,7 +3044,7 @@ class Component extends DCLogic {
       v.detail = {
         dateLong: this.date(m.date, true), type: this.typeLabel(m.type), resultWord: this.t(r.win ? 'resultWin' : 'resultLoss'), gamesWon: `${r.us}–${r.them}`,
         sideA: [{ name: this.t('you') + ' · ' + this.nm('me'), initials: this.ini('me'), avBg: A, avFg: 'var(--action-on-primary)' }]
-          .concat(m.partner ? [{ name: this.nm(m.partner), initials: this.ini(m.partner), avBg: 'var(--border-default)', avFg: 'var(--text-primary)' }] : []),
+          .concat(m.partner ? [{ name: this.nm(m.partner), initials: this.ini(m.partner), avBg: 'var(--icon-badge-bg)', avFg: 'var(--icon-badge-fg)' }] : []),
         sideB: m.opps.map(id => ({ name: this.nm(id), initials: this.ini(id), open: openP(id) })),
         aShort: m.partner ? this.t('you') + ' & ' + this.first(m.partner).slice(0, 1) : this.t('you'),
         rows: m.games.map((g, i) => ({ label: this.t('game', { n: i + 1 }), a: String(g[0]), b: String(g[1]), aFg: g[0] > g[1] ? 'var(--text-primary)' : 'var(--text-secondary)', bFg: g[1] > g[0] ? 'var(--text-primary)' : 'var(--text-secondary)' })),
@@ -2604,6 +3083,137 @@ class Component extends DCLogic {
         stats: [st(this.t('overallH2H'), o), st(this.t('singlesH2H'), si), st(this.t('doublesH2H'), du), st(this.t('asPartner'), w)],
         recent: inv.slice(0, 5).map(m => this.card(m)),
         recentEmpty: !inv.length && { ...empty('no-matches', this.t('noTogether'), this.t('noTogetherBody')), style: { padding: '8px 16px' } } };
+    }
+    // Focus: list, detail, the New / Add / Edit sheet, and Add to Focus on Grow's Build Next.
+    const day = this.today(), FS = s.focuses || [], FP = s.focusPeriods || [];
+    const rowsOf = f => FP.filter(r => r.focusId === f.id && r.start >= f.plan.start).sort((a, b) => a.start < b.start ? -1 : 1);
+    const planParts = f => f.type === 'practice' ? [this.t('planPractice'), this.t('perWeek', { n: f.plan.target }), f.plan.periods ? (f.plan.periods === 1 ? this.t('oneWeek') : this.t('weeksN', { n: f.plan.periods })) : this.t('ongoing')]
+      : f.type === 'match' ? [this.t('planMatches'), this.t('nextN', { n: f.plan.target })] : [this.t('noSchedule')];
+    // This week's row for an active practice Focus (made by syncFocus; drawn empty until then).
+    const weekNow = f => { const cur = this.currentWeek(f, day); if (!cur) return null; return FP.find(r => r.id === cur.id) || { ...this.newWeekRow(f, cur.k), k: cur.k }; };
+    const doneIn = r => r ? r.marks.filter(Boolean).length : 0;
+    if (v.grow && v.grow.build) v.grow.build = v.grow.build.map(b => {
+      const ex = FS.find(f => f.status === 'active' && f.title.trim().toLowerCase() === String(b.name).trim().toLowerCase());
+      return { ...b, ...(ex
+        ? { fLabel: this.t('inFocus'), fIcon: 'Check', fBg: 'transparent', fFg: 'var(--text-tertiary)', fBorder: 'var(--ghost-button-outline)', focus: () => this.go('focusDetail', { focusId: ex.id }) }
+        : { fLabel: this.t('addToFocus'), fIcon: 'Plus', fBg: 'var(--surface-muted)', fFg: 'var(--text-primary)', fBorder: 'transparent',
+            focus: () => this.openFocusSheet({ mode: 'grow', title: b.name, goal: b.action || '' }) }) };
+    });
+    v.isFocus = s.screen === 'focus'; v.isFocusDetail = s.screen === 'focusDetail';
+    v.newFocus = () => { if (this.dataReady()) this.openFocusSheet({ mode: 'new' }); };
+    if (v.isFocus) {
+      const dots = f => {
+        const n = f.type === 'practice' ? f.plan.target : f.type === 'match' ? f.plan.target : 0;
+        const d = f.type === 'practice' ? doneIn(weekNow(f)) : f.type === 'match' ? Math.min(this.matchesDone(f), f.plan.target) : 0;
+        return Array.from({ length: n }, (_, i) => ({ bg: i < d ? 'var(--progress-active)' : 'var(--border-default)' }));
+      };
+      const sub = f => {
+        if (f.status === 'completed') return this.t('focusCompleted');
+        if (f.type === 'practice') return this.t('sessionsThisWeek', { n: doneIn(weekNow(f)), t: f.plan.target });
+        if (f.type === 'match') return this.t('matchesSub', { t: f.plan.target, n: Math.min(this.matchesDone(f), f.plan.target) });
+        return this.t('noSchedule');
+      };
+      const open = f => () => this.go('focusDetail', { focusId: f.id });
+      const act = FS.filter(f => f.status !== 'completed'), dn = FS.filter(f => f.status === 'completed');
+      v.fl = {
+        active: act.map(f => ({ title: f.title, sub: sub(f), fromGrow: f.source === 'grow', dots: dots(f), open: open(f) })),
+        activeCount: String(act.length), hasActive: act.length > 0, hasDone: dn.length > 0,
+        done: dn.map(f => ({ title: f.title, open: open(f) })), doneLabel: this.t('focusCompletedN', { n: dn.length }), showDone: !!s.showDone,
+        doneIcon: s.showDone ? 'ChevronUp' : 'ChevronDown', toggleDone: () => this.setState(x => ({ showDone: !x.showDone })),
+        ready: !s.loading && !s.blocked, loading: !s.blocked && !!s.loading,
+        empty: !s.loading && !s.blocked && !FS.length && empty('no-focus', this.t('noFocus'), this.t('noFocusBody'), this.t('newFocus'), v.newFocus)
+      };
+    }
+    const fdF = v.isFocusDetail && FS.find(f => f.id === s.focusId);
+    if (v.isFocusDetail && !fdF && !s.loading) setTimeout(() => this.state.screen === 'focusDetail' && !this.state.focuses.some(f => f.id === this.state.focusId) && this.setState({ screen: 'focus', back: [], focusId: null }), 0);
+    if (fdF) {
+      const f = fdF, P = f.type === 'practice', Mt = f.type === 'match', done = f.status === 'completed';
+      const parts = planParts(f).concat(done ? [this.t('focusCompleted')] : []);
+      let markers = [], hint = '', hintFg = 'var(--text-secondary)', periodPos = '', wrapW = 'none';
+      const cur = P && !done ? weekNow(f) : null;
+      if (cur) {
+        const n = cur.target, d = doneIn(cur), k = this.weekIndex(f, day);
+        // Markers are 48px, the size of the app's IconButton: 1–5 on one row, 6–7 over two rows.
+        const size = 48, gap = 12;
+        if (n >= 6) wrapW = (4 * size + 3 * gap) + 'px';
+        markers = cur.marks.map((m, i) => ({ done: m, open: !m, n: String(i + 1), size: size + 'px', gap,
+          aria: this.t(m ? 'sessionDone' : 'sessionOpen', { n: i + 1 }), pressed: m, disabled: false,
+          bg: m ? 'var(--progress-active)' : 'var(--border-default)', fg: m ? 'var(--text-primary)' : 'var(--neutral-600)', cursor: 'pointer',
+          toggle: () => this.toggleSession(f.id, cur.start, i) }));
+        hint = this.t(d >= n ? 'hintWeekDone' : d ? 'hintUndo' : 'hintStart'); if (d >= n) hintFg = 'var(--neutral-600)';
+        periodPos = f.plan.periods ? this.t('weekOf', { n: k + 1, t: f.plan.periods }) : this.t('weekN', { n: k + 1 });
+      } else if (Mt && !done) {
+        const md = Math.min(this.matchesDone(f), f.plan.target);
+        markers = Array.from({ length: f.plan.target }, (_, i) => { const m = i < md; return { done: m, open: !m, n: String(i + 1), size: '48px', gap: 12,
+          aria: this.t(m ? 'matchDone' : 'matchOpen', { n: i + 1 }), pressed: null, disabled: true,
+          bg: m ? 'var(--progress-active)' : 'var(--border-default)', fg: m ? 'var(--text-primary)' : 'var(--text-secondary)', cursor: 'default', toggle: () => {} }; });
+        hint = this.t('hintMatch'); periodPos = this.t('nMatches', { n: f.plan.target });
+      }
+      // Overall Progress: every week of the plan. Past and current weeks show their own recorded target and
+      // result; weeks to come show the plan's target and can't be tapped (they aren't controls at all).
+      let weeks = [];
+      if (P) {
+        const rows = rowsOf(f), kNow = done ? -1 : this.weekIndex(f, day);
+        const count = f.plan.periods || Math.max(rows.length, kNow + 1);
+        weeks = Array.from({ length: count }, (_, k) => {
+          const start = this.weekStart(f, k), r = rows.find(x => x.start === start), isCur = k === kNow, past = !isCur && (done || k < kNow);
+          const target = r ? r.target : f.plan.target, marks = r ? r.marks : Array(target).fill(false), dd = marks.filter(Boolean).length;
+          const tag = isCur ? this.t('tagNow') : r && r.status === 'skipped' ? this.t('tagSkipped') : past && dd >= target ? this.t('tagDone') : '';
+          return { label: this.t('weekN', { n: k + 1 }), labelFg: isCur ? 'var(--text-primary)' : past ? 'var(--neutral-600)' : 'var(--text-secondary)',
+            aria: this.t('weekRow', { n: k + 1, d: dd, t: target }) + (tag ? ' · ' + tag : ''),
+            dots: marks.map(m => ({ bg: m ? 'var(--progress-active)' : 'var(--border-default)' })), hasTag: !!tag, tag };
+        });
+      }
+      v.fd = { title: f.title, source: this.t(f.source === 'grow' ? 'addedFromGrow' : 'createdByYou'), srcDot: f.source === 'grow' ? 'var(--progress-active)' : 'var(--text-secondary)',
+        summary: parts.map((t, i) => ({ t, sep: i > 0 })),
+        hasPeriod: markers.length > 0, isMatch: Mt, periodLabel: this.t(P ? 'thisWeek' : 'thisPlan'), periodPos, markers, wrapW, hint, hintFg,
+        hasOverall: P && (weeks.length > 1 || !f.plan.periods), weeks, overallMeta: f.plan.periods ? (f.plan.periods === 1 ? this.t('oneWeek') : this.t('weeksN', { n: f.plan.periods })) : this.t('ongoing'),
+        hasCues: !!(f.goal || f.cues.length), hasGoal: !!f.goal, goal: f.goal, hasCueList: f.cues.length > 0, cues: f.cues.map(t => ({ t })),
+        // No schedule: completing it by hand is the only way to finish, so it gets a quiet button here as well.
+        showComplete: f.type === 'manual' && !done, complete: () => this.setFocusDone(f.id, true),
+        logMatch: () => { if (this.dataReady()) this.go('log', { log: this.logStart('focus') }); } };
+    }
+    if (v.isFocusDetail) {
+      v.menuItems = fdF ? [
+        { label: this.t('editFocus'), icon: 'Pencil', select: () => {
+          const f = fdF, P = f.type === 'practice';
+          this.openFocusSheet({ mode: 'edit', editId: f.id, title: f.title, goal: f.goal, type: f.type, perWeek: P ? f.plan.target : 3,
+            weeks: P ? f.plan.periods : 2, matches: f.type === 'match' ? f.plan.target : 4, minWeeks: P && f.status !== 'completed' ? this.weekIndex(f, day) + 1 : 0 }); } },
+        fdF.status === 'completed'
+          ? (fdF.completedBy === 'user' ? { label: this.t('markActive'), icon: 'RotateCcw', select: () => this.setFocusDone(fdF.id, false) } : null)
+          : { label: this.t('markComplete'), icon: 'CircleCheck', select: () => this.setFocusDone(fdF.id, true) },
+        { label: this.t('deleteFocus'), icon: 'Trash2', select: () => this.setState({ menu: false, confirmDeleteFocus: fdF.id }) }
+      ].filter(Boolean) : [];
+    }
+    v.confirmDeleteFocus = !!s.confirmDeleteFocus;
+    if (s.confirmDeleteFocus) {
+      const f = FS.find(x => x.id === s.confirmDeleteFocus);
+      v.delFocusBody = this.t('deleteFocusBody', { title: f ? f.title : '' });
+      v.cancelDeleteFocus = () => this.setState({ confirmDeleteFocus: null });
+      v.doDeleteFocus = () => this.deleteFocus(s.confirmDeleteFocus);
+    }
+    v.hasSheet = !!s.sheet;
+    if (s.sheet) {
+      const sh = s.sheet, isEdit = sh.mode === 'edit', isGrow = sh.mode === 'grow', ok = sh.title.trim().length > 1;
+      const types = [['practice', 'optPractice', 'Repeat'], ['match', 'optMatches', 'Trophy']].concat(isGrow ? [] : [['manual', 'optNone', 'Circle']]);
+      // Edit can't shorten a running plan to end before this week; those lengths are disabled.
+      const minW = isEdit && sh.type === 'practice' && sh.type === (FS.find(x => x.id === sh.editId) || {}).type ? sh.minWeeks || 0 : 0;
+      v.sh = { heading: this.t(isEdit ? 'editFocus' : isGrow ? 'addToFocus' : 'createFocus'), isGrow, isNew: !isGrow, nameQ: this.t(isEdit ? 'focusName' : 'improveQ'),
+        title: sh.title, goal: sh.goal, onTitle: e => this.setSheet({ title: e.target.value.replace(/\s*\n\s*/g, ' ') }),
+        close: () => this.setState({ sheet: null }),
+        types: types.map(([k, label, icon]) => { const on = sh.type === k; return { label: this.t(label), icon, on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent',
+          dotBg: on ? 'var(--control-selected-bg)' : 'transparent', dotBorder: on ? 'var(--control-selected-bg)' : 'var(--control-outline)', select: () => this.setSheet({ type: k }) }; }),
+        isPractice: sh.type === 'practice', isMatch: sh.type === 'match', isNone: sh.type === 'manual',
+        freqLabel: this.t('perWeek', { n: sh.perWeek }), notDec: sh.perWeek <= 1, notInc: sh.perWeek >= 7, decOp: sh.perWeek <= 1 ? .4 : 1, incOp: sh.perWeek >= 7 ? .4 : 1,
+        dec: () => this.setSheet({ perWeek: Math.max(1, sh.perWeek - 1) }), inc: () => this.setSheet({ perWeek: Math.min(7, sh.perWeek + 1) }),
+        weekOpts: [[1, this.t('oneWeek')], [2, this.t('weeksN', { n: 2 })], [4, this.t('weeksN', { n: 4 })], [0, this.t('ongoing')]].map(([w, label]) => {
+          const on = sh.weeks === w, off = w > 0 && w < minW;
+          return { label, on, off, fg: off ? 'var(--text-tertiary)' : on ? 'var(--filter-pill-text-selected)' : 'var(--filter-pill-text-default)',
+            border: on ? 'var(--filter-pill-border-selected)' : 'transparent', select: () => { if (!off) this.setSheet({ weeks: w }); } }; }),
+        matchOpts: [3, 4, 5, 6].map(m => { const on = sh.matches === m;
+          return { label: String(m), on, off: false, fg: on ? 'var(--filter-pill-text-selected)' : 'var(--filter-pill-text-default)', border: on ? 'var(--filter-pill-border-selected)' : 'transparent', select: () => this.setSheet({ matches: m }) }; }),
+        ctaLabel: this.t(isEdit ? 'saveChanges' : 'addToFocus'), ok, notOk: !ok,
+        ctaBg: ok ? A : 'var(--surface-muted)', ctaFg: ok ? 'var(--action-on-primary)' : 'var(--text-tertiary)', save: () => this.saveFocusSheet() };
     }
     if (s.toast) {
       const t = s.toast, K = { success: ['CircleCheck', 'var(--action-primary)'], error: ['CircleAlert', 'var(--status-error)'], info: ['Info', 'var(--text-inverse)'] }[t.kind] || [];
