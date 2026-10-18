@@ -149,7 +149,7 @@
     },
       illustration ? h(Illustration, { name: illustration, size }) : null,
       title ? h('div', { style: { font: '500 19px/1.35 var(--font-sans)', color: 'var(--text-primary)', marginTop: 20 } }, title) : null,
-      body ? h('div', { style: { font: '400 15px/1.45 var(--font-sans)', color: 'var(--text-secondary)', marginTop: 8, maxWidth: 280 } }, body) : null,
+      body ? h('div', { style: { font: 'var(--empty-body-weight, 400) 15px/1.45 var(--font-sans)', color: 'var(--text-secondary)', marginTop: 8, maxWidth: 280 } }, body) : null,
       actionLabel ? h('button', {
         onClick: onAction,
         style: { marginTop: 24, height: 52, padding: '0 28px', border: '1px solid var(--ghost-button-outline)', borderRadius: 999, background: 'transparent', color: 'var(--text-primary)', font: '500 15px/1 var(--font-sans)', cursor: 'pointer' },

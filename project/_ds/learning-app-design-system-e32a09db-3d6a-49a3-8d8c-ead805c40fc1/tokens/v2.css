@@ -60,7 +60,9 @@
   --rw-nav-active-border: var(--neutral-500); /* N500 #A6A6A8 */
   --rw-nav-active-fg: var(--white);
 
-  /* Type: Poppins, -0.16px tracking on everything except tracked eyebrows */
+  /* Type: Poppins, -0.16px tracking on everything except tracked eyebrows.
+     V2 never goes below Medium (500): no Regular weight anywhere on a V2 screen. */
+  --rw-weight-min: 500;
   --rw-tracking: -0.16px;
   --rw-type-title: 600 24px/28.8px var(--font-sans);
   --rw-type-eyebrow: 500 12px/13px var(--font-sans);
