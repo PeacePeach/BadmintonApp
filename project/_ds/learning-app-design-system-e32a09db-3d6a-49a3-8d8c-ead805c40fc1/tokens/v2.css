@@ -18,9 +18,11 @@
   --rw-glass-fill: rgba(42, 41, 46, .5);
   --rw-glass-blur: 4px;
 
-  /* Screen background: app background + the soft ellipse glow (Ellipse 2: 1103px at -590/-751) */
-  --rw-bg-glow: radial-gradient(circle 551.5px at -38.5px -199.5px, #212631 0%, rgba(18, 17, 19, 0) 100%);
-  --rw-bg: var(--rw-purplegrey-900);
+  /* Semantic: app background. Screens use these, never the primitive.
+     Value follows Figma (PurpleGrey/purplegrey-900); change it here only. */
+  --rw-bg-app: var(--rw-purplegrey-900);
+  /* Soft glow on top of the app background (Figma Ellipse 2: 1103px at -590/-751) */
+  --rw-bg-app-glow: radial-gradient(circle 551.5px at -38.5px -199.5px, #212631 0%, transparent 100%);
 
   /* Text */
   --rw-text-primary: var(--neutral-800);   /* N800 #EBEBEC */
