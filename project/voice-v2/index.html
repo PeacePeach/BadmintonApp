@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rallywise Voice Logging</title>
+<!-- Voice match logging prototype: real speech recognition + AI parsing. Not linked from the app; saves nothing to the match database. -->
+<link rel="stylesheet" href="../_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/styles.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&display=swap">
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.3/dist/umd/supabase.js"></script>
+<script src="../rallywise-config.js"></script>
+<script src="voice-config.js"></script>
+<style>
+/* Rallywise V1 design system tokens (copied from project/_ds/.../tokens, unchanged). Dark only, like the app. */
+/* Layout: prototype notes on the left, a 390pt phone on the right; on a phone the notes fold into one bar. */
+:root{--proto-bg:#121114;--proto-line:#2c2b30;}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{margin:0;background:var(--proto-bg);color:var(--text-primary);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;}
+button,input,textarea,select{font-family:inherit;color:inherit;}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--blue-100);outline-offset:2px;}
+.lucide{flex-shrink:0;stroke-width:2;}
+.num{font-variant-numeric:tabular-nums;}
+
+/* ---------- Stage and prototype panel (not part of the app) ---------- */
+.stage{min-height:100%;display:flex;gap:40px;align-items:center;justify-content:center;padding-block:32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));}
+.proto{width:300px;display:flex;flex-direction:column;gap:18px;color:var(--text-secondary);font-size:13px;line-height:1.5;}
+.proto h1{margin:0;color:var(--text-primary);font:600 20px/1.25 var(--font-sans);}
+.proto .eyebrow{font:500 11px/1 var(--font-sans);letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);}
+.proto p{margin:0;}
+.sc-list{display:flex;flex-direction:column;gap:6px;}
+.sc{display:flex;gap:12px;align-items:flex-start;text-align:left;background:transparent;border:1px solid var(--proto-line);border-radius:18px;padding:10px 14px;color:var(--text-secondary);}
+.sc b{display:block;color:var(--text-primary);font:500 14px/1.3 var(--font-sans);}
+.sc .k{width:24px;height:24px;border-radius:50%;background:var(--surface-muted);color:var(--text-primary);display:flex;align-items:center;justify-content:center;font:600 12px/1 var(--font-sans);flex-shrink:0;margin-top:1px;}
+.sc[aria-pressed="true"]{border-color:var(--ghost-button-outline-highlight);background:var(--surface-muted);}
+.sc[aria-pressed="true"] .k{background:var(--text-primary);color:var(--text-inverse);}
+.proto-row{display:flex;gap:8px;}
+.ghost{height:40px;padding:0 16px;border-radius:99px;border:1px solid var(--control-outline);background:transparent;display:inline-flex;align-items:center;gap:8px;font:500 13px/1 var(--font-sans);}
+.proto-bar{display:none;}
+
+/* ---------- Phone ---------- */
+.phone{position:relative;width:390px;height:844px;flex-shrink:0;border-radius:48px;background:var(--bg-primary);overflow:hidden;box-shadow:0 0 0 10px #232226,0 30px 80px rgba(0,0,0,.5);}
+.app{position:absolute;inset:0;display:flex;flex-direction:column;}
+.scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:24px 20px 24px;display:flex;flex-direction:column;gap:22px;scrollbar-width:none;}
+.scroll::-webkit-scrollbar{display:none;}
+.scroll>*{flex-shrink:0;}
+.dock{padding:12px 20px 30px;background:var(--bg-primary);display:flex;flex-direction:column;gap:12px;}
+
+@media (max-width:760px){
+  .stage{flex-direction:column;gap:12px;padding-block:12px;align-items:stretch;}
+  .proto{display:none;}
+  .proto-bar{display:flex;gap:8px;align-items:center;}
+  .proto-bar select{flex:1;min-width:0;height:40px;border-radius:99px;background:var(--surface-muted);border:1px solid var(--proto-line);padding:0 14px;font:500 13px/1 var(--font-sans);}
+  .phone{width:100%;max-width:430px;align-self:center;height:min(844px,calc(100dvh - 76px));border-radius:32px;box-shadow:0 0 0 1px var(--proto-line);}
+}
+/* #phone: the app alone, edge to edge (used for screenshots). */
+.bare .stage{padding:0;}
+.bare .proto,.bare .proto-bar{display:none !important;}
+.bare .phone{width:100%;max-width:none;height:100vh;height:100dvh;border-radius:0;box-shadow:none;}
+
+/* ---------- App components ---------- */
+.hdr{display:flex;align-items:center;gap:14px;}
+.iconbtn{width:48px;height:48px;border-radius:50%;border:none;background:var(--icon-button-bg);color:var(--text-primary);display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0;transition:transform .14s var(--ease-out);}
+.iconbtn:active{transform:scale(.94);}
+.hdr-t{display:flex;flex-direction:column;gap:4px;}
+.hdr-t .a{font:500 19px/1.2 var(--font-sans);}
+.hdr-t .b{font:400 13px/1 var(--font-sans);color:var(--text-secondary);}
+.steps{display:flex;gap:6px;}
+.steps i{flex:1;height:4px;border-radius:99px;background:var(--progress-inactive,var(--violet-8));}
+.steps i.on{background:var(--blue-100);}
+.title{font:600 30px/1.25 var(--font-sans);margin:0;text-wrap:balance;}
+.sub{font:400 15px/1.4 var(--font-sans);color:var(--text-secondary);margin:-14px 0 0;}
+.sec{display:flex;flex-direction:column;gap:12px;}
+.sec-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px;}
+.sec-h h3{margin:0;font:500 19px/1.3 var(--font-sans);}
+.sec-h .aside{font:500 13px/1 var(--font-sans);color:var(--text-secondary);}
+.card{background:var(--surface-primary);border-radius:26px;padding:16px;display:flex;flex-direction:column;gap:10px;}
+.lbl{font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding:4px 6px 0;}
+.hint{display:flex;gap:10px;align-items:flex-start;font:400 13px/1.45 var(--font-sans);color:var(--text-secondary);}
+.hint .lucide{margin-top:1px;}
+
+.cta{height:60px;border:none;border-radius:999px;background:var(--action-primary);color:var(--action-on-primary);font:600 17px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:10px;width:100%;transition:transform .14s var(--ease-out);}
+.cta:active{transform:scale(.97);}
+.cta[disabled]{opacity:.85;cursor:default;}
+.spin{animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--surface-muted);padding:5px;border-radius:99px;}
+.seg button{height:44px;border:1px solid transparent;border-radius:99px;background:transparent;font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;color:var(--text-primary);}
+.seg button[aria-pressed="true"]{background:var(--control-selected-bg);color:var(--control-selected-fg);}
+
+.prow{min-height:56px;border-radius:99px;background:var(--surface-muted);display:flex;align-items:center;gap:12px;padding:0 6px 0 8px;border:1px solid transparent;}
+.prow.warn{border-color:var(--ghost-button-outline);border-style:dashed;}
+.av{width:40px;height:40px;border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);flex-shrink:0;border:1px solid var(--border-default);}
+.prow .nm{flex:1;min-width:0;text-align:left;background:none;border:none;padding:8px 0;display:flex;flex-direction:column;gap:3px;}
+.prow .nm span{font:500 15px/1.2 var(--font-sans);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.prow .nm small{font:400 12px/1.2 var(--font-sans);color:var(--text-secondary);}
+.xbtn{width:40px;height:40px;border-radius:50%;border:none;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0;}
+.addrow{height:52px;border-radius:99px;border:1px dashed var(--ghost-button-outline);background:transparent;display:flex;align-items:center;gap:12px;padding:0 8px;font:500 15px/1 var(--font-sans);color:var(--text-primary);width:100%;}
+.addrow .av{background:transparent;border:1px solid var(--control-outline);color:var(--text-primary);width:36px;height:36px;}
+.which{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:2px 6px 4px;}
+.which span{font:400 12px/1 var(--font-sans);color:var(--text-secondary);width:100%;padding-bottom:2px;}
+.chip{height:36px;padding:0 14px;border-radius:99px;border:1px solid var(--control-outline);background:transparent;font:500 13px/1 var(--font-sans);color:var(--text-primary);display:inline-flex;align-items:center;gap:6px;}
+.chip[aria-pressed="true"]{background:var(--control-selected-bg);color:var(--control-selected-fg);border-color:transparent;}
+
+.game{background:var(--surface-muted);border-radius:22px;padding:8px 6px 8px 16px;display:flex;flex-direction:column;gap:8px;}
+.game-main{display:flex;align-items:center;gap:10px;}
+.game-n{font:500 15px/1 var(--font-sans);width:64px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.game-n small{font:400 12px/1 var(--font-sans);color:var(--text-secondary);}
+.wl{display:flex;gap:6px;}
+.wl button{width:44px;height:44px;border-radius:50%;border:1px solid var(--control-outline);background:transparent;color:var(--text-secondary);font:600 15px/1 var(--font-sans);padding:0;}
+.wl button.w[aria-pressed="true"]{background:var(--status-win);border-color:transparent;color:var(--app-background);}
+.wl button.l[aria-pressed="true"]{background:var(--status-loss);border-color:transparent;color:var(--app-background);}
+.wl.unset button{border-style:dashed;}
+.scorebtn{margin-left:auto;height:36px;padding:0 10px 0 12px;border-radius:99px;border:none;background:transparent;color:var(--text-secondary);font:500 13px/1 var(--font-sans);display:flex;align-items:center;gap:4px;}
+.scorebtn.has{color:var(--text-primary);font:500 15px/1 var(--font-sans);}
+.scoreedit{display:flex;align-items:center;gap:10px;padding:2px 10px 6px 0;}
+.scoreedit label{display:flex;flex-direction:column;gap:6px;align-items:center;font:400 12px/1 var(--font-sans);color:var(--text-secondary);flex:1;}
+.scoreedit input{width:100%;height:48px;border-radius:99px;background:var(--input-field-bg);border:1px solid var(--input-field-outline);text-align:center;font:500 20px/1 var(--font-sans);outline:none;color:var(--text-primary);font-variant-numeric:tabular-nums;}
+.scoreedit input:focus{border-color:var(--ghost-button-outline-highlight);}
+.scoreedit .colon{font:500 20px/1 var(--font-sans);color:var(--text-tertiary);padding-top:16px;}
+.pchip{align-self:flex-start;height:28px;padding:0 10px;border-radius:99px;border:1px solid var(--control-outline);background:transparent;font:500 12px/1 var(--font-sans);color:var(--text-secondary);display:inline-flex;align-items:center;gap:6px;}
+.gsum{font:500 13px/1 var(--font-sans);}
+.gsum .w{color:var(--status-win);} .gsum .l{color:var(--status-loss);} .gsum .u{color:var(--text-secondary);}
+.addgame{height:52px;border-radius:99px;background:transparent;border:1px solid var(--control-outline);color:var(--text-primary);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;}
+.banner{display:flex;gap:10px;align-items:flex-start;background:var(--surface-muted);border-radius:22px;padding:12px 8px 12px 16px;font:400 13px/1.45 var(--font-sans);color:var(--text-primary);}
+.banner .lucide{color:var(--blue-100);margin-top:1px;}
+.banner div{flex:1;}
+.banner .xbtn{width:32px;height:32px;margin-top:-6px;}
+
+/* Describe */
+.compose{flex:1;min-height:220px;background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;}
+.compose textarea,.compose .live{flex:1;width:100%;background:transparent;border:none;outline:none;resize:none;font:400 17px/1.55 var(--font-sans);color:var(--text-primary);padding:0;margin:0;}
+.compose textarea::placeholder{color:var(--input-field-text-default);}
+.compose .live{overflow-y:auto;white-space:pre-wrap;}
+.compose .live .interim{color:var(--text-secondary);}
+.compose .caret{display:inline-block;width:2px;height:1.1em;background:var(--blue-100);vertical-align:-3px;margin-left:2px;animation:blink 1s steps(1) infinite;}
+@keyframes blink{50%{opacity:0;}}
+.compose-foot{display:flex;justify-content:space-between;align-items:center;font:400 12px/1 var(--font-sans);color:var(--text-tertiary);padding-top:10px;min-height:22px;}
+.compose-foot button{background:none;border:none;color:var(--text-secondary);font:500 13px/1 var(--font-sans);display:flex;gap:6px;align-items:center;padding:4px 0;}
+.wave{height:64px;display:flex;align-items:center;justify-content:center;gap:4px;}
+.wave i{width:3px;border-radius:99px;background:var(--blue-100);height:4px;transition:height .09s linear;}
+.recrow{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;}
+.timer{justify-self:start;height:36px;padding:0 14px;border-radius:99px;background:var(--surface-muted);display:flex;align-items:center;gap:8px;font:500 14px/1 var(--font-sans);}
+.timer i{width:8px;height:8px;border-radius:50%;background:var(--red-300);animation:blink 1.2s steps(1) infinite;}
+.bigmic{width:76px;height:76px;border-radius:50%;border:none;background:var(--blue-100);color:var(--text-inverse);display:flex;align-items:center;justify-content:center;padding:0;transition:transform .14s var(--ease-out);}
+.bigmic.primary{background:var(--action-primary);color:var(--action-on-primary);}
+.bigmic:active{transform:scale(.94);}
+.side-cap{justify-self:end;font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);text-align:right;}
+.idle-mic{display:flex;flex-direction:column;align-items:center;gap:10px;font:400 13px/1 var(--font-sans);color:var(--text-secondary);padding-top:6px;}
+.go{display:flex;gap:12px;align-items:center;}
+.minimic{width:60px;height:60px;border-radius:50%;border:1px solid var(--control-outline);background:transparent;color:var(--text-primary);display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0;}
+.dock-note{font:400 12px/1.4 var(--font-sans);color:var(--text-secondary);text-align:center;}
+
+/* Notes */
+.summary{background:var(--surface-primary);border-radius:26px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;}
+.summary .t{font:500 15px/1.3 var(--font-sans);overflow-wrap:anywhere;}
+.summary .s{font:400 13px/1.35 var(--font-sans);color:var(--text-secondary);}
+.badge{height:28px;padding:0 12px;border-radius:99px;display:flex;align-items:center;font:600 12px/1 var(--font-sans);flex-shrink:0;}
+.badge.win{background:var(--status-win);color:var(--app-background);}
+.badge.loss{background:var(--status-loss);color:var(--app-background);}
+.badge.draw,.badge.notes{background:var(--surface-muted);color:var(--text-primary);}
+.note{background:var(--surface-primary);border-radius:20px;padding:12px 8px 12px 16px;display:flex;gap:8px;align-items:flex-start;}
+.note .body{flex:1;min-width:0;text-align:left;background:none;border:none;padding:2px 0;display:flex;flex-direction:column;gap:8px;}
+.note .txt{font:400 15px/1.45 var(--font-sans);color:var(--text-primary);}
+.note .meta{display:flex;gap:6px;flex-wrap:wrap;}
+.tag{height:24px;padding:0 10px;border-radius:99px;background:var(--surface-muted);font:500 12px/1 var(--font-sans);color:var(--text-secondary);display:inline-flex;align-items:center;}
+.note.edit{flex-direction:column;align-items:stretch;gap:14px;padding:14px 16px 12px;}
+.note.edit textarea{background:var(--input-field-bg);border:1px solid var(--input-field-outline);outline:none;border-radius:18px;padding:12px 14px;font:400 15px/1.45 var(--font-sans);color:var(--text-primary);resize:none;min-height:72px;}
+.note.edit textarea:focus{border-color:var(--ghost-button-outline-highlight);}
+.mini-h{font:400 12px/1 var(--font-sans);color:var(--text-secondary);}
+.chips{display:flex;flex-wrap:wrap;gap:6px;}
+.edit-foot{display:flex;justify-content:space-between;align-items:center;}
+.textbtn{background:none;border:none;padding:8px 4px;font:500 14px/1 var(--font-sans);color:var(--text-secondary);display:flex;align-items:center;gap:6px;}
+.donebtn{height:40px;padding:0 18px;border-radius:99px;border:none;background:var(--control-selected-bg);color:var(--control-selected-fg);font:600 14px/1 var(--font-sans);}
+.sortrow{display:flex;gap:6px;flex-wrap:wrap;}
+.addnote{height:44px;border-radius:99px;border:1px dashed var(--ghost-button-outline);background:transparent;display:flex;align-items:center;justify-content:center;gap:8px;font:500 14px/1 var(--font-sans);color:var(--text-primary);}
+.cat-sub{font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);margin-top:-6px;}
+
+/* Sheet */
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:20;}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:88%;overflow-y:auto;background:var(--bg-primary);border-radius:34px 34px 0 0;padding:12px 20px 30px;display:flex;flex-direction:column;gap:18px;z-index:21;animation:up .22s var(--ease-out) both;}
+@keyframes up{from{transform:translateY(24px);opacity:0;}to{transform:none;opacity:1;}}
+.grab{width:40px;height:5px;border-radius:99px;background:var(--border-default);align-self:center;}
+.sheet-h{display:flex;align-items:center;justify-content:space-between;}
+.sheet-h h2{margin:0;font:600 24px/1.2 var(--font-sans);}
+.search{height:52px;border-radius:99px;border:1px solid var(--control-outline);display:flex;align-items:center;gap:10px;padding:0 18px;color:var(--input-field-text-default);}
+.search:focus-within{border-color:var(--ghost-button-outline-highlight);}
+.search input{flex:1;min-width:0;background:transparent;border:none;outline:none;font:400 16px/1 var(--font-sans);color:var(--text-primary);}
+.pick{height:60px;border-radius:99px;background:var(--surface-primary);display:flex;align-items:center;gap:12px;padding:0 10px;border:none;width:100%;text-align:left;font:500 15px/1 var(--font-sans);}
+.pick small{margin-left:auto;padding-right:10px;font:400 12px/1 var(--font-sans);color:var(--text-secondary);}
+.picklist{display:flex;flex-direction:column;gap:8px;}
+
+/* Matches + toast (V1 pattern) */
+.mcard{background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;}
+.mcard.fresh{box-shadow:0 0 0 1px var(--ghost-button-outline-highlight);}
+.mtop{display:flex;justify-content:space-between;align-items:center;font:400 13px/1 var(--font-sans);color:var(--text-secondary);}
+.mmid{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;}
+.mmid .a{font:500 16px/1.3 var(--font-sans);overflow-wrap:anywhere;}
+.mmid .b{font:400 15px/1.3 var(--font-sans);color:var(--neutral-600);overflow-wrap:anywhere;}
+.mmid .g{font:500 28px/1 var(--font-sans);flex-shrink:0;}
+.pills{display:flex;gap:6px;flex-wrap:wrap;}
+.pill{height:28px;padding:0 12px;border-radius:99px;background:var(--score-pill-bg);display:flex;align-items:center;font:500 13px/1 var(--font-sans);}
+.mfoot{font:400 13px/1.4 var(--font-sans);color:var(--text-secondary);display:flex;gap:8px;align-items:center;}
+.toast-wrap{position:absolute;left:20px;right:20px;top:24px;display:flex;justify-content:center;pointer-events:none;z-index:30;}
+.toast{height:44px;max-width:100%;padding:0 18px 0 14px;border-radius:99px;background:var(--text-primary);color:var(--text-inverse);display:flex;align-items:center;gap:8px;font:500 14px/1 var(--font-sans);animation:toast-in .22s var(--ease-out) both;}
+.toast .lucide{color:var(--action-primary);}
+.toast.out{animation:toast-out .2s ease-in both;}
+@keyframes toast-in{from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:none;}}
+@keyframes toast-out{from{opacity:1;}to{opacity:0;transform:translateY(-12px);}}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important;}}
+
+:root{--font-sans:"Poppins","Noto Sans SC",system-ui,-apple-system,"PingFang SC",sans-serif;}
+.langseg{display:flex;gap:6px;align-self:center;background:var(--surface-muted);padding:4px;border-radius:99px;}
+.langseg button{height:36px;padding:0 16px;border:none;border-radius:99px;background:transparent;font:500 14px/1 var(--font-sans);color:var(--text-secondary);}
+.langseg button[aria-pressed="true"]{background:var(--control-selected-bg);color:var(--control-selected-fg);}
+.langseg button[disabled]{opacity:.6;cursor:default;}
+.compose-foot .over{color:var(--status-error);}
+.errbox{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:22px;background:var(--surface-muted);font:400 14px/1.45 var(--font-sans);}
+.errbox>.lucide{color:var(--status-error);margin-top:1px;}
+.errbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+a.chip{text-decoration:none;}
+.banner a{color:var(--blue-100);}
+.banner.quiet .lucide{color:var(--text-secondary);}
+.banner .amb{color:var(--text-secondary);margin-top:4px;}
+.aid{align-self:flex-start;color:var(--text-tertiary);font-size:13px;}
+.aibox{display:flex;flex-direction:column;gap:10px;font:400 13px/1.45 var(--font-sans);color:var(--text-secondary);}
+.aibox select{height:40px;border-radius:99px;background:var(--surface-muted);border:1px solid var(--proto-line);padding:0 14px;font:500 13px/1 var(--font-sans);color:var(--text-primary);}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0;}
+.kv dt{color:var(--text-tertiary);} .kv dd{margin:0;color:var(--text-primary);overflow-wrap:anywhere;}
+.aibox details summary{cursor:pointer;color:var(--text-primary);}
+.aibox pre{margin:8px 0 0;max-height:320px;overflow:auto;background:var(--surface-muted);border-radius:14px;padding:12px;font:400 11px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text-primary);white-space:pre-wrap;}
+.proto .sc span{color:var(--text-primary);font:400 13px/1.45 var(--font-sans);}
+button[disabled]{cursor:default;}
+</style>
+</head>
+<body>
+<div class="stage">
+  <aside class="proto" aria-label="Prototype panel">
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <div class="eyebrow">Rallywise prototype</div>
+      <h1>Voice Match Logging</h1>
+      <p>Real speech recognition and AI parsing. Nothing here is added to your Rallywise matches.</p>
+    </div>
+    <div class="aibox" id="aiPanel"></div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="eyebrow">Try saying</div>
+      <div class="sc-list" id="samples"></div>
+    </div>
+  </aside>
+  <div class="phone" id="phone">
+    <div class="app" id="app"></div>
+    <div id="overlay"></div>
+    <div class="toast-wrap" id="toast" role="status" aria-live="polite"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+'use strict';
+
+/* ------------------------------------------------------------------
+   Config. voice-config.js decides where parsing runs:
+   endpoint 'supabase' calls the parse-voice-log edge function with the
+   signed-in Rallywise session; any other value is a URL (local dev server).
+------------------------------------------------------------------ */
+const CONF = window.RALLYWISE_CONFIG || {};
+const CFG = Object.assign({ endpoint: 'supabase', fn: 'parse-voice-log', auth: true, models: ['gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-5-mini'] }, window.RALLYWISE_VOICE || {});
+const MAX_CHARS = 3000;
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+const SAVED_KEY = 'rallywise.voiceproto.sessions';
+const DEMO_PLAYERS = [
+  { id: 'alex', name: 'Alex Chen' }, { id: 'priya', name: 'Priya Nair' }, { id: 'marcus', name: 'Marcus Lee' },
+  { id: 'jordan', name: 'Jordan Kim' }, { id: 'leo', name: 'Leo Park' }, { id: 'mei', name: 'Mei Tan' }, { id: 'ravi', name: 'Ravi Shah' }
+];
+let DB = CFG.auth ? [] : DEMO_PLAYERS.slice();
+const TAGS = ['Serve', 'Return', 'Net', 'Smash', 'Defence', 'Footwork', 'Placement', 'Other'];
+const SAMPLES = [
+  'I played four games and lost three.',
+  '今天和小王打了六局，赢了四局，输了两局。杀球不错，但是网前失误比较多。',
+  'Played doubles with Alex, then switched partners for the last two games.',
+  'Singles against Jordan. Won the first game 21-15, lost the second 18-21. My smash was working well.'
+];
+
+let sbClient = null;
+function sb() {
+  if (sbClient) return sbClient;
+  if (!window.supabase || !CONF.supabaseUrl) return null;
+  // Same storage key as the app, so a session signed in on this site is reused here.
+  sbClient = window.supabase.createClient(CONF.supabaseUrl, CONF.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, storageKey: 'rallywise.auth' } });
+  return sbClient;
+}
+async function getSession() { const c = sb(); if (!c) return null; try { const { data } = await c.auth.getSession(); return data.session; } catch (e) { return null; } }
+async function loadPlayers() {
+  if (!CFG.auth) return;
+  const c = sb(); if (!c) return;
+  try {
+    const { data, error } = await c.from('players').select('id,name');
+    if (!error && data) DB = data.filter(p => p.id !== 'me' && (p.name || '').trim());
+  } catch (e) {}
+}
+function fail(code) { const e = new Error(code); e.code = code; return e; }
+async function callParse(transcript) {
+  const t0 = performance.now();
+  const body = JSON.stringify({ transcript, model: S.model });
+  let res;
+  try {
+    if (CFG.endpoint === 'supabase') {
+      const s = await getSession(); if (!s) throw fail('signin');
+      res = await fetch(`${CONF.supabaseUrl}/functions/v1/${CFG.fn}`, { method: 'POST', body,
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + s.access_token, apikey: CONF.supabaseAnonKey } });
+    } else {
+      res = await fetch(CFG.endpoint, { method: 'POST', body, headers: { 'Content-Type': 'application/json' } });
+    }
+  } catch (e) { throw e.code ? e : fail('network'); }
+  const j = await res.json().catch(() => ({}));
+  if (!res.ok) throw fail(j.error || (res.status === 401 ? 'signin' : 'http_' + res.status));
+  j.roundtrip_ms = Math.round(performance.now() - t0);
+  return j;
+}
+
+/* ------------------------------------------------------------------
+   State and helpers
+------------------------------------------------------------------ */
+const clone = o => JSON.parse(JSON.stringify(o));
+let uid = 0; const nid = p => p + Date.now().toString(36) + (++uid);
+let S = {
+  screen: 'describe', transcript: '', lang: store.get('rallywise.voiceproto.lang', /^zh/i.test(navigator.language || '') ? 'zh' : 'en'),
+  model: store.get('rallywise.voiceproto.model', CFG.models[0]),
+  rec: null, recMsg: '', parsing: false, parseErr: null, parsedFrom: null, ai: null, meta: null,
+  d: null, dirty: { type: false, players: false, games: false, notes: false }, notice: null, editNote: null, sheet: null,
+  saved: store.get(SAVED_KEY, []), justSaved: null, signedIn: !CFG.auth
+};
+const pById = id => DB.find(p => p.id === id);
+const pName = ref => (ref.id && pById(ref.id)) ? pById(ref.id).name : ref.heard;
+const initials = n => { const t = n.trim(); return /[㐀-鿿]/.test(t) ? t.slice(-1) : t.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase(); };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const icon = (n, s) => `<i data-lucide="${n}" width="${s || 24}" height="${s || 24}"></i>`;
+const CJK = /[　-〿㐀-鿿＀-￯]/;
+function joinText(a, b) {
+  a = (a || '').replace(/\s+$/, ''); b = (b || '').trim();
+  if (!a) return b; if (!b) return a;
+  return a + (CJK.test(a.slice(-1)) || CJK.test(b[0]) ? '' : ' ') + b;
+}
+function resolve(heard) {
+  const h = heard.trim().toLowerCase();
+  const c = DB.filter(p => p.name.toLowerCase() === h || p.name.split(/\s+/)[0].toLowerCase() === h);
+  return { key: nid('p'), heard: heard.trim(), id: c.length === 1 ? c[0].id : null, cands: c.length > 1 ? c.map(p => p.id) : [], unclear: false };
+}
+function tally(d) {
+  const set = { w: d.games.filter(g => g.r === 'W').length, l: d.games.filter(g => g.r === 'L').length };
+  const unset = d.games.filter(g => !g.r).length;
+  if (d.totals) { const rw = d.totals.w - set.w, rl = d.totals.l - set.l; return { w: set.w + rw, l: set.l + rl, unknown: unset - rw - rl, orderOpen: unset > 0 }; }
+  return { w: set.w, l: set.l, unknown: unset, orderOpen: false };
+}
+function outcome(d) { if (!d.games.length) return null; const t = tally(d); if (t.w + t.l === 0) return null; return t.w > t.l ? 'win' : t.l > t.w ? 'loss' : 'draw'; }
+// Keep spoken totals consistent after a tap; fill the rest only when one answer is left.
+function settleTotals(d) {
+  if (!d.totals) return;
+  const setW = d.games.filter(g => g.r === 'W').length, setL = d.games.filter(g => g.r === 'L').length;
+  const rw = d.totals.w - setW, rl = d.totals.l - setL, open = d.games.filter(g => !g.r);
+  if (rw < 0 || rl < 0 || rw + rl !== open.length) { d.totals = null; return; }
+  if (open.length && (rw === 0 || rl === 0)) open.forEach(g => g.r = rw === 0 ? 'L' : 'W');
+}
+
+/* ------------------------------------------------------------------
+   AI result -> screen data. Nothing is added that the result lacks.
+------------------------------------------------------------------ */
+function mapResult(r) {
+  const d = { type: r.match_type === 'doubles' ? 'Doubles' : r.match_type === 'singles' ? 'Singles' : null, partners: [], opponents: [], games: [], totals: null, notes: [] };
+  for (const p of r.players) {
+    const ref = resolve(p.name);
+    if (p.role === 'partner') d.partners.push(ref);
+    else { ref.unclear = p.role === 'unknown'; d.opponents.push(ref); }
+  }
+  const t = r.totals || {};
+  let n = r.game_count != null ? r.game_count : Math.max(0, ...r.games.map(g => g.number));
+  if (!n && t.wins != null && t.losses != null) n = t.wins + t.losses;
+  const byNum = Object.fromEntries(r.games.map(g => [g.number, g]));
+  const keyOf = name => {
+    let ref = d.partners.find(p => p.heard.toLowerCase() === name.toLowerCase());
+    if (!ref) { ref = resolve(name); d.partners.push(ref); }
+    return ref.key;
+  };
+  for (let i = 1; i <= n; i++) {
+    const g = byNum[i] || {};
+    d.games.push({ id: nid('g'), r: g.result === 'win' ? 'W' : g.result === 'loss' ? 'L' : null,
+      a: g.my_score != null ? String(g.my_score) : '', b: g.their_score != null ? String(g.their_score) : '',
+      partner: g.partners && g.partners.length ? keyOf(g.partners[0]) : null, open: false });
+  }
+  // Only one side of the total known and no count: those games all share one result, so no order is invented.
+  if (!n && (t.wins || t.losses) && (t.wins == null || t.losses == null)) {
+    const k = t.wins != null ? 'W' : 'L', m = t.wins != null ? t.wins : t.losses;
+    for (let i = 0; i < m; i++) d.games.push({ id: nid('g'), r: k, a: '', b: '', partner: null, open: false });
+  }
+  if (t.wins != null && t.losses != null && d.games.some(g => !g.r) && t.wins + t.losses === d.games.length) { d.totals = { w: t.wins, l: t.losses }; settleTotals(d); }
+  if (d.type !== 'Doubles') d.games.forEach(g => g.partner = null);
+  d.notes = r.observations.map(o => {
+    const cat = { won_points: 'won', lost_points: 'lost', opponent: 'opp' }[o.category] || null;
+    return { id: nid('n'), text: o.text.trim(), cat, tag: cat === 'opp' ? null : (o.area || 'Other') };
+  });
+  return d;
+}
+
+/* ------------------------------------------------------------------
+   Speech recognition (Web Speech API). Audio goes only to the browser's
+   own recognizer; the prototype never records or stores it.
+------------------------------------------------------------------ */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const speechOK = !!SR && window.isSecureContext !== false;
+const ERR = {
+  'not-allowed': 'Microphone access is blocked. Allow it for this site in your browser settings, or type instead.',
+  'service-not-allowed': 'Speech recognition is turned off on this device. On iPhone, turn on Siri in Settings, or type instead.',
+  'audio-capture': 'No microphone was found. Type instead.',
+  'network': 'Speech recognition needs an internet connection. Check your connection, or type instead.',
+  'language-not-supported': 'This browser can\'t recognise that language. Switch language, or type instead.'
+};
+let waveTimer = null, clockTimer = null, phase = 0;
+function startRec() {
+  if (!speechOK || S.rec) return;
+  S.recMsg = ''; S.parseErr = null;
+  S.rec = { start: Date.now(), phase: 'starting', done: '', seg: '', interim: '', last: 0, stopping: false, error: null, r: null };
+  try { newRecognizer(); } catch (e) { S.rec = null; S.recMsg = 'Couldn\'t start the microphone. Type instead.'; render(); return; }
+  render();
+  waveTimer = setInterval(paintWave, 90);
+  clockTimer = setInterval(() => { const el = document.getElementById('clock'); if (el && S.rec) el.textContent = clock(); }, 250);
+}
+function newRecognizer() {
+  const rec = S.rec, r = new SR();
+  r.lang = S.lang === 'zh' ? 'zh-CN' : 'en-US';
+  r.continuous = true; r.interimResults = true; r.maxAlternatives = 1;
+  r.onstart = () => { if (S.rec === rec && !rec.stopping) { rec.phase = 'listening'; render(); } };
+  r.onresult = e => {
+    if (S.rec !== rec) return;
+    const fin = []; let interim = '';
+    for (let i = 0; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) fin.push(t); else interim += t;
+    }
+    // Some Android builds repeat earlier final text cumulatively; keep the longest version.
+    const out = [];
+    fin.forEach(t => { const p = out[out.length - 1]; if (p && t.trim().startsWith(p.trim())) out[out.length - 1] = t; else out.push(t); });
+    rec.seg = out.reduce(joinText, ''); rec.interim = interim; rec.last = Date.now();
+    paintLive();
+  };
+  r.onerror = e => { if (S.rec === rec && e.error !== 'no-speech' && e.error !== 'aborted') rec.error = e.error; };
+  r.onend = () => {
+    if (S.rec !== rec) return;
+    rec.done = joinText(rec.done, rec.stopping ? joinText(rec.seg, rec.interim) : rec.seg);
+    rec.seg = ''; rec.interim = '';
+    // Browsers end recognition after a pause; keep listening until the user taps stop (max 5 minutes).
+    if (!rec.stopping && !rec.error && Date.now() - rec.start < 5 * 60e3) { try { newRecognizer(); return; } catch (e) {} }
+    finishRec();
+  };
+  rec.r = r; r.start();
+}
+function stopRec() {
+  const rec = S.rec; if (!rec || rec.stopping) return;
+  rec.stopping = true; rec.phase = 'finishing'; render();
+  try { rec.r.stop(); } catch (e) { finishRec(); }
+  setTimeout(() => { if (S.rec === rec) { rec.done = joinText(rec.done, joinText(rec.seg, rec.interim)); finishRec(); } }, 3000);
+}
+function finishRec() {
+  const rec = S.rec; if (!rec) return;
+  clearInterval(waveTimer); clearInterval(clockTimer);
+  if (rec.done.trim()) S.transcript = joinText(S.transcript, rec.done);
+  if (rec.error) S.recMsg = ERR[rec.error] || 'Speech recognition stopped unexpectedly. Try again, or type instead.';
+  else if (!rec.done.trim()) S.recMsg = 'Nothing was recognised. Try again a little closer to the mic.';
+  S.rec = null;
+  render();
+  const ta = document.getElementById('transcript'); if (ta) ta.scrollTop = ta.scrollHeight;
+}
+function clock() { const s = Math.floor((Date.now() - S.rec.start) / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+function paintWave() {
+  const bars = document.querySelectorAll('.wave i'); if (!bars.length || !S.rec) return;
+  phase += 0.55;
+  const n = bars.length, live = S.rec.phase === 'listening' && Date.now() - S.rec.last < 900, level = live ? 1 : S.rec.phase === 'listening' ? 0.18 : 0.08;
+  bars.forEach((b, i) => {
+    const x = (i - (n - 1) / 2) / ((n - 1) / 2), env = Math.exp(-x * x * 2.2);
+    const v = 0.35 + 0.65 * Math.abs(Math.sin(phase * (0.7 + (i % 5) * 0.13) + i * 1.7)) * Math.random();
+    b.style.height = Math.max(4, Math.round(60 * env * v * level + 4)) + 'px';
+    b.style.opacity = (0.45 + 0.55 * env).toFixed(2);
+  });
+}
+function liveHTML() {
+  const rec = S.rec, base = joinText(S.transcript, rec.done);
+  const add = joinText(rec.seg, rec.interim);
+  return `${esc(base)}${base && add && !CJK.test(add[0]) ? ' ' : ''}<span class="interim">${esc(add)}</span><span class="caret"></span>`;
+}
+function paintLive() { const el = document.getElementById('live'); if (el) { el.innerHTML = liveHTML(); el.scrollTop = el.scrollHeight; } }
+
+/* ------------------------------------------------------------------
+   Flow
+------------------------------------------------------------------ */
+const SECTION_NAMES = { type: 'Match Type', players: 'Players', games: 'Games', notes: 'Notes' };
+const PARSE_ERR = {
+  signin: 'Sign in to Rallywise in this browser to use AI parsing.',
+  rate_limited: 'Too many requests in a short time. Wait a minute and try again.',
+  too_long: 'That description is too long. Shorten it a little and try again.',
+  too_large: 'That description is too long. Shorten it a little and try again.',
+  ai_not_configured: 'AI parsing isn\'t set up on the server yet.',
+  network: 'Couldn\'t reach the server. Check your connection and try again.'
+};
+async function continueFromDescribe() {
+  if (!S.transcript.trim() || S.parsing) return;
+  if (S.transcript.length > MAX_CHARS) return;
+  if (S.parsedFrom === S.transcript && S.d) { go('details'); return; }
+  S.parsing = true; S.parseErr = null; render();
+  let j;
+  try { j = await callParse(S.transcript); }
+  catch (e) { S.parsing = false; S.parseErr = PARSE_ERR[e.code] || 'Couldn\'t read your description. Try again, or fill in the details yourself.'; S.parseErrCode = e.code; render(); return; }
+  const p = mapResult(j.result);
+  S.meta = { model: j.model, latency: j.latency_ms, roundtrip: j.roundtrip_ms, usage: j.usage, cost: j.cost_usd, guards: j.guards || [], missing: j.result.missing, ambiguities: j.result.ambiguities, raw: j.result, prompt: j.prompt_version };
+  if (!S.d) S.d = p;
+  else {
+    const kept = [], updated = [];
+    const pick = { type: x => x.type, players: x => [x.partners, x.opponents].map(l => l.map(r => r.heard)), games: x => [x.games.map(g => [g.r, g.a, g.b]), x.totals] };
+    for (const sec of Object.keys(pick)) {
+      if (JSON.stringify(pick[sec](p)) === JSON.stringify(pick[sec](S.ai))) continue;
+      if (S.dirty[sec]) { kept.push(sec); continue; }
+      updated.push(sec);
+      if (sec === 'type') S.d.type = p.type;
+      if (sec === 'players') { S.d.partners = p.partners; S.d.opponents = p.opponents; }
+      if (sec === 'games') { S.d.games = p.games; S.d.totals = p.totals; }
+    }
+    // Game partners point at player rows; re-point them by name, or clear them if that partner is gone.
+    const keys = new Set(S.d.partners.map(r => r.key));
+    S.d.games.forEach(g => {
+      if (!g.partner || keys.has(g.partner)) return;
+      const heard = (p.partners.find(r => r.key === g.partner) || S.ai.partners.find(r => r.key === g.partner) || {}).heard;
+      const now = heard && S.d.partners.find(r => r.heard.toLowerCase() === heard.toLowerCase());
+      g.partner = now ? now.key : null;
+    });
+    const oldTexts = new Set(S.ai.notes.map(n => n.text));
+    const fresh = p.notes.filter(n => !oldTexts.has(n.text));
+    if (!S.dirty.notes) { if (JSON.stringify(p.notes.map(n => n.text)) !== JSON.stringify(S.ai.notes.map(n => n.text))) updated.push('notes'); S.d.notes = p.notes; }
+    else if (fresh.length) { S.d.notes.push(...fresh); updated.push('notes'); }
+    S.notice = kept.length || updated.length ? { kept: kept.map(k => SECTION_NAMES[k]), updated: [...new Set(updated)].map(k => SECTION_NAMES[k]) } : null;
+  }
+  S.ai = clone(p); S.parsedFrom = S.transcript; S.parsing = false;
+  go('details');
+}
+function fillManually() {
+  S.parseErr = null;
+  if (!S.d) { S.d = { type: null, partners: [], opponents: [], games: [], totals: null, notes: [] }; S.ai = clone(S.d); S.meta = null; }
+  go('details');
+}
+function go(screen) { S.screen = screen; S.editNote = null; render(); const sc = document.querySelector('.scroll'); if (sc) sc.scrollTop = 0; }
+function touch(sec) { S.dirty[sec] = true; }
+function saveSession() {
+  const d = S.d, notes = d.notes.filter(n => n.text.trim() && n.cat), byCat = c => notes.filter(n => n.cat === c);
+  const rec = {
+    id: nid('s'), date: new Date().toISOString().slice(0, 10), type: d.type,
+    partners: d.type === 'Doubles' ? d.partners.map(pName) : [], opponents: d.opponents.map(pName),
+    games: d.games.map(g => ({ r: g.r, a: g.a, b: g.b })), totals: d.totals, outcome: outcome(d), tally: tally(d),
+    // Same fields V1 stores, so the shape can move into the app later.
+    wt: [...new Set(byCat('won').map(n => n.tag))], lt: [...new Set(byCat('lost').map(n => n.tag))],
+    worked: byCat('won').map(n => n.text).join(' '), lost: byCat('lost').map(n => n.text).join(' '), on: byCat('opp').map(n => n.text).join(' '),
+    noteCount: notes.length, model: S.meta ? S.meta.model : null
+  };
+  S.saved.unshift(rec); S.saved = S.saved.slice(0, 30); store.set(SAVED_KEY, S.saved); S.justSaved = rec.id;
+  S.screen = 'matches'; S.sheet = null; flash('Session saved'); render();
+}
+function newSession() {
+  S = Object.assign(S, { screen: 'describe', transcript: '', rec: null, recMsg: '', parsing: false, parseErr: null, parsedFrom: null, ai: null,
+    d: null, dirty: { type: false, players: false, games: false, notes: false }, notice: null, editNote: null, sheet: null, justSaved: null });
+}
+function flash(text) {
+  const el = document.getElementById('toast');
+  el.innerHTML = `<div class="toast">${icon('circle-check', 18)}<span>${esc(text)}</span></div>`;
+  lucide.createIcons();
+  clearTimeout(flash.t1); clearTimeout(flash.t2);
+  flash.t1 = setTimeout(() => { const t = el.querySelector('.toast'); if (t) t.classList.add('out'); }, 2400);
+  flash.t2 = setTimeout(() => { el.innerHTML = ''; }, 2600);
+}
+
+/* ------------------------------------------------------------------
+   Views
+------------------------------------------------------------------ */
+function header(step, backIcon, backAct, label) {
+  return `<div class="hdr">
+    <button class="iconbtn" data-act="${backAct}" aria-label="${label}">${icon(backIcon)}</button>
+    <div class="hdr-t"><div class="a">Log Match</div><div class="b">Step ${step} of 3</div></div>
+  </div>
+  <div class="steps" aria-hidden="true">${[1, 2, 3].map(i => `<i class="${i <= step ? 'on' : ''}"></i>`).join('')}</div>`;
+}
+function viewDescribe() {
+  const rec = S.rec, has = S.transcript.trim().length > 0, over = S.transcript.length > MAX_CHARS;
+  const langSeg = `<div class="langseg" role="group" aria-label="Speech language">
+      <button data-act="lang" data-v="en" aria-pressed="${S.lang === 'en'}" ${rec ? 'disabled' : ''}>English</button>
+      <button data-act="lang" data-v="zh" aria-pressed="${S.lang === 'zh'}" ${rec ? 'disabled' : ''}>中文</button></div>`;
+  const body = rec ? `<div class="live" id="live" aria-live="polite">${liveHTML()}</div>`
+    : `<textarea id="transcript" aria-label="Session description" placeholder="${S.lang === 'zh' ? '点麦克风说话，或直接输入。&#10;&#10;例如：今天和小王打了三局单打，赢了两局。杀球不错。' : 'Tap the mic and talk, or type here.&#10;&#10;For example: Singles against Alex, won 21-18, lost 17-21. My net shots worked.'}">${esc(S.transcript)}</textarea>`;
+  const status = rec ? { starting: 'Starting the microphone…', listening: S.lang === 'zh' ? 'Listening in Chinese' : 'Listening in English', finishing: 'Finishing…' }[rec.phase] : '';
+  const foot = rec ? `<span>${status}</span>`
+    : has ? `<span class="${over ? 'over' : ''}">${over ? `${S.transcript.length}/${MAX_CHARS} characters` : S.parsedFrom && S.parsedFrom !== S.transcript ? 'Changed since you continued' : ''}</span><button data-act="clear">${icon('x', 16)}Clear</button>` : '';
+  let dock;
+  if (rec) {
+    dock = `<div class="wave" aria-hidden="true">${Array.from({ length: 41 }, () => '<i></i>').join('')}</div>
+      <div class="recrow">
+        <div class="timer num"><i></i><span id="clock">${clock()}</span></div>
+        <button class="bigmic" data-act="stop" aria-label="Stop recording" ${rec.stopping ? 'disabled' : ''}>${rec.stopping ? icon('loader-circle', 26).replace('<i ', '<i class="spin" ') : icon('square', 26)}</button>
+        <div class="side-cap">Tap to stop</div>
+      </div>`;
+  } else if (!has) {
+    dock = speechOK ? `<div class="idle-mic"><button class="bigmic primary" data-act="rec" aria-label="Start recording">${icon('mic', 30)}</button><span>Tap to talk</span></div>`
+      : `<div class="hint">${icon('keyboard', 18)}<span>Voice input isn't available in this browser${window.isSecureContext === false ? ' because the page isn\'t on HTTPS' : ''}. Type above, or use your keyboard's dictation key.</span></div>`;
+  } else {
+    dock = `<div class="go">
+        ${speechOK ? `<button class="minimic" data-act="rec" aria-label="Record more" ${S.parsing ? 'disabled' : ''}>${icon('mic')}</button>` : ''}
+        <button class="cta" data-act="continue" ${S.parsing || over ? 'disabled' : ''} ${S.parsing ? 'aria-busy="true"' : ''}>${S.parsing ? icon('loader-circle').replace('<i ', '<i class="spin" ') + 'Reading your description' : 'Continue'}</button>
+      </div>`;
+  }
+  const err = S.parseErr && !rec ? `<div class="errbox" role="alert">${icon('circle-alert', 20)}<div><div>${esc(S.parseErr)}</div>
+      <div class="errbtns">${S.parseErrCode === 'signin' ? `<a class="chip" href="../">Open Rallywise</a>` : `<button class="chip" data-act="continue">Try Again</button>`}<button class="chip" data-act="manual">Fill In Myself</button></div></div></div>` : '';
+  const msg = S.recMsg && !rec ? `<div class="dock-note">${esc(S.recMsg)}</div>` : '';
+  const signin = CFG.auth && !S.signedIn ? `<div class="banner">${icon('info', 18)}<div>AI parsing uses your Rallywise account. <a href="../">Sign in to Rallywise</a> in this browser, then come back.</div></div>` : '';
+  return `<div class="scroll" style="padding-bottom:12px;">
+      ${header(1, 'x', 'close', 'Close')}
+      <h1 class="title">Describe Your Session</h1>
+      <p class="sub">Who you played, how many games, how it went.</p>
+      ${signin}
+      <div class="compose">${body}<div class="compose-foot">${foot}</div></div>
+      ${speechOK ? langSeg : ''}
+    </div>
+    <div class="dock">${err}${msg}${dock}</div>`;
+}
+function playerRow(ref, role, i) {
+  const amb = !ref.id && ref.cands.length > 1, isNew = !ref.id && !amb;
+  const sub = ref.unclear ? 'Partner or opponent?' : amb ? 'More than one match' : isNew ? 'New player · tap to match' : '';
+  const name = amb ? ref.heard + '?' : pName(ref);
+  let html = `<div class="prow ${amb || isNew || ref.unclear ? 'warn' : ''}">
+    <div class="av">${esc(initials(amb ? ref.heard : name))}</div>
+    <button class="nm" data-act="pick" data-role="${role}" data-i="${i}" aria-label="Change ${esc(name)}"><span>${esc(name)}</span>${sub ? `<small>${sub}</small>` : ''}</button>
+    <button class="xbtn" data-act="rmp" data-role="${role}" data-i="${i}" aria-label="Remove ${esc(name)}">${icon('x', 20)}</button>
+  </div>`;
+  if (ref.unclear) html += `<div class="which"><span>${esc(ref.heard)} was on…</span><button class="chip" data-act="role" data-i="${i}" data-v="partner">Your Side</button><button class="chip" data-act="role" data-i="${i}" data-v="opponent">Other Side</button></div>`;
+  if (amb) html += `<div class="which"><span>Which ${esc(ref.heard)}?</span>${ref.cands.map(id => `<button class="chip" data-act="choose" data-role="${role}" data-i="${i}" data-id="${id}">${esc(pById(id).name)}</button>`).join('')}<button class="chip" data-act="choose" data-role="${role}" data-i="${i}" data-id="">Someone new</button></div>`;
+  return html;
+}
+const MISSING_LABEL = { match_type: 'match type', opponents: 'opponents', partners: 'partners', game_count: 'number of games', results: 'results', scores: 'scores', game_order: 'game order' };
+function viewDetails() {
+  const d = S.d, dbl = d.type === 'Doubles', maxOpp = dbl ? 2 : 1, n = S.notice;
+  const notice = n ? `<div class="banner" role="status">${icon('info', 18)}<div>${n.updated.length ? `Updated from your new description: ${n.updated.join(', ')}.` : ''} ${n.kept.length ? `Kept your edits to ${n.kept.join(', ')}. Check them against what you said.` : ''}</div>
+      <button class="xbtn" data-act="dismiss" aria-label="Dismiss">${icon('x', 18)}</button></div>` : '';
+  const m = S.meta;
+  const aiHint = m && !S.hideAiHint && (m.missing.length || m.ambiguities.length) ? `<div class="banner quiet">${icon('sparkles', 18)}<div>${m.missing.length ? `Not mentioned: ${m.missing.map(x => MISSING_LABEL[x]).join(', ')}.` : ''}${m.ambiguities.slice(0, 3).map(a => `<div class="amb">${esc(a.note)}</div>`).join('')}</div>
+      <button class="xbtn" data-act="hideai" aria-label="Dismiss">${icon('x', 18)}</button></div>` : '';
+  const typeSec = `<div class="sec"><div class="sec-h"><h3>Match Type</h3>${!d.type ? '<span class="aside">Not mentioned</span>' : ''}</div>
+    <div class="seg" role="group" aria-label="Match type">
+      <button data-act="type" data-v="Singles" aria-pressed="${d.type === 'Singles'}">${icon('user', 18)}Singles</button>
+      <button data-act="type" data-v="Doubles" aria-pressed="${d.type === 'Doubles'}">${icon('users', 18)}Doubles</button>
+    </div></div>`;
+  const partners = dbl ? `<div class="lbl">${d.partners.length > 1 ? 'Partners' : 'Partner'}</div>
+      ${d.partners.map((p, i) => playerRow(p, 'partner', i)).join('')}
+      <button class="addrow" data-act="addp" data-role="partner"><span class="av">${icon('plus', 20)}</span>${d.partners.length ? 'Add Another Partner' : 'Add Partner'}</button>` : '';
+  const opps = `<div class="lbl">${dbl ? 'Opponents' : 'Opponent'}</div>
+      ${d.opponents.map((p, i) => playerRow(p, 'opponent', i)).join('')}
+      ${d.opponents.filter(o => !o.unclear).length < maxOpp ? `<button class="addrow" data-act="addp" data-role="opponent"><span class="av">${icon('plus', 20)}</span>Add Opponent</button>` : ''}`;
+  const playersSec = `<div class="sec"><div class="sec-h"><h3>Players</h3></div><div class="card">${partners}${opps}</div></div>`;
+  const t = tally(d);
+  const sum = d.games.length ? `<span class="gsum num"><span class="w">${t.w}W</span> · <span class="l">${t.l}L</span>${t.unknown ? ` · <span class="u">${t.unknown} not set</span>` : ''}</span>` : '';
+  const multiP = dbl && d.partners.length > 1;
+  const rows = d.games.map((g, i) => {
+    const score = g.a !== '' && g.b !== '', part = multiP ? d.partners.find(p => p.key === g.partner) : null;
+    return `<div class="game">
+      <div class="game-main">
+        <div class="game-n">Game ${i + 1}${!g.r ? '<small>Not set</small>' : ''}</div>
+        <div class="wl ${g.r ? '' : 'unset'}" role="group" aria-label="Game ${i + 1} result">
+          <button class="w" data-act="wl" data-i="${i}" data-v="W" aria-pressed="${g.r === 'W'}" aria-label="Won">W</button>
+          <button class="l" data-act="wl" data-i="${i}" data-v="L" aria-pressed="${g.r === 'L'}" aria-label="Lost">L</button>
+        </div>
+        <button class="scorebtn ${score ? 'has num' : ''}" data-act="score" data-i="${i}" aria-expanded="${g.open}">${score ? `${esc(g.a)}–${esc(g.b)}` : 'Score'}${icon(g.open ? 'chevron-up' : 'chevron-down', 16)}</button>
+        <button class="xbtn" data-act="rmg" data-i="${i}" aria-label="Remove game ${i + 1}">${icon('x', 20)}</button>
+      </div>
+      ${multiP ? `<button class="pchip" data-act="gpartner" data-i="${i}">${icon('users', 14)}${part ? 'With ' + esc(pName(part).split(' ')[0]) : 'Partner not set'}</button>` : ''}
+      ${g.open ? `<div class="scoreedit">
+          <label>You<input id="sa-${g.id}" inputmode="numeric" maxlength="2" value="${esc(g.a)}" data-in="sa" data-i="${i}" aria-label="Your points, game ${i + 1}"></label>
+          <span class="colon">:</span>
+          <label>Them<input id="sb-${g.id}" inputmode="numeric" maxlength="2" value="${esc(g.b)}" data-in="sb" data-i="${i}" aria-label="Their points, game ${i + 1}"></label>
+        </div>` : ''}
+    </div>`;
+  }).join('');
+  const orderHint = d.totals && t.orderOpen ? `<div class="hint">${icon('info', 18)}<span>You said ${d.totals.w} won and ${d.totals.l} lost, not the order. Set games if you remember, or save as is.</span></div>` : '';
+  const empty = !d.games.length ? `<div class="hint">${icon('info', 18)}<span>No games mentioned. That's fine for a practice or notes-only session.</span></div>` : '';
+  const gamesSec = `<div class="sec"><div class="sec-h"><h3>Games</h3>${sum}</div>${orderHint}${empty}${rows}
+      <button class="addgame" data-act="addg">${icon('plus', 18)}Add Game ${d.games.length + 1}</button></div>`;
+  return `<div class="scroll">
+      ${header(2, 'chevron-left', 'back', 'Back to Describe')}
+      <h1 class="title">Match Details</h1>
+      ${notice}${aiHint}${typeSec}${playersSec}${gamesSec}
+      ${m ? `<button class="textbtn aid" data-act="aisheet">${icon('sparkles', 16)}AI details · ${esc(m.model)} · ${(m.roundtrip / 1000).toFixed(1)} s</button>` : ''}
+    </div>
+    <div class="dock"><button class="cta" data-act="tonotes">Continue</button></div>`;
+}
+function noteCard(n) {
+  if (S.editNote === n.id) {
+    const hasOpp = S.d.opponents.length > 0 || n.cat === 'opp';
+    return `<div class="note edit">
+      <textarea id="nt-${n.id}" data-in="note" data-id="${n.id}" rows="2" aria-label="Note" placeholder="What happened?">${esc(n.text)}</textarea>
+      <div class="sec" style="gap:8px;"><div class="mini-h">Goes under</div><div class="chips">
+        <button class="chip" data-act="ncat" data-id="${n.id}" data-v="won" aria-pressed="${n.cat === 'won'}">What Worked</button>
+        <button class="chip" data-act="ncat" data-id="${n.id}" data-v="lost" aria-pressed="${n.cat === 'lost'}">What Cost Points</button>
+        ${hasOpp ? `<button class="chip" data-act="ncat" data-id="${n.id}" data-v="opp" aria-pressed="${n.cat === 'opp'}">Opponent</button>` : ''}
+      </div></div>
+      ${n.cat !== 'opp' ? `<div class="sec" style="gap:8px;"><div class="mini-h">Area</div><div class="chips">${TAGS.map(t => `<button class="chip" data-act="ntag" data-id="${n.id}" data-v="${t}" aria-pressed="${n.tag === t}">${t}</button>`).join('')}</div></div>` : ''}
+      <div class="edit-foot"><button class="textbtn" data-act="ndel" data-id="${n.id}">${icon('trash-2', 18)}Delete</button><button class="donebtn" data-act="ndone" data-id="${n.id}">Done</button></div>
+    </div>`;
+  }
+  return `<div class="note">
+    <button class="body" data-act="nedit" data-id="${n.id}" aria-label="Edit note"><span class="txt">${esc(n.text)}</span>${n.tag && n.cat !== 'opp' ? `<span class="meta"><span class="tag">${n.tag}</span></span>` : ''}</button>
+    <button class="xbtn" data-act="ndel" data-id="${n.id}" aria-label="Delete note">${icon('x', 20)}</button>
+  </div>`;
+}
+function viewNotes() {
+  const d = S.d, oc = outcome(d), t = tally(d);
+  const me = d.type === 'Doubles' && d.partners.length ? 'You & ' + d.partners.map(p => pName(p).split(' ')[0]).join(' / ') : 'You';
+  const opp = d.opponents.length ? d.opponents.map(pName).join(' & ') : 'Opponent not set';
+  const scoreLine = d.games.length ? `${d.type || 'Match'} · ${t.w}–${t.l}${t.unknown ? ` · ${t.unknown} not set` : ''}${d.games.some(g => g.a && g.b) ? ' · ' + d.games.filter(g => g.a && g.b).map(g => g.a + '–' + g.b).join(', ') : ''}` : 'No games recorded';
+  const badge = oc ? `<span class="badge ${oc}">${{ win: 'Win', loss: 'Loss', draw: 'Draw' }[oc]}</span>` : `<span class="badge notes">Notes</span>`;
+  const summary = `<div class="summary"><div style="min-width:0;display:flex;flex-direction:column;gap:4px;"><div class="t">${d.games.length || d.opponents.length ? `${esc(me)} vs ${esc(opp)}` : 'Notes only'}</div><div class="s num">${esc(scoreLine)}</div></div>${badge}</div>`;
+  const unsorted = d.notes.filter(n => !n.cat);
+  const unsortedSec = unsorted.length ? `<div class="sec"><div class="sec-h"><h3>Not Sure Where These Go</h3></div>
+      ${unsorted.map(n => S.editNote === n.id ? noteCard(n) : `<div class="note" style="flex-direction:column;align-items:stretch;gap:10px;padding:14px 16px;">
+        <button class="body" data-act="nedit" data-id="${n.id}" aria-label="Edit note"><span class="txt">${esc(n.text)}</span></button>
+        <div class="sortrow"><button class="chip" data-act="ncat" data-id="${n.id}" data-v="won">${icon('thumbs-up', 16)}Worked</button><button class="chip" data-act="ncat" data-id="${n.id}" data-v="lost">${icon('thumbs-down', 16)}Cost Points</button><button class="chip" data-act="ndel" data-id="${n.id}" aria-label="Delete note">${icon('trash-2', 16)}</button></div>
+      </div>`).join('')}</div>` : '';
+  const oppName = d.opponents.length === 1 ? pName(d.opponents[0]).split(' ')[0] : 'Your Opponents';
+  const cat = (key, title, sub) => {
+    const list = d.notes.filter(n => n.cat === key);
+    return `<div class="sec"><div class="sec-h"><h3>${title}</h3>${list.length ? `<span class="aside num">${list.length}</span>` : ''}</div>
+      <div class="cat-sub">${sub}</div>${list.map(noteCard).join('')}
+      <button class="addnote" data-act="nadd" data-v="${key}">${icon('plus', 18)}Add Note</button></div>`;
+  };
+  const showOpp = d.opponents.length || d.notes.some(n => n.cat === 'opp');
+  return `<div class="scroll">
+      ${header(3, 'chevron-left', 'back2', 'Back to Match Details')}
+      <h1 class="title">Notes</h1>
+      <p class="sub">Optional. Tap a note to edit or move it.</p>
+      ${summary}${unsortedSec}
+      ${cat('won', 'What Worked?', 'Why you won points')}
+      ${cat('lost', 'What Cost You Points?', 'Why you lost points')}
+      ${showOpp ? cat('opp', `What Did You Notice About ${esc(oppName)}?`, 'Tendencies, strengths, weak spots') : ''}
+    </div>
+    <div class="dock"><button class="cta" data-act="save">Save Session</button></div>`;
+}
+function matchCard(m, fresh) {
+  const badge = m.outcome ? `<span class="badge ${m.outcome}">${{ win: 'Win', loss: 'Loss', draw: 'Draw' }[m.outcome]}</span>` : `<span class="badge notes">Notes</span>`;
+  const teamA = m.partners.length ? 'You & ' + m.partners.join(' / ') : 'You';
+  const pills = m.games.filter(g => g.r || (g.a && g.b)).map(g => `<span class="pill num" style="color:${g.r === 'W' ? 'var(--status-win)' : g.r === 'L' ? 'var(--status-loss)' : 'var(--text-secondary)'}">${g.a && g.b ? g.a + '–' + g.b : g.r}</span>`).join('');
+  const foot = [];
+  if (m.totals && m.games.some(g => !g.r)) foot.push('Game order not set');
+  if (m.noteCount) foot.push(m.noteCount + (m.noteCount === 1 ? ' note' : ' notes'));
+  return `<div class="mcard ${fresh ? 'fresh' : ''}">
+    <div class="mtop"><span>${esc(m.date)}${m.type ? ' · ' + m.type : ''}</span>${badge}</div>
+    <div class="mmid"><div style="min-width:0;display:flex;flex-direction:column;gap:3px;"><div class="a">${esc(teamA)}</div><div class="b">${m.opponents.length ? 'vs ' + esc(m.opponents.join(' & ')) : m.games.length ? 'Opponent not set' : 'Practice notes'}</div></div>${m.games.length ? `<div class="g num">${m.tally.w}–${m.tally.l}</div>` : ''}</div>
+    ${pills ? `<div class="pills">${pills}</div>` : ''}
+    ${foot.length ? `<div class="mfoot">${icon('notebook-pen', 16)}${esc(foot.join(' · '))}</div>` : ''}
+  </div>`;
+}
+function viewMatches() {
+  return `<div class="scroll">
+      <h1 class="title" style="font-size:32px;">Saved Sessions</h1>
+      <p class="sub">Prototype only. These stay on this device and are not added to your Rallywise matches.</p>
+      <button class="cta" data-act="newlog">${icon('plus')}Log Another Session</button>
+      <div style="display:flex;flex-direction:column;gap:10px;">${S.saved.map(m => matchCard(m, m.id === S.justSaved)).join('') || '<div class="hint">Nothing saved yet.</div>'}</div>
+      ${S.saved.length ? `<button class="textbtn" data-act="clearsaved" style="align-self:center;">${icon('trash-2', 16)}Clear saved sessions</button>` : ''}
+    </div>`;
+}
+function aiDetailsHTML() {
+  const m = S.meta;
+  const models = `<label class="mini-h" for="modelSel">Model for the next parse</label>
+    <select id="modelSel" data-in="model">${CFG.models.map(x => `<option ${x === S.model ? 'selected' : ''}>${x}</option>`).join('')}</select>`;
+  if (!m) return models + `<p class="mini-h">No parse yet. Describe a session and tap Continue.</p>`;
+  const usd = x => x == null ? 'n/a' : '$' + x.toFixed(5);
+  return `${models}
+    <dl class="kv">
+      <dt>Model</dt><dd>${esc(m.model)}</dd>
+      <dt>Model time</dt><dd class="num">${m.latency} ms</dd>
+      <dt>Round trip</dt><dd class="num">${m.roundtrip} ms</dd>
+      <dt>Tokens</dt><dd class="num">${m.usage ? `${m.usage.input_tokens} in / ${m.usage.output_tokens} out` : 'n/a'}</dd>
+      <dt>Est. cost</dt><dd class="num">${usd(m.cost)}</dd>
+      <dt>Guards</dt><dd>${m.guards.length ? esc(m.guards.join('; ')) : 'none'}</dd>
+    </dl>
+    <details><summary>Raw JSON</summary><pre>${esc(JSON.stringify(m.raw, null, 2))}</pre></details>`;
+}
+function viewSheet() {
+  const sh = S.sheet; if (!sh) return '';
+  if (sh.kind === 'ai') return `<div class="scrim" data-act="closesheet"></div>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-h"><div class="grab" aria-hidden="true"></div>
+      <div class="sheet-h"><h2 id="sheet-h">AI Details</h2><button class="iconbtn" data-act="closesheet" aria-label="Close">${icon('x')}</button></div>
+      <div class="aibox">${aiDetailsHTML()}</div></div>`;
+  const role = sh.role, list = role === 'partner' ? S.d.partners : S.d.opponents;
+  const used = new Set([...S.d.partners, ...S.d.opponents].map(r => r.id).filter(Boolean));
+  const cur = sh.i != null ? list[sh.i] : null;
+  if (cur && cur.id) used.delete(cur.id);
+  const q = sh.q.trim().toLowerCase();
+  const avail = DB.filter(p => !used.has(p.id) && (!q || p.name.toLowerCase().includes(q)));
+  const exact = DB.some(p => p.name.toLowerCase() === q);
+  const addNew = q.length > 0 && !exact ? `<button class="addrow" data-act="picknew" style="height:56px;"><span class="av">${icon('plus', 20)}</span>Add “${esc(sh.q.trim())}” as New Player</button>` : '';
+  return `<div class="scrim" data-act="closesheet"></div>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-h">
+      <div class="grab" aria-hidden="true"></div>
+      <div class="sheet-h"><h2 id="sheet-h">${cur ? 'Change ' : 'Add '}${role === 'partner' ? 'Partner' : 'Opponent'}</h2><button class="iconbtn" data-act="closesheet" aria-label="Close">${icon('x')}</button></div>
+      ${cur && !cur.id ? `<div class="hint">${icon('info', 18)}<span>You said “${esc(cur.heard)}”. Pick who that is, or keep them as a new player.</span></div>` : ''}
+      <div class="search">${icon('search')}<input id="sheetq" data-in="sheetq" value="${esc(sh.q)}" placeholder="Search or type a new name" autocomplete="off"></div>
+      ${addNew}
+      ${cur && !cur.id && !q ? `<button class="addrow" data-act="closesheet" style="height:56px;"><span class="av">${icon('check', 20)}</span>Keep “${esc(cur.heard)}” as New Player</button>` : ''}
+      <div class="picklist">${avail.map(p => `<button class="pick" data-act="pickid" data-id="${esc(p.id)}"><span class="av">${esc(initials(p.name))}</span>${esc(p.name)}</button>`).join('')}</div>
+    </div>`;
+}
+function render() {
+  const app = document.getElementById('app');
+  const ae = document.activeElement, focusId = ae && ae.id, sel = ae && ae.selectionStart != null ? [ae.selectionStart, ae.selectionEnd] : null;
+  const scEl = app.querySelector('.scroll'), scrollTop = scEl ? scEl.scrollTop : 0, prev = render.prev;
+  app.innerHTML = { describe: viewDescribe, details: viewDetails, notes: viewNotes, matches: viewMatches }[S.screen]();
+  document.getElementById('overlay').innerHTML = viewSheet();
+  document.getElementById('aiPanel').innerHTML = `<div class="eyebrow">AI details</div>${aiDetailsHTML()}`;
+  lucide.createIcons({ attrs: { 'stroke-width': 2 } });
+  const sc2 = app.querySelector('.scroll'); if (sc2 && prev === S.screen) sc2.scrollTop = scrollTop;
+  render.prev = S.screen;
+  if (focusId) { const el = document.getElementById(focusId); if (el) { el.focus(); if (sel && el.setSelectionRange) try { el.setSelectionRange(sel[0], sel[1]); } catch (e) {} } }
+  if (S.rec) { paintWave(); const lv = document.getElementById('live'); if (lv) lv.scrollTop = lv.scrollHeight; }
+}
+
+/* ------------------------------------------------------------------
+   Events
+------------------------------------------------------------------ */
+const listOf = role => role === 'partner' ? S.d.partners : S.d.opponents;
+const noteById = id => S.d.notes.find(n => n.id === id);
+function finishNote() { if (!S.editNote) return; const n = noteById(S.editNote); if (n && !n.text.trim()) S.d.notes = S.d.notes.filter(x => x !== n); S.editNote = null; }
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b || !b.closest('#phone')) return;
+  const act = b.dataset.act, i = b.dataset.i != null ? +b.dataset.i : null, d = S.d;
+  switch (act) {
+    case 'rec': startRec(); return;
+    case 'stop': stopRec(); return;
+    case 'lang': S.lang = b.dataset.v; store.set('rallywise.voiceproto.lang', S.lang); break;
+    case 'clear': S.transcript = ''; S.recMsg = ''; S.parseErr = null; break;
+    case 'continue': continueFromDescribe(); return;
+    case 'manual': fillManually(); return;
+    case 'close': S.screen = 'matches'; S.justSaved = null; break;
+    case 'back': go('describe'); return;
+    case 'back2': finishNote(); go('details'); return;
+    case 'tonotes': S.notice = null; go('notes'); return;
+    case 'dismiss': S.notice = null; break;
+    case 'hideai': S.hideAiHint = true; break;
+    case 'aisheet': S.sheet = { kind: 'ai' }; break;
+    case 'type': d.type = b.dataset.v; touch('type'); break;
+    case 'pick': S.sheet = { role: b.dataset.role, i, q: '' }; break;
+    case 'addp': S.sheet = { role: b.dataset.role, i: null, q: '' }; break;
+    case 'rmp': { const l = listOf(b.dataset.role), key = l[i].key; l.splice(i, 1); d.games.forEach(g => { if (g.partner === key) g.partner = null; }); touch('players'); break; }
+    case 'role': { const ref = d.opponents.splice(i, 1)[0]; ref.unclear = false; (b.dataset.v === 'partner' ? d.partners : d.opponents).push(ref); if (b.dataset.v === 'partner' && !d.type) d.type = 'Doubles'; touch('players'); break; }
+    case 'choose': { const r = listOf(b.dataset.role)[i]; r.id = b.dataset.id || null; r.cands = []; touch('players'); break; }
+    case 'closesheet': S.sheet = null; break;
+    case 'pickid': case 'picknew': {
+      const sh = S.sheet, l = listOf(sh.role);
+      const ref = act === 'pickid' ? { key: nid('p'), heard: pById(b.dataset.id).name, id: b.dataset.id, cands: [], unclear: false } : { key: nid('p'), heard: sh.q.trim(), id: null, cands: [], unclear: false };
+      if (sh.i != null) { ref.key = l[sh.i].key; l[sh.i] = ref; } else l.push(ref);
+      touch('players'); S.sheet = null; break;
+    }
+    case 'wl': { const g = d.games[i]; g.r = g.r === b.dataset.v && !d.totals ? null : b.dataset.v; touch('games'); settleTotals(d); break; }
+    case 'score': d.games[i].open = !d.games[i].open; if (d.games[i].open) setTimeout(() => { const el = document.getElementById('sa-' + d.games[i].id); if (el) el.focus(); }, 0); break;
+    case 'rmg': d.games.splice(i, 1); d.totals = null; touch('games'); break;
+    case 'addg': { const last = d.games[d.games.length - 1]; d.games.push({ id: nid('g'), r: null, a: '', b: '', partner: last ? last.partner : null, open: false }); d.totals = null; touch('games'); break; }
+    case 'gpartner': { const g = d.games[i], ks = d.partners.map(p => p.key), at = ks.indexOf(g.partner); g.partner = ks[(at + 1) % ks.length]; touch('games'); break; }
+    case 'nedit': finishNote(); S.editNote = b.dataset.id; setTimeout(() => { const el = document.getElementById('nt-' + b.dataset.id); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }, 0); break;
+    case 'ndone': finishNote(); break;
+    case 'ndel': d.notes = d.notes.filter(n => n.id !== b.dataset.id); if (S.editNote === b.dataset.id) S.editNote = null; touch('notes'); break;
+    case 'ncat': { const n = noteById(b.dataset.id); n.cat = b.dataset.v; n.tag = n.cat === 'opp' ? null : (n.tag || 'Other'); touch('notes'); break; }
+    case 'ntag': noteById(b.dataset.id).tag = b.dataset.v; touch('notes'); break;
+    case 'nadd': { finishNote(); const n = { id: nid('n'), text: '', cat: b.dataset.v, tag: b.dataset.v === 'opp' ? null : 'Other' }; d.notes.push(n); S.editNote = n.id; touch('notes'); setTimeout(() => { const el = document.getElementById('nt-' + n.id); if (el) el.focus(); }, 0); break; }
+    case 'save': finishNote(); saveSession(); return;
+    case 'newlog': newSession(); break;
+    case 'clearsaved': S.saved = []; store.set(SAVED_KEY, []); break;
+  }
+  render();
+});
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.id === 'transcript') {
+    const had = !!S.transcript.trim(), over = S.transcript.length > MAX_CHARS;
+    S.transcript = el.value; S.recMsg = ''; S.parseErr = null;
+    if (had !== !!el.value.trim() || over !== (el.value.length > MAX_CHARS) || document.querySelector('.errbox')) render();
+    return;
+  }
+  const kind = el.dataset.in; if (!kind) return;
+  if (kind === 'sa' || kind === 'sb') {
+    const g = S.d.games[+el.dataset.i]; el.value = el.value.replace(/\D/g, '');
+    g[kind === 'sa' ? 'a' : 'b'] = el.value; touch('games');
+    if (g.a !== '' && g.b !== '' && +g.a !== +g.b) { g.r = +g.a > +g.b ? 'W' : 'L'; settleTotals(S.d); }
+    render(); return;
+  }
+  if (kind === 'note') { noteById(el.dataset.id).text = el.value; touch('notes'); return; }
+  if (kind === 'sheetq') { S.sheet.q = el.value; render(); return; }
+});
+document.addEventListener('change', e => { if (e.target.dataset && e.target.dataset.in === 'model') { S.model = e.target.value; store.set('rallywise.voiceproto.model', S.model); render(); } });
+
+document.getElementById('samples').innerHTML = SAMPLES.map(t => `<button class="sc" type="button" data-sample="${esc(t)}"><span>${esc(t)}</span></button>`).join('');
+document.getElementById('samples').addEventListener('click', e => {
+  const b = e.target.closest('[data-sample]'); if (!b || S.rec) return;
+  newSession(); S.transcript = b.dataset.sample; render();
+});
+if (location.hash === '#phone') document.documentElement.classList.add('bare');
+
+window.voiceProto = { state: () => S, mapResult };
+render();
+(async () => {
+  if (CFG.auth) { S.signedIn = !!(await getSession()); render(); }
+  await loadPlayers();
+})();
+})();
+</script>
+</body>
+</html>
