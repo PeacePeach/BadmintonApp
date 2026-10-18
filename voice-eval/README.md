@@ -18,6 +18,8 @@ Speak or type a session, let a language model turn it into match data, fix anyth
    - drops scores whose numbers aren't in the text (digits or Chinese numerals)
    - makes W/L agree with scores
    - sets `order_known` only when every game's result is known in sequence
+   - drops empty game entries, and clears the game count when the text mentions no games (notes-only sessions get an empty games list)
+   - tags a note with the area its text names, e.g. 网前 or "at the net" is Net
 3. **Screens.** The result fills Match Details and Notes. Edits never call the model again. If you go back and change the text, sections you haven't edited refresh, and edited sections are kept.
 
 ## Deploy (one time)
@@ -62,6 +64,7 @@ OPENAI_API_KEY=sk-... node voice-eval/run.mjs --model gpt-5-mini    # compare an
 OPENAI_API_KEY=sk-... node voice-eval/run.mjs --repeat 3            # check run-to-run stability
 node voice-eval/run.mjs --replay voice-eval/results/<file>.json     # re-score saved outputs after editing cases
 node voice-eval/run.mjs --selftest                                  # check the scorer itself (expects 100%)
+node --test voice-eval/regression.test.mjs                          # regression tests for guards and screen mapping (no key needed)
 ```
 
 Each run writes `voice-eval/results/<model>-<time>.json` (raw outputs) and a `.md` report with:

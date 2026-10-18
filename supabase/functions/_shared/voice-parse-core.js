@@ -2,7 +2,7 @@
 // Plain ES module with no dependencies, shared by the parse-voice-log edge function (Deno) and the
 // eval runner in voice-eval/ (Node 18+), so both exercise exactly the same prompt, schema and guards.
 
-export const PROMPT_VERSION = '2026-10-18-v1';
+export const PROMPT_VERSION = '2026-10-18-v2';
 export const AREAS = ['Serve', 'Return', 'Net', 'Smash', 'Defence', 'Footwork', 'Placement', 'Other'];
 const MISSING = ['match_type', 'opponents', 'partners', 'game_count', 'results', 'scores', 'game_order'];
 const AMBIG = ['match_type', 'players', 'games', 'results', 'scores', 'observations'];
@@ -51,11 +51,11 @@ Fields
 - order_known: true only if the result of every game is known in sequence.
 - observations: technical or tactical reflections only (shots, movement, tactics, mistakes, an opponent's habits), not results or small talk. One item per distinct point, short, in the same language the speaker used for it, lightly cleaned up.
   category: "won_points" for strengths, things that worked or won points; "lost_points" for mistakes, weaknesses, things that cost points; "opponent" for an opponent's tendencies, strengths or weaknesses; "unsure" when the speaker is uncertain or it could go either way.
-  area: one of ${AREAS.join(', ')} that best fits (lifts and clears under pressure count as Defence when defending; drops, clears and length as Placement), "Other" if none fits, null for opponent observations. about: the opponent's name for opponent observations, else null.
+  area: one of ${AREAS.join(', ')} that best fits, "Other" if none fits, null for opponent observations. When the observation names where or which stroke, use it: 网前/net → Net (a mistake at the net is Net, not Footwork), 杀球/smash → Smash, 发球/serve → Serve, 接发/return → Return, 步法/footwork → Footwork, 防守/defence → Defence, 落点/clears/drops/length → Placement. Lifts under pressure count as Defence. about: the opponent's name for opponent observations, else null.
 - missing: what a match log usually needs that the description does not give: ${MISSING.join(', ')}. Only include items that apply; if there was no match at all, include nothing about results.
 - ambiguities: short English notes on anything unclear or contradictory, for example a player whose role is unclear or a partner switch without a name.
 
-If the description has observations but no match (a practice or drills), return match_type null, game_count null, games [], totals nulls, order_known false.`;
+If the description has observations but no match results (a practice, drills, or just reflections), return match_type null, game_count null, games [], totals nulls, order_known false. Never add a placeholder game.`;
 
 // USD per 1M tokens (input, output). Check current OpenAI pricing before relying on these.
 export const PRICES = {
@@ -106,6 +106,21 @@ export function numbersIn(text) {
   return set;
 }
 
+// Words that name an area outright. If an observation names one and the model picked a different area,
+// the named one wins (e.g. "网前失误比较多" is Net). Several named areas: the model's pick stands if it is one of them.
+export const AREA_TERMS = [
+  ['Return', /接发|\breturns?\b|\breceiv/i],
+  ['Serve', /(?<!接)发球|\bserv(e|es|ing)\b/i],
+  ['Net', /网前|放网|搓球|\bnet\b/i],
+  ['Smash', /杀球|扣杀|\bsmash/i],
+  ['Defence', /防守|接杀|\bdefen[cs]e|\bdefend/i],
+  ['Footwork', /步法|脚步|\bfootwork\b/i],
+  ['Placement', /落点|高远球|吊球|\bclears?\b|\bdrops?\b|\bplacement\b/i]
+];
+export function namedAreas(text) { return AREA_TERMS.filter(([, re]) => re.test(text)).map(([a]) => a); }
+const GAME_WORDS = /\bgames?\b|\bsets?\b|\bmatch(es)?\b|局|盘|比赛|\d{1,2}\s*[-–:比]\s*\d{1,2}/i;
+const NO_GAMES = /\bno (proper |real )?(games|matches)\b|\bdidn'?t play (any )?(games|matches)\b|没有比赛|没打比赛|没比赛|没打/i;
+
 export function guard(out, transcript) {
   const notes = [];
   const lower = transcript.toLowerCase();
@@ -118,6 +133,14 @@ export function guard(out, transcript) {
   });
   const named = new Set(out.players.map(p => p.name.toLowerCase()));
   // Games: sane numbering, scores that appear in the text, results consistent with scores.
+  // A game entry with no result, score or partner says nothing; an empty session must not get a placeholder game.
+  const before = out.games.length;
+  out.games = out.games.filter(g => g.result || g.my_score != null || g.their_score != null || g.partners.length);
+  if (out.games.length < before) notes.push(`dropped ${before - out.games.length} empty game entr${before - out.games.length === 1 ? 'y' : 'ies'}`);
+  const noTotals = out.totals.wins == null && out.totals.losses == null;
+  if (out.game_count != null && !out.games.length && noTotals && (!GAME_WORDS.test(transcript) || NO_GAMES.test(transcript))) {
+    notes.push('cleared game_count with no games in transcript'); out.game_count = null;
+  }
   const seen = new Set();
   out.games = out.games.filter(g => g.number >= 1 && g.number <= 50 && !seen.has(g.number) && seen.add(g.number)).sort((a, b) => a.number - b.number);
   for (const g of out.games) {
@@ -145,7 +168,11 @@ export function guard(out, transcript) {
   if (out.game_count != null && (t.wins || 0) + (t.losses || 0) > out.game_count) { notes.push('totals exceed game_count'); out.ambiguities.push({ field: 'results', note: 'Wins and losses add up to more than the number of games.' }); }
   out.order_known = out.game_count != null && out.game_count > 0 && out.games.length === out.game_count && out.games.every(g => g.result);
   out.observations = out.observations.filter(o => o.text.trim());
-  for (const o of out.observations) if (o.category === 'opponent') o.area = null;
+  for (const o of out.observations) {
+    if (o.category === 'opponent') { o.area = null; continue; }
+    const named = namedAreas(o.text);
+    if (named.length && !named.includes(o.area)) { notes.push(`area ${o.area} -> ${named[0]} (named in text)`); o.area = named[0]; }
+  }
   return notes;
 }
 
