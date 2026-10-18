@@ -27,10 +27,10 @@ const repeat = +args.repeat || 1;
 function perfect(c) {
   const e = c.expect, pick = v => (v && typeof v === 'object' && v.any) ? v.any[0] : v;
   return {
-    language: c.lang, match_type: pick(e.match_type ?? null), game_count: e.game_count ?? null, order_known: !!e.order_known,
+    language: c.lang, match_type: pick(e.match_type ?? null), multiple_lineups: !!e.multiple_lineups, game_count: e.game_count ?? null, order_known: !!e.order_known,
     totals: e.totals || { wins: null, losses: null },
-    players: (e.players || []).map(p => ({ name: p.name, role: pick(p.role), games: [] })),
-    games: (e.games || []).map(g => ({ number: g.number, result: g.result, my_score: g.my_score, their_score: g.their_score, partners: g.partners || [] })),
+    players: (e.players || []).map(p => ({ name: p.name, role: pick(p.role) })),
+    games: (e.games || []).map(g => ({ number: g.number, result: g.result, my_score: g.my_score, their_score: g.their_score, interrupted: !!g.interrupted })),
     observations: (e.observations || []).map(o => ({ text: o.any[0], category: o.category, area: null, about: null })),
     missing: [], ambiguities: []
   };

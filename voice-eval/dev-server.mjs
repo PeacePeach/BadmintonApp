@@ -21,9 +21,9 @@ function fixtureFor(transcript) {
   const cases = JSON.parse(fs.readFileSync(path.join(here, 'cases.json'), 'utf8'));
   const c = cases.find(x => x.transcript === transcript.trim()); if (!c) return null;
   const e = c.expect, pick = v => (v && typeof v === 'object' && v.any) ? v.any[0] : v;
-  return { language: c.lang, match_type: pick(e.match_type ?? null), game_count: e.game_count ?? null, order_known: !!e.order_known, totals: e.totals || { wins: null, losses: null },
-    players: (e.players || []).map(p => ({ name: p.name, role: pick(p.role), games: [] })),
-    games: (e.games || []).map(g => ({ partners: [], ...g })),
+  return { language: c.lang, match_type: pick(e.match_type ?? null), multiple_lineups: !!e.multiple_lineups, game_count: e.game_count ?? null, order_known: !!e.order_known, totals: e.totals || { wins: null, losses: null },
+    players: (e.players || []).map(p => ({ name: p.name, role: pick(p.role) })),
+    games: (e.games || []).map(g => ({ interrupted: false, ...g })),
     observations: (e.observations || []).map(o => ({ text: o.any[0], category: o.category, area: null, about: null })), missing: [], ambiguities: [] };
 }
 

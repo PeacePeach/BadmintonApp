@@ -122,7 +122,6 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .scoreedit input{width:100%;height:48px;border-radius:99px;background:var(--input-field-bg);border:1px solid var(--input-field-outline);text-align:center;font:500 20px/1 var(--font-sans);outline:none;color:var(--text-primary);font-variant-numeric:tabular-nums;}
 .scoreedit input:focus{border-color:var(--ghost-button-outline-highlight);}
 .scoreedit .colon{font:500 20px/1 var(--font-sans);color:var(--text-tertiary);padding-top:16px;}
-.pchip{align-self:flex-start;height:28px;padding:0 10px;border-radius:99px;border:1px solid var(--control-outline);background:transparent;font:500 12px/1 var(--font-sans);color:var(--text-secondary);display:inline-flex;align-items:center;gap:6px;}
 .gsum{font:500 13px/1 var(--font-sans);}
 .gsum .w{color:var(--status-win);} .gsum .l{color:var(--status-loss);} .gsum .u{color:var(--text-secondary);}
 .addgame{height:52px;border-radius:99px;background:transparent;border:1px solid var(--control-outline);color:var(--text-primary);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;}
@@ -363,6 +362,7 @@ function tally(d) {
 function outcome(d) { if (!d.games.length) return null; const t = tally(d); if (t.w + t.l === 0) return null; return t.w > t.l ? 'win' : t.l > t.w ? 'loss' : 'draw'; }
 const settleTotals = VoiceMap.settleTotals;
 const mapResult = r => VoiceMap.mapResult(r, { resolve, nid });
+const notesOnly = VoiceMap.notesOnly;
 
 /* ------------------------------------------------------------------
    Speech recognition (Web Speech API). Audio goes only to the browser's
@@ -466,33 +466,25 @@ const PARSE_ERR = {
 async function continueFromDescribe() {
   if (!S.transcript.trim() || S.parsing) return;
   if (S.transcript.length > MAX_CHARS) return;
-  if (S.parsedFrom === S.transcript && S.d) { go('details'); return; }
+  if (S.parsedFrom === S.transcript && S.d) { go(notesOnly(S.d) ? 'notes' : 'details'); return; }
   S.parsing = true; S.parseErr = null; render();
   let j;
   try { j = await callParse(S.transcript); }
   catch (e) { S.parsing = false; S.parseErr = PARSE_ERR[e.code] || 'Couldn\'t read your description. Try again, or fill in the details yourself.'; S.parseErrCode = e.code; render(); return; }
   const p = mapResult(j.result);
   S.meta = { model: j.model, latency: j.latency_ms, roundtrip: j.roundtrip_ms, usage: j.usage, cost: j.cost_usd, guards: j.guards || [], missing: j.result.missing, ambiguities: j.result.ambiguities, raw: j.result, prompt: j.prompt_version };
-  if (!S.d) S.d = p;
+  if (!S.d) { S.d = p; S.showGames = false; }
   else {
     const kept = [], updated = [];
-    const pick = { type: x => x.type, players: x => [x.partners, x.opponents].map(l => l.map(r => r.heard)), games: x => [x.games.map(g => [g.r, g.a, g.b]), x.totals] };
+    const pick = { type: x => x.type, players: x => [x.partners, x.opponents].map(l => l.map(r => r.heard)).concat([x.lineup && x.lineup.names]), games: x => [x.games.map(g => [g.r, g.a, g.b]), x.totals] };
     for (const sec of Object.keys(pick)) {
       if (JSON.stringify(pick[sec](p)) === JSON.stringify(pick[sec](S.ai))) continue;
       if (S.dirty[sec]) { kept.push(sec); continue; }
       updated.push(sec);
       if (sec === 'type') S.d.type = p.type;
-      if (sec === 'players') { S.d.partners = p.partners; S.d.opponents = p.opponents; }
-      if (sec === 'games') { S.d.games = p.games; S.d.totals = p.totals; }
+      if (sec === 'players') { S.d.partners = p.partners; S.d.opponents = p.opponents; S.d.lineup = p.lineup; }
+      if (sec === 'games') { S.d.games = p.games; S.d.totals = p.totals; S.showGames = false; }
     }
-    // Game partners point at player rows; re-point them by name, or clear them if that partner is gone.
-    const keys = new Set(S.d.partners.map(r => r.key));
-    S.d.games.forEach(g => {
-      if (!g.partner || keys.has(g.partner)) return;
-      const heard = (p.partners.find(r => r.key === g.partner) || S.ai.partners.find(r => r.key === g.partner) || {}).heard;
-      const now = heard && S.d.partners.find(r => r.heard.toLowerCase() === heard.toLowerCase());
-      g.partner = now ? now.key : null;
-    });
     const oldTexts = new Set(S.ai.notes.map(n => n.text));
     const fresh = p.notes.filter(n => !oldTexts.has(n.text));
     if (!S.dirty.notes) { if (JSON.stringify(p.notes.map(n => n.text)) !== JSON.stringify(S.ai.notes.map(n => n.text))) updated.push('notes'); S.d.notes = p.notes; }
@@ -500,11 +492,11 @@ async function continueFromDescribe() {
     S.notice = kept.length || updated.length ? { kept: kept.map(k => SECTION_NAMES[k]), updated: [...new Set(updated)].map(k => SECTION_NAMES[k]) } : null;
   }
   S.ai = clone(p); S.parsedFrom = S.transcript; S.parsing = false;
-  go('details');
+  go(notesOnly(S.d) ? 'notes' : 'details');
 }
 function fillManually() {
   S.parseErr = null;
-  if (!S.d) { S.d = { type: null, partners: [], opponents: [], games: [], totals: null, notes: [] }; S.ai = clone(S.d); S.meta = null; }
+  if (!S.d) { S.d = { type: null, partners: [], opponents: [], games: [], totals: null, notes: [], lineup: null }; S.ai = clone(S.d); S.meta = null; }
   go('details');
 }
 function go(screen) { S.screen = screen; S.editNote = null; render(); const sc = document.querySelector('.scroll'); if (sc) sc.scrollTop = 0; }
@@ -596,7 +588,7 @@ function playerRow(ref, role, i) {
     <button class="nm" data-act="pick" data-role="${role}" data-i="${i}" aria-label="Change ${esc(name)}"><span>${esc(name)}</span>${sub ? `<small>${sub}</small>` : ''}</button>
     <button class="xbtn" data-act="rmp" data-role="${role}" data-i="${i}" aria-label="Remove ${esc(name)}">${icon('x', 20)}</button>
   </div>`;
-  if (ref.unclear) html += `<div class="which"><span>${esc(ref.heard)} was on…</span><button class="chip" data-act="role" data-i="${i}" data-v="partner">Your Side</button><button class="chip" data-act="role" data-i="${i}" data-v="opponent">Other Side</button></div>`;
+  if (ref.unclear) html += `<div class="which"><span>${esc(ref.heard)} was on…</span>${S.d.partners.length ? '' : `<button class="chip" data-act="role" data-i="${i}" data-v="partner">Your Side</button>`}<button class="chip" data-act="role" data-i="${i}" data-v="opponent">Other Side</button></div>`;
   if (amb) html += `<div class="which"><span>Which ${esc(ref.heard)}?</span>${ref.cands.map(id => `<button class="chip" data-act="choose" data-role="${role}" data-i="${i}" data-id="${id}">${esc(pById(id).name)}</button>`).join('')}<button class="chip" data-act="choose" data-role="${role}" data-i="${i}" data-id="">Someone new</button></div>`;
   return html;
 }
@@ -613,21 +605,24 @@ function viewDetails() {
       <button data-act="type" data-v="Singles" aria-pressed="${d.type === 'Singles'}">${icon('user', 18)}Singles</button>
       <button data-act="type" data-v="Doubles" aria-pressed="${d.type === 'Doubles'}">${icon('users', 18)}Doubles</button>
     </div></div>`;
-  const partners = dbl ? `<div class="lbl">${d.partners.length > 1 ? 'Partners' : 'Partner'}</div>
+  const partners = dbl ? `<div class="lbl">Partner</div>
       ${d.partners.map((p, i) => playerRow(p, 'partner', i)).join('')}
-      <button class="addrow" data-act="addp" data-role="partner"><span class="av">${icon('plus', 20)}</span>${d.partners.length ? 'Add Another Partner' : 'Add Partner'}</button>` : '';
+      ${!d.partners.length ? `<button class="addrow" data-act="addp" data-role="partner"><span class="av">${icon('plus', 20)}</span>Add Partner</button>` : ''}` : '';
   const opps = `<div class="lbl">${dbl ? 'Opponents' : 'Opponent'}</div>
       ${d.opponents.map((p, i) => playerRow(p, 'opponent', i)).join('')}
       ${d.opponents.filter(o => !o.unclear).length < maxOpp ? `<button class="addrow" data-act="addp" data-role="opponent"><span class="av">${icon('plus', 20)}</span>Add Opponent</button>` : ''}`;
-  const playersSec = `<div class="sec"><div class="sec-h"><h3>Players</h3></div><div class="card">${partners}${opps}</div></div>`;
+  const lineup = d.lineup && !d.partners.length && !d.opponents.length ? `<div class="banner" role="status">${icon('info', 18)}<div>You described more than one lineup${d.lineup.names.length ? ` (${esc(d.lineup.names.join(', '))})` : ''}. A match has one partner and one set of opponents, so players weren't filled in. Add the players for this match and log the other lineup as a separate match.</div></div>` : '';
+  const playersSec = `<div class="sec"><div class="sec-h"><h3>Players</h3></div>${lineup}<div class="card">${partners}${opps}</div></div>`;
   const t = tally(d);
-  const sum = d.games.length ? `<span class="gsum num"><span class="w">${t.w}W</span> · <span class="l">${t.l}L</span>${t.unknown ? ` · <span class="u">${t.unknown} not set</span>` : ''}</span>` : '';
-  const multiP = dbl && d.partners.length > 1;
+  // Totals without order: one compact summary instead of a card per unset game.
+  const compact = d.totals && t.orderOpen && !S.showGames;
+  const sum = d.games.length && !compact ? `<span class="gsum num"><span class="w">${t.w}W</span> · <span class="l">${t.l}L</span>${t.unknown ? ` · <span class="u">${t.unknown} not set</span>` : ''}</span>` : '';
   const rows = d.games.map((g, i) => {
-    const score = g.a !== '' && g.b !== '', part = multiP ? d.partners.find(p => p.key === g.partner) : null;
+    const score = g.a !== '' && g.b !== '';
+    if (compact && !g.r && !score) return '';
     return `<div class="game">
       <div class="game-main">
-        <div class="game-n">Game ${i + 1}${!g.r ? '<small>Not set</small>' : ''}</div>
+        <div class="game-n">Game ${i + 1}${!g.r ? `<small>${g.cut ? 'Interrupted' : 'Not set'}</small>` : ''}</div>
         <div class="wl ${g.r ? '' : 'unset'}" role="group" aria-label="Game ${i + 1} result">
           <button class="w" data-act="wl" data-i="${i}" data-v="W" aria-pressed="${g.r === 'W'}" aria-label="Won">W</button>
           <button class="l" data-act="wl" data-i="${i}" data-v="L" aria-pressed="${g.r === 'L'}" aria-label="Lost">L</button>
@@ -635,7 +630,6 @@ function viewDetails() {
         <button class="scorebtn ${score ? 'has num' : ''}" data-act="score" data-i="${i}" aria-expanded="${g.open}">${score ? `${esc(g.a)}–${esc(g.b)}` : 'Score'}${icon(g.open ? 'chevron-up' : 'chevron-down', 16)}</button>
         <button class="xbtn" data-act="rmg" data-i="${i}" aria-label="Remove game ${i + 1}">${icon('x', 20)}</button>
       </div>
-      ${multiP ? `<button class="pchip" data-act="gpartner" data-i="${i}">${icon('users', 14)}${part ? 'With ' + esc(pName(part).split(' ')[0]) : 'Partner not set'}</button>` : ''}
       ${g.open ? `<div class="scoreedit">
           <label>You<input id="sa-${g.id}" inputmode="numeric" maxlength="2" value="${esc(g.a)}" data-in="sa" data-i="${i}" aria-label="Your points, game ${i + 1}"></label>
           <span class="colon">:</span>
@@ -643,10 +637,11 @@ function viewDetails() {
         </div>` : ''}
     </div>`;
   }).join('');
-  const orderHint = d.totals && t.orderOpen ? `<div class="hint">${icon('info', 18)}<span>You said ${d.totals.w} won and ${d.totals.l} lost, not the order. Set games if you remember, or save as is.</span></div>` : '';
+  const summaryCard = compact ? `<div class="summary"><div style="min-width:0;display:flex;flex-direction:column;gap:4px;"><div class="t num">${d.games.length} games · ${t.w}W – ${t.l}L</div><div class="s">Order not recorded</div></div><button class="textbtn" data-act="showgames">Edit Games</button></div>` : '';
+  const orderHint = d.totals && t.orderOpen && !compact ? `<div class="hint">${icon('info', 18)}<span>You said ${d.totals.w} won and ${d.totals.l} lost, not the order. Set games if you remember, or save as is.</span></div>` : '';
   const empty = !d.games.length ? `<div class="hint">${icon('info', 18)}<span>No games mentioned. That's fine for a practice or notes-only session.</span></div>` : '';
-  const gamesSec = `<div class="sec"><div class="sec-h"><h3>Games</h3>${sum}</div>${orderHint}${empty}${rows}
-      <button class="addgame" data-act="addg">${icon('plus', 18)}Add Game ${d.games.length + 1}</button></div>`;
+  const gamesSec = `<div class="sec"><div class="sec-h"><h3>Games</h3>${sum}</div>${summaryCard}${orderHint}${empty}${rows}
+      ${compact ? '' : `<button class="addgame" data-act="addg">${icon('plus', 18)}Add Game ${d.games.length + 1}</button>`}</div>`;
   return `<div class="scroll">
       ${header(2, 'chevron-left', 'back', 'Back to Describe')}
       <h1 class="title">Match Details</h1>
@@ -811,7 +806,7 @@ document.addEventListener('click', e => {
     case 'type': d.type = b.dataset.v; touch('type'); break;
     case 'pick': S.sheet = { role: b.dataset.role, i, q: '' }; break;
     case 'addp': S.sheet = { role: b.dataset.role, i: null, q: '' }; break;
-    case 'rmp': { const l = listOf(b.dataset.role), key = l[i].key; l.splice(i, 1); d.games.forEach(g => { if (g.partner === key) g.partner = null; }); touch('players'); break; }
+    case 'rmp': listOf(b.dataset.role).splice(i, 1); touch('players'); break;
     case 'role': { const ref = d.opponents.splice(i, 1)[0]; ref.unclear = false; (b.dataset.v === 'partner' ? d.partners : d.opponents).push(ref); if (b.dataset.v === 'partner' && !d.type) d.type = 'Doubles'; touch('players'); break; }
     case 'choose': { const r = listOf(b.dataset.role)[i]; r.id = b.dataset.id || null; r.cands = []; touch('players'); break; }
     case 'closesheet': S.sheet = null; break;
@@ -824,8 +819,8 @@ document.addEventListener('click', e => {
     case 'wl': { const g = d.games[i]; g.r = g.r === b.dataset.v && !d.totals ? null : b.dataset.v; touch('games'); settleTotals(d); break; }
     case 'score': d.games[i].open = !d.games[i].open; if (d.games[i].open) setTimeout(() => { const el = document.getElementById('sa-' + d.games[i].id); if (el) el.focus(); }, 0); break;
     case 'rmg': d.games.splice(i, 1); d.totals = null; touch('games'); break;
-    case 'addg': { const last = d.games[d.games.length - 1]; d.games.push({ id: nid('g'), r: null, a: '', b: '', partner: last ? last.partner : null, open: false }); d.totals = null; touch('games'); break; }
-    case 'gpartner': { const g = d.games[i], ks = d.partners.map(p => p.key), at = ks.indexOf(g.partner); g.partner = ks[(at + 1) % ks.length]; touch('games'); break; }
+    case 'addg': d.games.push({ id: nid('g'), r: null, a: '', b: '', cut: false, open: false }); d.totals = null; touch('games'); break;
+    case 'showgames': S.showGames = true; break;
     case 'nedit': finishNote(); S.editNote = b.dataset.id; setTimeout(() => { const el = document.getElementById('nt-' + b.dataset.id); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }, 0); break;
     case 'ndone': finishNote(); break;
     case 'ndel': d.notes = d.notes.filter(n => n.id !== b.dataset.id); if (S.editNote === b.dataset.id) S.editNote = null; touch('notes'); break;

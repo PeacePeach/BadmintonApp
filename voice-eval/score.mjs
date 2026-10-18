@@ -15,6 +15,9 @@ export function score(expect, actual) {
     check('match_type', anyOf(expect.match_type, actual.match_type), expect.match_type, actual.match_type);
     if (expect.match_type === null && actual.match_type !== null) invented.push({ kind: 'match_type', detail: actual.match_type });
   }
+  if ('multiple_lineups' in expect) {
+    check('multiple_lineups', expect.multiple_lineups === actual.multiple_lineups, expect.multiple_lineups, actual.multiple_lineups);
+  }
   if ('game_count' in expect) {
     check('game_count', expect.game_count === actual.game_count, expect.game_count, actual.game_count);
     if (expect.game_count === null && actual.game_count !== null) invented.push({ kind: 'game_count', detail: actual.game_count });
@@ -33,11 +36,12 @@ export function score(expect, actual) {
     for (const eg of expect.games) {
       const g = ag.find(x => x.number === eg.number);
       check(`game${eg.number}.result`, g && g.result === eg.result, eg.result, g ? g.result : undefined);
+      if (g && eg.result === null && g.result) invented.push({ kind: 'result', detail: `game ${eg.number} ${g.result}${g.interrupted ? ' (interrupted)' : ''}` });
+      if ('interrupted' in eg) check(`game${eg.number}.interrupted`, g && g.interrupted === eg.interrupted, eg.interrupted, g ? g.interrupted : undefined);
       for (const k of ['my_score', 'their_score']) {
         check(`game${eg.number}.${k}`, g && g[k] === eg[k], eg[k], g ? g[k] : undefined);
         if (g && eg[k] === null && g[k] !== null) invented.push({ kind: 'score', detail: `game ${eg.number} ${k}=${g[k]}` });
       }
-      if (eg.partners) check(`game${eg.number}.partners`, g && eg.partners.length === g.partners.length && eg.partners.every(p => g.partners.some(q => sameName(p, q))), eg.partners, g ? g.partners : undefined);
     }
     // Games the model listed that the description never placed in order.
     for (const g of ag) if (!expect.games.some(e => e.number === g.number) && (g.result || g.my_score != null)) {

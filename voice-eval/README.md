@@ -19,8 +19,11 @@ Speak or type a session, let a language model turn it into match data, fix anyth
    - makes W/L agree with scores
    - sets `order_known` only when every game's result is known in sequence
    - drops empty game entries, and clears the game count when the text mentions no games (notes-only sessions get an empty games list)
+   - never gives an interrupted game (没打完, "ran out of time", injury) a result from its score; only an explicit retirement decides it
+   - applies spoken corrections ("18-21, no wait, 19-21", "说错了"), reads "2115" as 21-15, and treats "won 2-1" as a game tally
+   - flags descriptions with more than one lineup (changed partners or opponents, singles and doubles together)
    - tags a note with the area its text names, e.g. 网前 or "at the net" is Net
-3. **Screens.** The result fills Match Details and Notes. Edits never call the model again. If you go back and change the text, sections you haven't edited refresh, and edited sections are kept.
+3. **Screens.** The result fills Match Details and Notes. One record holds one lineup, matching the Rallywise match model: if the description has more than one, players are left empty with a notice instead of being merged. Totals without game order show as one summary line (Edit Games opens the individual games). Input with only notes skips Match Details and opens Notes. Edits never call the model again. If you go back and change the text, sections you haven't edited refresh, and edited sections are kept.
 
 ## Deploy (one time)
 
@@ -75,14 +78,16 @@ Each run writes `voice-eval/results/<model>-<time>.json` (raw outputs) and a `.m
 - **Latency:** p50 and p95 of the model call.
 - **Cost:** average per request and per 1,000 requests, from token usage and the prices in `PRICES`. Check those against current OpenAI pricing.
 
-The 25 cases in `cases.json` cover:
+The 33 cases in `cases.json` cover:
 
 - English, Chinese and mixed language
 - singles and doubles
 - known, partial and missing scores
-- aggregate-only results and changing partners
+- aggregate-only results
 - self-corrections, ambiguous roles, vague counts
 - observations with no match, Chinese numerals
+- interrupted games, spoken corrections, run-together and winner-first scores, game tallies
+- more than one lineup in one description
 
 To add a case, append it to `cases.json`. Only the fields under `expect` are scored, and `{"any": [...]}` accepts several answers.
 
