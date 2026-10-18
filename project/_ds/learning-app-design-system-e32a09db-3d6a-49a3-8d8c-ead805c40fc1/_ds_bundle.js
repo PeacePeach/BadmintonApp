@@ -172,8 +172,8 @@ const V = {
   // V2 Button / Icon: 40px glass circle drawn inside a 44px tap area (transparent border, -2px margin).
   glass: {
     background: 'var(--rw-glass-fill)',
-    WebkitBackdropFilter: 'blur(var(--rw-glass-blur))',
-    backdropFilter: 'blur(var(--rw-glass-blur))',
+    WebkitBackdropFilter: 'var(--rw-glass-effect)',
+    backdropFilter: 'var(--rw-glass-effect)',
     backgroundClip: 'padding-box',
     color: 'var(--rw-text-primary)',
     border: '2px solid transparent',

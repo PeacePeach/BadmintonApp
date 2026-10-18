@@ -14,9 +14,11 @@
   --rw-blue-chart: #5b9dff;     /* bars, dots, delta */
   --rw-orange-100: #fab86f;     /* Orange/O100 */
 
-  /* Glass: GlassFill at 50% + "Default Glass" effect (radius 4) */
+  /* Glass: the one surface style for tiles, pills, icon buttons and the nav bar.
+     Figma: fill "GlassFill" (#2A292E) at 50% + effect "Default Glass" (radius 4).
+     Apply it as a pair (fill + effect), via the .rw-glass class or the IconButton "glass" variant. */
   --rw-glass-fill: rgba(42, 41, 46, .5);
-  --rw-glass-blur: 4px;
+  --rw-glass-effect: blur(4px);
 
   /* Semantic: app background. Screens use these, never the primitive.
      Value follows Figma (PurpleGrey/purplegrey-900); change it here only. */
