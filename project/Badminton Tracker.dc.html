@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/typography.css">
 <link rel="stylesheet" href="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/spacing.css">
 <link rel="stylesheet" href="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/effects.css">
+<link rel="stylesheet" href="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/v2.css">
 <link rel="stylesheet" href="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/styles.css">
 <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
 <script src="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/_ds_bundle.js"></script>
@@ -87,12 +88,65 @@ button:disabled{cursor:default !important;}
    tighten; text set below 12px (.zh12) comes up to 12px, where Noto keeps its stroke detail. English is unchanged. */
 :root[lang="zh-Hans"] .tl{letter-spacing:.04em !important;text-transform:none !important;}
 :root[lang="zh-Hans"] .zh12{font-size:12px !important;}
+/* ===== Design System V2 (tokens/v2.css). Shared pieces from the Figma Design System page; Matches uses them first. ===== */
+/* Screen background: the soft glow at the top left scrolls with the page, like the Figma frames. */
+.rw-scroll.is-v2{background:var(--rw-bg-glow) no-repeat local,var(--rw-bg);}
+.rw-bar>div>div.is-grad{background:var(--rw-bar-fill-grad);}
+/* Glass: GlassFill + Default Glass. */
+.rw-glass{background:var(--rw-glass-fill);-webkit-backdrop-filter:blur(var(--rw-glass-blur));backdrop-filter:blur(var(--rw-glass-blur));}
+/* Tile Container */
+.rw-tile{border-radius:var(--rw-tile-radius);padding:var(--rw-tile-pad);}
+.rw-press{cursor:pointer;transition:transform var(--dur-fast) var(--ease-out);}
+.rw-press:active{transform:scale(.98);}
+:where(.rw-btn,.rw-pill,.rw-press,.rw-nav-item):focus-visible{outline:2px solid var(--rw-pill-active-border);outline-offset:2px;}
+/* Page title */
+.rw-title{font:var(--rw-type-title);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);margin:0;}
+/* Button / Primary, Large */
+.rw-btn{border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform var(--dur-fast) var(--ease-out),opacity var(--dur-fast);}
+.rw-btn-primary{height:var(--rw-btn-primary-h);border-radius:999px;padding:1px 24px;background:var(--rw-btn-primary-bg);color:var(--rw-btn-primary-fg);font:var(--rw-type-button);}
+.rw-btn:active{transform:scale(.97);}
+.rw-btn:disabled{opacity:.4;transform:none;}
+/* Pills: Medium (14px) and Small (12px); Active adds the light outline. The tap area extends to 44px. */
+.rw-pill{position:relative;height:var(--rw-pill-h);padding:0 16px;border-radius:999px;border:1px solid transparent;color:var(--rw-text-secondary);font:var(--rw-type-pill);white-space:nowrap;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out);}
+.rw-pill::after{content:"";position:absolute;inset:-6px 0;}
+.rw-pill-sm{font:var(--rw-type-pill-sm);}
+.rw-pill.is-active{border-color:var(--rw-pill-active-border);color:var(--rw-pill-active-fg);}
+/* Metric: eyebrow, value, Insight Subtitle, Simple bar */
+.rw-eyebrow{font:var(--rw-type-eyebrow);letter-spacing:1.1px;text-transform:uppercase;color:var(--rw-text-secondary);}
+.rw-metric-value{font:var(--rw-type-metric);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);font-variant-numeric:var(--font-variant-numeric-metric);}
+.rw-subtitle{font:var(--rw-type-subtitle);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
+.rw-bar{height:13px;display:flex;flex-direction:column;justify-content:flex-end;}
+.rw-bar>div{height:8px;border-radius:99px;background:var(--rw-bar-track);overflow:hidden;}
+.rw-bar>div>div{height:100%;border-radius:99px;background:var(--rw-bar-fill);}
+/* Match Result: dot + label */
+.rw-result{height:26px;display:flex;align-items:center;gap:4px;font:var(--rw-type-result);white-space:nowrap;flex-shrink:0;}
+.rw-result::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor;}
+.rw-result.is-win{color:var(--rw-win);}
+.rw-result.is-loss{color:var(--rw-loss);}
+/* Avatar / Letter (40px); Match Players uses the 32px size. */
+.rw-avatar{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--rw-avatar-bg);color:var(--rw-avatar-fg);font:var(--rw-type-avatar);letter-spacing:var(--rw-tracking);}
+.rw-avatar-sm{width:32px;height:32px;}
+/* Match Players: Singles = 2 in a row, Doubles = 2 x 2 grid. */
+.rw-players{display:grid;grid-auto-flow:column;gap:4px;flex-shrink:0;}
+.rw-players.is-doubles{grid-auto-flow:row;grid-template-columns:repeat(2,32px);}
+/* Match */
+.rw-match{display:flex;flex-direction:column;gap:24px;}
+.rw-caption{font:var(--rw-type-caption);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
+.rw-name{font:var(--rw-type-name);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);overflow-wrap:anywhere;}
+.rw-name.is-muted{color:var(--rw-text-secondary);}
+.rw-score{font:var(--rw-type-score);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);white-space:nowrap;flex-shrink:0;font-variant-numeric:var(--font-variant-numeric-metric);}
+/* Bottom Nav: floating glass pill */
+.rw-nav{position:absolute;left:0;right:0;bottom:0;padding:0 16px 32px;display:flex;justify-content:center;pointer-events:none;}
+.rw-nav-bar{pointer-events:auto;display:flex;gap:12px;padding:4px;border-radius:100px;}
+.rw-nav-item{width:84px;height:60px;padding:8px 16px 10px;border-radius:100px;border:1px solid transparent;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:var(--rw-text-secondary);font:var(--rw-type-nav);letter-spacing:var(--rw-tracking);white-space:nowrap;transition:background var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out);}
+.rw-nav-item.is-active{background:var(--rw-nav-active-bg);border-color:var(--rw-nav-active-border);color:var(--rw-nav-active-fg);}
+@media (prefers-reduced-motion:reduce){.rw-btn,.rw-press,.rw-pill,.rw-nav-item{transition:none;}}
 </style>
 </helmet>
 <div class="stage" style="width:100%;height:100vh;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:0;">
 <div data-screen-label="Phone" class="phone" style="position:relative;width:100%;height:100vh;border-radius:0;background:var(--bg-primary);overflow:hidden;color:var(--text-primary);box-shadow:none;">
 
-  <div ref="{{ scrollRef }}" style="position:absolute;inset:0;overflow-y:auto;padding:58px 20px 120px;">
+  <div ref="{{ scrollRef }}" class="{{ scrollCls }}" style="position:absolute;inset:0;overflow-y:auto;padding:58px 20px 120px;">
     <div class="fake-status" style="position:absolute;top:18px;left:34px;font:500 15px/1 var(--font-sans);">9:41</div>
 
     <!-- LOG IN -->
@@ -311,47 +365,48 @@ button:disabled{cursor:default !important;}
 
     <!-- MATCHES -->
     <sc-if value="{{ isMatches }}" hint-placeholder-val="{{ true }}">
-      <div data-screen-label="Matches" style="display:flex;flex-direction:column;gap:22px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="font:600 32px/1.2 var(--font-sans);">{{ tx.matches }}</div>
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" size="{{ 48 }}" label="{{ tx.menu }}" onClick="{{ toggleMenu }}" hint-size="48px,48px"></x-import>
+      <div data-screen-label="Matches" style="display:flex;flex-direction:column;gap:40px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;min-height:40px;">
+          <h1 class="rw-title">{{ tx.matches }}</h1>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.menu }}" onClick="{{ toggleMenu }}" hint-size="44px,44px"></x-import>
         </div>
         <sc-if value="{{ blocked }}" hint-placeholder-val="{{ false }}">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ blockedState.illustration }}" title="{{ blockedState.title }}" body="{{ blockedState.body }}" actionLabel="{{ blockedState.actionLabel }}" onAction="{{ blockedState.onAction }}" hint-size="350px,330px"></x-import>
         </sc-if>
         <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
-          <div aria-busy="true" style="display:flex;flex-direction:column;gap:22px;">
+          <div aria-busy="true" style="display:flex;flex-direction:column;gap:40px;">
             <span class="sr-only" role="status">{{ tx.loadingMatches }}</span>
-            <div aria-hidden="true" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-              <sc-for list="{{ skel2 }}" as="k" hint-placeholder-count="2">
-                <div style="background:var(--surface-primary);border-radius:26px;padding:20px 22px;display:flex;flex-direction:column;gap:8px;">
-                  <div class="skel" style="height:13px;width:70%;"></div>
-                  <div class="skel" style="height:40px;width:50%;"></div>
-                  <div class="skel" style="height:13px;width:40%;"></div>
-                </div>
-              </sc-for>
+            <div style="display:flex;flex-direction:column;gap:24px;">
+              <div aria-hidden="true" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <sc-for list="{{ skel2 }}" as="k" hint-placeholder-count="2">
+                  <div class="rw-glass rw-tile" style="min-height:110px;display:flex;flex-direction:column;gap:12px;">
+                    <div class="skel" style="height:13px;width:70%;"></div>
+                    <div class="skel" style="height:32px;width:45%;"></div>
+                    <div class="skel" style="height:13px;width:50%;"></div>
+                  </div>
+                </sc-for>
+              </div>
+              <button class="rw-btn rw-btn-primary" disabled="{{ true }}">
+                <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 22 }}" hint-size="22px,22px"></x-import>
+                {{ tx.logMatch }}
+              </button>
             </div>
-            <button disabled="{{ true }}" style="height:60px;border:none;border-radius:999px;background:var(--surface-muted);color:var(--text-tertiary);font:600 17px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;">
-              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import>
-              {{ tx.logMatch }}
-            </button>
             <div aria-hidden="true" style="display:flex;flex-direction:column;gap:10px;">
               <sc-for list="{{ skel3 }}" as="k" hint-placeholder-count="3">
-                <div style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;">
-                  <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <div class="skel" style="height:13px;width:38%;"></div>
-                    <div class="skel" style="height:26px;width:48px;"></div>
+                <div class="rw-glass rw-tile rw-match">
+                  <div style="display:flex;justify-content:space-between;align-items:center;height:26px;">
+                    <div class="skel" style="height:12px;width:38%;"></div>
+                    <div class="skel" style="height:12px;width:40px;"></div>
                   </div>
                   <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;">
-                    <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
-                      <div class="skel" style="height:16px;width:45%;"></div>
-                      <div class="skel" style="height:15px;width:35%;"></div>
+                    <div style="display:flex;align-items:center;gap:15px;flex:1;">
+                      <div style="display:flex;gap:4px;"><div class="skel" style="width:32px;height:32px;"></div><div class="skel" style="width:32px;height:32px;"></div></div>
+                      <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
+                        <div class="skel" style="height:14px;width:30%;"></div>
+                        <div class="skel" style="height:14px;width:55%;"></div>
+                      </div>
                     </div>
-                    <div class="skel" style="height:28px;width:44px;"></div>
-                  </div>
-                  <div style="display:flex;gap:6px;">
-                    <div class="skel" style="height:28px;width:60px;"></div>
-                    <div class="skel" style="height:28px;width:60px;"></div>
+                    <div class="skel" style="height:24px;width:44px;"></div>
                   </div>
                 </div>
               </sc-for>
@@ -359,51 +414,59 @@ button:disabled{cursor:default !important;}
           </div>
         </sc-if>
         <sc-if value="{{ matchesReady }}" hint-placeholder-val="{{ true }}">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-          <div style="background:var(--surface-primary);border-radius:26px;padding:20px 22px;display:flex;flex-direction:column;gap:8px;">
-            <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.totalMatches }}</div>
-            <div style="font:500 40px/1 var(--font-sans);">{{ overall.n }}</div>
-            <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ overallWL }}</div>
-          </div>
-          <div style="background:var(--surface-primary);border-radius:26px;padding:20px 22px;display:flex;flex-direction:column;gap:8px;">
-            <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.winRate }}</div>
-            <div style="font:500 40px/1 var(--font-sans);color:var(--text-primary);">{{ overall.pctStr }}</div>
-            <div style="height:6px;border-radius:99px;background:var(--border-default);overflow:hidden;margin-top:6px;"><div style="height:100%;border-radius:99px;background:var(--status-win);width: {{ overall.barW }};"></div></div>
-          </div>
-        </div>
-        <button onClick="{{ startLog }}" style="height:60px;border:none;border-radius:999px;background:var(--action-primary);color:var(--action-on-primary);font:600 17px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;" style-active="transform:scale(.97);">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import>
-          {{ tx.logMatch }}
-        </button>
-        <div style="display:flex;gap:8px;">
-          <sc-for list="{{ filters }}" as="f" hint-placeholder-count="3">
-            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Chip" active="{{ f.active }}" onClick="{{ f.select }}" hint-size="90px,44px">{{ f.label }}</x-import>
-          </sc-for>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          <sc-for list="{{ matchCards }}" as="m" hint-placeholder-count="4">
-            <div onClick="{{ m.open }}" style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;cursor:pointer;">
-              <div style="display:flex;justify-content:space-between;align-items:center;">
-                <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ m.dateLabel }} · {{ m.type }}</div>
-                <div style="height:26px;padding:0 12px;border-radius:99px;display:flex;align-items:center;font:600 12px/1 var(--font-sans);background: {{ m.badgeBg }};color: {{ m.badgeFg }};">{{ m.resultLabel }}</div>
-              </div>
-              <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;">
-                <div style="display:flex;flex-direction:column;gap:3px;min-width:0;">
-                  <div style="font:500 16px/1.3 var(--font-sans);overflow-wrap:anywhere;">{{ m.teamA }}</div>
-                  <div style="font:400 15px/1.3 var(--font-sans);color:var(--neutral-600);overflow-wrap:anywhere;">vs {{ m.teamB }}</div>
-                </div>
-                <div style="font:500 28px/1 var(--font-sans);flex-shrink:0;">{{ m.gamesWon }}</div>
-              </div>
-              <div style="display:flex;gap:6px;">
-                <sc-for list="{{ m.games }}" as="g" hint-placeholder-count="2">
-                  <div style="height:28px;padding:0 12px;border-radius:99px;background:var(--score-pill-bg);display:flex;align-items:center;font:500 13px/1 var(--font-sans);color: {{ g.fg }};">{{ g.s }}</div>
-                </sc-for>
+        <div style="display:flex;flex-direction:column;gap:24px;">
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;">
+            <div class="rw-glass rw-tile" style="display:flex;flex-direction:column;gap:12px;min-height:110px;">
+              <div class="rw-eyebrow tl">{{ tx.totalMatches }}</div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div class="rw-metric-value">{{ overall.n }}</div>
+                <div class="rw-subtitle">{{ overallWL }}</div>
               </div>
             </div>
-          </sc-for>
-          <sc-if value="{{ matchesEmpty }}" hint-placeholder-val="{{ false }}">
-            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ matchesEmpty.illustration }}" title="{{ matchesEmpty.title }}" body="{{ matchesEmpty.body }}" actionLabel="{{ matchesEmpty.actionLabel }}" onAction="{{ matchesEmpty.onAction }}" hint-size="350px,300px"></x-import>
-          </sc-if>
+            <div class="rw-glass rw-tile" style="display:flex;flex-direction:column;gap:12px;min-height:110px;">
+              <div class="rw-eyebrow tl">{{ tx.winRate }}</div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div class="rw-metric-value">{{ overall.pctStr }}</div>
+                <div class="rw-bar" role="img" aria-label="{{ overall.pctStr }}"><div><div class="is-grad" style="width: {{ overall.barW }};"></div></div></div>
+              </div>
+            </div>
+          </div>
+          <button class="rw-btn rw-btn-primary" onClick="{{ startLog }}">
+            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 22 }}" hint-size="22px,22px"></x-import>
+            {{ tx.logMatch }}
+          </button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div role="group" style="display:flex;gap:8px;">
+            <sc-for list="{{ filters }}" as="f" hint-placeholder-count="3">
+              <button class="rw-glass rw-pill {{ f.cls }}" aria-pressed="{{ f.active }}" onClick="{{ f.select }}">{{ f.label }}</button>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <sc-for list="{{ matchCards }}" as="m" hint-placeholder-count="4">
+              <div onClick="{{ m.open }}" class="rw-glass rw-tile rw-match rw-press">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                  <div class="rw-caption">{{ m.dateLabel }} · {{ m.type }}</div>
+                  <div class="rw-result {{ m.resultCls }}">{{ m.resultLabel }}</div>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;">
+                  <div style="display:flex;align-items:center;gap:15px;min-width:0;">
+                    <div class="rw-players {{ m.playersCls }}" aria-hidden="true">
+                      <sc-for list="{{ m.players }}" as="p" hint-placeholder-count="2"><div class="rw-avatar rw-avatar-sm">{{ p.ini }}</div></sc-for>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:3px;min-width:0;">
+                      <div class="rw-name">{{ m.teamA }}</div>
+                      <div class="rw-name is-muted">vs {{ m.teamB }}</div>
+                    </div>
+                  </div>
+                  <div class="rw-score">{{ m.score }}</div>
+                </div>
+              </div>
+            </sc-for>
+            <sc-if value="{{ matchesEmpty }}" hint-placeholder-val="{{ false }}">
+              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ matchesEmpty.illustration }}" title="{{ matchesEmpty.title }}" body="{{ matchesEmpty.body }}" actionLabel="{{ matchesEmpty.actionLabel }}" onAction="{{ matchesEmpty.onAction }}" hint-size="350px,300px"></x-import>
+            </sc-if>
+          </div>
         </div>
         </sc-if>
       </div>
@@ -1453,14 +1516,16 @@ button:disabled{cursor:default !important;}
 
   <!-- Tabs -->
   <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
-    <div style="position:absolute;left:0;right:0;bottom:0;height:92px;padding:10px 16px 28px;background:var(--bg-primary);border-top:1px solid var(--bottom-nav-outline);display:grid;grid-template-columns:1fr 1fr 1fr;">
-      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
-        <div onClick="{{ t.select }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;color: {{ t.fg }};">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ t.icon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import>
-          <div style="font:500 12px/1 var(--font-sans);">{{ t.label }}</div>
-        </div>
-      </sc-for>
-    </div>
+    <nav class="rw-nav">
+      <div class="rw-glass rw-nav-bar">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+          <button class="rw-nav-item {{ t.cls }}" aria-current="{{ t.current }}" onClick="{{ t.select }}">
+            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ t.icon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import>
+            <span>{{ t.label }}</span>
+          </button>
+        </sc-for>
+      </div>
+    </nav>
   </sc-if>
 
   <!-- Menu -->
@@ -2378,6 +2443,10 @@ class Component extends DCLogic {
       id: m.id, type: this.typeLabel(m.type), dateLabel: this.date(m.date), teamA: this.teamA(m), teamB: this.teamB(m), gamesWon: `${r.us}–${r.them}`,
       ...this.badge(r.win),
       games: m.games.map(g => ({ s: `${g[0]}–${g[1]}`, fg: 'var(--text-secondary)' })),
+      // V2 Match card: result dot, Letter avatars (you, partner, then opponents) and the "2 : 1" score.
+      resultCls: r.win ? 'is-win' : 'is-loss', score: `${r.us} : ${r.them}`,
+      playersCls: m.type === 'Doubles' ? 'is-doubles' : '',
+      players: ['me'].concat(m.type === 'Doubles' ? [m.partner] : [], m.opps).map(id => ({ ini: this.ini(id) })),
       open: () => this.go('detail', { detailId: m.id })
     };
   }
@@ -2647,6 +2716,7 @@ class Component extends DCLogic {
     const exists = s.players.some(p => p.name.toLowerCase() === q);
     const v = {
       scrollRef: this.scrollRef, overall,
+      scrollCls: s.screen === 'matches' ? 'rw-scroll is-v2' : 'rw-scroll',
       isMatches: s.screen === 'matches', isInsights: s.screen === 'insights', isLog: s.screen === 'log',
       isDetail: s.screen === 'detail', isPlayers: s.screen === 'players', isPlayer: s.screen === 'player',
       isLogin: s.screen === 'login', isSignup: s.screen === 'signup', isSplash: s.screen === 'splash', skipSplash: () => this.leaveSplash(),
@@ -2702,7 +2772,7 @@ class Component extends DCLogic {
       // Log Match opens only once the account's data has loaded; the loading state shows the button disabled.
       startLog: () => { if (this.dataReady()) this.go('log', { log: this.logStart('matches') }); },
       tabs: [[this.t('matches'), 'matches', 'List'], [this.t('insights'), 'insights', 'ChartColumn'], [this.t('focus'), 'focus', 'Target']].map(([label, k, icon]) => ({
-        label, icon, fg: s.screen === k ? 'var(--text-primary)' : 'var(--text-secondary)', select: () => {
+        label, icon, fg: s.screen === k ? 'var(--text-primary)' : 'var(--text-secondary)', cls: s.screen === k ? 'is-active' : '', current: s.screen === k ? 'page' : null, select: () => {
           // Back to Insights on Grow with no AI insight on screen (say the language changed since): make one.
           if (k === 'insights' && this.state.insTab === 'coach' && !this.state.aiGrow) setTimeout(() => this.refreshGrow(), 0);
           this.setState({ screen: k, back: [], menu: false });
@@ -2717,7 +2787,7 @@ class Component extends DCLogic {
         { label: this.t('settings'), icon: 'Settings', select: () => this.go('settings') },
         { label: this.t('logOut'), icon: 'LogOut', select: () => this.signOut() }
       ],
-      filters: ['All', 'Singles', 'Doubles'].map(f => ({ label: f === 'All' ? this.t('all') : this.typeLabel(f), active: s.filter === f, select: () => this.setState({ filter: f }) })),
+      filters: ['All', 'Singles', 'Doubles'].map(f => ({ label: f === 'All' ? this.t('all') : this.typeLabel(f), active: s.filter === f, cls: s.filter === f ? 'is-active' : '', select: () => this.setState({ filter: f }) })),
       matchCards: all.filter(m => s.filter === 'All' || m.type === s.filter).map(m => this.card(m))
     };
 

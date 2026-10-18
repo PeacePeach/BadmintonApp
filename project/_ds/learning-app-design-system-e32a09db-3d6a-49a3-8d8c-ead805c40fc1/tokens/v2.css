@@ -1,0 +1,78 @@
+/* =========================================================
+   RALLYWISE DESIGN SYSTEM V2
+   From Figma "Badminton App" → Design System (159:5834) and the Matches screen (179:1568).
+   Added beside the V1 tokens so screens not yet moved to V2 keep their current look.
+   ========================================================= */
+:root {
+  /* Primitives (Figma Foundation names in comments) */
+  --rw-purplegrey-400: #555458; /* PurpleGrey/purplegrey-400 */
+  --rw-purplegrey-500: #2a292e; /* PurpleGrey/purplegrey-500, GlassFill */
+  --rw-purplegrey-600: #26252a; /* PurpleGrey/purplegrey-600 */
+  --rw-purplegrey-900: #121113; /* PurpleGrey/purplegrey-900, V2 screen background */
+  --rw-grey-650: #3a393e;       /* Avatar / Letter fill, inactive form bars */
+  --rw-blue-100: #6ba6ff;       /* Blue/B100 */
+  --rw-blue-chart: #5b9dff;     /* bars, dots, delta */
+  --rw-orange-100: #fab86f;     /* Orange/O100 */
+
+  /* Glass: GlassFill at 50% + "Default Glass" effect (radius 4) */
+  --rw-glass-fill: rgba(42, 41, 46, .5);
+  --rw-glass-blur: 4px;
+
+  /* Screen background: app background + the soft ellipse glow (Ellipse 2: 1103px at -590/-751) */
+  --rw-bg-glow: radial-gradient(circle 551.5px at -38.5px -199.5px, #212631 0%, rgba(18, 17, 19, 0) 100%);
+  --rw-bg: var(--rw-purplegrey-900);
+
+  /* Text */
+  --rw-text-primary: var(--neutral-800);   /* N800 #EBEBEC */
+  --rw-text-secondary: var(--neutral-400); /* N400 #8F8F91 */
+  --rw-text-on-light: var(--app-background);
+
+  /* Result */
+  --rw-win: var(--rw-blue-100);
+  --rw-loss: var(--rw-orange-100);
+
+  /* Tile Container */
+  --rw-tile-radius: 15px;
+  --rw-tile-pad: 16px;
+
+  /* Buttons */
+  --rw-btn-primary-bg: var(--neutral-800);
+  --rw-btn-primary-fg: var(--app-background);
+  --rw-btn-primary-h: 52px;
+  --rw-icon-btn-size: 40px;
+
+  /* Pills */
+  --rw-pill-h: 32px;
+  --rw-pill-active-border: var(--neutral-700); /* N700 #D4D4D5 */
+  --rw-pill-active-fg: var(--neutral-700);
+
+  /* Simple bar */
+  --rw-bar-track: var(--rw-purplegrey-500);
+  --rw-bar-fill: var(--rw-blue-chart);
+  --rw-bar-fill-grad: linear-gradient(90deg, #5b9dff 0%, #2c3f5c 100%); /* "Blue Gradient 01" as applied on the Matches screen */
+
+  /* Avatar / Letter */
+  --rw-avatar-bg: var(--rw-grey-650);
+  --rw-avatar-fg: var(--white);
+
+  /* Bottom Nav */
+  --rw-nav-active-bg: var(--rw-purplegrey-500);
+  --rw-nav-active-border: var(--neutral-500); /* N500 #A6A6A8 */
+  --rw-nav-active-fg: var(--white);
+
+  /* Type: Poppins, -0.16px tracking on everything except tracked eyebrows */
+  --rw-tracking: -0.16px;
+  --rw-type-title: 600 24px/28.8px var(--font-sans);
+  --rw-type-eyebrow: 500 12px/13px var(--font-sans);
+  --rw-type-metric: 500 32px/1 var(--font-sans);
+  --rw-type-subtitle: 500 12px/13px var(--font-sans);
+  --rw-type-caption: 500 12px/12px var(--font-sans);
+  --rw-type-result: 600 12px/12px var(--font-sans);
+  --rw-type-name: 500 14px/18.2px var(--font-sans);
+  --rw-type-score: 500 24px/1 var(--font-sans);
+  --rw-type-button: 600 15px/15px var(--font-sans);
+  --rw-type-pill: 500 14px/15px var(--font-sans);
+  --rw-type-pill-sm: 500 12px/15px var(--font-sans);
+  --rw-type-avatar: 500 13px/13px var(--font-sans);
+  --rw-type-nav: 500 11px/12px var(--font-sans);
+}
