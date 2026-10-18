@@ -174,6 +174,7 @@ const V = {
     background: 'var(--rw-glass-fill)',
     WebkitBackdropFilter: 'var(--rw-glass-effect)',
     backdropFilter: 'var(--rw-glass-effect)',
+    boxShadow: 'var(--rw-glass-rim)',
     backgroundClip: 'padding-box',
     color: 'var(--rw-text-primary)',
     border: '2px solid transparent',
