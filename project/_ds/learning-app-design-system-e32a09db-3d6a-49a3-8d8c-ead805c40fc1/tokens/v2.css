@@ -33,7 +33,7 @@
   --rw-color-text-primary: var(--rw-n800);
   --rw-color-text-secondary: var(--rw-n400);
   --rw-color-text-inactive: var(--rw-n500);           /* unselected nav items */
-  --rw-color-text-on-selected: var(--rw-n900);
+  --rw-color-text-on-selected: var(--rw-n600);
   --rw-color-text-on-action: var(--rw-n75);
   --rw-color-text-highlight: linear-gradient(90deg, var(--rw-n800) 0%, var(--rw-b100) 100%); /* greeting title */
   /* Actions and borders */
