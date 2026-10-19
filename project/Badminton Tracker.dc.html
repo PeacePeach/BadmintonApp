@@ -374,7 +374,7 @@ button:disabled{cursor:default !important;}
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.menu }}" onClick="{{ toggleMenu }}" hint-size="44px,44px"></x-import>
         </div>
         <div class="rw-greeting">
-          <h1 class="rw-title rw-text-gradient">{{ greeting.title }}</h1>
+          <h1 class="rw-title rw-text-gradient" style="align-self:flex-start;">{{ greeting.title }}</h1>
           <sc-if value="{{ matchesReady }}" hint-placeholder-val="{{ true }}">
             <p class="rw-lead">{{ greeting.body }}</p>
           </sc-if>
