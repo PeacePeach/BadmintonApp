@@ -13,6 +13,12 @@
     href="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/typography.css"
   />
 
+  <link rel="stylesheet" href="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/fonts.css" />
+  <link rel="stylesheet" href="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/effects.css" />
+  <link rel="stylesheet" href="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/spacing.css" />
+  <link rel="stylesheet" href="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/v2.css" />
+  <link rel="stylesheet" href="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/components-v2.css" />
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
   <script src="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/illustrations.js"></script>
 
   <title>Badminton Design System</title>
@@ -177,6 +183,19 @@
         gap: 10px;
       }
     }
+    /* Design System V2 section */
+    .v2-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .v2-table th, .v2-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border-default); vertical-align: middle; }
+    .v2-table th { color: var(--text-secondary); font-weight: 500; }
+    .v2-table td:nth-child(2), .v2-table td:nth-child(3) { font-family: ui-monospace, monospace; font-size: 12px; }
+    .v2-sw { display: block; width: 28px; height: 28px; border-radius: 6px; border: 1px solid rgba(255,255,255,.15); }
+    .v2-stage { border-radius: 24px; padding: 32px 24px; font-family: var(--font-sans); }
+    .v2-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 32px 24px; }
+    .v2-wide { grid-column: 1 / -1; }
+    .v2-label { font: 500 11px/1.3 var(--font-sans); color: var(--rw-text-secondary); margin-bottom: 10px; }
+    .v2-iconbtn { width: var(--rw-icon-btn-size); height: var(--rw-icon-btn-size); border-radius: 50%; border: none; color: var(--rw-text-primary); display: flex; align-items: center; justify-content: center; }
+    .v2-navwrap { position: relative; height: 96px; }
+    @media (max-width: 600px) { .v2-table th:nth-child(4), .v2-table td:nth-child(4) { display: none; } }
   </style>
 </head>
 
@@ -436,6 +455,114 @@
       })();
     </script>
 
+    <!-- ===================== DESIGN SYSTEM V2 ===================== -->
+    <section class="v2" id="v2">
+    <h2>Design System V2 (Matches screen)</h2>
+    <div class="section-note">Source: Figma Design System page 159:5834 and the Matches screen 199:3497. Tokens live in <code>tokens/v2.css</code>, component styles in <code>components-v2.css</code>. Components use semantic or component tokens only, never primitives. Minimum font weight is Medium (500).</div>
+
+    <h3>V2 semantic colors used on Matches</h3>
+    <table class="v2-table">
+      <thead><tr><th></th><th>Semantic token</th><th>Primitive</th><th>Value</th><th>Used for</th></tr></thead>
+      <tbody>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-bg-app)"></i></td><td>--rw-color-bg-app</td><td>--rw-purplegrey-900</td><td>#121113</td><td>Screen background</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-bg-glow),var(--rw-color-bg-app);background-size:56px 56px,auto"></i></td><td>--rw-color-bg-glow</td><td>none (Ellipse 2)</td><td>#6C9FEF → #5B9DFF, 20%</td><td>Blue glow at the top, fixed while scrolling</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface)"></i></td><td>--rw-color-surface</td><td>--rw-glassfill</td><td>#FFFFFF 5%</td><td>Tiles, Match cards, Pills</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-glass)"></i></td><td>--rw-color-surface-glass</td><td>--rw-glassfill</td><td>#FFFFFF 5% + glass</td><td>Header icon button, Bottom Nav bar</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-selected)"></i></td><td>--rw-color-surface-selected</td><td>--rw-purplegrey-500</td><td>#2A292E</td><td>Active Bottom Nav item</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-text-primary)"></i></td><td>--rw-color-text-primary</td><td>--rw-n800</td><td>#EBEBEC</td><td>Greeting line, metric values, names, scores, active pill text</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-text-secondary)"></i></td><td>--rw-color-text-secondary</td><td>--rw-n400</td><td>#8F8F91</td><td>Eyebrows, Insight Subtitle, dates, inactive pills, muted names</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-text-inactive)"></i></td><td>--rw-color-text-inactive</td><td>--rw-n500</td><td>#A6A6A8</td><td>Inactive Bottom Nav items</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-text-on-selected)"></i></td><td>--rw-color-text-on-selected</td><td>--rw-n900</td><td>#FFFFFF</td><td>Active Bottom Nav item</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-text-on-action)"></i></td><td>--rw-color-text-on-action</td><td>--rw-ink *</td><td>#1B1A1D</td><td>Label and icon on the primary button</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-text-highlight)"></i></td><td>--rw-color-text-highlight</td><td>--rw-n800 → --rw-b100</td><td>#EBEBEC → #6BA6FF</td><td>Greeting title gradient</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-action-primary)"></i></td><td>--rw-color-action-primary</td><td>--rw-n800</td><td>#EBEBEC</td><td>Primary button fill</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-border-selected)"></i></td><td>--rw-color-border-selected</td><td>--rw-n800</td><td>#EBEBEC</td><td>Active pill outline, focus ring</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-border-selected-subtle)"></i></td><td>--rw-color-border-selected-subtle</td><td>--rw-n500</td><td>#A6A6A8</td><td>Active Bottom Nav item outline</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-status-win)"></i></td><td>--rw-color-status-win</td><td>--rw-b100</td><td>#6BA6FF</td><td>Match Result Win</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-status-loss)"></i></td><td>--rw-color-status-loss</td><td>--rw-o100</td><td>#FAB86F</td><td>Match Result Loss</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-data-fill)"></i></td><td>--rw-color-data-fill</td><td>--rw-blue-gradient-01</td><td>#5B9DFF → #2C3F5C</td><td>Simple bar fill</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-data-track)"></i></td><td>--rw-color-data-track</td><td>--rw-purplegrey-500</td><td>#2A292E</td><td>Simple bar track</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-avatar-bg)"></i></td><td>--rw-color-avatar-bg</td><td>--rw-grey-650 *</td><td>#3A393E</td><td>Initials avatar fill</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-avatar-fg)"></i></td><td>--rw-color-avatar-fg</td><td>--rw-n900</td><td>#FFFFFF</td><td>Initials avatar letter</td></tr>
+      </tbody>
+    </table>
+    <div class="section-note">* Not a Figma Foundation paint style yet.</div>
+
+    <h3>V2 components</h3>
+    <div class="v2-stage rw-scroll is-v2">
+      <div class="v2-grid">
+        <div class="v2-cell"><div class="v2-label">Greeting</div>
+          <div class="rw-greeting"><h1 class="rw-title rw-text-gradient">Hi, Han</h1><p class="rw-lead">Your win rate is up 12% this month.</p></div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Button / Icon, Medium (glass)</div>
+          <button class="rw-glass v2-iconbtn" aria-label="Settings"><i data-lucide="settings"></i></button>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Button / Primary, Large (enabled, disabled)</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <button class="rw-btn rw-btn-primary"><i data-lucide="plus"></i>Log match</button>
+            <button class="rw-btn rw-btn-primary" disabled><i data-lucide="plus"></i>Log match</button>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Pills (Medium Active, Medium Inactive, Small)</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="rw-surface rw-pill is-active">All</button>
+            <button class="rw-surface rw-pill">Singles</button>
+            <button class="rw-surface rw-pill rw-pill-sm is-active">30 days</button>
+            <button class="rw-surface rw-pill rw-pill-sm">All time</button>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Tile Container + Metric + Insight Subtitle</div>
+          <div class="rw-surface rw-tile" style="display:flex;flex-direction:column;gap:8px">
+            <span class="rw-eyebrow">Matches</span><span class="rw-metric-value">24</span><span class="rw-subtitle">Last 30 days</span>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Metric + Graphs / Simple bar</div>
+          <div class="rw-surface rw-tile" style="display:flex;flex-direction:column;gap:8px">
+            <span class="rw-eyebrow">Win rate</span><span class="rw-metric-value">62%</span>
+            <div class="rw-bar"><div><div style="width:62%"></div></div></div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Match Result (Win, Loss) · Avatar / Letter · Match Players</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;gap:16px"><span class="rw-result is-win">Win</span><span class="rw-result is-loss">Loss</span></div>
+            <div style="display:flex;gap:16px;align-items:center">
+              <span class="rw-avatar">H</span>
+              <span class="rw-players"><span class="rw-avatar rw-avatar-sm">H</span><span class="rw-avatar rw-avatar-sm">L</span></span>
+              <span class="rw-players is-doubles"><span class="rw-avatar rw-avatar-sm">H</span><span class="rw-avatar rw-avatar-sm">M</span><span class="rw-avatar rw-avatar-sm">L</span><span class="rw-avatar rw-avatar-sm">K</span></span>
+            </div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Match (Singles, Win)</div>
+          <div class="rw-surface rw-tile rw-match">
+            <div style="display:flex;justify-content:space-between;align-items:center"><span class="rw-caption">Oct 18 · Singles</span><span class="rw-result is-win">Win</span></div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <span class="rw-players"><span class="rw-avatar rw-avatar-sm">H</span><span class="rw-avatar rw-avatar-sm">L</span></span>
+              <div style="flex:1;display:flex;flex-direction:column"><span class="rw-name">Han</span><span class="rw-name is-muted">Leo</span></div>
+              <span class="rw-score">21–17</span>
+            </div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Match (Doubles, Loss)</div>
+          <div class="rw-surface rw-tile rw-match">
+            <div style="display:flex;justify-content:space-between;align-items:center"><span class="rw-caption">Oct 16 · Doubles</span><span class="rw-result is-loss">Loss</span></div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <span class="rw-players is-doubles"><span class="rw-avatar rw-avatar-sm">H</span><span class="rw-avatar rw-avatar-sm">M</span><span class="rw-avatar rw-avatar-sm">L</span><span class="rw-avatar rw-avatar-sm">K</span></span>
+              <div style="flex:1;display:flex;flex-direction:column"><span class="rw-name">Han &amp; Mia</span><span class="rw-name is-muted">Leo &amp; Kai</span></div>
+              <span class="rw-score">18–21</span>
+            </div>
+          </div>
+        </div>
+        <div class="v2-cell v2-wide"><div class="v2-label">Bottom Nav (Matches active)</div>
+          <div class="v2-navwrap"><nav class="rw-nav"><div class="rw-glass rw-nav-bar">
+            <button class="rw-nav-item is-active"><i data-lucide="list"></i>Matches</button>
+            <button class="rw-nav-item"><i data-lucide="chart-no-axes-column"></i>Insights</button>
+            <button class="rw-nav-item"><i data-lucide="target"></i>Focus</button>
+          </div></nav></div>
+        </div>
+      </div>
+    </div>
+    <script>if (window.lucide) lucide.createIcons({ attrs: { width: 24, height: 24, 'stroke-width': 2 } });</script>
+    </section>
   </main>
 </body>
 </html>

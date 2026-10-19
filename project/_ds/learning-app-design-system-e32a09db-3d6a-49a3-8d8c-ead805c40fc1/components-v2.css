@@ -1,0 +1,75 @@
+/* =========================================================
+   RALLYWISE DESIGN SYSTEM V2: COMPONENTS
+   One stylesheet for every V2 component, built from tokens/v2.css (component and semantic tokens only).
+   Figma source: Design System page (159:5834), as used on the Matches screen (199:3497).
+   Components (Figma name -> class):
+     Screen background ............ .rw-scroll.is-v2
+     Tile Container ............... .rw-surface.rw-tile
+     Glass (floating controls) .... .rw-glass   (IconButton variant "glass" in _ds_bundle.js uses the same tokens)
+     Button / Primary, Large ...... .rw-btn.rw-btn-primary
+     Pills (Medium, Small; Active)  .rw-surface.rw-pill[.rw-pill-sm][.is-active]
+     Metric ....................... .rw-eyebrow + .rw-metric-value + .rw-subtitle | .rw-bar
+     Graphs / Simple bar .......... .rw-bar
+     Match ........................ .rw-surface.rw-tile.rw-match (+ .rw-caption, .rw-name, .rw-score)
+     Match Result (Win, Loss) ..... .rw-result.is-win | .is-loss
+     Match Players (Singles, Doubles) .rw-players[.is-doubles] > .rw-avatar.rw-avatar-sm
+     Avatar / Letter .............. .rw-avatar[.rw-avatar-sm]
+     Bottom Nav ................... .rw-nav > .rw-glass.rw-nav-bar > .rw-nav-item[.is-active]
+     Greeting ..................... .rw-greeting > .rw-title.rw-text-gradient + .rw-lead
+   ========================================================= */
+/* Screen background: app background + glow. The glow stays fixed while the content scrolls over it. */
+.rw-scroll.is-v2{background:var(--rw-bg-app-glow) no-repeat scroll,var(--rw-bg-app);--empty-body-weight:var(--rw-weight-min);}
+/* Surface (in-page content) and Glass (floating controls). */
+.rw-surface{background:var(--rw-surface-fill);}
+.rw-glass{background:var(--rw-glass-fill);-webkit-backdrop-filter:var(--rw-glass-effect);backdrop-filter:var(--rw-glass-effect);box-shadow:var(--rw-glass-rim);}
+/* Tile Container */
+.rw-tile{border-radius:var(--rw-tile-radius);padding:var(--rw-tile-pad);}
+.rw-press{cursor:pointer;transition:transform var(--dur-fast) var(--ease-out);}
+.rw-press:active{transform:scale(.98);}
+:where(.rw-btn,.rw-pill,.rw-press,.rw-nav-item):focus-visible{outline:2px solid var(--rw-pill-active-border);outline-offset:2px;}
+/* Page title */
+.rw-title{font:var(--rw-type-title);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);margin:0;}
+/* Button / Primary, Large */
+.rw-btn{border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform var(--dur-fast) var(--ease-out),opacity var(--dur-fast);}
+.rw-btn-primary{height:var(--rw-btn-primary-h);border-radius:999px;padding:1px 24px;background:var(--rw-btn-primary-bg);color:var(--rw-btn-primary-fg);font:var(--rw-type-button);}
+.rw-btn:active{transform:scale(.97);}
+.rw-btn:disabled{opacity:.4;transform:none;}
+/* Pills: Medium (14px) and Small (12px); Active adds the light outline. The tap area extends to 44px. */
+.rw-pill{position:relative;height:var(--rw-pill-h);padding:0 16px;border-radius:999px;border:1px solid transparent;color:var(--rw-pill-fg);font:var(--rw-type-pill);white-space:nowrap;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out);}
+.rw-pill::after{content:"";position:absolute;inset:-6px 0;}
+.rw-pill-sm{font:var(--rw-type-pill-sm);}
+.rw-pill.is-active{border-color:var(--rw-pill-active-border);color:var(--rw-pill-active-fg);}
+/* Metric: eyebrow, value, Insight Subtitle, Simple bar */
+.rw-eyebrow{font:var(--rw-type-eyebrow);letter-spacing:1.1px;text-transform:uppercase;color:var(--rw-text-secondary);}
+.rw-metric-value{font:var(--rw-type-metric);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);font-variant-numeric:var(--font-variant-numeric-metric);}
+.rw-greeting{display:flex;flex-direction:column;gap:8px;}
+.rw-greeting>.rw-title{align-self:flex-start;} /* hug the text so the highlight gradient spans it */
+.rw-lead{font:var(--rw-type-lead);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);margin:0;}
+.rw-text-gradient{background:var(--rw-text-gradient);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;}
+.rw-subtitle{font:var(--rw-type-subtitle);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
+.rw-bar{height:13px;display:flex;flex-direction:column;justify-content:flex-end;}
+.rw-bar>div{height:8px;border-radius:99px;background:var(--rw-bar-track);overflow:hidden;}
+.rw-bar>div>div{height:100%;border-radius:99px;background:var(--rw-bar-fill);}
+/* Match Result: dot + label */
+.rw-result{height:26px;display:flex;align-items:center;gap:4px;font:var(--rw-type-result);white-space:nowrap;flex-shrink:0;}
+.rw-result::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor;}
+.rw-result.is-win{color:var(--rw-win);}
+.rw-result.is-loss{color:var(--rw-loss);}
+/* Avatar / Letter (40px); Match Players uses the 32px size. */
+.rw-avatar{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--rw-avatar-bg);color:var(--rw-avatar-fg);font:var(--rw-type-avatar);letter-spacing:var(--rw-tracking);}
+.rw-avatar-sm{width:32px;height:32px;}
+/* Match Players: Singles = 2 in a row, Doubles = 2 x 2 grid. */
+.rw-players{display:grid;grid-auto-flow:column;gap:4px;flex-shrink:0;}
+.rw-players.is-doubles{grid-auto-flow:row;grid-template-columns:repeat(2,32px);}
+/* Match */
+.rw-match{display:flex;flex-direction:column;gap:24px;}
+.rw-caption{font:var(--rw-type-caption);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
+.rw-name{font:var(--rw-type-name);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);overflow-wrap:anywhere;}
+.rw-name.is-muted{color:var(--rw-text-secondary);}
+.rw-score{font:var(--rw-type-score);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);white-space:nowrap;flex-shrink:0;font-variant-numeric:var(--font-variant-numeric-metric);}
+/* Bottom Nav: floating glass pill */
+.rw-nav{position:absolute;left:0;right:0;bottom:0;padding:0 16px 32px;display:flex;justify-content:center;pointer-events:none;}
+.rw-nav-bar{pointer-events:auto;display:flex;gap:12px;padding:4px;border-radius:100px;}
+.rw-nav-item{width:84px;height:60px;padding:8px 16px 10px;border-radius:100px;border:1px solid transparent;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:var(--rw-nav-fg);font:var(--rw-type-nav);letter-spacing:var(--rw-tracking);white-space:nowrap;transition:background var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out);}
+.rw-nav-item.is-active{background:var(--rw-nav-active-bg);border-color:var(--rw-nav-active-border);color:var(--rw-nav-active-fg);}
+@media (prefers-reduced-motion:reduce){.rw-btn,.rw-press,.rw-pill,.rw-nav-item{transition:none;}}

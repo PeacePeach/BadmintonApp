@@ -1,77 +1,100 @@
 /* =========================================================
-   RALLYWISE DESIGN SYSTEM V2
-   From Figma "Badminton App" → Design System (159:5834) and the Matches screen (179:1568).
+   RALLYWISE DESIGN SYSTEM V2: TOKENS
+   Source: Figma "Badminton App": Foundation paint styles, the Design System page (159:5834)
+   and the Matches screen (199:3497), which is the reference for every value below.
+   Three layers. Components use component or semantic tokens only, never primitives or hex.
    Added beside the V1 tokens so screens not yet moved to V2 keep their current look.
    ========================================================= */
 :root {
-  /* Primitives (Figma Foundation names in comments) */
-  --rw-purplegrey-400: #555458; /* PurpleGrey/purplegrey-400 */
-  --rw-purplegrey-500: #2a292e; /* PurpleGrey/purplegrey-500, GlassFill */
-  --rw-purplegrey-600: #26252a; /* PurpleGrey/purplegrey-600 */
-  --rw-purplegrey-900: #121113; /* PurpleGrey/purplegrey-900, V2 screen background */
-  --rw-grey-650: #3a393e;       /* Avatar / Letter fill, inactive form bars */
-  --rw-blue-100: #6ba6ff;       /* Blue/B100 */
-  --rw-blue-chart: #5b9dff;     /* bars, dots, delta */
-  --rw-orange-100: #fab86f;     /* Orange/O100 */
+  /* ---------- 1. Primitives: Figma Foundation paint styles, same names ---------- */
+  --rw-n400: #8f8f91;              /* Neutral/N400 */
+  --rw-n500: #a6a6a8;              /* Neutral/N500 */
+  --rw-n800: #ebebec;              /* Neutral/N800 */
+  --rw-n900: #ffffff;              /* Neutral/N900 */
+  --rw-purplegrey-500: #2a292e;    /* PurpleGrey/purplegrey-500 (= Violet/violet - 5.5) */
+  --rw-purplegrey-900: #121113;    /* PurpleGrey/purplegrey-900 */
+  --rw-b100: #6ba6ff;              /* Blue/B100 */
+  --rw-o100: #fab86f;              /* Orange/O100 */
+  --rw-glassfill: rgba(255, 255, 255, .05);                              /* GlassFill: #FFFFFF at 5% */
+  --rw-blue-gradient-01: linear-gradient(90deg, #5b9dff 0%, #2c3f5c 100%); /* Blue Gradient 01 */
+  /* Not Figma Foundation styles yet (used on the screen, or needed by the app): */
+  --rw-ink: #1b1a1d;               /* Primary button label/icon on the Matches screen; V1 --app-background */
+  --rw-grey-650: #3a393e;          /* Initials avatar fill (Figma uses illustrated avatars) */
 
-  /* Surfaces, per the Matches screen (Figma 199:3497).
-     Surface: content that sits in the page (tiles, filter pills). Fill only, no glass.
-     Glass: controls that float over content (header icon button, bottom nav). Same fill
-     + effect style "Default Glass" (Liquid Glass: frost 11, refraction 0.31, depth 38,
-     light 331deg at 20%, dispersion 0.61, splay 0.17) + the light rim it draws on the edges
-     (strong on top, softer on the bottom, faint on the sides; sampled from Figma renders).
-     Use .rw-surface / .rw-glass, or the IconButton "glass" variant; never inline the values. */
-  --rw-surface-fill: rgba(255, 255, 255, .05);
-  --rw-glass-fill: rgba(255, 255, 255, .05);
-  --rw-glass-effect: blur(5.5px); /* Figma frost radius 11 = CSS blur 5.5px */
+  /* ---------- 2. Semantic tokens: what a colour is for ---------- */
+  /* Backgrounds and surfaces */
+  --rw-color-bg-app: var(--rw-purplegrey-900);
+  --rw-color-bg-glow: radial-gradient(circle 552.5px at 167.5px -102.5px, rgba(108, 159, 239, .2) 0%, rgba(91, 157, 255, 0) 100%); /* Ellipse 2: #6C9FEF -> #5B9DFF, 20% */
+  --rw-color-surface: var(--rw-glassfill);            /* content in the page: tiles, pills */
+  --rw-color-surface-glass: var(--rw-glassfill);      /* floating controls, with the glass effect */
+  --rw-color-surface-selected: var(--rw-purplegrey-500);
+  /* Text */
+  --rw-color-text-primary: var(--rw-n800);
+  --rw-color-text-secondary: var(--rw-n400);
+  --rw-color-text-inactive: var(--rw-n500);           /* unselected nav items */
+  --rw-color-text-on-selected: var(--rw-n900);
+  --rw-color-text-on-action: var(--rw-ink);
+  --rw-color-text-highlight: linear-gradient(90deg, var(--rw-n800) 0%, var(--rw-b100) 100%); /* greeting title */
+  /* Actions and borders */
+  --rw-color-action-primary: var(--rw-n800);
+  --rw-color-border-selected: var(--rw-n800);         /* active pill, focus ring */
+  --rw-color-border-selected-subtle: var(--rw-n500);  /* active nav item */
+  /* Status and data */
+  --rw-color-status-win: var(--rw-b100);
+  --rw-color-status-loss: var(--rw-o100);
+  --rw-color-data-fill: var(--rw-blue-gradient-01);
+  --rw-color-data-track: var(--rw-purplegrey-500);
+  /* Avatars */
+  --rw-color-avatar-bg: var(--rw-grey-650);
+  --rw-color-avatar-fg: var(--rw-n900);
+
+  /* Back-compat names used by screens and the IconButton component */
+  --rw-bg-app: var(--rw-color-bg-app);
+  --rw-bg-app-glow: var(--rw-color-bg-glow);
+  --rw-text-primary: var(--rw-color-text-primary);
+  --rw-text-secondary: var(--rw-color-text-secondary);
+
+  /* ---------- Effects ---------- */
+  /* Liquid Glass, effect style "Default Glass": frost 11, refraction 0.31, depth 38, light 331deg at 20%,
+     dispersion 0.61, splay 0.17. CSS has frost (Figma radius 11 = blur 5.5px) and the edge light it draws
+     (strong top, softer bottom, faint sides; sampled from Figma renders). Refraction is not reproduced. */
+  --rw-glass-fill: var(--rw-color-surface-glass);
+  --rw-glass-effect: blur(5.5px);
   --rw-glass-rim: inset 0 1px 0 rgba(255, 255, 255, .12), inset 0 -1px 0 rgba(255, 255, 255, .07), inset 0 0 0 1px rgba(255, 255, 255, .02);
 
-  /* Semantic: app background. Screens use these, never the primitive.
-     Value follows Figma (PurpleGrey/purplegrey-900); change it here only. */
-  --rw-bg-app: var(--rw-purplegrey-900);
-  /* Blue glow on top of the app background (Figma Ellipse 2: 1105px at -385/-655, #6C9FEF -> #5B9DFF, 20%) */
-  --rw-bg-app-glow: radial-gradient(circle 552.5px at 167.5px -102.5px, rgba(108, 159, 239, .2) 0%, rgba(91, 157, 255, 0) 100%);
-
-  /* Text */
-  --rw-text-gradient: linear-gradient(90deg, var(--neutral-800) 0%, var(--rw-blue-100) 100%); /* greeting title: N800 -> B100 */
-  --rw-text-primary: var(--neutral-800);   /* N800 #EBEBEC */
-  --rw-text-secondary: var(--neutral-400); /* N400 #8F8F91 */
-  --rw-text-on-light: var(--app-background);
-
-  /* Result */
-  --rw-win: var(--rw-blue-100);
-  --rw-loss: var(--rw-orange-100);
-
+  /* ---------- 3. Component tokens ---------- */
   /* Tile Container */
+  --rw-surface-fill: var(--rw-color-surface);
   --rw-tile-radius: 15px;
   --rw-tile-pad: 16px;
-
-  /* Buttons */
-  --rw-btn-primary-bg: var(--neutral-800);
-  --rw-btn-primary-fg: var(--app-background);
+  /* Button: Primary/Large and Icon/Medium */
+  --rw-btn-primary-bg: var(--rw-color-action-primary);
+  --rw-btn-primary-fg: var(--rw-color-text-on-action);
   --rw-btn-primary-h: 52px;
   --rw-icon-btn-size: 40px;
-
   /* Pills */
   --rw-pill-h: 32px;
-  --rw-pill-active-border: var(--neutral-700); /* N700 #D4D4D5 */
-  --rw-pill-active-fg: var(--neutral-700);
-
-  /* Simple bar */
-  --rw-bar-track: var(--rw-purplegrey-500);
-  --rw-bar-fill: var(--rw-blue-chart);
-  --rw-bar-fill-grad: linear-gradient(90deg, #5b9dff 0%, #2c3f5c 100%); /* "Blue Gradient 01" as applied on the Matches screen */
-
+  --rw-pill-fg: var(--rw-color-text-secondary);
+  --rw-pill-active-border: var(--rw-color-border-selected);
+  --rw-pill-active-fg: var(--rw-color-text-primary);
+  /* Graphs / Simple bar */
+  --rw-bar-track: var(--rw-color-data-track);
+  --rw-bar-fill: var(--rw-color-data-fill);
+  /* Match Result */
+  --rw-win: var(--rw-color-status-win);
+  --rw-loss: var(--rw-color-status-loss);
   /* Avatar / Letter */
-  --rw-avatar-bg: var(--rw-grey-650);
-  --rw-avatar-fg: var(--white);
-
+  --rw-avatar-bg: var(--rw-color-avatar-bg);
+  --rw-avatar-fg: var(--rw-color-avatar-fg);
   /* Bottom Nav */
-  --rw-nav-active-bg: var(--rw-purplegrey-500);
-  --rw-nav-active-border: var(--neutral-500); /* N500 #A6A6A8 */
-  --rw-nav-active-fg: var(--white);
+  --rw-nav-fg: var(--rw-color-text-inactive);
+  --rw-nav-active-bg: var(--rw-color-surface-selected);
+  --rw-nav-active-border: var(--rw-color-border-selected-subtle);
+  --rw-nav-active-fg: var(--rw-color-text-on-selected);
+  /* Greeting */
+  --rw-text-gradient: var(--rw-color-text-highlight);
 
-  /* Type: Poppins, -0.16px tracking on everything except tracked eyebrows.
+  /* ---------- Type: Poppins, -0.16px tracking except tracked eyebrows ----------
      V2 never goes below Medium (500): no Regular weight anywhere on a V2 screen. */
   --rw-weight-min: 500;
   --rw-tracking: -0.16px;
