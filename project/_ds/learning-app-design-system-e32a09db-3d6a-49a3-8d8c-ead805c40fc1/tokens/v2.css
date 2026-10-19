@@ -9,6 +9,7 @@
   /* ---------- 1. Primitives: Figma Foundation paint styles, same names ---------- */
   --rw-n400: #8f8f91;              /* Neutral/N400 */
   --rw-n500: #a6a6a8;              /* Neutral/N500 */
+  --rw-n600: #bdbdbf;              /* Neutral/N600 */
   --rw-n800: #ebebec;              /* Neutral/N800 */
   --rw-n900: #ffffff;              /* Neutral/N900 */
   --rw-purplegrey-500: #2a292e;    /* PurpleGrey/purplegrey-500 (= Violet/violet - 5.5) */
@@ -37,8 +38,7 @@
   --rw-color-text-highlight: linear-gradient(90deg, var(--rw-n800) 0%, var(--rw-b100) 100%); /* greeting title */
   /* Actions and borders */
   --rw-color-action-primary: var(--rw-n800);
-  --rw-color-border-selected: var(--rw-n800);         /* active pill, focus ring */
-  --rw-color-border-selected-subtle: var(--rw-n500);  /* active nav item */
+  --rw-color-border-selected: var(--rw-n600);         /* every selected outline: pills, nav item, radios, focus ring (Han) */
   /* Status and data */
   --rw-color-status-win: var(--rw-b100);
   --rw-color-status-loss: var(--rw-o100);
@@ -89,7 +89,7 @@
   /* Bottom Nav */
   --rw-nav-fg: var(--rw-color-text-inactive);
   --rw-nav-active-bg: var(--rw-color-surface-selected);
-  --rw-nav-active-border: var(--rw-color-border-selected-subtle);
+  --rw-nav-active-border: var(--rw-color-border-selected);
   --rw-nav-active-fg: var(--rw-color-text-on-selected);
   /* Greeting */
   --rw-text-gradient: var(--rw-color-text-highlight);
