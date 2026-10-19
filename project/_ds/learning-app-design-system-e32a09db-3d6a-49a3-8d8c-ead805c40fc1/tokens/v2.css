@@ -46,7 +46,7 @@
   --rw-color-data-track: var(--rw-purplegrey-500);
   /* Avatars */
   --rw-color-avatar-bg: var(--rw-grey-650);
-  --rw-color-avatar-fg: var(--rw-n900);
+  --rw-color-avatar-fg: var(--rw-n800);
 
   /* Back-compat names used by screens and the IconButton component */
   --rw-bg-app: var(--rw-color-bg-app);
