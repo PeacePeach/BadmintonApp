@@ -376,7 +376,7 @@ button:disabled{cursor:default !important;}
         <div class="rw-greeting">
           <h1 class="rw-title rw-text-gradient">{{ greeting.title }}</h1>
           <sc-if value="{{ matchesReady }}" hint-placeholder-val="{{ true }}">
-            <p class="rw-lead rw-text-gradient">{{ greeting.body }}</p>
+            <p class="rw-lead">{{ greeting.body }}</p>
           </sc-if>
         </div>
         <sc-if value="{{ blocked }}" hint-placeholder-val="{{ false }}">
