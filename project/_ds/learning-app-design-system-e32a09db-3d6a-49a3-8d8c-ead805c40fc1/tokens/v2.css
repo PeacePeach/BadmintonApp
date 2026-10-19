@@ -8,6 +8,7 @@
 :root {
   /* ---------- 1. Primitives: Figma Foundation paint styles, same names ---------- */
   --rw-n75: #202020;               /* Neutral/N75 */
+  --rw-n150: #2c2c2c;              /* Neutral/N150 */
   --rw-n400: #8f8f91;              /* Neutral/N400 */
   --rw-n500: #a6a6a8;              /* Neutral/N500 */
   --rw-n600: #bdbdbf;              /* Neutral/N600 */
@@ -19,8 +20,6 @@
   --rw-o100: #fab86f;              /* Orange/O100 */
   --rw-glassfill: rgba(255, 255, 255, .05);                              /* GlassFill: #FFFFFF at 5% */
   --rw-blue-gradient-01: linear-gradient(90deg, #5b9dff 0%, #2c3f5c 100%); /* Blue Gradient 01 */
-  /* Not Figma Foundation styles yet (used on the screen, or needed by the app): */
-  --rw-grey-650: #3a393e;          /* Initials avatar fill (Figma uses illustrated avatars) */
 
   /* ---------- 2. Semantic tokens: what a colour is for ---------- */
   /* Backgrounds and surfaces */
@@ -45,7 +44,7 @@
   --rw-color-data-fill: var(--rw-blue-gradient-01);
   --rw-color-data-track: var(--rw-purplegrey-500);
   /* Avatars */
-  --rw-color-avatar-bg: var(--rw-grey-650);
+  --rw-color-avatar-bg: var(--rw-n150);
   --rw-color-avatar-fg: var(--rw-n800);
 
   /* Back-compat names used by screens and the IconButton component */
