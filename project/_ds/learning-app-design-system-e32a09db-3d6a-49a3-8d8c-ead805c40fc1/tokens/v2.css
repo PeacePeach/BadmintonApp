@@ -27,7 +27,7 @@
   --rw-color-bg-glow: radial-gradient(circle 552.5px at 167.5px -102.5px, rgba(108, 159, 239, .2) 0%, rgba(91, 157, 255, 0) 100%); /* Ellipse 2: #6C9FEF -> #5B9DFF, 20% */
   --rw-color-surface: var(--rw-glassfill);            /* content in the page: tiles, pills */
   --rw-color-surface-glass: var(--rw-glassfill);      /* floating controls, with the glass effect */
-  --rw-color-surface-selected: var(--rw-purplegrey-500);
+  --rw-color-surface-selected: var(--rw-glassfill);      /* same fill as glass surfaces (Han, consolidate) */
   /* Text */
   --rw-color-text-primary: var(--rw-n800);
   --rw-color-text-secondary: var(--rw-n400);
