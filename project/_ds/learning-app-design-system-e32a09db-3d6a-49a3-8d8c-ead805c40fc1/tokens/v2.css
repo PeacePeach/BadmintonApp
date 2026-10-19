@@ -6,18 +6,101 @@
    Added beside the V1 tokens so screens not yet moved to V2 keep their current look.
    ========================================================= */
 :root {
-  /* ---------- 1. Primitives: Figma Foundation paint styles, same names ---------- */
-  --rw-n75: #202020;               /* Neutral/N75 */
-  --rw-n150: #2c2c2c;              /* Neutral/N150 */
-  --rw-n400: #8f8f91;              /* Neutral/N400 */
-  --rw-n500: #a6a6a8;              /* Neutral/N500 */
-  --rw-n600: #bdbdbf;              /* Neutral/N600 */
-  --rw-n800: #ebebec;              /* Neutral/N800 */
-  --rw-n900: #ffffff;              /* Neutral/N900 */
-  --rw-purplegrey-500: #2a292e;    /* PurpleGrey/purplegrey-500 (= Violet/violet - 5.5) */
-  --rw-purplegrey-900: #121113;    /* PurpleGrey/purplegrey-900 */
-  --rw-b100: #6ba6ff;              /* Blue/B100 */
-  --rw-o100: #fab86f;              /* Orange/O100 */
+  /* ---------- 1. Primitives: the full Figma Foundation palette (Section 2, node 3:1854), same names ----------
+     Values come from the Foundation paint styles. The palette sheet's text labels for Blue and Orange still show
+     older values (e.g. B100 #6C9FEF); the paint styles, which the screens use, win. */
+  /* Blue */
+  --rw-b50:               #e6f0ff;
+  --rw-b75:               #96c0ff;
+  --rw-b100:              #6ba6ff;
+  --rw-b200:              #2b7fff;
+  --rw-b300:              #0065ff;
+  --rw-b400:              #0047b3;
+  --rw-b500:              #003e9c;
+  /* Orange */
+  --rw-o50:               #fef3e6;
+  --rw-o75:               #fccd99;
+  --rw-o100:              #fab86f;
+  --rw-o200:              #f89930;
+  --rw-o300:              #f78406;
+  --rw-o400:              #ad5c04;
+  --rw-o500:              #975104;
+  /* Ocean */
+  --rw-ocean-50:          #e6fafc;
+  --rw-ocean-75:          #96ebf1;
+  --rw-ocean-100:         #6be3eb;
+  --rw-ocean-200:         #2bd6e3;
+  --rw-ocean-300:         #00cedd;
+  --rw-ocean-400:         #00909b;
+  --rw-ocean-500:         #007e87;
+  /* Green */
+  --rw-g50:               #e6f9f1;
+  --rw-g75:               #98e6c4;
+  --rw-g100:              #6ddcac;
+  --rw-g200:              #2ecd88;
+  --rw-g300:              #03c370;
+  --rw-g400:              #02894e;
+  --rw-g500:              #027744;
+  /* Yellow */
+  --rw-y50:               #fffae6;
+  --rw-y75:               #ffea97;
+  --rw-y100:              #ffe16c;
+  --rw-y200:              #ffd52d;
+  --rw-y300:              #ffcc02;
+  --rw-y400:              #b38f01;
+  --rw-y500:              #9c7c01;
+  /* Purple */
+  --rw-p50:               #f0e6fa;
+  --rw-p75:               #c096eb;
+  --rw-p100:              #a66be2;
+  --rw-p200:              #802bd6;
+  --rw-p300:              #6600cd;
+  --rw-p400:              #470090;
+  --rw-p500:              #3e007d;
+  /* Red */
+  --rw-r50:               #ffefef;
+  --rw-r75:               #ffbcbc;
+  --rw-r100:              #ffa0a0;
+  --rw-r200:              #ff7878;
+  --rw-r300:              #ff5c5c;
+  --rw-r400:              #b34040;
+  --rw-r500:              #9c3838;
+  /* Violet */
+  --rw-violet-1:          #eaeaec;
+  --rw-violet-2:          #cbccd1;
+  --rw-violet-3:          #a3a3ac;
+  --rw-violet-4:          #787885;
+  --rw-violet-5:          #4f5061;
+  --rw-violet-6:          #28293e;
+  --rw-violet-7:          #222335;
+  --rw-violet-8:          #1c1d2c;
+  --rw-violet-9:          #171723;
+  --rw-violet-10:         #12121c;
+  /* Neutral */
+  --rw-n0:                #000000;
+  --rw-n75:               #202020;
+  --rw-n100:              #242425;
+  --rw-n150:              #2c2c2c;
+  --rw-n200:              #474749;
+  --rw-n300:              #6b6b6d;
+  --rw-n400:              #8f8f91;
+  --rw-n500:              #a6a6a8;
+  --rw-n600:              #bdbdbf;
+  --rw-n700:              #d4d4d5;
+  --rw-n800:              #ebebec;
+  --rw-n900:              #ffffff;
+  /* PurpleGrey */
+  --rw-purplegrey-50:     #eaeaea;
+  --rw-purplegrey-100:    #bdbdbe;
+  --rw-purplegrey-200:    #9d9d9f;
+  --rw-purplegrey-300:    #707073;
+  --rw-purplegrey-400:    #555458;
+  --rw-purplegrey-500:    #2a292e;
+  --rw-purplegrey-600:    #26252a;
+  --rw-purplegrey-700:    #1e1d21;
+  --rw-purplegrey-800:    #171719;
+  --rw-purplegrey-900:    #121113;
+  /* Effects and gradients */
   --rw-glassfill: rgba(255, 255, 255, .05);                              /* GlassFill: #FFFFFF at 5% */
   --rw-blue-gradient-01: linear-gradient(90deg, #5b9dff 0%, #2c3f5c 100%); /* Blue Gradient 01 */
 

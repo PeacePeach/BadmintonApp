@@ -191,6 +191,12 @@
     .v2-sw { display: block; width: 28px; height: 28px; border-radius: 6px; border: 1px solid rgba(255,255,255,.15); }
     .v2-stage { border-radius: 24px; padding: 32px 24px; font-family: var(--font-sans); }
     .v2-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 32px 24px; }
+    .v2-fam { margin: 18px 0 8px; font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+    .v2-prims { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 10px; }
+    .v2-prim { display: flex; flex-direction: column; gap: 2px; font-size: 11px; }
+    .v2-prim i { display: block; height: 40px; border-radius: 8px; border: 1px solid rgba(255,255,255,.12); margin-bottom: 4px; }
+    .v2-prim b { font-weight: 600; font-size: 12px; }
+    .v2-prim span { color: var(--text-secondary); font-family: ui-monospace, monospace; }
     .v2-wide { grid-column: 1 / -1; }
     .v2-label { font: 500 11px/1.3 var(--font-sans); color: var(--rw-text-secondary); margin-bottom: 10px; }
     .v2-iconbtn { width: var(--rw-icon-btn-size); height: var(--rw-icon-btn-size); border-radius: 50%; border: none; color: var(--rw-text-primary); display: flex; align-items: center; justify-content: center; }
@@ -459,6 +465,119 @@
     <section class="v2" id="v2">
     <h2>Design System V2 (Matches screen)</h2>
     <div class="section-note">Source: Figma Design System page 159:5834 and the Matches screen 199:3497. Tokens live in <code>tokens/v2.css</code>, component styles in <code>components-v2.css</code>. Components use semantic or component tokens only, never primitives. Minimum font weight is Medium (500).</div>
+
+    <h3>V2 primitives (Figma Foundation)</h3>
+    <h4 class="v2-fam">Blue</h4>
+    <div class="v2-prims">
+      <div class="v2-prim"><i style="background:var(--rw-b50)"></i><b>B50</b><span>--rw-b50</span><span>#E6F0FF</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-b75)"></i><b>B75</b><span>--rw-b75</span><span>#96C0FF</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-b100)"></i><b>B100</b><span>--rw-b100</span><span>#6BA6FF</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-b200)"></i><b>B200</b><span>--rw-b200</span><span>#2B7FFF</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-b300)"></i><b>B300</b><span>--rw-b300</span><span>#0065FF</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-b400)"></i><b>B400</b><span>--rw-b400</span><span>#0047B3</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-b500)"></i><b>B500</b><span>--rw-b500</span><span>#003E9C</span></div>
+    </div>
+    <h4 class="v2-fam">Orange</h4>
+    <div class="v2-prims">
+      <div class="v2-prim"><i style="background:var(--rw-o50)"></i><b>O50</b><span>--rw-o50</span><span>#FEF3E6</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-o75)"></i><b>O75</b><span>--rw-o75</span><span>#FCCD99</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-o100)"></i><b>O100</b><span>--rw-o100</span><span>#FAB86F</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-o200)"></i><b>O200</b><span>--rw-o200</span><span>#F89930</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-o300)"></i><b>O300</b><span>--rw-o300</span><span>#F78406</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-o400)"></i><b>O400</b><span>--rw-o400</span><span>#AD5C04</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-o500)"></i><b>O500</b><span>--rw-o500</span><span>#975104</span></div>
+    </div>
+    <h4 class="v2-fam">Ocean</h4>
+    <div class="v2-prims">
+      <div class="v2-prim"><i style="background:var(--rw-ocean-50)"></i><b>O50</b><span>--rw-ocean-50</span><span>#E6FAFC</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-ocean-75)"></i><b>O75</b><span>--rw-ocean-75</span><span>#96EBF1</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-ocean-100)"></i><b>O100</b><span>--rw-ocean-100</span><span>#6BE3EB</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-ocean-200)"></i><b>O200</b><span>--rw-ocean-200</span><span>#2BD6E3</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-ocean-300)"></i><b>O300</b><span>--rw-ocean-300</span><span>#00CEDD</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-ocean-400)"></i><b>O400</b><span>--rw-ocean-400</span><span>#00909B</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-ocean-500)"></i><b>O500</b><span>--rw-ocean-500</span><span>#007E87</span></div>
+    </div>
+    <h4 class="v2-fam">Green</h4>
+    <div class="v2-prims">
+      <div class="v2-prim"><i style="background:var(--rw-g50)"></i><b>G50</b><span>--rw-g50</span><span>#E6F9F1</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-g75)"></i><b>G75</b><span>--rw-g75</span><span>#98E6C4</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-g100)"></i><b>G100</b><span>--rw-g100</span><span>#6DDCAC</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-g200)"></i><b>G200</b><span>--rw-g200</span><span>#2ECD88</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-g300)"></i><b>G300</b><span>--rw-g300</span><span>#03C370</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-g400)"></i><b>G400</b><span>--rw-g400</span><span>#02894E</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-g500)"></i><b>G500</b><span>--rw-g500</span><span>#027744</span></div>
+    </div>
+    <h4 class="v2-fam">Yellow</h4>
+    <div class="v2-prims">
+      <div class="v2-prim"><i style="background:var(--rw-y50)"></i><b>Y50</b><span>--rw-y50</span><span>#FFFAE6</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-y75)"></i><b>Y75</b><span>--rw-y75</span><span>#FFEA97</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-y100)"></i><b>Y100</b><span>--rw-y100</span><span>#FFE16C</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-y200)"></i><b>Y200</b><span>--rw-y200</span><span>#FFD52D</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-y300)"></i><b>Y300</b><span>--rw-y300</span><span>#FFCC02</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-y400)"></i><b>Y400</b><span>--rw-y400</span><span>#B38F01</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-y500)"></i><b>Y500</b><span>--rw-y500</span><span>#9C7C01</span></div>
+    </div>
+    <h4 class="v2-fam">Purple</h4>
+    <div class="v2-prims">
+      <div class="v2-prim"><i style="background:var(--rw-p50)"></i><b>P50</b><span>--rw-p50</span><span>#F0E6FA</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-p75)"></i><b>P75</b><span>--rw-p75</span><span>#C096EB</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-p100)"></i><b>P100</b><span>--rw-p100</span><span>#A66BE2</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-p200)"></i><b>P200</b><span>--rw-p200</span><span>#802BD6</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-p300)"></i><b>P300</b><span>--rw-p300</span><span>#6600CD</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-p400)"></i><b>P400</b><span>--rw-p400</span><span>#470090</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-p500)"></i><b>P500</b><span>--rw-p500</span><span>#3E007D</span></div>
+    </div>
+    <h4 class="v2-fam">Red</h4>
+    <div class="v2-prims">
+      <div class="v2-prim"><i style="background:var(--rw-r50)"></i><b>R50</b><span>--rw-r50</span><span>#FFEFEF</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-r75)"></i><b>R75</b><span>--rw-r75</span><span>#FFBCBC</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-r100)"></i><b>R100</b><span>--rw-r100</span><span>#FFA0A0</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-r200)"></i><b>R200</b><span>--rw-r200</span><span>#FF7878</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-r300)"></i><b>R300</b><span>--rw-r300</span><span>#FF5C5C</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-r400)"></i><b>R400</b><span>--rw-r400</span><span>#B34040</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-r500)"></i><b>R500</b><span>--rw-r500</span><span>#9C3838</span></div>
+    </div>
+    <h4 class="v2-fam">Violet</h4>
+    <div class="v2-prims">
+      <div class="v2-prim"><i style="background:var(--rw-violet-1)"></i><b>violet-1</b><span>--rw-violet-1</span><span>#EAEAEC</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-violet-2)"></i><b>violet-2</b><span>--rw-violet-2</span><span>#CBCCD1</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-violet-3)"></i><b>violet-3</b><span>--rw-violet-3</span><span>#A3A3AC</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-violet-4)"></i><b>violet-4</b><span>--rw-violet-4</span><span>#787885</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-violet-5)"></i><b>violet-5</b><span>--rw-violet-5</span><span>#4F5061</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-violet-6)"></i><b>violet-6</b><span>--rw-violet-6</span><span>#28293E</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-violet-7)"></i><b>violet-7</b><span>--rw-violet-7</span><span>#222335</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-violet-8)"></i><b>violet-8</b><span>--rw-violet-8</span><span>#1C1D2C</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-violet-9)"></i><b>violet-9</b><span>--rw-violet-9</span><span>#171723</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-violet-10)"></i><b>violet-10</b><span>--rw-violet-10</span><span>#12121C</span></div>
+    </div>
+    <h4 class="v2-fam">Neutral</h4>
+    <div class="v2-prims">
+      <div class="v2-prim"><i style="background:var(--rw-n0)"></i><b>N0</b><span>--rw-n0</span><span>#000000</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-n75)"></i><b>N75</b><span>--rw-n75</span><span>#202020</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-n100)"></i><b>N100</b><span>--rw-n100</span><span>#242425</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-n150)"></i><b>N150</b><span>--rw-n150</span><span>#2C2C2C</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-n200)"></i><b>N200</b><span>--rw-n200</span><span>#474749</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-n300)"></i><b>N300</b><span>--rw-n300</span><span>#6B6B6D</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-n400)"></i><b>N400</b><span>--rw-n400</span><span>#8F8F91</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-n500)"></i><b>N500</b><span>--rw-n500</span><span>#A6A6A8</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-n600)"></i><b>N600</b><span>--rw-n600</span><span>#BDBDBF</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-n700)"></i><b>N700</b><span>--rw-n700</span><span>#D4D4D5</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-n800)"></i><b>N800</b><span>--rw-n800</span><span>#EBEBEC</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-n900)"></i><b>N900</b><span>--rw-n900</span><span>#FFFFFF</span></div>
+    </div>
+    <h4 class="v2-fam">PurpleGrey</h4>
+    <div class="v2-prims">
+      <div class="v2-prim"><i style="background:var(--rw-purplegrey-50)"></i><b>purplegrey-50</b><span>--rw-purplegrey-50</span><span>#EAEAEA</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-purplegrey-100)"></i><b>purplegrey-100</b><span>--rw-purplegrey-100</span><span>#BDBDBE</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-purplegrey-200)"></i><b>purplegrey-200</b><span>--rw-purplegrey-200</span><span>#9D9D9F</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-purplegrey-300)"></i><b>purplegrey-300</b><span>--rw-purplegrey-300</span><span>#707073</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-purplegrey-400)"></i><b>purplegrey-400</b><span>--rw-purplegrey-400</span><span>#555458</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-purplegrey-500)"></i><b>purplegrey-500</b><span>--rw-purplegrey-500</span><span>#2A292E</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-purplegrey-600)"></i><b>purplegrey-600</b><span>--rw-purplegrey-600</span><span>#26252A</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-purplegrey-700)"></i><b>purplegrey-700</b><span>--rw-purplegrey-700</span><span>#1E1D21</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-purplegrey-800)"></i><b>purplegrey-800</b><span>--rw-purplegrey-800</span><span>#171719</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-purplegrey-900)"></i><b>purplegrey-900</b><span>--rw-purplegrey-900</span><span>#121113</span></div>
+    </div>
 
     <h3>V2 semantic colors used on Matches</h3>
     <table class="v2-table">
