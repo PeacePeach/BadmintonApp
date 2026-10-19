@@ -33,6 +33,7 @@
   --rw-bg-app-glow: radial-gradient(circle 552.5px at 167.5px -102.5px, rgba(108, 159, 239, .2) 0%, rgba(91, 157, 255, 0) 100%);
 
   /* Text */
+  --rw-text-gradient: linear-gradient(90deg, var(--neutral-800) 0%, var(--rw-blue-100) 100%); /* greeting: N800 -> B100 */
   --rw-text-primary: var(--neutral-800);   /* N800 #EBEBEC */
   --rw-text-secondary: var(--neutral-400); /* N400 #8F8F91 */
   --rw-text-on-light: var(--app-background);
@@ -75,6 +76,7 @@
   --rw-weight-min: 500;
   --rw-tracking: -0.16px;
   --rw-type-title: 600 24px/28.8px var(--font-sans);
+  --rw-type-lead: 500 16px/1.4 var(--font-sans);
   --rw-type-eyebrow: 500 12px/13px var(--font-sans);
   --rw-type-metric: 500 32px/1 var(--font-sans);
   --rw-type-subtitle: 500 12px/13px var(--font-sans);

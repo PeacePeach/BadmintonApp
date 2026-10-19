@@ -115,6 +115,9 @@ button:disabled{cursor:default !important;}
 /* Metric: eyebrow, value, Insight Subtitle, Simple bar */
 .rw-eyebrow{font:var(--rw-type-eyebrow);letter-spacing:1.1px;text-transform:uppercase;color:var(--rw-text-secondary);}
 .rw-metric-value{font:var(--rw-type-metric);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);font-variant-numeric:var(--font-variant-numeric-metric);}
+.rw-greeting{display:flex;flex-direction:column;gap:8px;}
+.rw-lead{font:var(--rw-type-lead);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);margin:0;}
+.rw-text-gradient{background:var(--rw-text-gradient);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;}
 .rw-subtitle{font:var(--rw-type-subtitle);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
 .rw-bar{height:13px;display:flex;flex-direction:column;justify-content:flex-end;}
 .rw-bar>div{height:8px;border-radius:99px;background:var(--rw-bar-track);overflow:hidden;}
@@ -367,9 +370,14 @@ button:disabled{cursor:default !important;}
     <!-- MATCHES -->
     <sc-if value="{{ isMatches }}" hint-placeholder-val="{{ true }}">
       <div data-screen-label="Matches" style="display:flex;flex-direction:column;gap:40px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;min-height:40px;">
-          <h1 class="rw-title">{{ tx.matches }}</h1>
+        <div style="display:flex;align-items:center;justify-content:flex-end;min-height:40px;">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.menu }}" onClick="{{ toggleMenu }}" hint-size="44px,44px"></x-import>
+        </div>
+        <div class="rw-greeting">
+          <h1 class="rw-title rw-text-gradient">{{ greeting.title }}</h1>
+          <sc-if value="{{ matchesReady }}" hint-placeholder-val="{{ true }}">
+            <p class="rw-lead rw-text-gradient">{{ greeting.body }}</p>
+          </sc-if>
         </div>
         <sc-if value="{{ blocked }}" hint-placeholder-val="{{ false }}">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ blockedState.illustration }}" title="{{ blockedState.title }}" body="{{ blockedState.body }}" actionLabel="{{ blockedState.actionLabel }}" onAction="{{ blockedState.onAction }}" hint-size="350px,330px"></x-import>
@@ -1757,6 +1765,10 @@ const I18N = {
     loadingMatches: 'Loading matches', totalMatches: 'Total Matches', winRate: 'Win Rate', logMatch: 'Log Match', wl: '{w}–{l} W–L',
     all: 'All', Singles: 'Singles', Doubles: 'Doubles', win: 'Win', loss: 'Loss', you: 'You', record: '{w}–{l}',
     noMatches: 'No Matches Yet', noMatchesBody: 'Log your first match to start tracking results.',
+    hiName: 'Hi, {name}', hiThere: 'Hi there', greetUp: 'Your win rate improved by {d}% in the last month. Keep going!',
+    greetDown: 'Your win rate is down {d}% from the month before. Keep logging to see what changed.',
+    greetFlat: 'Your win rate held steady over the last month. Keep going!', greetLogged: '{n} matches logged so far. Keep going!',
+    greetLogged1: '1 match logged so far. Keep going!', greetNone: 'Ready for your first match?',
     noTypeMatches: 'No {type} Matches Yet', noTypeMatchesBody: '{type} matches you log will show up here.',
     connLost: 'Connection Lost', connLostBody: 'Check your Wi-Fi or mobile data, then try again.', tryAgain: 'Try Again',
     cantLoad: "Couldn't Load {what}", cantLoadBody: 'Something went wrong on our side. Try again in a moment.',
@@ -1884,6 +1896,10 @@ const I18N = {
     loadingMatches: '正在加载比赛', totalMatches: '总场次', winRate: '胜率', logMatch: '记录比赛', wl: '{w}胜 {l}负',
     all: '全部', Singles: '单打', Doubles: '双打', win: '胜', loss: '负', you: '我', record: '{w}胜 {l}负',
     noMatches: '还没有比赛记录', noMatchesBody: '记录第一场比赛，开始追踪你的表现。',
+    hiName: '嗨，{name}', hiThere: '嗨', greetUp: '最近一个月你的胜率提升了 {d}%，继续加油！',
+    greetDown: '最近一个月的胜率比之前一个月低了 {d}%，继续记录，看看哪里变了。',
+    greetFlat: '最近一个月你的胜率保持稳定，继续加油！', greetLogged: '已记录 {n} 场比赛，继续加油！',
+    greetLogged1: '已记录 1 场比赛，继续加油！', greetNone: '准备好记录第一场比赛了吗？',
     noTypeMatches: '还没有{type}比赛', noTypeMatchesBody: '你记录的{type}比赛会显示在这里。',
     connLost: '连接中断', connLostBody: '请检查 Wi-Fi 或移动数据，然后重试。', tryAgain: '重试',
     cantLoad: '无法加载{what}', cantLoadBody: '我们这边出了点问题，请稍后再试。',
@@ -2455,6 +2471,20 @@ class Component extends DCLogic {
     const w = list.filter(m => this.res(m.games).win).length, n = list.length;
     return { w, l: n - w, n, label: `${w}–${n - w}`, pct: n ? w / n : 0, pctStr: n ? Math.round(w / n * 100) + '%' : '—', barW: n ? Math.round(w / n * 100) + '%' : '0%' };
   }
+  // Matches greeting: first name, then last 30 days' win rate against the 30 days before (3+ matches in each),
+  // otherwise how many matches are logged.
+  greeting(all) {
+    const name = (this.nm('me') || '').trim().split(/\s+/)[0];
+    const day = 864e5, now = new Date(), today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    const ago = m => { const [y, mo, d] = String(m.date).split('-').map(Number); return (today - Date.UTC(y, mo - 1, d)) / day; };
+    const recent = this.rec(all.filter(m => ago(m) < 30)), before = this.rec(all.filter(m => ago(m) >= 30 && ago(m) < 60));
+    let body;
+    if (recent.n >= 3 && before.n >= 3) {
+      const d = Math.round((recent.pct - before.pct) * 100);
+      body = d >= 1 ? this.t('greetUp', { d }) : d <= -1 ? this.t('greetDown', { d: -d }) : this.t('greetFlat');
+    } else body = !all.length ? this.t('greetNone') : all.length === 1 ? this.t('greetLogged1') : this.t('greetLogged', { n: all.length });
+    return { title: name ? this.t('hiName', { name }) : this.t('hiThere'), body };
+  }
   vs(pid, type) { return this.rec(this.state.matches.filter(m => m.opps.includes(pid) && (!type || m.type === type))); }
   with(pid) { return this.rec(this.state.matches.filter(m => m.partner === pid)); }
 
@@ -2716,7 +2746,7 @@ class Component extends DCLogic {
     const q = s.search.trim().toLowerCase();
     const exists = s.players.some(p => p.name.toLowerCase() === q);
     const v = {
-      scrollRef: this.scrollRef, overall,
+      scrollRef: this.scrollRef, overall, greeting: this.greeting(all),
       scrollCls: s.screen === 'matches' ? 'rw-scroll is-v2' : 'rw-scroll',
       isMatches: s.screen === 'matches', isInsights: s.screen === 'insights', isLog: s.screen === 'log',
       isDetail: s.screen === 'detail', isPlayers: s.screen === 'players', isPlayer: s.screen === 'player',
