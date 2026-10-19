@@ -16,6 +16,11 @@
      Avatar / Letter .............. .rw-avatar[.rw-avatar-sm]
      Bottom Nav ................... .rw-nav > .rw-glass.rw-nav-bar > .rw-nav-item[.is-active]
      Greeting ..................... .rw-greeting > .rw-title.rw-text-gradient + .rw-lead
+     Top Tab ...................... .rw-surface.rw-tabs > .rw-tab[.is-active]
+     Insight Subtitle (change) .... .rw-trend > .rw-trend-delta.is-up|.is-down|.is-flat
+     Graphs / Large bar ........... .rw-form > .rw-form-bars > .rw-form-bar[.is-recent] + .rw-chart-label
+     Performance breakdown ........ .rw-breakdown (label, .rw-bar, .rw-row-value + .rw-row-sub)
+     Insight / ListRow ............ .rw-list-row (.rw-avatar, .rw-eyebrow, .rw-name, .rw-list-value, .rw-caption)
    ========================================================= */
 /* Screen background: app background + glow. The glow stays fixed while the content scrolls over it. */
 .rw-scroll.is-v2{background:var(--rw-bg-app-glow) no-repeat scroll,var(--rw-bg-app);--empty-body-weight:var(--rw-weight-min);}
@@ -73,3 +78,39 @@
 .rw-nav-item{width:84px;height:60px;padding:8px 16px 10px;border-radius:100px;border:1px solid transparent;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:var(--rw-nav-fg);font:var(--rw-type-nav);letter-spacing:var(--rw-tracking);white-space:nowrap;transition:background var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out);}
 .rw-nav-item.is-active{background:var(--rw-nav-active-bg);border-color:var(--rw-nav-active-border);color:var(--rw-nav-active-fg);}
 @media (prefers-reduced-motion:reduce){.rw-btn,.rw-press,.rw-pill,.rw-nav-item{transition:none;}}
+/* ---------- Insights / Performance (Figma 199:3555) ---------- */
+/* Top Tab: segmented control. The bar is a surface; the active tab is glass with the selected outline. */
+.rw-tabs{display:flex;gap:12px;padding:4px;border-radius:100px;}
+.rw-tab{flex:1;min-width:0;height:var(--rw-tab-h);padding:0 16px;border-radius:100px;border:1px solid transparent;background:transparent;color:var(--rw-tab-fg);font:var(--rw-type-tab);letter-spacing:var(--rw-tracking);white-space:nowrap;cursor:pointer;transition:color var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out);}
+.rw-tab.is-active{background:var(--rw-glass-fill);-webkit-backdrop-filter:var(--rw-glass-effect);backdrop-filter:var(--rw-glass-effect);box-shadow:var(--rw-glass-rim);border-color:var(--rw-tab-active-border);color:var(--rw-tab-active-fg);}
+/* Insight Subtitle with change: arrow + value, then the comparison */
+.rw-trend{display:flex;align-items:center;gap:4px;font:var(--rw-type-subtitle);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);white-space:nowrap;}
+.rw-trend-delta{display:flex;align-items:center;gap:3px;font:var(--rw-type-trend);}
+.rw-trend-delta.is-up{color:var(--rw-trend-up);}
+.rw-trend-delta.is-down{color:var(--rw-trend-down);}
+.rw-trend-delta.is-flat{color:var(--rw-trend-flat);}
+/* Graphs / Large bar: 10 vertical bars, the recent ones filled */
+.rw-form{display:flex;flex-direction:column;gap:12px;}
+.rw-form-bars{height:81px;display:flex;align-items:flex-end;justify-content:space-between;}
+.rw-form-bar{width:8px;border-radius:99px;background:var(--rw-form-bar-track);transition:height .22s ease-out;}
+.rw-form-bar.is-recent{background:var(--rw-form-bar-fill);}
+.rw-chart-label{display:flex;justify-content:space-between;font:var(--rw-type-chart-label);letter-spacing:var(--rw-tracking);color:var(--rw-chart-label-fg);}
+/* Section title inside a tile */
+.rw-section-title{font:var(--rw-type-section);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);margin:0;}
+/* Performance breakdown row: label, Simple bar, value + sub */
+.rw-breakdown{display:grid;grid-template-columns:98px minmax(0,1fr) 62px;align-items:center;gap:24px;}
+.rw-breakdown-label{font:var(--rw-type-row-label);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);}
+.rw-breakdown .rw-bar{height:8px;}
+.rw-breakdown .rw-bar>div{position:relative;overflow:visible;}
+.rw-breakdown .rw-bar>div>div{position:absolute;top:0;bottom:0;}
+.rw-breakdown-mid{position:absolute;left:50%;top:-4px;bottom:-4px;width:2px;margin-left:-1px;border-radius:2px;background:var(--rw-text-primary);}
+.rw-breakdown-value{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+.rw-row-value{font:var(--rw-type-row-value);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);white-space:nowrap;}
+.rw-row-sub{font:var(--rw-type-row-sub);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);white-space:nowrap;}
+/* Insight / ListRow: avatar, eyebrow + name, value + caption */
+.rw-list-row{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.rw-list-row-who{display:flex;align-items:center;gap:12px;min-width:0;}
+.rw-list-row-text{display:flex;flex-direction:column;gap:8px;min-width:0;}
+.rw-list-row-end{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+.rw-list-value{font:var(--rw-type-list-value);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);white-space:nowrap;}
+@media (prefers-reduced-motion:reduce){.rw-tab,.rw-form-bar{transition:none;}}

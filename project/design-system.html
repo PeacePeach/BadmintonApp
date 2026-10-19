@@ -463,7 +463,7 @@
 
     <!-- ===================== DESIGN SYSTEM V2 ===================== -->
     <section class="v2" id="v2">
-    <h2>Design System V2 (Matches screen)</h2>
+    <h2>Design System V2 (Matches, Insights)</h2>
     <div class="section-note">Source: Figma Design System page 159:5834 and the Matches screen 199:3497. Tokens live in <code>tokens/v2.css</code>, component styles in <code>components-v2.css</code>. Components use semantic or component tokens only, never primitives. Minimum font weight is Medium (500).</div>
 
     <h3>V2 primitives (Figma Foundation)</h3>
@@ -579,27 +579,29 @@
       <div class="v2-prim"><i style="background:var(--rw-purplegrey-900)"></i><b>purplegrey-900</b><span>--rw-purplegrey-900</span><span>#121113</span></div>
     </div>
 
-    <h3>V2 semantic colors used on Matches</h3>
+    <h3>V2 semantic colors (Matches, Insights)</h3>
     <table class="v2-table">
       <thead><tr><th></th><th>Semantic token</th><th>Primitive</th><th>Value</th><th>Used for</th></tr></thead>
       <tbody>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-bg-app)"></i></td><td>--rw-color-bg-app</td><td>--rw-purplegrey-900</td><td>#121113</td><td>Screen background</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-bg-glow),var(--rw-color-bg-app);background-size:56px 56px,auto"></i></td><td>--rw-color-bg-glow</td><td>none (Ellipse 2)</td><td>#6C9FEF → #5B9DFF, 20%</td><td>Blue glow at the top, fixed while scrolling</td></tr>
-        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface)"></i></td><td>--rw-color-surface</td><td>--rw-glassfill</td><td>#FFFFFF 5%</td><td>Tiles, Match cards, Pills</td></tr>
-        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-glass)"></i></td><td>--rw-color-surface-glass</td><td>--rw-glassfill</td><td>#FFFFFF 5% + glass</td><td>Header icon button, Bottom Nav bar</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface)"></i></td><td>--rw-color-surface</td><td>--rw-glassfill</td><td>#FFFFFF 5%</td><td>Tiles, Match cards, Pills, Top Tab bar</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-glass)"></i></td><td>--rw-color-surface-glass</td><td>--rw-glassfill</td><td>#FFFFFF 5% + glass</td><td>Header icon button, Bottom Nav bar, active Top Tab</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-selected)"></i></td><td>--rw-color-surface-selected</td><td>--rw-glassfill</td><td>#FFFFFF 5%</td><td>Active Bottom Nav item</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-text-primary)"></i></td><td>--rw-color-text-primary</td><td>--rw-n800</td><td>#EBEBEC</td><td>Greeting line, metric values, names, scores, active pill text</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-text-secondary)"></i></td><td>--rw-color-text-secondary</td><td>--rw-n400</td><td>#8F8F91</td><td>Eyebrows, Insight Subtitle, dates, inactive pills, muted names</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-text-tertiary)"></i></td><td>--rw-color-text-tertiary</td><td>--rw-n300</td><td>#6B6B6D</td><td>Chart axis labels (5-match form, Now)</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-text-inactive)"></i></td><td>--rw-color-text-inactive</td><td>--rw-n500</td><td>#A6A6A8</td><td>Inactive Bottom Nav items</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-text-on-selected)"></i></td><td>--rw-color-text-on-selected</td><td>--rw-n600</td><td>#BDBDBF</td><td>Active Bottom Nav item label and icon</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-text-on-action)"></i></td><td>--rw-color-text-on-action</td><td>--rw-n75</td><td>#202020</td><td>Label and icon on the primary button</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-text-highlight)"></i></td><td>--rw-color-text-highlight</td><td>--rw-n800 → --rw-b100</td><td>#EBEBEC → #6BA6FF</td><td>Greeting title gradient</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-action-primary)"></i></td><td>--rw-color-action-primary</td><td>--rw-n800</td><td>#EBEBEC</td><td>Primary button fill</td></tr>
-        <tr><td><i class="v2-sw" style="background:var(--rw-color-border-selected)"></i></td><td>--rw-color-border-selected</td><td>--rw-n600</td><td>#BDBDBF</td><td>Every selected outline: active pill, active Bottom Nav item, radios, focus ring</td></tr>
-        <tr><td><i class="v2-sw" style="background:var(--rw-color-status-win)"></i></td><td>--rw-color-status-win</td><td>--rw-b100</td><td>#6BA6FF</td><td>Match Result Win</td></tr>
-        <tr><td><i class="v2-sw" style="background:var(--rw-color-status-loss)"></i></td><td>--rw-color-status-loss</td><td>--rw-o100</td><td>#FAB86F</td><td>Match Result Loss</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-border-selected)"></i></td><td>--rw-color-border-selected</td><td>--rw-n600</td><td>#BDBDBF</td><td>Every selected outline: active pill, active Top Tab, active Bottom Nav item, radios, focus ring</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-status-win)"></i></td><td>--rw-color-status-win</td><td>--rw-b100</td><td>#6BA6FF</td><td>Match Result Win, trend up</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-status-loss)"></i></td><td>--rw-color-status-loss</td><td>--rw-o100</td><td>#FAB86F</td><td>Match Result Loss, trend down</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-data-fill)"></i></td><td>--rw-color-data-fill</td><td>--rw-blue-gradient-01</td><td>#5B9DFF → #2C3F5C</td><td>Simple bar fill</td></tr>
-        <tr><td><i class="v2-sw" style="background:var(--rw-color-data-track)"></i></td><td>--rw-color-data-track</td><td>--rw-purplegrey-500</td><td>#2A292E</td><td>Simple bar track</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-data-fill-vertical)"></i></td><td>--rw-color-data-fill-vertical</td><td>--rw-blue-gradient-02</td><td>#5B9DFF → #375E99 80%</td><td>Recent bars in the form chart</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-data-track)"></i></td><td>--rw-color-data-track</td><td>--rw-purplegrey-500</td><td>#2A292E</td><td>Simple bar track, older bars in the form chart</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-avatar-bg)"></i></td><td>--rw-color-avatar-bg</td><td>--rw-n150</td><td>#2C2C2C</td><td>Initials avatar fill</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-avatar-fg)"></i></td><td>--rw-color-avatar-fg</td><td>--rw-n800</td><td>#EBEBEC</td><td>Initials avatar letter</td></tr>
       </tbody>
@@ -668,6 +670,32 @@
               <span class="rw-score">18–21</span>
             </div>
           </div>
+        </div>
+        <div class="v2-cell v2-wide"><div class="v2-label">Top Tab (Performance active)</div>
+          <div class="rw-surface rw-tabs" role="tablist" style="max-width:350px"><button class="rw-tab is-active" role="tab">Performance</button><button class="rw-tab" role="tab">Grow</button></div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Metric + Insight Subtitle (change: up, down, flat) + Graphs / Large bar</div>
+          <div class="rw-surface rw-tile" style="display:flex;flex-direction:column;gap:16px;max-width:170px">
+            <div style="display:flex;flex-direction:column;gap:12px"><span class="rw-eyebrow">Win rate</span>
+              <div style="display:flex;flex-direction:column;gap:8px"><span class="rw-metric-value">60%</span>
+                <div class="rw-trend"><span class="rw-trend-delta is-up"><i data-lucide="arrow-up-right" style="width:15px;height:15px"></i>+20%</span><span>vs prev 10</span></div></div></div>
+            <div class="rw-form"><div class="rw-form-bars"><div class="rw-form-bar" style="height:53%"></div><div class="rw-form-bar" style="height:75%"></div><div class="rw-form-bar" style="height:64%"></div><div class="rw-form-bar" style="height:58%"></div><div class="rw-form-bar" style="height:85%"></div><div class="rw-form-bar is-recent" style="height:64%"></div><div class="rw-form-bar is-recent" style="height:56%"></div><div class="rw-form-bar is-recent" style="height:64%"></div><div class="rw-form-bar is-recent" style="height:100%"></div><div class="rw-form-bar is-recent" style="height:88%"></div></div>
+              <div class="rw-chart-label"><span>5-match form</span><span>Now</span></div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+            <div class="rw-trend"><span class="rw-trend-delta is-down"><i data-lucide="arrow-down-right" style="width:15px;height:15px"></i>-10%</span><span>vs prev 10</span></div>
+            <div class="rw-trend"><span class="rw-trend-delta is-flat"><i data-lucide="minus" style="width:15px;height:15px"></i>0%</span><span>vs prev 10</span></div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Performance Breakdown (section title + rows, incl. centred margin bar)</div>
+          <div class="rw-surface rw-tile" style="display:flex;flex-direction:column;gap:16px">
+            <h2 class="rw-section-title">Performance Breakdown</h2>
+            <div class="rw-breakdown"><div class="rw-breakdown-label">Singles Win Rate</div><div class="rw-bar"><div><div style="left:0;width:45%"></div><div class="rw-breakdown-mid" style="opacity:0"></div></div></div><div class="rw-breakdown-value"><div class="rw-row-value">45%</div><div class="rw-row-sub">5 of 11</div></div></div>
+            <div class="rw-breakdown"><div class="rw-breakdown-label">Avg. Point Margin</div><div class="rw-bar"><div><div style="left:50%;width:15%"></div><div class="rw-breakdown-mid"></div></div></div><div class="rw-breakdown-value"><div class="rw-row-value">+3.0</div><div class="rw-row-sub">per game</div></div></div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Insight / ListRow</div>
+          <div class="rw-surface rw-tile rw-list-row"><div class="rw-list-row-who"><div class="rw-avatar">PN</div><div class="rw-list-row-text"><div class="rw-eyebrow">Best partner</div><div class="rw-name">Priya Nair</div></div></div><div class="rw-list-row-end"><div class="rw-list-value">100%</div><div class="rw-caption">Win rate together</div></div></div>
         </div>
         <div class="v2-cell v2-wide"><div class="v2-label">Bottom Nav (Matches active)</div>
           <div class="v2-navwrap"><nav class="rw-nav"><div class="rw-glass rw-nav-bar">

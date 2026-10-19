@@ -103,6 +103,7 @@
   /* Effects and gradients */
   --rw-glassfill: rgba(255, 255, 255, .05);                              /* GlassFill: #FFFFFF at 5% */
   --rw-blue-gradient-01: linear-gradient(90deg, #5b9dff 0%, #2c3f5c 100%); /* Blue Gradient 01 */
+  --rw-blue-gradient-02: linear-gradient(180deg, #5b9dff 0%, rgba(55, 94, 153, .8) 100%); /* Blue Gradient 02 (vertical) */
 
   /* ---------- 2. Semantic tokens: what a colour is for ---------- */
   /* Backgrounds and surfaces */
@@ -114,6 +115,7 @@
   /* Text */
   --rw-color-text-primary: var(--rw-n800);
   --rw-color-text-secondary: var(--rw-n400);
+  --rw-color-text-tertiary: var(--rw-n300);           /* chart axis labels */
   --rw-color-text-inactive: var(--rw-n500);           /* unselected nav items */
   --rw-color-text-on-selected: var(--rw-n600);
   --rw-color-text-on-action: var(--rw-n75);
@@ -125,6 +127,7 @@
   --rw-color-status-win: var(--rw-b100);
   --rw-color-status-loss: var(--rw-o100);
   --rw-color-data-fill: var(--rw-blue-gradient-01);
+  --rw-color-data-fill-vertical: var(--rw-blue-gradient-02); /* vertical bars */
   --rw-color-data-track: var(--rw-purplegrey-500);
   /* Avatars */
   --rw-color-avatar-bg: var(--rw-n150);
@@ -168,6 +171,19 @@
   /* Avatar / Letter */
   --rw-avatar-bg: var(--rw-color-avatar-bg);
   --rw-avatar-fg: var(--rw-color-avatar-fg);
+  /* Graphs / Large bar (form chart) */
+  --rw-form-bar-track: var(--rw-color-data-track);
+  --rw-form-bar-fill: var(--rw-color-data-fill-vertical);
+  --rw-chart-label-fg: var(--rw-color-text-tertiary);
+  /* Trend (Insight Subtitle with change) */
+  --rw-trend-up: var(--rw-color-status-win);
+  --rw-trend-down: var(--rw-color-status-loss);
+  --rw-trend-flat: var(--rw-color-text-secondary);
+  /* Top Tab */
+  --rw-tab-h: 48px;
+  --rw-tab-fg: var(--rw-color-text-secondary);
+  --rw-tab-active-border: var(--rw-color-border-selected);
+  --rw-tab-active-fg: var(--rw-color-text-primary);
   /* Bottom Nav */
   --rw-nav-fg: var(--rw-color-text-inactive);
   --rw-nav-active-bg: var(--rw-color-surface-selected);
@@ -194,4 +210,12 @@
   --rw-type-pill-sm: 500 12px/15px var(--font-sans);
   --rw-type-avatar: 500 13px/13px var(--font-sans);
   --rw-type-nav: 500 11px/12px var(--font-sans);
+  --rw-type-tab: 500 15px/15px var(--font-sans);
+  --rw-type-section: 500 16px/19.2px var(--font-sans);
+  --rw-type-trend: 600 12px/13px var(--font-sans);
+  --rw-type-chart-label: 500 12px/11px var(--font-sans);
+  --rw-type-row-label: 500 12px/16.9px var(--font-sans);
+  --rw-type-row-value: 500 14px/14px var(--font-sans);
+  --rw-type-row-sub: 500 11px/11px var(--font-sans);
+  --rw-type-list-value: 500 15px/15px var(--font-sans);
 }

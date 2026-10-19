@@ -427,16 +427,16 @@ button:disabled{cursor:default !important;}
 
     <!-- INSIGHTS -->
     <sc-if value="{{ isInsights }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Insights" style="display:flex;flex-direction:column;gap:28px;">
+      <div data-screen-label="Insights" style="display:flex;flex-direction:column;gap:24px;">
         <div style="display:flex;flex-direction:column;gap:20px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div style="font:600 32px/1.2 var(--font-sans);">{{ tx.insights }}</div>
-            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" size="{{ 48 }}" label="{{ tx.menu }}" onClick="{{ toggleMenu }}" hint-size="48px,48px"></x-import>
+          <div style="display:flex;align-items:center;justify-content:space-between;min-height:40px;">
+            <h1 class="rw-title">{{ tx.insights }}</h1>
+            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.menu }}" onClick="{{ toggleMenu }}" hint-size="44px,44px"></x-import>
           </div>
           <sc-if value="{{ insHasData }}" hint-placeholder-val="{{ true }}">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:99px;background:var(--filter-pill-bg);">
+          <div class="rw-surface rw-tabs" role="tablist">
             <sc-for list="{{ insTabs }}" as="t" hint-placeholder-count="2">
-              <button onClick="{{ t.select }}" style="height:44px;border:none;border-radius:99px;font:500 15px/1 var(--font-sans);cursor:pointer;transition:background .18s ease-out,color .18s ease-out;background: {{ t.bg }};color: {{ t.fg }};">{{ t.label }}</button>
+              <button class="rw-tab {{ t.cls }}" role="tab" aria-selected="{{ t.on }}" onClick="{{ t.select }}">{{ t.label }}</button>
             </sc-for>
           </div>
           </sc-if>
@@ -446,18 +446,18 @@ button:disabled{cursor:default !important;}
           <div aria-busy="true" style="display:flex;flex-direction:column;gap:10px;">
             <span class="sr-only" role="status">{{ tx.loadingInsights }}</span>
             <div aria-hidden="true" style="display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);gap:10px;">
-              <div style="background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:14px;">
+              <div class="rw-surface rw-tile" style="display:flex;flex-direction:column;gap:14px;">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                   <div class="skel" style="height:11px;width:56px;margin-top:6px;"></div>
                   <div class="skel" style="width:36px;height:36px;border-radius:50%;"></div>
                 </div>
                 <div class="skel" style="height:50px;width:70%;"></div>
                 <div class="skel" style="height:13px;width:60%;"></div>
-                <div class="skel" style="flex:1;min-height:96px;border-radius:18px;margin-top:12px;"></div>
+                <div class="skel" style="flex:1;min-height:96px;border-radius:var(--rw-tile-radius);margin-top:12px;"></div>
               </div>
               <div style="display:flex;flex-direction:column;gap:10px;">
                 <sc-for list="{{ skel2 }}" as="k" hint-placeholder-count="2">
-                  <div style="background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:14px;">
+                  <div class="rw-surface rw-tile" style="display:flex;flex-direction:column;gap:14px;">
                     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
                       <div class="skel" style="height:11px;width:60%;margin-top:6px;"></div>
                       <div class="skel" style="width:36px;height:36px;border-radius:50%;flex-shrink:0;"></div>
@@ -468,7 +468,7 @@ button:disabled{cursor:default !important;}
                 </sc-for>
               </div>
             </div>
-            <div aria-hidden="true" style="background:var(--surface-primary);border-radius:26px;padding:22px 20px;display:flex;flex-direction:column;gap:22px;">
+            <div aria-hidden="true" class="rw-surface rw-tile" style="display:flex;flex-direction:column;gap:22px;">
               <div class="skel" style="height:19px;width:55%;"></div>
               <sc-for list="{{ skel3 }}" as="k" hint-placeholder-count="3">
                 <div style="display:grid;grid-template-columns:96px minmax(0,1fr) 62px;align-items:center;gap:14px;">
@@ -486,81 +486,79 @@ button:disabled{cursor:default !important;}
         </sc-if>
 
         <sc-if value="{{ insProgress }}" hint-placeholder-val="{{ true }}">
-          <div data-screen-label="Performance" style="display:flex;flex-direction:column;gap:10px;">
-            <div style="display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);gap:10px;">
-              <div style="background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:14px;">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                  <div class="tl zh12" style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);padding-top:6px;">{{ tx.winRate }}</div>
-                  <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);display:flex;align-items:center;justify-content:center;color:var(--icon-badge-fg);flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Trophy" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:10px;">
-                  <div style="font:500 52px/.95 var(--font-sans);letter-spacing:-.03em;">{{ pf.win }}</div>
-                  <div style="display:flex;align-items:center;gap:6px;font:400 13px/1 var(--font-sans);color:var(--text-secondary);">
-                    <div style="display:flex;align-items:center;gap:3px;font-weight:600;color: {{ pf.deltaFg }};"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pf.deltaIcon }}" size="{{ 15 }}" hint-size="15px,15px"></x-import>{{ pf.delta }}</div>
-                    {{ tx.vsPrev10 }}
+          <div data-screen-label="Performance" style="display:flex;flex-direction:column;gap:24px;">
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;">
+              <div class="rw-surface rw-tile" style="display:flex;flex-direction:column;gap:16px;">
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                  <div class="rw-eyebrow tl">{{ tx.winRate }}</div>
+                  <div style="display:flex;flex-direction:column;gap:8px;">
+                    <div class="rw-metric-value">{{ pf.win }}</div>
+                    <div class="rw-trend">
+                      <span class="rw-trend-delta {{ pf.deltaCls }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pf.deltaIcon }}" size="{{ 15 }}" hint-size="15px,15px"></x-import>{{ pf.delta }}</span>
+                      <span>{{ tx.vsPrev10 }}</span>
+                    </div>
                   </div>
                 </div>
-                <div style="flex:1;min-height:96px;display:flex;align-items:flex-end;justify-content:space-between;gap:4px;padding-top:12px;">
-                  <sc-for list="{{ pf.bars }}" as="b" hint-placeholder-count="10">
-                    <div style="width:8px;border-radius:99px;transition:height .22s ease-out;height: {{ b.h }};background: {{ b.bg }};"></div>
-                  </sc-for>
+                <div class="rw-form" style="flex:1;justify-content:flex-end;">
+                  <div class="rw-form-bars" aria-hidden="true">
+                    <sc-for list="{{ pf.bars }}" as="b" hint-placeholder-count="10">
+                      <div class="rw-form-bar {{ b.cls }}" style="height: {{ b.h }};"></div>
+                    </sc-for>
+                  </div>
+                  <div class="rw-chart-label zh12"><span>{{ tx.form5 }}</span><span>{{ tx.now }}</span></div>
                 </div>
-                <div class="zh12" style="display:flex;justify-content:space-between;font:400 11px/1 var(--font-sans);color:var(--text-secondary);"><div>{{ tx.form5 }}</div><div>{{ tx.now }}</div></div>
               </div>
               <div style="display:flex;flex-direction:column;gap:10px;">
-                <div style="flex:1;background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;">
-                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
-                    <div class="tl zh12" style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);line-height:1.4;">{{ tx.matchesPlayed }}</div>
-                    <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);display:flex;align-items:center;justify-content:center;color:var(--icon-badge-fg);flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Calendar" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
-                  </div>
-                  <div style="display:flex;flex-direction:column;gap:6px;">
-                    <div style="font:500 40px/1 var(--font-sans);">{{ pf.played }}</div>
-                    <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.last30 }}</div>
+                <div class="rw-surface rw-tile" style="flex:1;display:flex;flex-direction:column;gap:12px;">
+                  <div class="rw-eyebrow tl">{{ tx.matchesPlayed }}</div>
+                  <div style="display:flex;flex-direction:column;gap:8px;">
+                    <div class="rw-metric-value">{{ pf.played }}</div>
+                    <div class="rw-subtitle">{{ tx.last30 }}</div>
                   </div>
                 </div>
-                <div style="flex:1;background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;">
-                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
-                    <div class="tl zh12" style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);line-height:1.4;">{{ tx.recentRecord }}</div>
-                    <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);display:flex;align-items:center;justify-content:center;color:var(--icon-badge-fg);flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ListChecks" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
-                  </div>
-                  <div style="display:flex;flex-direction:column;gap:6px;">
-                    <div style="font:500 40px/1 var(--font-sans);">{{ pf.record }}</div>
-                    <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.last5 }}</div>
+                <div class="rw-surface rw-tile" style="flex:1;display:flex;flex-direction:column;gap:12px;">
+                  <div class="rw-eyebrow tl">{{ tx.recentRecord }}</div>
+                  <div style="display:flex;flex-direction:column;gap:8px;">
+                    <div class="rw-metric-value">{{ pf.record }}</div>
+                    <div class="rw-subtitle">{{ tx.last5 }}</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div style="background:var(--surface-primary);border-radius:26px;padding:22px 20px;display:flex;flex-direction:column;gap:22px;">
-              <div style="font:500 19px/1.2 var(--font-sans);">{{ tx.breakdown }}</div>
-              <sc-for list="{{ pf.rows }}" as="r" hint-placeholder-count="4">
-                <div style="display:grid;grid-template-columns:96px minmax(0,1fr) 62px;align-items:center;gap:14px;">
-                  <div style="font:400 14px/1.3 var(--font-sans);color:var(--neutral-600);">{{ r.label }}</div>
-                  <div style="position:relative;height:8px;border-radius:99px;background:repeating-linear-gradient(-60deg,var(--border-default) 0 1.5px,transparent 1.5px 5px);">
-                    <div style="position:absolute;top:0;bottom:0;border-radius:99px;background:var(--progress-active);left: {{ r.l }};width: {{ r.w }};"></div>
-                    <div style="position:absolute;left:50%;top:-4px;bottom:-4px;width:2px;margin-left:-1px;border-radius:2px;background:var(--text-primary);opacity: {{ r.mid }};"></div>
+            <div class="rw-surface rw-tile" style="display:flex;flex-direction:column;gap:16px;">
+              <h2 class="rw-section-title">{{ tx.breakdown }}</h2>
+              <div style="display:flex;flex-direction:column;gap:16px;">
+                <sc-for list="{{ pf.rows }}" as="r" hint-placeholder-count="4">
+                  <div class="rw-breakdown">
+                    <div class="rw-breakdown-label">{{ r.label }}</div>
+                    <div class="rw-bar" role="img" aria-label="{{ r.value }}"><div><div style="left: {{ r.l }};width: {{ r.w }};"></div><div class="rw-breakdown-mid" style="opacity: {{ r.mid }};"></div></div></div>
+                    <div class="rw-breakdown-value">
+                      <div class="rw-row-value">{{ r.value }}</div>
+                      <div class="rw-row-sub zh12">{{ r.sub }}</div>
+                    </div>
                   </div>
-                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
-                    <div style="font:500 16px/1 var(--font-sans);">{{ r.value }}</div>
-                    <div class="zh12" style="font:400 11px/1 var(--font-sans);color:var(--text-secondary);">{{ r.sub }}</div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <sc-for list="{{ pf.people }}" as="p" hint-placeholder-count="3">
+                <div onClick="{{ p.open }}" class="rw-surface rw-tile rw-list-row rw-press">
+                  <div class="rw-list-row-who">
+                    <div class="rw-avatar" aria-hidden="true">{{ p.initials }}</div>
+                    <div class="rw-list-row-text">
+                      <div class="rw-eyebrow tl">{{ p.role }}</div>
+                      <div class="rw-name">{{ p.name }}</div>
+                    </div>
+                  </div>
+                  <div class="rw-list-row-end">
+                    <div class="rw-list-value">{{ p.value }}</div>
+                    <div class="rw-caption">{{ p.sub }}</div>
                   </div>
                 </div>
               </sc-for>
             </div>
-
-            <sc-for list="{{ pf.people }}" as="p" hint-placeholder-count="3">
-                <div onClick="{{ p.open }}" style="background:var(--surface-primary);border-radius:26px;display:flex;align-items:center;gap:14px;padding:16px 20px 16px 16px;cursor:pointer;">
-                  <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);flex-shrink:0;">{{ p.initials }}</div>
-                  <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;">
-                    <div class="tl zh12" style="font:500 11px/1 var(--font-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary);">{{ p.role }}</div>
-                    <div style="font:500 16px/1.1 var(--font-sans);">{{ p.name }}</div>
-                  </div>
-                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
-                    <div style="font:500 17px/1 var(--font-sans);color: {{ p.vFg }};">{{ p.value }}</div>
-                    <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);">{{ p.sub }}</div>
-                  </div>
-                </div>
-              </sc-for>
           </div>
         </sc-if>
 
@@ -2691,7 +2689,7 @@ class Component extends DCLogic {
     const exists = s.players.some(p => p.name.toLowerCase() === q);
     const v = {
       scrollRef: this.scrollRef, overall, greeting: this.greeting(all),
-      scrollCls: s.screen === 'matches' ? 'rw-scroll is-v2' : 'rw-scroll',
+      scrollCls: s.screen === 'matches' || s.screen === 'insights' ? 'rw-scroll is-v2' : 'rw-scroll',
       isMatches: s.screen === 'matches', isInsights: s.screen === 'insights', isLog: s.screen === 'log',
       isDetail: s.screen === 'detail', isPlayers: s.screen === 'players', isPlayer: s.screen === 'player',
       isLogin: s.screen === 'login', isSignup: s.screen === 'signup', isSplash: s.screen === 'splash', skipSplash: () => this.leaveSplash(),
@@ -2880,7 +2878,7 @@ class Component extends DCLogic {
       const dl = pct(rr.pct) - pct(pr.pct);
       v.insProgress = s.insTab !== 'coach'; v.insCoach = !v.insProgress;
       v.insTabs = [[this.t('performance'), 'progress'], [this.t('grow'), 'coach']].map(([label, k]) => { const on = (s.insTab || 'progress') === k; return { label,
-        bg: on ? 'var(--text-primary)' : 'transparent', fg: on ? 'var(--text-inverse)' : 'var(--filter-pill-text-default)', select: () => {
+        cls: on ? 'is-active' : '', on: String(on), select: () => {
         if (k === 'coach' && this.state.insTab !== 'coach') {
           this.track('grow_viewed', { match_count: this.state.matches.length });
           setTimeout(() => this.refreshGrow(), 0);
@@ -2894,7 +2892,7 @@ class Component extends DCLogic {
         const today = new Date(this.today() + 'T12:00:00'), cutoff = new Date(today - 30 * 864e5).toISOString().slice(0, 10);
         const last5 = this.rec(chron.slice(-5));
         const bars = chron.slice(-10).map((m, i, arr) => { const idx = chron.indexOf(m); const w = this.rec(chron.slice(Math.max(0, idx - 4), idx + 1)).pct;
-          return { h: Math.max(10, Math.round(w * 100)) + '%', bg: i >= arr.length - 4 ? 'var(--progress-active)' : 'var(--border-default)' }; });
+          return { h: Math.max(10, Math.round(w * 100)) + '%', cls: i >= arr.length - 5 ? 'is-recent' : '' }; });
         const row = (label, r, sub) => ({ label, value: r.pctStr, sub, l: '0%', w: pct(r.pct) + '%', mid: 0 });
         const mw = Math.min(50, Math.abs(mg) * 5);
         const partners = [...new Set(all.map(m => m.partner).filter(Boolean))].map(id => ({ id, r: this.with(id) })).filter(o => o.r.n >= 2).sort((a, b) => b.r.pct - a.r.pct || b.r.n - a.r.n);
@@ -2902,19 +2900,19 @@ class Component extends DCLogic {
         const bp = partners[0], tf = foes[0];
         const others = s.players.filter(p => p.id !== 'me' && (!bp || p.id !== bp.id) && (!tf || p.id !== tf.id)).map(p => ({ id: p.id, n: all.filter(m => m.partner === p.id || m.opps.includes(p.id)).length })).filter(o => o.n).sort((a, b) => b.n - a.n);
         const mp = others[0];
-        const person = (role, id, value, sub, vFg) => ({ role, name: this.nm(id), initials: this.ini(id), value, sub, vFg, open: () => this.go('player', { playerId: id }) });
+        const person = (role, id, value, sub) => ({ role, name: this.nm(id), initials: this.ini(id), value, sub, open: () => this.go('player', { playerId: id }) });
         // The headline Win Rate is the overall record, the same as Matches. The change compares the newer half of the
         // last 20 matches with the older half, and its arrow and colour follow the sign.
         v.pf = { win: this.rec(all).pctStr, delta: (dl > 0 ? '+' : '') + dl + '%', bars,
           deltaIcon: dl > 0 ? 'ArrowUpRight' : dl < 0 ? 'ArrowDownRight' : 'Minus',
-          deltaFg: dl > 0 ? 'var(--status-win)' : dl < 0 ? 'var(--status-loss)' : 'var(--text-secondary)',
-          played: String(all.filter(m => m.date >= cutoff).length), record: last5.label.replace('–', ' – '),
+          deltaCls: dl > 0 ? 'is-up' : dl < 0 ? 'is-down' : 'is-flat',
+          played: String(all.filter(m => m.date >= cutoff).length), record: last5.w + ':' + last5.l,
           rows: [row(this.t('singlesWin'), sg, this.t('ofMatches', { w: sg.w, n: sg.n })), row(this.t('doublesWin'), db, this.t('ofMatches', { w: db.w, n: db.n })),
             row(this.t('closeGames'), { pct: cg.length ? cw / cg.length : 0, pctStr: (cg.length ? pct(cw / cg.length) : 0) + '%' }, this.t('ofGames', { w: cw, n: cg.length })),
             { label: this.t('avgMargin'), value: (mg >= 0 ? '+' : '') + mg.toFixed(1), sub: this.t('perGame'), l: mg >= 0 ? '50%' : (50 - mw) + '%', w: mw + '%', mid: 1 }],
-          people: [bp && person(this.t('bestPartner'), bp.id, bp.r.pctStr, this.t('winTogether'), 'var(--status-win)'),
-            tf && person(this.t('toughest'), tf.id, tf.r.pctStr, this.t('winVs'), 'var(--text-primary)'),
-            mp && person(this.t('mostPlayed'), mp.id, String(mp.n), this.t('matchesTogether'), 'var(--text-primary)')].filter(Boolean) };
+          people: [bp && person(this.t('bestPartner'), bp.id, bp.r.pctStr, this.t('winTogether')),
+            tf && person(this.t('toughest'), tf.id, tf.r.pctStr, this.t('winVs')),
+            mp && person(this.t('mostPlayed'), mp.id, String(mp.n), this.t('matchesTogether'))].filter(Boolean) };
       }
       {
         const n6 = chron.filter(m => m.wt.length || m.lt.length).slice(-6), dh = n6.filter(m => m.lt.includes('Defence')).length;
