@@ -7,6 +7,7 @@
    ========================================================= */
 :root {
   /* ---------- 1. Primitives: Figma Foundation paint styles, same names ---------- */
+  --rw-n75: #202020;               /* Neutral/N75 */
   --rw-n400: #8f8f91;              /* Neutral/N400 */
   --rw-n500: #a6a6a8;              /* Neutral/N500 */
   --rw-n600: #bdbdbf;              /* Neutral/N600 */
@@ -19,7 +20,6 @@
   --rw-glassfill: rgba(255, 255, 255, .05);                              /* GlassFill: #FFFFFF at 5% */
   --rw-blue-gradient-01: linear-gradient(90deg, #5b9dff 0%, #2c3f5c 100%); /* Blue Gradient 01 */
   /* Not Figma Foundation styles yet (used on the screen, or needed by the app): */
-  --rw-ink: #1b1a1d;               /* Primary button label/icon on the Matches screen; V1 --app-background */
   --rw-grey-650: #3a393e;          /* Initials avatar fill (Figma uses illustrated avatars) */
 
   /* ---------- 2. Semantic tokens: what a colour is for ---------- */
@@ -34,7 +34,7 @@
   --rw-color-text-secondary: var(--rw-n400);
   --rw-color-text-inactive: var(--rw-n500);           /* unselected nav items */
   --rw-color-text-on-selected: var(--rw-n900);
-  --rw-color-text-on-action: var(--rw-ink);
+  --rw-color-text-on-action: var(--rw-n75);
   --rw-color-text-highlight: linear-gradient(90deg, var(--rw-n800) 0%, var(--rw-b100) 100%); /* greeting title */
   /* Actions and borders */
   --rw-color-action-primary: var(--rw-n800);
