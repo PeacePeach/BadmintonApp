@@ -93,6 +93,7 @@ button:disabled{cursor:default !important;}
 .rw-scroll.is-v2{background:var(--rw-bg-app-glow) no-repeat local,var(--rw-bg-app);--empty-body-weight:var(--rw-weight-min);}
 .rw-bar>div>div.is-grad{background:var(--rw-bar-fill-grad);}
 /* Glass: GlassFill + Default Glass. */
+.rw-surface{background:var(--rw-surface-fill);}
 .rw-glass{background:var(--rw-glass-fill);-webkit-backdrop-filter:var(--rw-glass-effect);backdrop-filter:var(--rw-glass-effect);box-shadow:var(--rw-glass-rim);}
 /* Tile Container */
 .rw-tile{border-radius:var(--rw-tile-radius);padding:var(--rw-tile-pad);}
@@ -379,7 +380,7 @@ button:disabled{cursor:default !important;}
             <div style="display:flex;flex-direction:column;gap:24px;">
               <div aria-hidden="true" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                 <sc-for list="{{ skel2 }}" as="k" hint-placeholder-count="2">
-                  <div class="rw-glass rw-tile" style="min-height:110px;display:flex;flex-direction:column;gap:12px;">
+                  <div class="rw-surface rw-tile" style="min-height:110px;display:flex;flex-direction:column;gap:12px;">
                     <div class="skel" style="height:13px;width:70%;"></div>
                     <div class="skel" style="height:32px;width:45%;"></div>
                     <div class="skel" style="height:13px;width:50%;"></div>
@@ -393,7 +394,7 @@ button:disabled{cursor:default !important;}
             </div>
             <div aria-hidden="true" style="display:flex;flex-direction:column;gap:10px;">
               <sc-for list="{{ skel3 }}" as="k" hint-placeholder-count="3">
-                <div class="rw-glass rw-tile rw-match">
+                <div class="rw-surface rw-tile rw-match">
                   <div style="display:flex;justify-content:space-between;align-items:center;height:26px;">
                     <div class="skel" style="height:12px;width:38%;"></div>
                     <div class="skel" style="height:12px;width:40px;"></div>
@@ -416,14 +417,14 @@ button:disabled{cursor:default !important;}
         <sc-if value="{{ matchesReady }}" hint-placeholder-val="{{ true }}">
         <div style="display:flex;flex-direction:column;gap:24px;">
           <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;">
-            <div class="rw-glass rw-tile" style="display:flex;flex-direction:column;gap:12px;min-height:110px;">
+            <div class="rw-surface rw-tile" style="display:flex;flex-direction:column;gap:12px;min-height:110px;">
               <div class="rw-eyebrow tl">{{ tx.totalMatches }}</div>
               <div style="display:flex;flex-direction:column;gap:8px;">
                 <div class="rw-metric-value">{{ overall.n }}</div>
                 <div class="rw-subtitle">{{ overallWL }}</div>
               </div>
             </div>
-            <div class="rw-glass rw-tile" style="display:flex;flex-direction:column;gap:12px;min-height:110px;">
+            <div class="rw-surface rw-tile" style="display:flex;flex-direction:column;gap:12px;min-height:110px;">
               <div class="rw-eyebrow tl">{{ tx.winRate }}</div>
               <div style="display:flex;flex-direction:column;gap:8px;">
                 <div class="rw-metric-value">{{ overall.pctStr }}</div>
@@ -439,12 +440,12 @@ button:disabled{cursor:default !important;}
         <div style="display:flex;flex-direction:column;gap:16px;">
           <div role="group" style="display:flex;gap:8px;">
             <sc-for list="{{ filters }}" as="f" hint-placeholder-count="3">
-              <button class="rw-glass rw-pill {{ f.cls }}" aria-pressed="{{ f.active }}" onClick="{{ f.select }}">{{ f.label }}</button>
+              <button class="rw-surface rw-pill {{ f.cls }}" aria-pressed="{{ f.active }}" onClick="{{ f.select }}">{{ f.label }}</button>
             </sc-for>
           </div>
           <div style="display:flex;flex-direction:column;gap:10px;">
             <sc-for list="{{ matchCards }}" as="m" hint-placeholder-count="4">
-              <div onClick="{{ m.open }}" class="rw-glass rw-tile rw-match rw-press">
+              <div onClick="{{ m.open }}" class="rw-surface rw-tile rw-match rw-press">
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
                   <div class="rw-caption">{{ m.dateLabel }} · {{ m.type }}</div>
                   <div class="rw-result {{ m.resultCls }}">{{ m.resultLabel }}</div>
