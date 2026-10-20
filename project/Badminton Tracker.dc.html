@@ -94,7 +94,7 @@ button:disabled{cursor:default !important;}
 <div class="stage" style="width:100%;height:100vh;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:0;">
 <div data-screen-label="Phone" class="phone" style="position:relative;width:100%;height:100vh;border-radius:0;background:var(--bg-primary);overflow:hidden;color:var(--text-primary);box-shadow:none;">
 
-  <div ref="{{ scrollRef }}" class="{{ scrollCls }}" style="position:absolute;inset:0;overflow-y:auto;padding:58px 20px 120px;">
+  <div ref="{{ scrollRef }}" class="{{ scrollCls }}" onScroll="{{ onScroll }}" style="position:absolute;inset:0;overflow-y:auto;padding:58px 20px 120px;">
 
     <!-- LOG IN -->
     <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
@@ -427,7 +427,7 @@ button:disabled{cursor:default !important;}
       <div data-screen-label="Insights" style="display:flex;flex-direction:column;gap:24px;">
         <div style="display:flex;flex-direction:column;gap:20px;">
           <div style="display:flex;align-items:center;justify-content:space-between;min-height:40px;">
-            <h1 class="rw-title">{{ tx.insights }}</h1>
+            <h1 class="rw-title rw-title-fade">{{ tx.insights }}</h1>
           </div>
           <sc-if value="{{ insHasData }}" hint-placeholder-val="{{ true }}">
           <div class="rw-surface rw-tabs" role="tablist">
@@ -1934,6 +1934,9 @@ function deviceLang() {
 
 class Component extends DCLogic {
   scrollRef = React.createRef();
+  // App bar: once the page moves, the scrim fades in and the page title fades out under it. A class on the phone,
+  // not state, so scrolling never re-renders.
+  onScroll = () => { const el = this.scrollRef.current; if (el) el.closest('.phone').classList.toggle('is-scrolled', el.scrollTop > 4); };
   state = this.seed();
 
   // Sample data for the demo account (sam@rallywise.app) and the design previews.
@@ -2386,6 +2389,7 @@ class Component extends DCLogic {
     const k = this.state.screen + (this.state.log ? this.state.log.step : '') + this.state.detailId + this.state.playerId + this.state.focusId;
     if (k !== this._scrollKey && this.scrollRef.current) this.scrollRef.current.scrollTop = 0;
     this._scrollKey = k;
+    this.onScroll();
   }
 
   nm(id) { const p = this.state.players.find(x => x.id === id); return p ? p.name : ''; }
@@ -2696,7 +2700,7 @@ class Component extends DCLogic {
     const q = s.search.trim().toLowerCase();
     const exists = s.players.some(p => p.name.toLowerCase() === q);
     const v = {
-      scrollRef: this.scrollRef, overall, greeting: this.greeting(all),
+      scrollRef: this.scrollRef, onScroll: this.onScroll, overall, greeting: this.greeting(all),
       scrollCls: s.screen === 'matches' || s.screen === 'insights' ? 'rw-scroll is-v2' : 'rw-scroll',
       isMatches: s.screen === 'matches', isInsights: s.screen === 'insights', isLog: s.screen === 'log',
       isDetail: s.screen === 'detail', isPlayers: s.screen === 'players', isPlayer: s.screen === 'player',

@@ -15,7 +15,7 @@
      Match Players (Singles, Doubles) .rw-players[.is-doubles] > .rw-avatar.rw-avatar-sm
      Avatar / Letter .............. .rw-avatar[.rw-avatar-sm]
      Bottom Nav ................... .rw-nav > .rw-glass.rw-nav-bar > .rw-nav-item[.is-active]
-     App bar ...................... .rw-appbar-scrim (progressive blur + fade) + .rw-status (time) + .rw-appbar-action
+     App bar ...................... .rw-appbar-scrim (progressive blur + fade, shown once scrolled) + .rw-status + .rw-appbar-action; .rw-title-fade
      Greeting ..................... .rw-greeting > .rw-title.rw-text-gradient + .rw-lead
      Top Tab ...................... .rw-surface.rw-tabs > .rw-tab[.is-active]
      Insight Subtitle (change) .... .rw-trend > .rw-trend-delta.is-up|.is-down|.is-flat
@@ -84,7 +84,11 @@
 .rw-appbar-action{position:absolute;top:58px;right:20px;}
 /* Scrim behind the app bar: content fades into the app background and blurs more the closer it gets to the top,
    so the time and the floating button stay readable over anything. Three blur layers, each masked to a band. */
-.rw-appbar-scrim{position:absolute;top:0;left:0;right:0;height:var(--rw-appbar-scrim-h);pointer-events:none;}
+.rw-appbar-scrim{position:absolute;top:0;left:0;right:0;height:var(--rw-appbar-scrim-h);pointer-events:none;opacity:0;transition:opacity var(--dur-base) var(--ease-out);}
+/* At rest the page title sits on top; once the page scrolls (.phone.is-scrolled) the scrim fades in and the title out. */
+.is-scrolled .rw-appbar-scrim{opacity:1;}
+.rw-title-fade{transition:opacity var(--dur-base) var(--ease-out);}
+.is-scrolled .rw-title-fade{opacity:0;}
 /* The tint is the screen's own backdrop (background + glow), so the glow carries on through the fade. It is a
    sibling of the blur layers, not their parent: a masked parent would stop their backdrop-filter seeing the page. */
 .rw-appbar-scrim>b{position:absolute;inset:0;background:var(--rw-bg-app-glow) no-repeat,var(--rw-bg-app);
@@ -130,4 +134,4 @@
 .rw-list-row-text{display:flex;flex-direction:column;gap:8px;min-width:0;}
 .rw-list-row-end{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
 .rw-list-value{font:var(--rw-type-list-value);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);white-space:nowrap;}
-@media (prefers-reduced-motion:reduce){.rw-tab,.rw-form-bar{transition:none;}}
+@media (prefers-reduced-motion:reduce){.rw-tab,.rw-form-bar,.rw-appbar-scrim,.rw-title-fade{transition:none;}}
