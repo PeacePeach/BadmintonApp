@@ -15,6 +15,7 @@
      Match Players (Singles, Doubles) .rw-players[.is-doubles] > .rw-avatar.rw-avatar-sm
      Avatar / Letter .............. .rw-avatar[.rw-avatar-sm]
      Bottom Nav ................... .rw-nav > .rw-glass.rw-nav-bar > .rw-nav-item[.is-active]
+     App bar ...................... .rw-status (time) + .rw-appbar-action (floating glass IconButton)
      Greeting ..................... .rw-greeting > .rw-title.rw-text-gradient + .rw-lead
      Top Tab ...................... .rw-surface.rw-tabs > .rw-tab[.is-active]
      Insight Subtitle (change) .... .rw-trend > .rw-trend-delta.is-up|.is-down|.is-flat
@@ -77,6 +78,10 @@
 .rw-nav-bar{pointer-events:auto;display:flex;gap:12px;padding:4px;border-radius:100px;}
 .rw-nav-item{width:84px;height:60px;padding:8px 16px 10px;border-radius:100px;border:1px solid transparent;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:var(--rw-nav-fg);font:var(--rw-type-nav);letter-spacing:var(--rw-tracking);white-space:nowrap;transition:background var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out);}
 .rw-nav-item.is-active{background:var(--rw-nav-active-bg);border-color:var(--rw-nav-active-border);color:var(--rw-nav-active-fg);}
+/* App bar: fixed above the scrolling content. The time sits where the phone's status bar is; the action floats
+   at the header's position and stays put while content scrolls under its glass. */
+.rw-status{position:absolute;top:18px;left:34px;font:500 15px/1 var(--font-sans);color:var(--rw-text-primary);pointer-events:none;}
+.rw-appbar-action{position:absolute;top:58px;right:20px;}
 @media (prefers-reduced-motion:reduce){.rw-btn,.rw-press,.rw-pill,.rw-nav-item{transition:none;}}
 /* ---------- Insights / Performance (Figma 199:3555) ---------- */
 /* Top Tab: segmented control. The bar is a surface; the active tab is glass with the selected outline. */

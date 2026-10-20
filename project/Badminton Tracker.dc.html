@@ -95,7 +95,6 @@ button:disabled{cursor:default !important;}
 <div data-screen-label="Phone" class="phone" style="position:relative;width:100%;height:100vh;border-radius:0;background:var(--bg-primary);overflow:hidden;color:var(--text-primary);box-shadow:none;">
 
   <div ref="{{ scrollRef }}" class="{{ scrollCls }}" style="position:absolute;inset:0;overflow-y:auto;padding:58px 20px 120px;">
-    <div class="fake-status" style="position:absolute;top:18px;left:34px;font:500 15px/1 var(--font-sans);">9:41</div>
 
     <!-- LOG IN -->
     <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
@@ -314,9 +313,7 @@ button:disabled{cursor:default !important;}
     <!-- MATCHES -->
     <sc-if value="{{ isMatches }}" hint-placeholder-val="{{ true }}">
       <div data-screen-label="Matches" style="display:flex;flex-direction:column;gap:40px;">
-        <div style="display:flex;align-items:center;justify-content:flex-end;min-height:40px;">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.menu }}" onClick="{{ toggleMenu }}" hint-size="44px,44px"></x-import>
-        </div>
+        <div aria-hidden="true" style="min-height:40px;"></div>
         <div class="rw-greeting">
           <h1 class="rw-title rw-text-gradient">{{ greeting.title }}</h1>
           <sc-if value="{{ matchesReady }}" hint-placeholder-val="{{ true }}">
@@ -431,7 +428,6 @@ button:disabled{cursor:default !important;}
         <div style="display:flex;flex-direction:column;gap:20px;">
           <div style="display:flex;align-items:center;justify-content:space-between;min-height:40px;">
             <h1 class="rw-title">{{ tx.insights }}</h1>
-            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.menu }}" onClick="{{ toggleMenu }}" hint-size="44px,44px"></x-import>
           </div>
           <sc-if value="{{ insHasData }}" hint-placeholder-val="{{ true }}">
           <div class="rw-surface rw-tabs" role="tablist">
@@ -1462,6 +1458,15 @@ button:disabled{cursor:default !important;}
         <div class="splash-text" style="margin-top:36px;font:600 34px/1 var(--font-sans);letter-spacing:-.01em;color:var(--text-primary);">Rallywise</div>
       </div>
       <div class="splash-line" style="position:absolute;left:0;right:0;bottom:64px;text-align:center;font:400 13px/1.4 var(--font-sans);color:var(--text-tertiary);">{{ tx.tagline }}</div>
+    </div>
+  </sc-if>
+
+  <!-- App bar: status time (previews only; a phone shows its own) and the screen's floating glass action. Content
+       scrolls underneath, so the glass shows it through the frost, like the Bottom Nav. -->
+  <div class="fake-status rw-status" aria-hidden="true">9:41</div>
+  <sc-if value="{{ floatMenu }}" hint-placeholder-val="{{ true }}">
+    <div class="rw-appbar-action">
+      <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.menu }}" onClick="{{ toggleMenu }}" hint-size="44px,44px"></x-import>
     </div>
   </sc-if>
 
@@ -2738,6 +2743,7 @@ class Component extends DCLogic {
       isLanguage: s.screen === 'language',
       isOnboarding: s.screen === 'onboarding',
       showTabs: s.screen === 'matches' || s.screen === 'insights' || s.screen === 'focus', menuOpen: s.menu,
+      floatMenu: s.screen === 'matches' || s.screen === 'insights',
       hasToast: !!s.toast, search: s.search, canAddNew: q.length > 1 && !exists,
       toggleMenu: () => this.setState(x => ({ menu: !x.menu })),
       goBack: this.goBack,
