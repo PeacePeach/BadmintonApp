@@ -1463,6 +1463,9 @@ button:disabled{cursor:default !important;}
 
   <!-- App bar: status time (previews only; a phone shows its own) and the screen's floating glass action. Content
        scrolls underneath, so the glass shows it through the frost, like the Bottom Nav. -->
+  <sc-if value="{{ floatMenu }}" hint-placeholder-val="{{ true }}">
+    <div class="rw-appbar-scrim" aria-hidden="true"><i></i><i></i><i></i><b></b></div>
+  </sc-if>
   <div class="fake-status rw-status" aria-hidden="true">9:41</div>
   <sc-if value="{{ floatMenu }}" hint-placeholder-val="{{ true }}">
     <div class="rw-appbar-action">

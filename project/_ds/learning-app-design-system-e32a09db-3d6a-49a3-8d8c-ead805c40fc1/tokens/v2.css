@@ -184,6 +184,8 @@
   --rw-tab-fg: var(--rw-color-text-secondary);
   --rw-tab-active-border: var(--rw-color-border-selected);
   --rw-tab-active-fg: var(--rw-color-text-primary);
+  /* App bar: scrim height covers the status time and the 40px action (58 + 40) plus the fade */
+  --rw-appbar-scrim-h: 124px;
   /* Bottom Nav */
   --rw-nav-fg: var(--rw-color-text-inactive);
   --rw-nav-active-bg: var(--rw-color-surface-selected);
