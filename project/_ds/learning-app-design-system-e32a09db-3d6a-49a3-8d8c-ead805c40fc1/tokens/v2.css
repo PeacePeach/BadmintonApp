@@ -104,7 +104,6 @@
   --rw-glassfill: rgba(255, 255, 255, .05);                              /* GlassFill: #FFFFFF at 5% */
   --rw-highlightfill: rgba(255, 255, 255, .08);                          /* Highlight Fill: #FFFFFF at 8% (Log Match, 207:7730) */
   --rw-inactivefill: rgba(255, 255, 255, .03);                           /* Inactive Fill: #FFFFFF at 3% */
-  --rw-chatboxfill: rgba(255, 255, 255, .02);                           /* ChatBox Fill: #FFFFFF at 2% (voice transcript card) */
   --rw-blue-gradient-01: linear-gradient(90deg, #5b9dff 0%, #2c3f5c 100%); /* Blue Gradient 01 */
   --rw-blue-gradient-02: linear-gradient(180deg, #5b9dff 0%, rgba(55, 94, 153, .8) 100%); /* Blue Gradient 02 (vertical) */
   /* Input Border Gradient (voice transcript card stroke, 213:7972): B100 at 50% -> clear at 51% -> B100 at 50%.
@@ -137,7 +136,7 @@
   --rw-color-data-fill-vertical: var(--rw-blue-gradient-02); /* vertical bars */
   --rw-color-data-track: var(--rw-purplegrey-500);
   /* Voice Log Match (Figma 207:7730, Review 217:8404 / 248:2470) */
-  --rw-color-surface-input: var(--rw-chatboxfill);
+  --rw-color-surface-input: var(--rw-inactivefill);   /* Figma 207:7730 card uses Inactive Fill (Han, 2026-10-22) */
   --rw-color-surface-done: var(--rw-highlightfill);     /* a recognised item */
   --rw-color-surface-pending: var(--rw-inactivefill);   /* an item not heard yet */
   --rw-color-border-input-active: var(--rw-input-border-gradient);
