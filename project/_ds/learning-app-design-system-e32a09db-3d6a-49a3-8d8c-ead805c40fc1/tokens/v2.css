@@ -143,7 +143,7 @@
   --rw-color-border-input-active: var(--rw-input-border-gradient);
   --rw-color-border-pending: var(--rw-n400);           /* dashed ring (Figma N400) */
   --rw-color-mark-done: var(--rw-b75);
-  --rw-color-mark-done-icon: var(--rw-n75);           /* check on the B75 dot (Han: icons N75; Figma file still B300) */
+  --rw-color-mark-done-icon: var(--rw-b300);          /* check on the B75 dot (Figma Pills ChatBox 216:8356, Han 2026-10-22) */
   --rw-color-status-recording: var(--rw-g100);
   --rw-color-data-wave: var(--rw-b100);                 /* Figma #6C9FEF is the palette sheet's old B100 label */
   --rw-color-status-warning: var(--rw-y400);

@@ -867,7 +867,7 @@ button:disabled{cursor:default !important;}
             <textarea ref="{{ voiceRef }}" class="rw-voice-text" value="{{ vc.text }}" onChange="{{ vc.onText }}" readOnly="{{ vc.live }}" placeholder="{{ tx.voicePh }}" aria-label="{{ tx.voiceTitle }}"></textarea>
             <div class="rw-cues" role="list" aria-label="{{ tx.cuesLabel }}">
               <sc-for list="{{ vc.cues }}" as="c" hint-placeholder-count="4">
-                <div role="listitem" class="rw-pill rw-pill-sm rw-cue {{ c.cls }}"><span class="rw-cue-mark" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 10 }}" strokeWidth="{{ 3 }}" hint-size="10px,10px"></x-import></span><span>{{ c.label }}</span><span class="sr-only">{{ c.state }}</span></div>
+                <div role="listitem" class="rw-pill rw-pill-sm rw-cue {{ c.cls }}"><span class="rw-cue-mark" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 10 }}" strokeWidth="{{ 3.6 }}" hint-size="10px,10px"></x-import></span><span>{{ c.label }}</span><span class="sr-only">{{ c.state }}</span></div>
               </sc-for>
             </div>
           </div>
