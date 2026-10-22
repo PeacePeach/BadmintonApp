@@ -267,7 +267,7 @@
   --rw-type-appbar-title: 600 16px/20px var(--font-sans);
   --rw-type-heading: 600 20px/1 var(--font-sans);
   --rw-type-hint: 500 14px/1.2 var(--font-sans);        /* Figma Regular -> Medium (V2 minimum) */
-  --rw-type-transcript: 400 16px/26.4px var(--font-sans); /* Regular for Han to review (2026-10-22); exception to the V2 Medium minimum */
+  --rw-type-transcript: 500 16px/26.4px var(--font-sans); /* Figma Regular -> Medium (V2 minimum) */
   --rw-type-timer: 500 14px/14px var(--font-sans);
   --rw-type-flag: 500 11px/15px var(--font-sans);
   --rw-type-row-text: 500 14px/1.4 var(--font-sans);
