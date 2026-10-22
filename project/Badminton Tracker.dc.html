@@ -2102,11 +2102,13 @@ class Component extends DCLogic {
   }
 
   // The "Start screen" design prop. A shared preview link can pick one too, e.g. ?preview=grow or ?preview=focus,
-  // to show the sample data without the design editor. Only on branch preview links (…-git-….vercel.app) and localhost.
+  // to show the sample data without the design editor. Only on preview hosts, see previewHost().
+  // Branch preview links (…-git-….vercel.app), a preview deployment's own URL (badmintonapp-<id>-<team>.vercel.app) and localhost.
+  previewHost() { return typeof location !== 'undefined' && /-git-.*\.vercel\.app$|^badmintonapp-[a-z0-9]{9}-zizibittergourd-9441\.vercel\.app$|^localhost$|^127\.0\.0\.1$/.test(location.hostname); }
   startScreen() {
     const p = (this.props || {}).startScreen;
     if (p && p !== 'Splash') return p;
-    if (typeof location === 'undefined' || !/-git-.*\.vercel\.app$|^localhost$|^127\.0\.0\.1$/.test(location.hostname)) return p;
+    if (typeof location === 'undefined' || !this.previewHost()) return p;
     const q = (new URLSearchParams(location.search).get('preview') || '').toLowerCase();
     return { grow: 'Insights', insights: 'Insights', matches: 'Matches', focus: 'Focus', 'focus-detail': 'Focus Detail', voice: 'Log Match (Voice)', review: 'Review Match (Voice)' }[q] || p;
   }
@@ -2371,7 +2373,7 @@ class Component extends DCLogic {
     const p = (this.props || {}).voiceMock;
     if (p && p !== 'Complete') return 'missing';
     // Branch previews and localhost can pick the scenario with ?voice=missing, like ?preview= for the start screen.
-    if (typeof location === 'undefined' || !/-git-.*\.vercel\.app$|^localhost$|^127\.0\.0\.1$/.test(location.hostname)) return 'complete';
+    if (typeof location === 'undefined' || !this.previewHost()) return 'complete';
     return /^missing/i.test(new URLSearchParams(location.search).get('voice') || '') ? 'missing' : 'complete';
   }
   openVoice(source) { if (!this.dataReady()) return; const l = this.logStart(source); this.go('voice', { voice: { ...this.newVoice(), startedAt: l.startedAt }, log: null }); }
