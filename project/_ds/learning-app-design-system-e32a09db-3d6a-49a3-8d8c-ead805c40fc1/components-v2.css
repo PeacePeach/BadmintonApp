@@ -160,7 +160,7 @@
 .rw-voice-text::placeholder{color:var(--rw-text-secondary);}
 .rw-cues{display:flex;flex-wrap:wrap;gap:4px;}
 /* Recognition cue: a status pill (Pills / Small), not a button. Done = Highlight Fill + check; pending = Inactive Fill + dashed ring. */
-.rw-cue{cursor:default;height:var(--rw-cue-h);gap:4px;padding:0 8px;border:none;background:var(--rw-cue-pending-bg);color:var(--rw-cue-pending-fg);transition:background var(--dur-base) var(--ease-out),color var(--dur-base) var(--ease-out);}
+.rw-cue{cursor:default;height:var(--rw-cue-h);gap:4px;padding:0 9px 0 8px;border:none;background:var(--rw-cue-pending-bg);color:var(--rw-cue-pending-fg);transition:background var(--dur-base) var(--ease-out),color var(--dur-base) var(--ease-out);}
 .rw-cue::after{content:none;}
 /* Center the label on the mark by its cap height, not its line box. Safari draws Poppins about 1px higher in a 15px line. */
 .rw-cue>span:not(.rw-cue-mark){text-box:trim-both cap alphabetic;}
