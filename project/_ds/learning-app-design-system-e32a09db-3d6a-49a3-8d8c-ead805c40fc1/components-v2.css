@@ -162,6 +162,8 @@
 /* Recognition cue: a status pill (Pills / Small), not a button. Done = Highlight Fill + check; pending = Inactive Fill + dashed ring. */
 .rw-cue{cursor:default;gap:4px;padding:0 8px;border:none;background:var(--rw-cue-pending-bg);color:var(--rw-cue-pending-fg);transition:background var(--dur-base) var(--ease-out),color var(--dur-base) var(--ease-out);}
 .rw-cue::after{content:none;}
+/* Center the label on the mark by its cap height, not its line box. Safari draws Poppins about 1px higher in a 15px line. */
+.rw-cue>span:not(.rw-cue-mark){text-box:trim-both cap alphabetic;}
 .rw-cue.is-done{background:var(--rw-cue-done-bg);color:var(--rw-cue-done-fg);}
 .rw-cue-mark{width:14px;height:14px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:1px dashed var(--rw-cue-ring);color:transparent;}
 .rw-cue.is-done .rw-cue-mark{background:var(--rw-cue-mark-bg);border-color:var(--rw-cue-mark-bg);color:var(--rw-cue-mark-fg);}
