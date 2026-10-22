@@ -26,7 +26,7 @@
      App bar title (Back/Close + name) .rw-appbar-title > IconButton glass + .rw-appbar-name
      Page heading + hint .......... .rw-page-head > .rw-heading + .rw-hint
      Voice Input (transcript card)  .rw-voice-input[.is-live] > .rw-voice-text + .rw-cues
-     Pills / Recognition cue ...... .rw-pill.rw-pill-sm.rw-cue[.is-done] > .rw-cue-mark  (Figma Pills, Type=ChatBox 216:8356/8357)
+     Pills / Recognition cue ...... .rw-pill.rw-pill-sm.rw-cue[.is-done] > .rw-cue-mark  (Figma Pills, Type=Indicator 216:8356/8357)
      Waveform ..................... .rw-wave[.is-live] > i (one per bar; height, opacity and delay set per bar)
      Record controls .............. .rw-rec > .rw-rec-side + .rw-rec-btn + .rw-rec-side.is-end; .rw-rec-timer (.is-live: green dot)
      Review row (ListRow + chevron) .rw-surface.rw-tile.rw-review-row[.is-flagged] > .rw-flag
@@ -160,13 +160,14 @@
 .rw-voice-text::placeholder{color:var(--rw-text-secondary);}
 .rw-cues{display:flex;flex-wrap:wrap;gap:4px;}
 /* Recognition cue: a status pill (Pills / Small), not a button. Done = Highlight Fill + check; pending = Inactive Fill + dashed ring. */
-.rw-cue{cursor:default;gap:4px;padding:0 8px;border:none;background:var(--rw-cue-pending-bg);color:var(--rw-cue-pending-fg);transition:background var(--dur-base) var(--ease-out),color var(--dur-base) var(--ease-out);}
+.rw-cue{cursor:default;height:var(--rw-cue-h);gap:4px;padding:0 8px;border:none;background:var(--rw-cue-pending-bg);color:var(--rw-cue-pending-fg);transition:background var(--dur-base) var(--ease-out),color var(--dur-base) var(--ease-out);}
 .rw-cue::after{content:none;}
 /* Center the label on the mark by its cap height, not its line box. Safari draws Poppins about 1px higher in a 15px line. */
 .rw-cue>span:not(.rw-cue-mark){text-box:trim-both cap alphabetic;}
 .rw-cue.is-done{background:var(--rw-cue-done-bg);color:var(--rw-cue-done-fg);}
-.rw-cue-mark{width:14px;height:14px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:1px dashed var(--rw-cue-ring);color:transparent;}
-.rw-cue.is-done .rw-cue-mark{background:var(--rw-cue-mark-bg);border-color:var(--rw-cue-mark-bg);color:var(--rw-cue-mark-fg);}
+/* Pending ring: 1px inside stroke, 2px dash / 2px gap like Figma (a CSS dashed border can't set the dash length). */
+.rw-cue-mark{width:14px;height:14px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:transparent;background:repeating-conic-gradient(var(--rw-cue-ring) 0 18deg,transparent 0 36deg);-webkit-mask:radial-gradient(closest-side,transparent calc(100% - 1px),#000 calc(100% - 1px));mask:radial-gradient(closest-side,transparent calc(100% - 1px),#000 calc(100% - 1px));}
+.rw-cue.is-done .rw-cue-mark{background:var(--rw-cue-mark-bg);-webkit-mask:none;mask:none;color:var(--rw-cue-mark-fg);}
 /* Waveform: 3px bars, 4px apart. Heights and opacity come from Figma; they move only while recording. */
 .rw-wave{height:56px;display:flex;align-items:center;justify-content:center;gap:4px;}
 .rw-wave>i{width:3px;border-radius:3px;background:var(--rw-wave-fill);transition:height var(--dur-base) var(--ease-out);}

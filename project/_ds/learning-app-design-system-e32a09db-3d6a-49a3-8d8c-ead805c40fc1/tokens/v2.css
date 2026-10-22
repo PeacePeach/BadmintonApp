@@ -219,6 +219,7 @@
   --rw-voice-input-border: var(--rw-color-border-input-active);
   --rw-voice-input-radius: 26px;
   --rw-voice-input-h: 302px;
+  --rw-cue-h: 24px;                                   /* Figma Pills Type=Indicator 216:8356 */
   --rw-cue-done-bg: var(--rw-color-surface-done);
   --rw-cue-done-fg: var(--rw-color-text-on-selected);
   --rw-cue-pending-bg: var(--rw-color-surface-pending);
