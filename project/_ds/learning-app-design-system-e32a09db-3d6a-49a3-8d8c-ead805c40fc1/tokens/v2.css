@@ -102,8 +102,15 @@
   --rw-purplegrey-900:    #121113;
   /* Effects and gradients */
   --rw-glassfill: rgba(255, 255, 255, .05);                              /* GlassFill: #FFFFFF at 5% */
+  --rw-highlightfill: rgba(255, 255, 255, .08);                          /* Highlight Fill: #FFFFFF at 8% (Log Match, 207:7730) */
+  --rw-inactivefill: rgba(255, 255, 255, .03);                           /* Inactive Fill: #FFFFFF at 3% */
+  --rw-chatboxfill: rgba(255, 255, 255, .02);                           /* ChatBox Fill: #FFFFFF at 2% (voice transcript card) */
   --rw-blue-gradient-01: linear-gradient(90deg, #5b9dff 0%, #2c3f5c 100%); /* Blue Gradient 01 */
   --rw-blue-gradient-02: linear-gradient(180deg, #5b9dff 0%, rgba(55, 94, 153, .8) 100%); /* Blue Gradient 02 (vertical) */
+  /* Input Border Gradient (voice transcript card stroke, 213:7972): B100 at 50% -> clear at 51% -> B100 at 50%.
+     Figma's middle stop is #C4DCFF at 0% alpha; it is fully transparent, so it is written as B100 at 0%.
+     Stops are Figma's 0 / 51% / 100% re-projected onto the CSS gradient line of the 350 x 302 card at 130deg. */
+  --rw-input-border-gradient: linear-gradient(130deg, color-mix(in srgb, var(--rw-b100) 50%, transparent) 1.5%, color-mix(in srgb, var(--rw-b100) 0%, transparent) 65.7%, color-mix(in srgb, var(--rw-b100) 50%, transparent) 127.3%);
 
   /* ---------- 2. Semantic tokens: what a colour is for ---------- */
   /* Backgrounds and surfaces */
@@ -129,6 +136,19 @@
   --rw-color-data-fill: var(--rw-blue-gradient-01);
   --rw-color-data-fill-vertical: var(--rw-blue-gradient-02); /* vertical bars */
   --rw-color-data-track: var(--rw-purplegrey-500);
+  /* Voice Log Match (Figma 207:7730, Review 217:8404 / 248:2470) */
+  --rw-color-surface-input: var(--rw-chatboxfill);
+  --rw-color-surface-done: var(--rw-highlightfill);     /* a recognised item */
+  --rw-color-surface-pending: var(--rw-inactivefill);   /* an item not heard yet */
+  --rw-color-border-input-active: var(--rw-input-border-gradient);
+  --rw-color-border-pending: var(--rw-n400);           /* dashed ring (Figma N400) */
+  --rw-color-mark-done: var(--rw-b75);
+  --rw-color-mark-done-icon: var(--rw-n75);           /* check on the B75 dot (Han: icons N75; Figma file still B300) */
+  --rw-color-status-recording: var(--rw-g100);
+  --rw-color-data-wave: var(--rw-b100);                 /* Figma #6C9FEF is the palette sheet's old B100 label */
+  --rw-color-status-warning: var(--rw-y400);
+  --rw-color-border-warning: var(--rw-y500);
+  --rw-color-surface-warning: color-mix(in srgb, var(--rw-o75) 8%, transparent); /* O75 at 8% */
   /* Avatars */
   --rw-color-avatar-bg: var(--rw-n150);
   --rw-color-avatar-fg: var(--rw-n800);
@@ -193,9 +213,33 @@
   --rw-nav-active-fg: var(--rw-color-text-on-selected);
   /* Greeting */
   --rw-text-gradient: var(--rw-color-text-highlight);
+  /* App bar title (Back / Close + screen name) */
+  --rw-appbar-title-gap: 12px;
+  /* Voice Input: transcript card, recognition cues, waveform, record controls */
+  --rw-voice-input-fill: var(--rw-color-surface-input);
+  --rw-voice-input-border: var(--rw-color-border-input-active);
+  --rw-voice-input-radius: 26px;
+  --rw-voice-input-h: 302px;
+  --rw-cue-done-bg: var(--rw-color-surface-done);
+  --rw-cue-done-fg: var(--rw-color-text-on-selected);
+  --rw-cue-pending-bg: var(--rw-color-surface-pending);
+  --rw-cue-pending-fg: var(--rw-color-text-secondary);
+  --rw-cue-mark-bg: var(--rw-color-mark-done);
+  --rw-cue-mark-fg: var(--rw-color-mark-done-icon);
+  --rw-cue-ring: var(--rw-color-border-pending);
+  --rw-wave-fill: var(--rw-color-data-wave);
+  --rw-rec-btn-size: 76px;
+  --rw-rec-btn-bg: var(--rw-color-action-primary);
+  --rw-rec-btn-fg: var(--rw-color-text-on-action);   /* stop glyph N75 (Figma N75) */
+  --rw-rec-dot: var(--rw-color-status-recording);
+  /* Review row (Insight / ListRow with chevron) and its flag */
+  --rw-flag-bg: var(--rw-color-surface-warning);
+  --rw-flag-icon: var(--rw-color-status-warning);
+  --rw-flag-border: var(--rw-color-border-warning);
 
   /* ---------- Type: Poppins, -0.16px tracking except tracked eyebrows ----------
-     V2 never goes below Medium (500): no Regular weight anywhere on a V2 screen. */
+     V2 never goes below Medium (500): no Regular weight anywhere on a V2 screen. Text colour is N800 (primary) or
+     N400 (secondary); Figma N100/N900 (white) text is built as N800 (Han, 2026-10-22). */
   --rw-weight-min: 500;
   --rw-tracking: -0.16px;
   --rw-type-title: 600 24px/28.8px var(--font-sans);
@@ -220,4 +264,11 @@
   --rw-type-row-value: 500 14px/14px var(--font-sans);
   --rw-type-row-sub: 500 11px/11px var(--font-sans);
   --rw-type-list-value: 500 15px/15px var(--font-sans);
+  --rw-type-appbar-title: 600 16px/20px var(--font-sans);
+  --rw-type-heading: 600 20px/1 var(--font-sans);
+  --rw-type-hint: 500 14px/1.2 var(--font-sans);        /* Figma Regular -> Medium (V2 minimum) */
+  --rw-type-transcript: 500 16px/26.4px var(--font-sans); /* Figma Regular -> Medium (V2 minimum) */
+  --rw-type-timer: 500 14px/14px var(--font-sans);
+  --rw-type-flag: 500 11px/15px var(--font-sans);
+  --rw-type-row-text: 500 14px/1.4 var(--font-sans);
 }

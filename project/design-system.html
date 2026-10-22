@@ -464,7 +464,7 @@
     <!-- ===================== DESIGN SYSTEM V2 ===================== -->
     <section class="v2" id="v2">
     <h2>Design System V2 (Matches, Insights)</h2>
-    <div class="section-note">Source: Figma Design System page 159:5834 and the Matches screen 199:3497. Tokens live in <code>tokens/v2.css</code>, component styles in <code>components-v2.css</code>. Components use semantic or component tokens only, never primitives. Minimum font weight is Medium (500).</div>
+    <div class="section-note">Source: Figma Design System page 159:5834, the Matches screen 199:3497 and Log Match (voice) 207:7730 / Review 217:8404. Tokens live in <code>tokens/v2.css</code>, component styles in <code>components-v2.css</code>. Components use semantic or component tokens only, never primitives. Minimum font weight is Medium (500).</div>
 
     <h3>V2 primitives (Figma Foundation)</h3>
     <h4 class="v2-fam">Blue</h4>
@@ -579,7 +579,16 @@
       <div class="v2-prim"><i style="background:var(--rw-purplegrey-900)"></i><b>purplegrey-900</b><span>--rw-purplegrey-900</span><span>#121113</span></div>
     </div>
 
-    <h3>V2 semantic colors (Matches, Insights)</h3>
+    <h4 class="v2-fam">Fills and gradients (Figma paint styles)</h4>
+    <div class="v2-prims">
+      <div class="v2-prim"><i style="background:var(--rw-glassfill)"></i><b>GlassFill</b><span>--rw-glassfill</span><span>#FFFFFF 5%</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-highlightfill)"></i><b>Highlight Fill</b><span>--rw-highlightfill</span><span>#FFFFFF 8%</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-inactivefill)"></i><b>Inactive Fill</b><span>--rw-inactivefill</span><span>#FFFFFF 3%</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-chatboxfill)"></i><b>ChatBox Fill</b><span>--rw-chatboxfill</span><span>#FFFFFF 2%</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-input-border-gradient)"></i><b>Input Border Gradient</b><span>--rw-input-border-gradient</span><span>B100 50% → 0% → 50%</span></div>
+    </div>
+
+    <h3>V2 semantic colors (Matches, Insights, Log Match)</h3>
     <table class="v2-table">
       <thead><tr><th></th><th>Semantic token</th><th>Primitive</th><th>Value</th><th>Used for</th></tr></thead>
       <tbody>
@@ -602,6 +611,18 @@
         <tr><td><i class="v2-sw" style="background:var(--rw-color-data-fill)"></i></td><td>--rw-color-data-fill</td><td>--rw-blue-gradient-01</td><td>#5B9DFF → #2C3F5C</td><td>Simple bar fill</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-data-fill-vertical)"></i></td><td>--rw-color-data-fill-vertical</td><td>--rw-blue-gradient-02</td><td>#5B9DFF → #375E99 80%</td><td>Recent bars in the form chart</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-data-track)"></i></td><td>--rw-color-data-track</td><td>--rw-purplegrey-500</td><td>#2A292E</td><td>Simple bar track, older bars in the form chart</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-input)"></i></td><td>--rw-color-surface-input</td><td>--rw-chatboxfill</td><td>#FFFFFF 2%</td><td>Voice transcript card fill</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-border-input-active)"></i></td><td>--rw-color-border-input-active</td><td>--rw-input-border-gradient</td><td>B100 50% → 0% → 50%, 130°</td><td>Voice transcript card stroke (1px, inside)</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-done)"></i></td><td>--rw-color-surface-done</td><td>--rw-highlightfill</td><td>#FFFFFF 8%</td><td>Recognition cue, heard</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-pending)"></i></td><td>--rw-color-surface-pending</td><td>--rw-inactivefill</td><td>#FFFFFF 3%</td><td>Recognition cue, not heard yet</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-border-pending)"></i></td><td>--rw-color-border-pending</td><td>--rw-n400</td><td>#8F8F91</td><td>Dashed ring on a cue not heard yet</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-mark-done)"></i></td><td>--rw-color-mark-done</td><td>--rw-b75</td><td>#96C0FF</td><td>Check dot on a heard cue</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-mark-done-icon)"></i></td><td>--rw-color-mark-done-icon</td><td>--rw-n75</td><td>#202020</td><td>Check on the B75 dot</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-status-recording)"></i></td><td>--rw-color-status-recording</td><td>--rw-g100</td><td>#6DDCAC</td><td>Recording dot beside the timer</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-data-wave)"></i></td><td>--rw-color-data-wave</td><td>--rw-b100</td><td>#6BA6FF</td><td>Waveform bars (opacity per bar from Figma)</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-status-warning)"></i></td><td>--rw-color-status-warning</td><td>--rw-y400</td><td>#B38F01</td><td>Flag icon on Review</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-border-warning)"></i></td><td>--rw-color-border-warning</td><td>--rw-y500</td><td>#9C7C01</td><td>Flagged Review row outline</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-warning)"></i></td><td>--rw-color-surface-warning</td><td>--rw-o75 at 8%</td><td>#FCCD99 8%</td><td>Flag pill fill</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-avatar-bg)"></i></td><td>--rw-color-avatar-bg</td><td>--rw-n150</td><td>#2C2C2C</td><td>Initials avatar fill</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-avatar-fg)"></i></td><td>--rw-color-avatar-fg</td><td>--rw-n800</td><td>#EBEBEC</td><td>Initials avatar letter</td></tr>
       </tbody>
@@ -697,6 +718,35 @@
         <div class="v2-cell"><div class="v2-label">Insight / ListRow</div>
           <div class="rw-surface rw-tile rw-list-row"><div class="rw-list-row-who"><div class="rw-avatar">PN</div><div class="rw-list-row-text"><div class="rw-eyebrow">Best partner</div><div class="rw-name">Priya Nair</div></div></div><div class="rw-list-row-end"><div class="rw-list-value">100%</div><div class="rw-caption">Win rate together</div></div></div>
         </div>
+        <div class="v2-cell"><div class="v2-label">App bar title (Close / Back + screen name) · Page heading</div>
+          <div style="display:flex;flex-direction:column;gap:24px;">
+            <div class="rw-appbar-title"><button class="rw-glass v2-iconbtn" aria-label="Close"><i data-lucide="x" style="width:18px;height:18px"></i></button><h1 class="rw-appbar-name">Log Match</h1></div>
+            <div class="rw-page-head"><h2 class="rw-heading">Describe Your Session</h2><p class="rw-hint">Who you played, how many games, how it went.</p></div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Voice Input (transcript card) + Pills / Recognition cue (heard, not heard)</div>
+          <div class="rw-voice-input" style="height:220px;">
+            <textarea class="rw-voice-text" aria-label="Session">Played singles against Alex today. Lost the first game 18-21…</textarea>
+            <div class="rw-cues">
+              <div class="rw-pill rw-pill-sm rw-cue is-done"><span class="rw-cue-mark"><i data-lucide="check" style="width:10px;height:10px;stroke-width:3"></i></span>Players</div>
+              <div class="rw-pill rw-pill-sm rw-cue"><span class="rw-cue-mark"><i data-lucide="check" style="width:10px;height:10px;stroke-width:3"></i></span>Number of games</div>
+              <div class="rw-pill rw-pill-sm rw-cue"><span class="rw-cue-mark"><i data-lucide="check" style="width:10px;height:10px;stroke-width:3"></i></span>Win vs Loss</div>
+            </div>
+          </div>
+        </div>
+        <div class="v2-cell v2-wide"><div class="v2-label">Waveform (recording) + Record controls (recording, idle)</div>
+          <div style="display:flex;flex-direction:column;gap:16px;max-width:390px;">
+            <div class="rw-wave is-live" id="v2-wave"></div>
+            <div class="rw-rec"><div class="rw-rec-side"><div class="rw-rec-timer">0:09</div></div><button class="rw-rec-btn" aria-label="Stop recording"><i data-lucide="square" style="width:28px;height:28px"></i></button><div class="rw-rec-side is-end"><button class="rw-rec-link">Continue</button></div></div>
+            <div class="rw-rec"><div class="rw-rec-side"><button class="rw-rec-link">Fill manually</button></div><button class="rw-rec-btn" aria-label="Start recording"><i data-lucide="mic" style="width:28px;height:28px"></i></button><div class="rw-rec-side is-end"><button class="rw-rec-link" disabled>Continue</button></div></div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Review row (Insight / ListRow + chevron; flagged)</div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <button class="rw-surface rw-tile rw-review-row is-flagged"><span class="rw-review-text"><span class="rw-eyebrow">Players</span><span class="rw-review-value">You, Priya Nair, Chris</span></span><span class="rw-review-end"><span class="rw-flag"><i data-lucide="circle-alert" style="width:14px;height:14px"></i>Missing players</span><i data-lucide="chevron-right" style="width:16px;height:16px"></i></span></button>
+            <button class="rw-surface rw-tile rw-review-row"><span class="rw-review-text"><span class="rw-eyebrow">Result</span><span class="rw-review-value">1 Win : 2 Loss</span></span><span class="rw-review-end"><i data-lucide="chevron-right" style="width:16px;height:16px"></i></span></button>
+          </div>
+        </div>
         <div class="v2-cell v2-wide"><div class="v2-label">Bottom Nav (Matches active)</div>
           <div class="v2-navwrap"><nav class="rw-nav"><div class="rw-glass rw-nav-bar">
             <button class="rw-nav-item is-active"><i data-lucide="list"></i>Matches</button>
@@ -706,6 +756,11 @@
         </div>
       </div>
     </div>
+    <script>
+      // Waveform sample: the Figma bar heights, as in the app.
+      [4.5,5.7,12.4,5.6,4.3,20.6,19.1,14.8,17,4.4,11.2,22.6,8.1,10.8,32,23.3,18.8,25.3,6.3,15.7,28.9,27.4,8.2,15,34,14.2,19.7,9.5,20.8,30.5,13.6,5.6,12.5,23.8,6.7,15.8,5.5,8,13.5,4.7,4.5,9]
+        .forEach((h, i, a) => { const b = document.createElement('i'); b.style.height = h + 'px'; b.style.opacity = (.57 + .42 * (1 - Math.abs(i - a.length / 2) / (a.length / 2))).toFixed(2); b.style.animationDelay = -(i * 137 % 1100) + 'ms'; document.getElementById('v2-wave').appendChild(b); });
+    </script>
     <script>if (window.lucide) lucide.createIcons({ attrs: { width: 24, height: 24, 'stroke-width': 2 } });</script>
     </section>
   </main>

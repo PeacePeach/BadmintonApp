@@ -22,6 +22,14 @@
      Graphs / Large bar ........... .rw-form > .rw-form-bars > .rw-form-bar[.is-recent] + .rw-chart-label
      Performance breakdown ........ .rw-breakdown (label, .rw-bar, .rw-row-value + .rw-row-sub)
      Insight / ListRow ............ .rw-list-row (.rw-avatar, .rw-eyebrow, .rw-name, .rw-list-value, .rw-caption)
+   Voice Log Match (Figma 207:7730 and Review 217:8404 / 248:2470):
+     App bar title (Back/Close + name) .rw-appbar-title > IconButton glass + .rw-appbar-name
+     Page heading + hint .......... .rw-page-head > .rw-heading + .rw-hint
+     Voice Input (transcript card)  .rw-voice-input[.is-live] > .rw-voice-text + .rw-cues
+     Pills / Recognition cue ...... .rw-pill.rw-pill-sm.rw-cue[.is-done] > .rw-cue-mark
+     Waveform ..................... .rw-wave[.is-live] > i (one per bar; height, opacity and delay set per bar)
+     Record controls .............. .rw-rec > .rw-rec-side + .rw-rec-btn + .rw-rec-side.is-end; .rw-rec-timer
+     Review row (ListRow + chevron) .rw-surface.rw-tile.rw-review-row[.is-flagged] > .rw-flag
    ========================================================= */
 /* Screen background: app background + glow. The glow stays fixed while the content scrolls over it. */
 .rw-scroll.is-v2{background:var(--rw-bg-app-glow) no-repeat scroll,var(--rw-bg-app);--empty-body-weight:var(--rw-weight-min);}
@@ -135,3 +143,53 @@
 .rw-list-row-end{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
 .rw-list-value{font:var(--rw-type-list-value);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);white-space:nowrap;}
 @media (prefers-reduced-motion:reduce){.rw-tab,.rw-form-bar,.rw-appbar-scrim,.rw-title-fade{transition:none;}}
+/* ---------- Voice Log Match (Figma 207:7730; Review 217:8404, 248:2470) ---------- */
+/* App bar title: the glass Back/Close button (IconButton variant "glass") with the screen name beside it. */
+.rw-appbar-title{display:flex;align-items:center;gap:var(--rw-appbar-title-gap);}
+.rw-appbar-name{font:var(--rw-type-appbar-title);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);margin:0;}
+/* Page heading: title + one-line hint */
+.rw-page-head{display:flex;flex-direction:column;gap:8px;}
+.rw-heading{font:var(--rw-type-heading);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);margin:0;}
+.rw-hint{font:var(--rw-type-hint);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);margin:0;}
+/* Voice Input: the transcript card. Text scrolls inside it; the recognition cues sit at the bottom. */
+/* The stroke is a gradient (Input Border Gradient), so it is drawn as a 1px masked ring on ::before (inside, like Figma). */
+.rw-voice-input{position:relative;height:var(--rw-voice-input-h);display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:var(--rw-voice-input-radius);background:var(--rw-voice-input-fill);}
+.rw-voice-input::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;background:var(--rw-voice-input-border);pointer-events:none;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);}
+.rw-voice-text{flex:1;min-height:0;width:100%;margin:0;padding:0;border:none;outline:none;resize:none;background:transparent;overflow-y:auto;font:var(--rw-type-transcript);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);caret-color:var(--rw-wave-fill);}
+.rw-voice-text::placeholder{color:var(--rw-text-secondary);}
+.rw-cues{display:flex;flex-wrap:wrap;gap:4px;}
+/* Recognition cue: a status pill (Pills / Small), not a button. Done = Highlight Fill + check; pending = Inactive Fill + dashed ring. */
+.rw-cue{cursor:default;gap:8px;background:var(--rw-cue-pending-bg);color:var(--rw-cue-pending-fg);transition:background var(--dur-base) var(--ease-out),color var(--dur-base) var(--ease-out);}
+.rw-cue::after{content:none;}
+.rw-cue.is-done{background:var(--rw-cue-done-bg);color:var(--rw-cue-done-fg);}
+.rw-cue-mark{width:14px;height:14px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:1px dashed var(--rw-cue-ring);color:var(--rw-cue-mark-fg);}
+.rw-cue-mark>*{opacity:0;}
+.rw-cue.is-done .rw-cue-mark{background:var(--rw-cue-mark-bg);border-color:var(--rw-cue-mark-bg);}
+.rw-cue.is-done .rw-cue-mark>*{opacity:1;}
+/* Waveform: 3px bars, 4px apart. Heights and opacity come from Figma; they move only while recording. */
+.rw-wave{height:56px;display:flex;align-items:center;justify-content:center;gap:4px;}
+.rw-wave>i{width:3px;border-radius:3px;background:var(--rw-wave-fill);transition:height var(--dur-base) var(--ease-out);}
+.rw-wave.is-live>i{animation:rw-wave 1.1s ease-in-out infinite alternate;}
+@keyframes rw-wave{from{transform:scaleY(.5);}to{transform:scaleY(1);}}
+/* Record controls: timer or secondary action | record/stop | Continue */
+.rw-rec{display:grid;grid-template-columns:minmax(0,1fr) var(--rw-rec-btn-size) minmax(0,1fr);align-items:center;}
+.rw-rec-side{justify-self:start;display:flex;align-items:center;min-width:0;}
+.rw-rec-side.is-end{justify-self:end;}
+.rw-rec-link{position:relative;border:none;background:transparent;padding:0;cursor:pointer;font:var(--rw-type-timer);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);white-space:nowrap;}
+.rw-rec-link::after{content:"";position:absolute;inset:-15px -8px;}
+.rw-rec-link:disabled{opacity:.4;cursor:default;}
+.rw-rec-timer{height:36px;padding:0 14px;display:flex;align-items:center;gap:4px;font:var(--rw-type-timer);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);font-variant-numeric:tabular-nums;}
+.rw-rec-timer::before{content:"";width:8px;height:8px;border-radius:4px;background:var(--rw-rec-dot);}
+.rw-rec-btn{width:var(--rw-rec-btn-size);height:var(--rw-rec-btn-size);border-radius:50%;border:none;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--rw-rec-btn-bg);color:var(--rw-rec-btn-fg);transition:transform var(--dur-fast) var(--ease-out);}
+.rw-rec-btn:active{transform:scale(.95);}
+/* Review row: Insight / ListRow content with a chevron. Flagged rows get the warning outline and a flag pill. */
+.rw-review-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid transparent;text-align:left;width:100%;font:inherit;color:inherit;}
+.rw-review-row.is-flagged{border-color:var(--rw-flag-border);}
+.rw-review-text{display:flex;flex-direction:column;gap:8px;min-width:0;flex:1;}
+.rw-review-value{font:var(--rw-type-row-text);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.rw-review-value.is-muted{color:var(--rw-text-secondary);}
+.rw-review-end{display:flex;align-items:center;gap:8px;flex-shrink:0;color:var(--rw-text-secondary);}
+.rw-flag{height:24px;padding:0 8px;border-radius:999px;display:flex;align-items:center;gap:4px;background:var(--rw-flag-bg);font:var(--rw-type-flag);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);white-space:nowrap;}
+.rw-flag>:first-child{color:var(--rw-flag-icon);flex-shrink:0;}
+@media (prefers-reduced-motion:reduce){.rw-wave.is-live>i{animation:none;}.rw-cue,.rw-wave>i,.rw-rec-btn{transition:none;}}

@@ -23,6 +23,7 @@
 <script src="rallywise-config.js"></script>
 <script src="rallywise-backend.js"></script>
 <script src="rallywise-analytics.js"></script>
+<script src="rallywise-voice.js"></script>
 <script>
 /* Native Capacitor shell: use the physical device as the frame, never the desktop preview chrome. */
 try {
@@ -842,6 +843,60 @@ button:disabled{cursor:default !important;}
       </div>
     </sc-if>
 
+    <!-- VOICE LOG MATCH (Figma 207:7730): describe the session, then Review. Phase 1 uses mock speech and parsing. -->
+    <sc-if value="{{ isVoice }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Log Match · Voice" style="display:flex;flex-direction:column;gap:40px;">
+        <div class="rw-appbar-title">
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="X" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.close }}" onClick="{{ vc.close }}" hint-size="44px,44px"></x-import>
+          <h1 class="rw-appbar-name">{{ tx.logMatch }}</h1>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:24px;">
+          <div class="rw-page-head">
+            <h2 class="rw-heading">{{ tx.voiceTitle }}</h2>
+            <p class="rw-hint">{{ tx.voiceHint }}</p>
+          </div>
+          <div class="rw-voice-input">
+            <textarea ref="{{ voiceRef }}" class="rw-voice-text" value="{{ vc.text }}" onChange="{{ vc.onText }}" readOnly="{{ vc.live }}" placeholder="{{ tx.voicePh }}" aria-label="{{ tx.voiceTitle }}"></textarea>
+            <div class="rw-cues" role="list" aria-label="{{ tx.cuesLabel }}">
+              <sc-for list="{{ vc.cues }}" as="c" hint-placeholder-count="4">
+                <div role="listitem" class="rw-pill rw-pill-sm rw-cue {{ c.cls }}"><span class="rw-cue-mark" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 10 }}" strokeWidth="{{ 3 }}" hint-size="10px,10px"></x-import></span><span>{{ c.label }}</span><span class="sr-only">{{ c.state }}</span></div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- REVIEW MATCH DETAILS (Figma 217:8404; flagged row 248:2470). Each row opens the matching Log Match step. -->
+    <sc-if value="{{ isReview }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Log Match · Review" style="display:flex;flex-direction:column;gap:40px;">
+        <div class="rw-appbar-title">
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ArrowLeft" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.back }}" onClick="{{ rv.back }}" hint-size="44px,44px"></x-import>
+          <h1 class="rw-appbar-name">{{ tx.logMatch }}</h1>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:24px;">
+          <div class="rw-page-head">
+            <h2 class="rw-heading">{{ tx.reviewTitle }}</h2>
+            <p class="rw-hint">{{ tx.reviewHint }}</p>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <sc-for list="{{ rv.rows }}" as="r" hint-placeholder-count="3">
+              <button type="button" class="rw-surface rw-tile rw-press rw-review-row {{ r.cls }}" onClick="{{ r.open }}">
+                <span class="rw-review-text">
+                  <span class="rw-eyebrow tl">{{ r.label }}</span>
+                  <span class="rw-review-value {{ r.valueCls }}">{{ r.value }}</span>
+                </span>
+                <span class="rw-review-end">
+                  <sc-if value="{{ r.flag }}" hint-placeholder-val="{{ false }}"><span class="rw-flag"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 14 }}" hint-size="14px,14px"></x-import>{{ r.flag }}</span></sc-if>
+                  <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 16 }}" hint-size="16px,16px"></x-import>
+                </span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
     <!-- LOG MATCH -->
     <sc-if value="{{ isLog }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Log Match" style="display:flex;flex-direction:column;gap:24px;">
@@ -1418,6 +1473,43 @@ button:disabled{cursor:default !important;}
     </sc-if>
   </div>
 
+  <!-- Voice dock: waveform and record controls (Figma 207:7730, Frame 49) -->
+  <sc-if value="{{ isVoice }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:24px;pointer-events:none;">
+      <div class="rw-wave {{ vc.waveCls }}" aria-hidden="true">
+        <sc-for list="{{ vc.bars }}" as="b" hint-placeholder-count="41"><i style="height: {{ b.h }};opacity: {{ b.o }};animation-delay: {{ b.d }};"></i></sc-for>
+      </div>
+      <div style="align-self:stretch;padding:12px 20px 34px;pointer-events:auto;">
+        <div class="rw-rec">
+          <div class="rw-rec-side">
+            <sc-if value="{{ vc.live }}" hint-placeholder-val="{{ true }}"><div class="rw-rec-timer" role="timer" aria-label="{{ vc.timerLabel }}">{{ vc.clock }}</div></sc-if>
+            <sc-if value="{{ vc.idle }}" hint-placeholder-val="{{ false }}"><button type="button" class="rw-rec-link" onClick="{{ vc.manual }}">{{ tx.fillManually }}</button></sc-if>
+          </div>
+          <button type="button" class="rw-rec-btn" onClick="{{ vc.toggle }}" aria-label="{{ vc.recLabel }}" aria-pressed="{{ vc.live }}">
+            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ vc.recIcon }}" size="{{ 28 }}" hint-size="28px,28px"></x-import>
+          </button>
+          <div class="rw-rec-side is-end"><button type="button" class="rw-rec-link" disabled="{{ vc.cantGo }}" onClick="{{ vc.next }}">{{ tx.continue }}</button></div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- Review footer -->
+  <sc-if value="{{ isReview }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:14px 20px 34px;display:flex;flex-direction:column;gap:10px;">
+      <sc-if value="{{ rv.saveErr }}" hint-placeholder-val="{{ false }}">
+        <div role="alert" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:22px;background:var(--surface-muted);">
+          <div style="color:var(--status-error);display:flex;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 24 }}" strokeWidth="{{ 2 }}" hint-size="24px,24px"></x-import></div>
+          <div style="font:400 14px/1.45 var(--font-sans);color:var(--text-primary);">{{ tx.saveErr }}</div>
+        </div>
+      </sc-if>
+      <button type="button" class="rw-btn rw-btn-primary" onClick="{{ rv.next }}" aria-busy="{{ rv.saving }}" disabled="{{ rv.saving }}">
+        <sc-if value="{{ rv.saving }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 22 }}" strokeWidth="{{ 2 }}" hint-size="22px,22px"></x-import></span><span class="sr-only">{{ tx.savingMatch }}</span></sc-if>
+        <sc-if value="{{ rv.idle }}" hint-placeholder-val="{{ true }}">{{ rv.ctaLabel }}<x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ArrowRight" size="{{ 22 }}" hint-size="22px,22px"></x-import></sc-if>
+      </button>
+    </div>
+  </sc-if>
+
   <!-- Log footer -->
   <sc-if value="{{ isLog }}" hint-placeholder-val="{{ false }}">
     <sc-if value="{{ showLogCta }}" hint-placeholder-val="{{ false }}">
@@ -1653,7 +1745,7 @@ button:disabled{cursor:default !important;}
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Splash&quot;,&quot;options&quot;:[&quot;Splash&quot;,&quot;Log In&quot;,&quot;Sign Up&quot;,&quot;Forgot Password&quot;,&quot;Check Email&quot;,&quot;Onboarding&quot;,&quot;Matches&quot;,&quot;Match Detail&quot;,&quot;Insights&quot;,&quot;Log Match&quot;,&quot;Settings&quot;,&quot;Focus&quot;,&quot;Focus Detail&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;authError&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Invalid email&quot;,&quot;Incorrect email or password&quot;,&quot;Email already exists&quot;,&quot;Password too short&quot;,&quot;Network error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Normal&quot;,&quot;options&quot;:[&quot;Normal&quot;,&quot;Loading&quot;,&quot;Empty&quot;,&quot;Offline&quot;,&quot;Error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;saveMatch&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Succeeds&quot;,&quot;options&quot;:[&quot;Succeeds&quot;,&quot;Fails&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;toastPreview&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Success&quot;,&quot;Error&quot;,&quot;Info&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Splash&quot;,&quot;options&quot;:[&quot;Splash&quot;,&quot;Log In&quot;,&quot;Sign Up&quot;,&quot;Forgot Password&quot;,&quot;Check Email&quot;,&quot;Onboarding&quot;,&quot;Matches&quot;,&quot;Match Detail&quot;,&quot;Insights&quot;,&quot;Log Match&quot;,&quot;Log Match (Voice)&quot;,&quot;Review Match (Voice)&quot;,&quot;Settings&quot;,&quot;Focus&quot;,&quot;Focus Detail&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;authError&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Invalid email&quot;,&quot;Incorrect email or password&quot;,&quot;Email already exists&quot;,&quot;Password too short&quot;,&quot;Network error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Normal&quot;,&quot;options&quot;:[&quot;Normal&quot;,&quot;Loading&quot;,&quot;Empty&quot;,&quot;Offline&quot;,&quot;Error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;saveMatch&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Succeeds&quot;,&quot;options&quot;:[&quot;Succeeds&quot;,&quot;Fails&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;voiceMock&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Complete&quot;,&quot;options&quot;:[&quot;Complete&quot;,&quot;Missing players&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;toastPreview&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Success&quot;,&quot;Error&quot;,&quot;Info&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
 // Localization. The app language is prefs.lang ('en' | 'zh', saved with the account's other prefs), with a copy
 // on this device under LANG_KEY so the right language shows before the account loads. With neither, the device
 // language decides: zh* means Simplified Chinese, anything else English. t(key, vars) fills {name}-style
@@ -1796,7 +1888,15 @@ const I18N = {
     addToFocus: 'Add to Focus', inFocus: 'In Focus', close: 'Close', improveQ: 'What do you want to improve?', focusName: 'Name', focusNamePh: 'Backhand clear',
     howQ: 'How will you work on it?',
     optPractice: 'Practice sessions', optMatches: 'Next matches', optNone: 'No schedule', howOften: 'How often?', howLong: 'For how long?',
-    howManyMatches: 'For how many matches?', noneHint: "You decide when it's done. Mark it complete any time."
+    howManyMatches: 'For how many matches?', noneHint: "You decide when it's done. Mark it complete any time.",
+    // Voice Log Match
+    voiceTitle: 'Describe Your Session', voiceHint: 'Who you played, how many games, how it went.', voicePh: 'Tap the mic and talk, or type here.',
+    cuesLabel: 'What we heard', cuePlayers: 'Players', cueGames: 'Number of games', cueResult: 'Win vs Loss', cueNotes: 'Reflection', cueHeard: 'heard', cueNotHeard: 'not heard yet',
+    startRec: 'Start recording', stopRec: 'Stop recording', recFor: 'Recording, {t}', fillManually: 'Fill manually',
+    reviewTitle: 'Review the Match Details', reviewHint: 'Tap a section to fix anything we got wrong.', rvPlayers: 'Players', rvResult: 'Result', rvNotes: 'Notes',
+    rvWL: '{w} Win : {l} Loss', notMentioned: 'Not mentioned', noNotes: 'No notes', doneEdit: 'Done',
+    flagMissing: 'Missing players', flagNew: 'New player', flagCheck: 'Check players', flagLineup: 'More than one lineup',
+    flagResult: 'Missing result', flagScores: 'Check scores', flagNotes: 'Check notes'
   },
   zh: {
     matches: '比赛', insights: '洞察', players: '球友', settings: '设置', profile: '个人资料', logOut: '退出登录',
@@ -1920,7 +2020,14 @@ const I18N = {
     addToFocus: '加入重点', inFocus: '已加入重点', close: '关闭', improveQ: '你想提升什么？', focusName: '名称', focusNamePh: '反手高远球',
     howQ: '打算怎么练？',
     optPractice: '专项练习', optMatches: '接下来的比赛', optNone: '不设计划', howOften: '多久练一次？', howLong: '练多久？',
-    howManyMatches: '跟进几场比赛？', noneHint: '什么时候完成由你决定，随时可以标记完成。'
+    howManyMatches: '跟进几场比赛？', noneHint: '什么时候完成由你决定，随时可以标记完成。',
+    voiceTitle: '说说这次打球', voiceHint: '和谁打、打了几局、打得怎么样。', voicePh: '点麦克风说话，或直接输入。',
+    cuesLabel: '已听到', cuePlayers: '球员', cueGames: '局数', cueResult: '输赢', cueNotes: '复盘', cueHeard: '已听到', cueNotHeard: '还没听到',
+    startRec: '开始录音', stopRec: '停止录音', recFor: '录音中，{t}', fillManually: '手动填写',
+    reviewTitle: '核对比赛信息', reviewHint: '点任意一项即可修改。', rvPlayers: '球员', rvResult: '结果', rvNotes: '笔记',
+    rvWL: '{w}胜 : {l}负', notMentioned: '没有提到', noNotes: '没有笔记', doneEdit: '完成',
+    flagMissing: '缺少球员', flagNew: '新球员', flagCheck: '确认球员', flagLineup: '不止一组对阵',
+    flagResult: '缺少结果', flagScores: '确认比分', flagNotes: '确认笔记'
   }
 };
 function deviceLang() {
@@ -1932,8 +2039,12 @@ function deviceLang() {
   return /^zh/i.test(sys) ? 'zh' : 'en';
 }
 
+// Waveform bar heights (px) and opacities from Figma 207:7730 (Frame 49), left to right.
+const VOICE_WAVE = [[4.5,.57],[5.7,.59],[12.4,.61],[5.6,.63],[4.3,.66],[20.6,.68],[19.1,.7],[14.8,.72],[17,.74],[4.4,.76],[11.2,.78],[22.6,.8],[8.1,.82],[10.8,.84],[32,.86],[23.3,.89],[18.8,.91],[25.3,.93],[6.3,.95],[15.7,.97],[28.9,.99],[27.4,.99],[8.2,.97],[15,.95],[34,.93],[14.2,.91],[19.7,.89],[9.5,.86],[20.8,.84],[30.5,.82],[13.6,.8],[5.6,.78],[12.5,.76],[23.8,.74],[6.7,.72],[15.8,.7],[5.5,.68],[8,.66],[13.5,.63],[4.7,.61],[4.5,.59],[9,.57]];
+
 class Component extends DCLogic {
   scrollRef = React.createRef();
+  voiceRef = React.createRef();
   // App bar: once the page moves, the scrim fades in and the page title fades out under it. A class on the phone,
   // not state, so scrolling never re-renders.
   onScroll = () => { const el = this.scrollRef.current; if (el) el.closest('.phone').classList.toggle('is-scrolled', el.scrollTop > 4); };
@@ -1997,7 +2108,7 @@ class Component extends DCLogic {
     if (p && p !== 'Splash') return p;
     if (typeof location === 'undefined' || !/-git-.*\.vercel\.app$|^localhost$|^127\.0\.0\.1$/.test(location.hostname)) return p;
     const q = (new URLSearchParams(location.search).get('preview') || '').toLowerCase();
-    return { grow: 'Insights', insights: 'Insights', matches: 'Matches', focus: 'Focus', 'focus-detail': 'Focus Detail' }[q] || p;
+    return { grow: 'Insights', insights: 'Insights', matches: 'Matches', focus: 'Focus', 'focus-detail': 'Focus Detail', voice: 'Log Match (Voice)', review: 'Review Match (Voice)' }[q] || p;
   }
   seed() {
     const p = this.props || {};
@@ -2006,13 +2117,13 @@ class Component extends DCLogic {
     // Reopening the app (it starts on the splash) restores the signed-in account; see restore().
     this._restoring = !start || start === 'Splash';
     const { players, matches, focuses, focusPeriods } = this.demoData();
-    const screens = { 'Splash': 'splash', 'Log In': 'login', 'Sign Up': 'signup', 'Forgot Password': 'forgot', 'Check Email': 'resetSent', 'Onboarding': 'onboarding', 'Match Detail': 'detail', 'Insights': 'insights', 'Log Match': 'log', 'Settings': 'settings', 'Focus': 'focus', 'Focus Detail': 'focusDetail' };
+    const screens = { 'Splash': 'splash', 'Log In': 'login', 'Sign Up': 'signup', 'Forgot Password': 'forgot', 'Check Email': 'resetSent', 'Onboarding': 'onboarding', 'Match Detail': 'detail', 'Insights': 'insights', 'Log Match': 'log', 'Log Match (Voice)': 'voice', 'Review Match (Voice)': 'review', 'Settings': 'settings', 'Focus': 'focus', 'Focus Detail': 'focusDetail' };
     return {
       screen: screens[start] || 'matches', pwVisible: false, agree: false, ob: this.newOb(),
       f: this.blankForm(), errors: {}, banner: null, busy: null, resetEmail: 'sam@rallywise.app', resendIn: 0,
       ...this.authPreset(p.authError),
       insTab: /[?&]preview=grow\b/i.test(typeof location === 'undefined' ? '' : location.search) && start === 'Insights' ? 'coach' : 'progress', aiGrow: null, growBusy: false, back: start === 'Match Detail' ? [{ screen: 'matches' }] : start === 'Focus Detail' ? [{ screen: 'focus' }] : [], filter: 'All', menu: false, confirmDelete: null, detailId: null, playerId: null, search: '', toast: null,
-      ...this.dataFor(p.dataState, players, matches, focuses, focusPeriods), log: start === 'Log Match' ? this.newLog() : null,
+      ...this.dataFor(p.dataState, players, matches, focuses, focusPeriods), log: start === 'Log Match' ? this.newLog() : null, voice: start === 'Log Match (Voice)' || start === 'Review Match (Voice)' ? this.newVoice() : null,
       focusId: start === 'Focus Detail' ? 'f0' : null, showDone: false, sheet: null, confirmDeleteFocus: null, day: null,
       email: 'sam@rallywise.app', acct: { name: '', level: null, cur: '', next: '' }, prefs: this.newPrefs(),
       onboarded: true, confirmDeleteAccount: false
@@ -2251,6 +2362,63 @@ class Component extends DCLogic {
     this.track('match_log_started', { source, match_count: this.state.matches.length });
     return { ...this.newLog(), startedAt: Date.now() };
   }
+
+  // Voice Log Match (Figma 207:7730 -> Review 217:8404). Phase 1: speech and parsing are mocks in rallywise-voice.js,
+  // shaped like the parse-voice-log result, so the real engine can replace them without touching these screens.
+  // Review turns the result into an ordinary Log Match draft; each row opens the existing Log Match step to fix it.
+  newVoice() { return { phase: 'idle', text: '', secs: 0 }; }
+  voiceScenario() {
+    const p = (this.props || {}).voiceMock;
+    if (p && p !== 'Complete') return 'missing';
+    // Branch previews and localhost can pick the scenario with ?voice=missing, like ?preview= for the start screen.
+    if (typeof location === 'undefined' || !/-git-.*\.vercel\.app$|^localhost$|^127\.0\.0\.1$/.test(location.hostname)) return 'complete';
+    return /^missing/i.test(new URLSearchParams(location.search).get('voice') || '') ? 'missing' : 'complete';
+  }
+  openVoice(source) { if (!this.dataReady()) return; const l = this.logStart(source); this.go('voice', { voice: { ...this.newVoice(), startedAt: l.startedAt }, log: null }); }
+  setVoice(patch) { this.setState(s => ({ voice: { ...s.voice, ...(typeof patch === 'function' ? patch(s.voice) : patch) } })); }
+  recStart() {
+    const V = window.RallywiseVoice; if (!V || !this.state.voice) return;
+    const parts = V.chunks(V.sample(this.voiceScenario(), this.lang()).text);
+    const lead = this.state.voice.text.trim(), cjk = /[\u3400-\u9fff]/;
+    let i = 0;
+    this.setVoice({ phase: 'rec', secs: 0, text: lead && !cjk.test(lead.slice(-1)) && !cjk.test(parts[0] || '') ? lead + ' ' : lead });
+    this._recT = setInterval(() => this.setVoice(v => ({ secs: v.secs + 1 })), 1000);
+    this._recS = setInterval(() => {
+      if (i >= parts.length) return clearInterval(this._recS);
+      const part = parts[i++];
+      this.setVoice(v => ({ text: v.text + part }));
+      const el = this.voiceRef.current; if (el) el.scrollTop = el.scrollHeight;
+    }, 140);
+  }
+  recStop(quiet) { clearInterval(this._recT); clearInterval(this._recS); if (!quiet && this.state.voice && this.state.voice.phase === 'rec') this.setVoice(v => ({ phase: 'idle', text: v.text.trim() })); }
+  // Continue: parse (mock), then Review. One record holds one lineup; nothing the result lacks is filled in.
+  voiceNext() {
+    const v = this.state.voice; if (!v || !v.text.trim()) return;
+    this.recStop();
+    const V = window.RallywiseVoice, base = this.newLog();
+    const r = V.mockParse(v.text.trim(), this.lang(), this.voiceScenario());
+    const d = V.toDraft(r, this.state.players, base.format);
+    const { flags, heard, totals, ...fields } = d;
+    this.go('review', { log: { ...base, ...fields, step: 'review', voice: { flags, heard, totals }, startedAt: v.startedAt || Date.now(), active: null } });
+  }
+  // Opens a Log Match step from Review. Players with a name we couldn't link start with that name in the search,
+  // so the existing list shows the matches (ambiguous) or "Add as new player" (new).
+  reviewOpen(part) {
+    const log = this.state.log; if (!log) return;
+    const heard = (log.voice.heard || []).find(h => !h.done);
+    const step = part === 'players' ? (log.type ? 2 : 1) : part === 'result' ? 3 : 4;
+    const patch = { step, ret: part };
+    if (step === 2) patch.active = this.nextEmpty(log);
+    this.setState({ screen: 'log', log: { ...log, ...patch }, search: step === 2 && heard && patch.active ? heard.heard : '' });
+  }
+  reviewReturn(save) {
+    this.setState(s => {
+      const l = s.log, f = { ...l.voice.flags };
+      if (save) { f[l.ret === 'players' ? 'players' : l.ret] = null; }
+      const heard = save && l.ret === 'players' ? [] : l.voice.heard;
+      return { screen: 'review', search: '', log: { ...l, step: 'review', ret: null, active: null, voice: { ...l.voice, flags: f, heard } } };
+    });
+  }
   // What an edit changed, for match_edited (names only, never the values).
   changedParts(a, b) {
     const J = JSON.stringify;
@@ -2287,6 +2455,10 @@ class Component extends DCLogic {
     this.applyLang();
     this.dayTick();
     this.syncFocus();
+    // Design preview of Review: say the sample session, then Continue.
+    if (this.state.screen === 'review' && this.state.voice && window.RallywiseVoice) {
+      this.setState({ screen: 'voice', voice: { ...this.state.voice, text: window.RallywiseVoice.sample(this.voiceScenario(), this.lang()).text } }, () => this.voiceNext());
+    }
     window.addEventListener('online', this.onOnline);
     document.addEventListener('visibilitychange', this.onVisibility);
 
@@ -2305,6 +2477,7 @@ class Component extends DCLogic {
     window.removeEventListener('online', this.onOnline);
     document.removeEventListener('visibilitychange', this.onVisibility);
     clearTimeout(this._t); clearTimeout(this._tOut); clearTimeout(this._splash); clearInterval(this._tick); clearTimeout(this._load); clearTimeout(this._dayT);
+    this.recStop(true);
   }
 
   // Auth. Requests go to the backend (rallywise-backend.js). The "Auth error" prop previews each
@@ -2701,8 +2874,8 @@ class Component extends DCLogic {
     const exists = s.players.some(p => p.name.toLowerCase() === q);
     const v = {
       scrollRef: this.scrollRef, onScroll: this.onScroll, overall, greeting: this.greeting(all),
-      scrollCls: s.screen === 'matches' || s.screen === 'insights' ? 'rw-scroll is-v2' : 'rw-scroll',
-      isMatches: s.screen === 'matches', isInsights: s.screen === 'insights', isLog: s.screen === 'log',
+      scrollCls: ['matches', 'insights', 'voice', 'review'].includes(s.screen) ? 'rw-scroll is-v2' : 'rw-scroll',
+      isMatches: s.screen === 'matches', isInsights: s.screen === 'insights', isLog: s.screen === 'log', isVoice: s.screen === 'voice' && !!s.voice, isReview: s.screen === 'review' && !!s.log, voiceRef: this.voiceRef,
       isDetail: s.screen === 'detail', isPlayers: s.screen === 'players', isPlayer: s.screen === 'player',
       isLogin: s.screen === 'login', isSignup: s.screen === 'signup', isSplash: s.screen === 'splash', skipSplash: () => this.leaveSplash(),
       pwType: s.pwVisible ? 'text' : 'password', pwIcon: s.pwVisible ? 'Eye' : 'EyeOff', pwToggleLabel: this.t(s.pwVisible ? 'hidePw' : 'showPw'),
@@ -2756,7 +2929,7 @@ class Component extends DCLogic {
       goBack: this.goBack,
       onSearch: e => this.setState({ search: e.target.value }),
       // Log Match opens only once the account's data has loaded; the loading state shows the button disabled.
-      startLog: () => { if (this.dataReady()) this.go('log', { log: this.logStart('matches') }); },
+      startLog: () => this.openVoice('matches'),
       tabs: [[this.t('matches'), 'matches', 'List'], [this.t('insights'), 'insights', 'ChartColumn'], [this.t('focus'), 'focus', 'Target']].map(([label, k, icon]) => ({
         label, icon, fg: s.screen === k ? 'var(--text-primary)' : 'var(--text-secondary)', cls: s.screen === k ? 'is-active' : '', current: s.screen === k ? 'page' : null, select: () => {
           // Back to Insights on Grow with no AI insight on screen (say the language changed since): make one.
@@ -2880,7 +3053,7 @@ class Component extends DCLogic {
 
     v.insLoading = v.loading;
     v.insHasData = !s.blocked && !s.loading && all.length > 0;
-    v.insState = s.blocked ? v.blockedState : !s.loading && !all.length && empty('no-insights', this.t('noInsights'), this.t('noInsightsBody'), this.t('logMatch'), () => this.go('log', { log: this.logStart('insights_empty') }));
+    v.insState = s.blocked ? v.blockedState : !s.loading && !all.length && empty('no-insights', this.t('noInsights'), this.t('noInsightsBody'), this.t('logMatch'), () => this.openVoice('insights_empty'));
     if (v.isInsights && v.insHasData) {
       // Oldest first. all is newest first, so reversing keeps same-day matches in the order they were logged.
       const chron = all.slice().reverse().sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
@@ -3002,7 +3175,7 @@ class Component extends DCLogic {
       v.obReadyTitle = this.t('obReadyTitle').replace('{name}', ob.name.trim().split(/\s+/)[0]);
       v.obCtaLabel = this.t(['getStarted', 'continue', 'logFirstMatch'][st - 1]);
       v.obCtaBg = ok ? A : 'var(--surface-muted)'; v.obCtaFg = ok ? 'var(--action-on-primary)' : 'var(--text-tertiary)';
-      v.obNext = () => { if (!ok) return; st < 3 ? setOb({ step: st + 1 }) : finish('log_first_match', () => ({ screen: 'log', log: this.logStart('onboarding') })); };
+      v.obNext = () => { if (!ok) return; st < 3 ? setOb({ step: st + 1 }) : finish('log_first_match', () => ({ screen: 'voice', voice: { ...this.newVoice(), startedAt: this.logStart('onboarding').startedAt }, log: null })); };
       v.obToMatches = () => finish('skip');
     }
 
@@ -3013,15 +3186,17 @@ class Component extends DCLogic {
       v.logBackIcon = st === first ? 'X' : 'ChevronLeft';
       v.logTitle = this.t(v.isEdit ? 'editMatch' : 'logMatch'); v.stepOf = this.t('stepOf', { n: st - first + 1, total: 5 - first });
       v.onDate = e => this.setLog({ date: e.target.value || log.date });
-      v.logBack = () => st === first ? (v.isEdit ? this.goBack() : this.setState({ screen: 'matches', log: null, back: [] })) : this.setLog({ step: st - 1 });
+      v.logBack = () => log.ret ? this.reviewReturn(false) : st === first ? (v.isEdit ? this.goBack() : this.setState({ screen: 'matches', log: null, back: [] })) : this.setLog({ step: st - 1 });
       v.stepBar = [1, 2, 3, 4].slice(first - 1).map(i => ({ bg: i <= st ? 'var(--progress-active)' : 'var(--progress-inactive)' }));
       v.stepTitle = this.t(['stepType', 'stepWho', 'stepScore', 'stepNotes'][st - 1]);
       v.showLogCta = st > 1;
       const ok = this.canNext(log);
-      v.ctaLabel = this.t(st === 4 ? (log.saveErr ? 'saveAgain' : v.isEdit ? 'saveChanges' : 'saveMatch') : 'continue');
+      v.ctaLabel = this.t(log.ret ? 'doneEdit' : st === 4 ? (log.saveErr ? 'saveAgain' : v.isEdit ? 'saveChanges' : 'saveMatch') : 'continue');
+      // Opened from voice Review: one step only, so no step count; Done goes back to Review.
+      if (log.ret) { v.logBackIcon = 'ChevronLeft'; v.stepOf = ''; v.stepBar = []; }
       v.saving = !!log.saving; v.notSaving = !log.saving; v.saveErr = st === 4 && !!log.saveErr;
       v.ctaBg = ok ? A : 'var(--surface-muted)'; v.ctaFg = ok ? 'var(--action-on-primary)' : 'var(--text-tertiary)';
-      v.logNext = () => { if (!this.canNext(this.state.log)) return; st === 4 ? this.save() : this.setLog({ step: st + 1 }); };
+      v.logNext = () => { if (!this.canNext(this.state.log)) return; log.ret ? this.reviewReturn(true) : st === 4 ? this.save() : this.setLog({ step: st + 1 }); };
       v.typeOptions = [['Singles', this.t('singlesSub'), 'User'], ['Doubles', this.t('doublesSub'), 'Users']].map(([label, sub, icon]) => ({
         label: this.typeLabel(label), sub, icon, border: log.editId && log.type === label ? 'var(--ghost-button-outline-highlight)' : 'transparent',
         select: () => this.setLog(l => { if (l.editId && l.type === label) return { step: 2 }; const n = { ...l, type: label, step: 2, partner: null, opp1: null, opp2: null }; n.active = label === 'Singles' ? 'opp1' : null; return n; })
@@ -3087,6 +3262,38 @@ class Component extends DCLogic {
       v.oppQ = this.t('oppQ', { name: oppName });
       v.onOpp = e => this.setLog({ on: e.target.value });
       v.linkHint = this.t('linkHint', { name: oppName });
+    }
+
+    // Voice Log Match: describe (Figma 207:7730) and Review (217:8404, 248:2470).
+    if (v.isVoice) {
+      const vo = s.voice, V = window.RallywiseVoice, live = vo.phase === 'rec';
+      const c = V ? V.cues(vo.text, s.players.filter(p => p.id !== 'me').flatMap(p => [p.name, p.name.split(' ')[0]])) : {};
+      const clock = Math.floor(vo.secs / 60) + ':' + String(vo.secs % 60).padStart(2, '0');
+      v.vc = { text: vo.text, live, idle: !live, clock, timerLabel: this.t('recFor', { t: clock }),
+        cues: [['players', 'cuePlayers'], ['games', 'cueGames'], ['results', 'cueResult'], ['notes', 'cueNotes']].map(([k, l]) => ({ label: this.t(l), cls: c[k] ? 'is-done' : '', state: this.t(c[k] ? 'cueHeard' : 'cueNotHeard') })),
+        waveCls: live ? 'is-live' : '', bars: VOICE_WAVE.map(([h, o], i) => ({ h: live ? h + 'px' : '4px', o: String(o), d: (-(i * 137) % 1100) + 'ms' })),
+        recIcon: live ? 'Square' : 'Mic', recLabel: this.t(live ? 'stopRec' : 'startRec'), cantGo: !vo.text.trim(),
+        toggle: () => live ? this.recStop() : this.recStart(),
+        onText: e => this.setVoice({ text: e.target.value }),
+        next: () => this.voiceNext(),
+        manual: () => { this.recStop(true); this.setState(x => ({ screen: 'log', voice: null, log: { ...this.newLog(), startedAt: x.voice && x.voice.startedAt } })); },
+        close: () => { this.recStop(true); this.setState({ screen: 'matches', voice: null, log: null, back: [] }); } };
+    }
+    if (v.isReview) {
+      const log = s.log, f = log.voice.flags, sep = this.lang() === 'zh' ? '、' : ', ';
+      const names = ['me', log.type === 'Doubles' ? log.partner : null, log.opp1, log.type === 'Doubles' ? log.opp2 : null].filter(Boolean).map(id => id === 'me' ? this.t('you') : this.nm(id))
+        .concat((log.voice.heard || []).map(h => h.heard));
+      const wl = this.res(this.draftGames(log));
+      const notes = [log.worked, log.lost, log.on].map(x => (x || '').trim()).filter(Boolean).join(this.lang() === 'zh' ? '' : ' ');
+      const flag = { missing: 'flagMissing', new: 'flagNew', check: 'flagCheck', lineup: 'flagLineup', scores: 'flagScores' };
+      const row = (part, label, value, muted, fk) => ({ label: this.t(label), value, valueCls: muted ? 'is-muted' : '', flag: fk ? this.t(fk) : '', cls: fk ? 'is-flagged' : '', open: () => this.reviewOpen(part) });
+      const blocking = f.players ? 'players' : f.result ? 'result' : null;
+      v.rv = { back: () => this.setState(x => ({ screen: 'voice', log: null, back: x.back.slice(0, -1) })),
+        rows: [row('players', 'rvPlayers', names.join(sep), false, f.players && flag[f.players]),
+          row('result', 'rvResult', f.result === 'missing' ? this.t('notMentioned') : this.t('rvWL', { w: wl.us, l: wl.them }), f.result === 'missing', f.result && (f.result === 'missing' ? 'flagResult' : 'flagScores')),
+          row('notes', 'rvNotes', notes || log.wt.concat(log.lt).map(t => this.tagLabel(t)).join(sep) || this.t('noNotes'), !notes && !log.wt.length && !log.lt.length, f.notes && 'flagNotes')],
+        saving: !!log.saving, idle: !log.saving, saveErr: !!log.saveErr, ctaLabel: this.t(log.saveErr ? 'saveAgain' : 'continue'),
+        next: () => blocking ? this.reviewOpen(blocking) : this.save() };
     }
 
     v.confirmDelete = !!s.confirmDelete;
@@ -3227,7 +3434,7 @@ class Component extends DCLogic {
         hasCues: !!(f.goal || f.cues.length), hasGoal: !!f.goal, goal: f.goal, hasCueList: f.cues.length > 0, cues: f.cues.map(t => ({ t })),
         // No schedule: completing it by hand is the only way to finish, so it gets a quiet button here as well.
         showComplete: f.type === 'manual' && !done, complete: () => this.setFocusDone(f.id, true),
-        logMatch: () => { if (this.dataReady()) this.go('log', { log: this.logStart('focus') }); } };
+        logMatch: () => this.openVoice('focus') };
     }
     if (v.isFocusDetail) {
       v.menuItems = fdF ? [
