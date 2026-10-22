@@ -1482,8 +1482,7 @@ button:disabled{cursor:default !important;}
       <div style="align-self:stretch;padding:12px 20px 34px;pointer-events:auto;">
         <div class="rw-rec">
           <div class="rw-rec-side">
-            <sc-if value="{{ vc.live }}" hint-placeholder-val="{{ true }}"><div class="rw-rec-timer" role="timer" aria-label="{{ vc.timerLabel }}">{{ vc.clock }}</div></sc-if>
-            <sc-if value="{{ vc.idle }}" hint-placeholder-val="{{ false }}"><button type="button" class="rw-rec-link" onClick="{{ vc.manual }}">{{ tx.fillManually }}</button></sc-if>
+            <div class="{{ vc.timerCls }}" role="timer" aria-label="{{ vc.timerLabel }}">{{ vc.clock }}</div>
           </div>
           <button type="button" class="rw-rec-btn" onClick="{{ vc.toggle }}" aria-label="{{ vc.recLabel }}" aria-pressed="{{ vc.live }}">
             <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ vc.recIcon }}" size="{{ 28 }}" hint-size="28px,28px"></x-import>
@@ -1892,7 +1891,7 @@ const I18N = {
     // Voice Log Match
     voiceTitle: 'Describe Your Session', voiceHint: 'Who you played, how many games, how it went.', voicePh: 'Tap the mic and talk, or type here.',
     cuesLabel: 'What we heard', cuePlayers: 'Players', cueGames: 'Number of games', cueResult: 'Win vs Loss', cueNotes: 'Reflection', cueHeard: 'heard', cueNotHeard: 'not heard yet',
-    startRec: 'Start recording', stopRec: 'Stop recording', recFor: 'Recording, {t}', fillManually: 'Fill manually',
+    startRec: 'Start recording', stopRec: 'Stop recording', recFor: 'Recording, {t}', recLength: 'Recorded {t}',
     reviewTitle: 'Review the Match Details', reviewHint: 'Tap a section to fix anything we got wrong.', rvPlayers: 'Players', rvResult: 'Result', rvNotes: 'Notes',
     rvWL: '{w} Win : {l} Loss', notMentioned: 'Not mentioned', noNotes: 'No notes', doneEdit: 'Done',
     flagMissing: 'Missing players', flagNew: 'New player', flagCheck: 'Check players', flagLineup: 'More than one lineup',
@@ -2023,7 +2022,7 @@ const I18N = {
     howManyMatches: '跟进几场比赛？', noneHint: '什么时候完成由你决定，随时可以标记完成。',
     voiceTitle: '说说这次打球', voiceHint: '和谁打、打了几局、打得怎么样。', voicePh: '点麦克风说话，或直接输入。',
     cuesLabel: '已听到', cuePlayers: '球员', cueGames: '局数', cueResult: '输赢', cueNotes: '复盘', cueHeard: '已听到', cueNotHeard: '还没听到',
-    startRec: '开始录音', stopRec: '停止录音', recFor: '录音中，{t}', fillManually: '手动填写',
+    startRec: '开始录音', stopRec: '停止录音', recFor: '录音中，{t}', recLength: '已录音 {t}',
     reviewTitle: '核对比赛信息', reviewHint: '点任意一项即可修改。', rvPlayers: '球员', rvResult: '结果', rvNotes: '笔记',
     rvWL: '{w}胜 : {l}负', notMentioned: '没有提到', noNotes: '没有笔记', doneEdit: '完成',
     flagMissing: '缺少球员', flagNew: '新球员', flagCheck: '确认球员', flagLineup: '不止一组对阵',
@@ -2383,7 +2382,7 @@ class Component extends DCLogic {
     const parts = V.chunks(V.sample(this.voiceScenario(), this.lang()).text);
     const lead = this.state.voice.text.trim(), cjk = /[\u3400-\u9fff]/;
     let i = 0;
-    this.setVoice({ phase: 'rec', secs: 0, text: lead && !cjk.test(lead.slice(-1)) && !cjk.test(parts[0] || '') ? lead + ' ' : lead });
+    this.setVoice({ phase: 'rec', text: lead && !cjk.test(lead.slice(-1)) && !cjk.test(parts[0] || '') ? lead + ' ' : lead });
     this._recT = setInterval(() => this.setVoice(v => ({ secs: v.secs + 1 })), 1000);
     this._recS = setInterval(() => {
       if (i >= parts.length) return clearInterval(this._recS);
@@ -3271,14 +3270,13 @@ class Component extends DCLogic {
       const vo = s.voice, V = window.RallywiseVoice, live = vo.phase === 'rec';
       const c = V ? V.cues(vo.text, s.players.filter(p => p.id !== 'me').flatMap(p => [p.name, p.name.split(' ')[0]])) : {};
       const clock = Math.floor(vo.secs / 60) + ':' + String(vo.secs % 60).padStart(2, '0');
-      v.vc = { text: vo.text, live, idle: !live, clock, timerLabel: this.t('recFor', { t: clock }),
+      v.vc = { text: vo.text, live, clock, timerCls: 'rw-rec-timer' + (live ? ' is-live' : ''), timerLabel: this.t(live ? 'recFor' : 'recLength', { t: clock }),
         cues: [['players', 'cuePlayers'], ['games', 'cueGames'], ['results', 'cueResult'], ['notes', 'cueNotes']].map(([k, l]) => ({ label: this.t(l), cls: c[k] ? 'is-done' : '', state: this.t(c[k] ? 'cueHeard' : 'cueNotHeard') })),
         waveCls: live ? 'is-live' : '', bars: VOICE_WAVE.map(([h, o], i) => ({ h: live ? h + 'px' : '4px', o: String(o), d: (-(i * 137) % 1100) + 'ms' })),
         recIcon: live ? 'Square' : 'Mic', recLabel: this.t(live ? 'stopRec' : 'startRec'), cantGo: !vo.text.trim(),
         toggle: () => live ? this.recStop() : this.recStart(),
         onText: e => this.setVoice({ text: e.target.value }),
         next: () => this.voiceNext(),
-        manual: () => { this.recStop(true); this.setState(x => ({ screen: 'log', voice: null, log: { ...this.newLog(), startedAt: x.voice && x.voice.startedAt } })); },
         close: () => { this.recStop(true); this.setState({ screen: 'matches', voice: null, log: null, back: [] }); } };
     }
     if (v.isReview) {

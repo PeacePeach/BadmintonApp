@@ -28,7 +28,7 @@
      Voice Input (transcript card)  .rw-voice-input[.is-live] > .rw-voice-text + .rw-cues
      Pills / Recognition cue ...... .rw-pill.rw-pill-sm.rw-cue[.is-done] > .rw-cue-mark
      Waveform ..................... .rw-wave[.is-live] > i (one per bar; height, opacity and delay set per bar)
-     Record controls .............. .rw-rec > .rw-rec-side + .rw-rec-btn + .rw-rec-side.is-end; .rw-rec-timer
+     Record controls .............. .rw-rec > .rw-rec-side + .rw-rec-btn + .rw-rec-side.is-end; .rw-rec-timer (.is-live: green dot)
      Review row (ListRow + chevron) .rw-surface.rw-tile.rw-review-row[.is-flagged] > .rw-flag
    ========================================================= */
 /* Screen background: app background + glow. The glow stays fixed while the content scrolls over it. */
@@ -180,7 +180,8 @@
 .rw-rec-link::after{content:"";position:absolute;inset:-15px -8px;}
 .rw-rec-link:disabled{opacity:.4;cursor:default;}
 .rw-rec-timer{height:36px;padding:0 14px;display:flex;align-items:center;gap:4px;font:var(--rw-type-timer);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);font-variant-numeric:tabular-nums;}
-.rw-rec-timer::before{content:"";width:8px;height:8px;border-radius:4px;background:var(--rw-rec-dot);}
+.rw-rec-timer::before{content:"";width:8px;height:8px;border-radius:4px;background:var(--rw-rec-dot-idle);transition:background-color var(--dur-fast) var(--ease-out);}
+.rw-rec-timer.is-live::before{background:var(--rw-rec-dot);}
 .rw-rec-btn{width:var(--rw-rec-btn-size);height:var(--rw-rec-btn-size);border-radius:50%;border:none;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--rw-rec-btn-bg);color:var(--rw-rec-btn-fg);transition:transform var(--dur-fast) var(--ease-out);}
 .rw-rec-btn:active{transform:scale(.95);}
 /* Review row: Insight / ListRow content with a chevron. Flagged rows get the warning outline and a flag pill. */

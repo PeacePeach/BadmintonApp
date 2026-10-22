@@ -232,6 +232,7 @@
   --rw-rec-btn-bg: var(--rw-color-action-primary);
   --rw-rec-btn-fg: var(--rw-color-text-on-action);   /* stop glyph N75 (Figma N75) */
   --rw-rec-dot: var(--rw-color-status-recording);
+  --rw-rec-dot-idle: var(--rw-color-text-secondary);  /* not recording: dot matches the time */
   /* Review row (Insight / ListRow with chevron) and its flag */
   --rw-flag-bg: var(--rw-color-surface-warning);
   --rw-flag-icon: var(--rw-color-status-warning);
