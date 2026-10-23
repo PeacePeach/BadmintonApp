@@ -13,7 +13,7 @@
      Match ........................ .rw-surface.rw-tile.rw-match (+ .rw-caption, .rw-name, .rw-score)
      Match Result (Win, Loss) ..... .rw-result.is-win | .is-loss
      Match Players (Singles, Doubles) .rw-players[.is-doubles] > .rw-avatar.rw-avatar-sm
-     Avatar / Letter .............. .rw-avatar[.rw-avatar-sm]
+     Avatar / Letter .............. .rw-avatar[.rw-avatar-sm][.is-me: B75, your own avatar]
      Bottom Nav ................... .rw-nav > .rw-glass.rw-nav-bar > .rw-nav-item[.is-active]
      App bar ...................... .rw-appbar-scrim (progressive blur + fade, shown once scrolled) + .rw-status + .rw-appbar-action; .rw-title-fade
      Greeting ..................... .rw-greeting > .rw-title.rw-text-gradient + .rw-lead
@@ -30,8 +30,9 @@
      Pills / Recognition cue ...... .rw-pill.rw-pill-sm.rw-cue[.is-done] > .rw-cue-mark  (Figma Pills, Type=Indicator 216:8356/8357)
      Waveform ..................... .rw-wave[.is-live] > i (one per bar; height, opacity and delay set per bar)
      Record controls .............. .rw-rec > .rw-rec-side + .rw-rec-btn + .rw-rec-side.is-end; .rw-rec-timer (.is-live: green dot)
-     Review row (ListRow + chevron) .rw-surface.rw-tile.rw-review-row[.is-flagged] > .rw-flag
+     InputTile (Figma 329:7089) ... .rw-surface.rw-tile.rw-input-tile[.is-warning] > .rw-input-tile-text (.rw-eyebrow + .rw-input-tile-value) + .rw-input-tile-end (.rw-flag, chevron 16px)
    Player row (Figma 228:8835) ... .rw-surface.rw-player[.is-empty] > .rw-avatar | IconButton variant "add" + .rw-name + .rw-caption
+   Search bar (Figma 329:7330) ... .rw-search[.is-filled] > Search icon + .rw-search-input + .rw-search-clear (states: Unfilled, Filled Inactive, Active Typing = :focus-within)
    Bottom Sheet (Figma 319:6349) ... .rw-sheet-scrim + .rw-sheet > .rw-sheet-head (.rw-sheet-grabber, .rw-sheet-bar > spacer + .rw-sheet-title + IconButton glass, .rw-sheet-divider) + .rw-sheet-body + .rw-sheet-foot
    ========================================================= */
 /* Screen background: app background + glow. The glow stays fixed while the content scrolls over it. */
@@ -75,6 +76,7 @@
 /* Avatar / Letter (40px); Match Players uses the 32px size. */
 .rw-avatar{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--rw-avatar-bg);color:var(--rw-avatar-fg);font:var(--rw-type-avatar);letter-spacing:var(--rw-tracking);}
 .rw-avatar-sm{width:32px;height:32px;}
+.rw-avatar.is-me{background:var(--rw-avatar-me-bg);color:var(--rw-avatar-me-fg);}
 /* Match Players: Singles = 2 in a row, Doubles = 2 x 2 grid. */
 .rw-players{display:grid;grid-auto-flow:column;gap:4px;flex-shrink:0;}
 .rw-players.is-doubles{grid-auto-flow:row;grid-template-columns:repeat(2,32px);}
@@ -190,12 +192,13 @@
 .rw-rec-btn{width:var(--rw-rec-btn-size);height:var(--rw-rec-btn-size);border-radius:50%;border:none;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--rw-rec-btn-bg);color:var(--rw-rec-btn-fg);transition:transform var(--dur-fast) var(--ease-out);}
 .rw-rec-btn:active{transform:scale(.95);}
 /* Review row: Insight / ListRow content with a chevron. Flagged rows get the warning outline and a flag pill. */
-.rw-review-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid transparent;text-align:left;width:100%;font:inherit;color:inherit;}
-.rw-review-row.is-flagged{border-color:var(--rw-flag-border);}
-.rw-review-text{display:flex;flex-direction:column;gap:8px;min-width:0;flex:1;}
-.rw-review-value{font:var(--rw-type-row-text);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
-.rw-review-value.is-muted{color:var(--rw-text-secondary);}
-.rw-review-end{display:flex;align-items:center;gap:8px;flex-shrink:0;color:var(--rw-text-secondary);}
+.rw-input-tile{display:flex;align-items:center;justify-content:space-between;gap:20px;border:1px solid transparent;text-align:left;width:100%;font:inherit;color:inherit;}
+.rw-input-tile.is-warning{border-color:var(--rw-flag-border);}
+.rw-input-tile-text{display:flex;flex-direction:column;gap:8px;min-width:0;flex:1;}
+.rw-input-tile-text>.rw-eyebrow{line-height:11px;}
+.rw-input-tile-value{font:var(--rw-type-row-text);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.rw-input-tile-value.is-muted{color:var(--rw-text-secondary);}
+.rw-input-tile-end{display:flex;align-items:center;gap:8px;flex-shrink:0;color:var(--rw-text-secondary);}
 .rw-flag{height:24px;padding:0 8px;border-radius:999px;display:flex;align-items:center;gap:4px;background:var(--rw-flag-bg);font:var(--rw-type-flag);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);white-space:nowrap;}
 .rw-flag>:first-child{color:var(--rw-flag-icon);flex-shrink:0;}
 @media (prefers-reduced-motion:reduce){.rw-wave.is-live>i{animation:none;}.rw-cue,.rw-wave>i,.rw-rec-btn{transition:none;}}
@@ -218,3 +221,13 @@
 .rw-player>.rw-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .rw-player.is-empty>.rw-name{color:var(--rw-text-secondary);}
 .rw-player>.rw-caption{flex-shrink:0;padding-right:12px;}
+/* Search bar. Unfilled: 5% fill. Filled Inactive (.is-filled): purplegrey-500. Active Typing (:focus-within): purplegrey-500 + N600 ring, N800 text. */
+.rw-search{height:var(--rw-search-h);padding:0 18px;border-radius:999px;border:1px solid transparent;background:var(--rw-search-bg);display:flex;align-items:center;gap:8px;color:var(--rw-search-fg);}
+.rw-search.is-filled,.rw-search:focus-within{background:var(--rw-search-bg-filled);}
+.rw-search:focus-within{border-color:var(--rw-search-border-active);}
+.rw-search>:first-child{flex-shrink:0;}
+.rw-search-input{flex:1;min-width:0;height:100%;padding:0 2px;border:none;outline:none;background:transparent;font:var(--rw-type-name);color:var(--rw-search-fg);caret-color:var(--rw-search-caret);}
+.rw-search-input::placeholder{color:var(--rw-search-fg);opacity:1;}
+.rw-search:focus-within .rw-search-input{color:var(--rw-search-fg-active);}
+.rw-search-clear{flex-shrink:0;width:20px;height:20px;padding:0;border:none;background:transparent;color:inherit;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;}
+.rw-search-clear::after{content:"";position:absolute;inset:-12px;}

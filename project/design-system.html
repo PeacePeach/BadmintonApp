@@ -203,6 +203,7 @@
     .v2-navwrap { position: relative; height: 96px; }
     @media (max-width: 600px) { .v2-table th:nth-child(4), .v2-table td:nth-child(4) { display: none; } }
   .v2-slot{height:120px;border:1px dashed var(--rw-n200);border-radius:15px;display:flex;align-items:center;justify-content:center;color:var(--rw-n400);font:500 12px/1 var(--font-sans);}
+  .v2-typing{border-color:var(--rw-search-border-active);} .v2-typing .rw-search-input{color:var(--rw-search-fg-active);}
 </style>
 </head>
 
@@ -611,6 +612,10 @@
         <tr><td><i class="v2-sw" style="background:var(--rw-color-data-fill)"></i></td><td>--rw-color-data-fill</td><td>--rw-blue-gradient-01</td><td>#5B9DFF → #2C3F5C</td><td>Simple bar fill</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-data-fill-vertical)"></i></td><td>--rw-color-data-fill-vertical</td><td>--rw-blue-gradient-02</td><td>#5B9DFF → #375E99 80%</td><td>Recent bars in the form chart</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-data-track)"></i></td><td>--rw-color-data-track</td><td>--rw-purplegrey-500</td><td>#2A292E</td><td>Simple bar track, older bars in the form chart</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-highlight)"></i></td><td>--rw-color-surface-highlight</td><td>--rw-highlightfill</td><td>#FFFFFF 8%</td><td>Raised control in a surface: Plus button on an empty player slot</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-input-filled)"></i></td><td>--rw-color-surface-input-filled</td><td>--rw-purplegrey-500</td><td>#2A292E</td><td>Search bar holding a value or typing</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-scrim)"></i></td><td>--rw-color-scrim</td><td>--rw-n75 at 50%</td><td>#202020 50%</td><td>Behind a Bottom Sheet</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-avatar-me-bg)"></i></td><td>--rw-color-avatar-me-bg</td><td>--rw-b75</td><td>#96C0FF</td><td>Your own avatar (letters --rw-color-avatar-me-fg = N75)</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-input)"></i></td><td>--rw-color-surface-input</td><td>--rw-inactivefill</td><td>#FFFFFF 3%</td><td>Voice transcript card fill</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-border-input-active)"></i></td><td>--rw-color-border-input-active</td><td>--rw-input-border-gradient</td><td>B100 50% → 0% → 50%, 130°</td><td>Voice transcript card stroke (1px, inside)</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-done)"></i></td><td>--rw-color-surface-done</td><td>--rw-highlightfill</td><td>#FFFFFF 8%</td><td>Recognition cue, heard</td></tr>
@@ -742,18 +747,25 @@
             <div class="rw-rec"><div class="rw-rec-side"><div class="rw-rec-timer">0:00</div></div><button class="rw-rec-btn" aria-label="Start recording"><i data-lucide="mic" style="width:28px;height:28px"></i></button><div class="rw-rec-side is-end"><button class="rw-rec-link" disabled>Continue</button></div></div>
           </div>
         </div>
-        <div class="v2-cell"><div class="v2-label">Review row (Insight / ListRow + chevron; flagged)</div>
+        <div class="v2-cell"><div class="v2-label">InputTile (Default, Warning)</div>
           <div style="display:flex;flex-direction:column;gap:16px;">
-            <button class="rw-surface rw-tile rw-review-row is-flagged"><span class="rw-review-text"><span class="rw-eyebrow">Players</span><span class="rw-review-value">You, Priya Nair, Chris</span></span><span class="rw-review-end"><span class="rw-flag"><i data-lucide="circle-alert" style="width:14px;height:14px"></i>Missing players</span><i data-lucide="chevron-right" style="width:16px;height:16px"></i></span></button>
-            <button class="rw-surface rw-tile rw-review-row"><span class="rw-review-text"><span class="rw-eyebrow">Result</span><span class="rw-review-value">1 Win : 2 Loss</span></span><span class="rw-review-end"><i data-lucide="chevron-right" style="width:16px;height:16px"></i></span></button>
+            <button class="rw-surface rw-tile rw-input-tile is-warning"><span class="rw-input-tile-text"><span class="rw-eyebrow">Players</span><span class="rw-input-tile-value">You, Priya Nair, Chris</span></span><span class="rw-input-tile-end"><span class="rw-flag"><i data-lucide="circle-alert" style="width:14px;height:14px"></i>Missing players</span><i data-lucide="chevron-right" style="width:16px;height:16px;stroke-width:3"></i></span></button>
+            <button class="rw-surface rw-tile rw-input-tile"><span class="rw-input-tile-text"><span class="rw-eyebrow">Result</span><span class="rw-input-tile-value">1 Win : 2 Loss</span></span><span class="rw-input-tile-end"><i data-lucide="chevron-right" style="width:16px;height:16px;stroke-width:3"></i></span></button>
           </div>
         </div>
         <div class="v2-cell"><div class="v2-label">Player row (filled: Avatar + name + role; empty: IconButton "add" + placeholder)</div>
           <div style="display:flex;flex-direction:column;gap:12px;">
-            <div class="rw-surface rw-player"><span class="rw-avatar">SR</span><span class="rw-name">Sam Rivera</span><span class="rw-caption">Me</span></div>
+            <div class="rw-surface rw-player"><span class="rw-avatar is-me">SR</span><span class="rw-name">Sam Rivera</span><span class="rw-caption">Me</span></div>
             <div class="rw-surface rw-player"><span class="rw-avatar">PN</span><span class="rw-name">Priya Nair</span><span class="rw-caption">Your partner</span></div>
             <div class="rw-surface rw-player is-empty"><span class="v2-iconbtn" style="background:var(--rw-icon-btn-add-bg);border:1px solid var(--rw-icon-btn-add-border);color:var(--rw-icon-btn-add-fg)"><i data-lucide="plus" style="width:18px;height:18px"></i></span><span class="rw-name">Select Opponent</span></div>
             <div class="rw-surface rw-player"><span class="rw-avatar">CW</span><span class="rw-name">Chris Wong</span><span class="rw-caption">H2H 3–0</span></div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Search bar (Unfilled, Filled Inactive, Active Typing)</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <label class="rw-search"><i data-lucide="search" style="width:20px;height:20px;stroke-width:1.6"></i><input class="rw-search-input" placeholder="Search or add a new player"></label>
+            <label class="rw-search is-filled"><i data-lucide="search" style="width:20px;height:20px;stroke-width:1.6"></i><input class="rw-search-input" value="Chris Wong"><button class="rw-search-clear" aria-label="Clear"><i data-lucide="circle-x" style="width:20px;height:20px;stroke-width:1.44"></i></button></label>
+            <label class="rw-search is-filled v2-typing"><i data-lucide="search" style="width:20px;height:20px;stroke-width:1.6"></i><input class="rw-search-input" value="Chris Won" id="v2-search-typing"><button class="rw-search-clear" aria-label="Clear"><i data-lucide="circle-x" style="width:20px;height:20px;stroke-width:1.44"></i></button></label>
           </div>
         </div>
         <div class="v2-cell v2-wide"><div class="v2-label">Bottom Sheet (scrim, grabber, title + close, divider, content slot, primary action)</div>

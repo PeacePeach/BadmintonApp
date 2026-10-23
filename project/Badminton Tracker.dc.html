@@ -889,14 +889,14 @@ button:disabled{cursor:default !important;}
           </div>
           <div style="display:flex;flex-direction:column;gap:16px;">
             <sc-for list="{{ rv.rows }}" as="r" hint-placeholder-count="3">
-              <button type="button" class="rw-surface rw-tile rw-press rw-review-row {{ r.cls }}" onClick="{{ r.open }}">
-                <span class="rw-review-text">
+              <button type="button" class="rw-surface rw-tile rw-press rw-input-tile {{ r.cls }}" onClick="{{ r.open }}">
+                <span class="rw-input-tile-text">
                   <span class="rw-eyebrow tl">{{ r.label }}</span>
-                  <span class="rw-review-value {{ r.valueCls }}">{{ r.value }}</span>
+                  <span class="rw-input-tile-value {{ r.valueCls }}">{{ r.value }}</span>
                 </span>
-                <span class="rw-review-end">
+                <span class="rw-input-tile-end">
                   <sc-if value="{{ r.flag }}" hint-placeholder-val="{{ false }}"><span class="rw-flag"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 14 }}" hint-size="14px,14px"></x-import>{{ r.flag }}</span></sc-if>
-                  <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 16 }}" hint-size="16px,16px"></x-import>
+                  <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 16 }}" strokeWidth="{{ 3 }}" hint-size="16px,16px"></x-import>
                 </span>
               </button>
             </sc-for>
@@ -3294,7 +3294,7 @@ class Component extends DCLogic {
       const wl = this.res(this.draftGames(log));
       const notes = [log.worked, log.lost, log.on].map(x => (x || '').trim()).filter(Boolean).join(this.lang() === 'zh' ? '' : ' ');
       const flag = { missing: 'flagMissing', new: 'flagNew', check: 'flagCheck', lineup: 'flagLineup', scores: 'flagScores' };
-      const row = (part, label, value, muted, fk) => ({ label: this.t(label), value, valueCls: muted ? 'is-muted' : '', flag: fk ? this.t(fk) : '', cls: fk ? 'is-flagged' : '', open: () => this.reviewOpen(part) });
+      const row = (part, label, value, muted, fk) => ({ label: this.t(label), value, valueCls: muted ? 'is-muted' : '', flag: fk ? this.t(fk) : '', cls: fk ? 'is-warning' : '', open: () => this.reviewOpen(part) });
       const blocking = f.players ? 'players' : f.result ? 'result' : null;
       v.rv = { back: () => this.setState(x => ({ screen: 'voice', log: null, back: x.back.slice(0, -1) })),
         rows: [row('players', 'rvPlayers', names.join(sep), false, f.players && flag[f.players]),

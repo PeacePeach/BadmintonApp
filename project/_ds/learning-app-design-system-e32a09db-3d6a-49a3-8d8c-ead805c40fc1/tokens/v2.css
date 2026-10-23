@@ -153,6 +153,9 @@
   /* Avatars */
   --rw-color-avatar-bg: var(--rw-n150);
   --rw-color-avatar-fg: var(--rw-n800);
+  --rw-color-avatar-me-bg: var(--rw-b75);             /* your own avatar (Han, 2026-10-23: Figma Player 228:8826) */
+  --rw-color-avatar-me-fg: var(--rw-n75);             /* Figma #1B1A1D is unbound; nearest Foundation N75 */
+  --rw-color-surface-input-filled: var(--rw-purplegrey-500); /* search field holding a value (Figma 329:7330) */
 
   /* Back-compat names used by screens and the IconButton component */
   --rw-bg-app: var(--rw-color-bg-app);
@@ -198,6 +201,16 @@
   /* Avatar / Letter */
   --rw-avatar-bg: var(--rw-color-avatar-bg);
   --rw-avatar-fg: var(--rw-color-avatar-fg);
+  --rw-avatar-me-bg: var(--rw-color-avatar-me-bg);
+  --rw-avatar-me-fg: var(--rw-color-avatar-me-fg);
+  /* Search bar (Figma 329:7330; Han approved a reusable search component, 2026-10-23) */
+  --rw-search-h: 48px;
+  --rw-search-bg: var(--rw-color-surface);
+  --rw-search-bg-filled: var(--rw-color-surface-input-filled);
+  --rw-search-border-active: var(--rw-color-border-selected);
+  --rw-search-fg: var(--rw-color-text-secondary);
+  --rw-search-fg-active: var(--rw-color-text-primary);
+  --rw-search-caret: var(--rw-color-text-on-selected);
   /* Graphs / Large bar (form chart) */
   --rw-form-bar-track: var(--rw-color-data-track);
   --rw-form-bar-fill: var(--rw-color-data-fill-vertical);
@@ -287,6 +300,6 @@
   --rw-type-transcript: 500 16px/26.4px var(--font-sans); /* Figma Regular -> Medium (V2 minimum) */
   --rw-type-timer: 500 14px/14px var(--font-sans);
   --rw-type-flag: 500 11px/15px var(--font-sans);
-  --rw-type-row-text: 500 14px/1.4 var(--font-sans);
+  --rw-type-row-text: 500 14px/20px var(--font-sans);   /* InputTile value (Figma 329:7089) */
   --rw-type-sheet-title: 500 16px/15px var(--font-sans);
 }
