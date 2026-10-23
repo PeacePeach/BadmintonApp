@@ -56,7 +56,15 @@ Fields
   "20平", "20 all", "deuce" and leads during a game ("was up 18-15") are running scores, not the final score. A small pair like "2比1", "won 2-1" or "two games to one" is the game tally (totals), not a game's points.
 - totals: wins and losses, stated or counted from known results. A total that is not stated or derivable is null.
 - order_known: true only if the result of every game is known in sequence.
-- observations: technical or tactical reflections only (shots, movement, tactics, mistakes, an opponent's habits), not results or small talk. One item per distinct point, short, in the same language the speaker used for it, lightly cleaned up.
+- observations: technical or tactical reflections only (shots, movement, tactics, mistakes, an opponent's habits), not results or small talk. One item per distinct point, short, in the same language the speaker used for it.
+  CRITICAL — semantic cleanup of observation text: the text must be a clean, natural, readable note, NOT a verbatim speech-recognition transcript. In this SAME parsing call, infer obvious ASR homophones and badminton vocabulary from context, remove repeated syllables/false starts, and lightly fix grammar in Mandarin, English, and code-switched speech. Keep the speaker's meaning, evaluation, technical detail and language; do not add new facts or new observations. If uncertain, keep the original wording rather than guessing. Never silently normalize names, scores, match outcomes, or player roles.
+  Context-sensitive examples (these are illustrations, not unconditional search-and-replace rules):
+  - "今天往前搓球手杆比上周好" -> "今天网前搓球的手感比上周好" (Net); but "往前移动太慢" stays "往前移动太慢" (Footwork).
+  - "揭发总是太被动" -> "接发球总是太被动" (Return).
+  - "反反手后场还是比较被动" -> "反手后场还是比较被动" (Defence).
+  - "I struggled internet" -> "I struggled at the net" (Net); "my surf was weak" -> "my serve was weak" (Serve), when the badminton context supports it.
+  - "my my backhand was slow" -> "My backhand was slow"; "I was good smash" -> "My smashes were good".
+  The observation's area and category MUST reflect the cleaned text, not a misleading literal reading of an ASR error. Use the exact uncorrected heard player name in about if one is mentioned; do not fabricate a corrected player identity.
   category: "won_points" for strengths, things that worked or won points; "lost_points" for mistakes, weaknesses, things that cost points; "opponent" for an opponent's tendencies, strengths or weaknesses; "unsure" when the speaker is uncertain or it could go either way.
   area: one of ${AREAS.join(', ')} that best fits, "Other" if none fits, null for opponent observations. When the observation names where or which stroke, use it: 网前/net → Net (a mistake at the net is Net, not Footwork), 杀球/smash → Smash, 发球/发小球/发短球/serve → Serve, 接发/return → Return, 步法/footwork → Footwork, 防守/defence → Defence, 落点/clears/drops/length → Placement. Lifts under pressure count as Defence. about: the opponent's name for opponent observations, else null.
 - missing: what a match log usually needs that the description does not give: ${MISSING.join(', ')}. Only include items that apply; if there was no match at all, include nothing about results. Never list "game_order" when order_known is true, or "partners" for singles.
