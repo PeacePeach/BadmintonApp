@@ -228,7 +228,7 @@
 .rw-search.is-filled,.rw-search:focus-within{background:var(--rw-search-bg-filled);}
 .rw-search:focus-within{border-color:var(--rw-search-border-active);}
 .rw-search>:first-child{flex-shrink:0;}
-.rw-search-input{flex:1;min-width:0;height:100%;padding:0 2px;border:none;outline:none;background:transparent;font:var(--rw-type-name);color:var(--rw-search-fg);caret-color:var(--rw-search-caret);}
+.rw-search-input{flex:1;min-width:0;height:100%;padding:0 2px;border:none;outline:none;background:transparent;font:var(--rw-type-name);letter-spacing:var(--rw-tracking);color:var(--rw-search-fg);caret-color:var(--rw-search-caret);}
 .rw-search-input::placeholder{color:var(--rw-search-fg);opacity:1;}
 .rw-search:focus-within .rw-search-input{color:var(--rw-search-fg-active);}
 .rw-search-clear{flex-shrink:0;width:20px;height:20px;padding:0;border:none;background:transparent;color:inherit;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;}
