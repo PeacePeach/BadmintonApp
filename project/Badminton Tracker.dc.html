@@ -2753,7 +2753,9 @@ class Component extends DCLogic {
     const { flags, slots, pool, people, totals, ...fields } = V.toDraft(r, this.state.players, base.format);
     let log = { ...base, ...fields, step: 'review', startedAt: v.startedAt || Date.now(), active: null,
       voice: { flags, slots, pool, people: people || [], totals, dirty: {}, from: text } };
-    if (v.prev) log = this.keepEdits(v.prev, log);
+    // A changed transcript must be parsed as a fresh match. Reusing manually edited
+    // players/results/notes from the previous draft can overwrite the new AI result.
+    // An unchanged transcript is already handled above by returning v.prev directly.
     this.setVoice({ parsing: false, prev: null });
     this.go('review', { log });
   }
