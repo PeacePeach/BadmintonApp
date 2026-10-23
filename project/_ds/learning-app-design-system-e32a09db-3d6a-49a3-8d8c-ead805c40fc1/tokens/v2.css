@@ -358,7 +358,8 @@
   --rw-type-button: 600 15px/15px var(--font-sans);
   --rw-type-pill: 500 14px/15px var(--font-sans);
   --rw-type-pill-sm: 500 12px/15px var(--font-sans);
-  --rw-type-avatar: 700 14px/14px var(--font-sans);    /* Bold 14px on both sizes (Han, 2026-10-23; Figma 360:8022 shows 16px) */
+  --rw-type-avatar: 700 14px/14px var(--font-sans);    /* 40px avatar: Bold 14px (Han, 2026-10-23; Figma 360:8022 shows 16px) */
+  --rw-type-avatar-sm: 700 12px/12px var(--font-sans); /* 32px Match Players avatar: Bold 12px (Han, 2026-10-23) */
   --rw-type-nav: 500 11px/12px var(--font-sans);
   --rw-type-tab: 500 15px/15px var(--font-sans);
   --rw-type-tab-sm: 500 12px/12px var(--font-sans);
