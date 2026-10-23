@@ -1966,6 +1966,8 @@ button:disabled{cursor:default !important;}
 // scores and anything the user typed are shown as entered, and stored values (match types, tags, skill levels)
 // stay in English; only their labels are translated.
 const LANG_KEY = 'rallywise.lang';
+// The parser version a Real Voice test (?voiceMode=real) expects from the deployed parse-voice-log.
+const REAL_VOICE_ENGINE = '2026-10-23-v4';
 const LANGS = [['en', 'English'], ['zh', '简体中文']];
 const I18N = {
   en: {
@@ -2118,6 +2120,7 @@ const I18N = {
     micNothing: 'Nothing was recognised. Try again a little closer to the mic.',
     vErrSignin: 'Sign in again to read your description.', vErrTooLong: 'That description is too long. Shorten it a little and try again.',
     vErrRate: 'Too many requests in a short time. Wait a minute and try again.', vErrNetwork: 'Couldn’t reach the server. Check your connection and try again.',
+    vEngineOld: 'Server parser is {v}, not {want}.',
     vErrSetup: 'Reading descriptions isn’t set up yet. Fill in the details yourself.', vErrFailed: 'Couldn’t read your description. Try again, or fill in the details yourself.',
     rvWL: '{w} Win : {l} Loss', notMentioned: 'Not mentioned', noNotes: 'No notes', doneEdit: 'Done',
     flagMissing: 'Missing players', flagNew: 'New player', flagCheck: 'Check players', flagLineup: 'More than one lineup',
@@ -2264,6 +2267,7 @@ const I18N = {
     micNothing: '没有识别到内容。靠近麦克风再试一次。',
     vErrSignin: '请重新登录后再读取描述。', vErrTooLong: '描述太长了，请稍微删减后再试。',
     vErrRate: '短时间内请求太多，请等一分钟再试。', vErrNetwork: '连不上服务器，请检查网络后再试。',
+    vEngineOld: '服务器解析器是 {v}，不是 {want}。',
     vErrSetup: '读取描述的功能还没设置好，请手动填写。', vErrFailed: '没能读懂你的描述。请再试一次，或手动填写。',
     rvWL: '{w}胜 : {l}负', notMentioned: '没有提到', noNotes: '没有笔记', doneEdit: '完成',
     flagMissing: '缺少球员', flagNew: '新球员', flagCheck: '确认球员', flagLineup: '不止一组对阵',
@@ -2348,10 +2352,13 @@ class Component extends DCLogic {
   // to show the sample data without the design editor. Only on preview hosts, see previewHost().
   // Branch preview links (…-git-….vercel.app), a preview deployment's own URL (badmintonapp-<id>-<team>.vercel.app) and localhost.
   previewHost() { return typeof location !== 'undefined' && /-git-.*\.vercel\.app$|^badmintonapp-[a-z0-9]{9}-zizibittergourd-9441\.vercel\.app$|^localhost$|^127\.0\.0\.1$/.test(location.hostname); }
+  // Real Voice test (?voiceMode=real on a preview host): the real app with the account's own data, the browser's
+  // speech recognizer and the deployed parse-voice-log; it opens on Log Match (Voice) once signed in. Never mock data.
+  realVoice() { return typeof location !== 'undefined' && this.previewHost() && (new URLSearchParams(location.search).get('voiceMode') || '').toLowerCase() === 'real'; }
   startScreen() {
     const p = (this.props || {}).startScreen;
     if (p && p !== 'Splash') return p;
-    if (typeof location === 'undefined' || !this.previewHost()) return p;
+    if (typeof location === 'undefined' || !this.previewHost() || this.realVoice()) return p;
     const q = (new URLSearchParams(location.search).get('preview') || '').toLowerCase();
     return { grow: 'Insights', insights: 'Insights', matches: 'Matches', focus: 'Focus', 'focus-detail': 'Focus Detail', voice: 'Log Match (Voice)', review: 'Review Match (Voice)' }[q] || p;
   }
@@ -2615,6 +2622,7 @@ class Component extends DCLogic {
   // Mock speech and parsing: design previews, the voiceMock prop, and ?voice=<scenario> on preview hosts
   // (so a signed-in preview can be tried without a paid parse).
   voiceMock() {
+    if (this.realVoice()) return false;
     if ((this.props || {}).voiceMock || !this.live() || this.previewData()) return true;
     return typeof location !== 'undefined' && this.previewHost() && new URLSearchParams(location.search).has('voice');
   }
@@ -2708,8 +2716,11 @@ class Component extends DCLogic {
   async parseVoice(text) {
     if (this.voiceMock()) return { result: window.RallywiseVoice.mockParse(text, this.lang(), this.voiceScenario()) };
     const b = await this.api();
-    if (!b.voice) return { result: window.RallywiseVoice.mockParse(text, this.lang(), this.voiceScenario()) };
-    return b.voice.parse(text);
+    if (!b.voice) { if (this.realVoice()) throw { code: 'ai_not_configured' }; return { result: window.RallywiseVoice.mockParse(text, this.lang(), this.voiceScenario()) }; }
+    const res = await b.voice.parse(text);
+    // Real Voice test: say so when the server isn't running the expected parser.
+    if (this.realVoice() && res && res.prompt_version !== REAL_VOICE_ENGINE) { const short = v => String(v || '?').split('-').pop(); this.flash(this.t('vEngineOld', { v: short(res.prompt_version), want: short(REAL_VOICE_ENGINE) }), 'info'); }
+    return res;
   }
   // Fill manually (empty transcript): an empty Review; nothing is assumed, not even the match type.
   fillManually() {
@@ -2980,6 +2991,10 @@ class Component extends DCLogic {
   }
 
   componentDidUpdate(pp) {
+    // Real Voice test: once the account is open on Matches, go straight to Log Match (Voice).
+    if (this.realVoice() && !this._realVoiceOpened && this.user && this.state.screen === 'matches' && this.dataReady()) {
+      this._realVoiceOpened = true; setTimeout(() => this.openVoice('matches'), 0);
+    }
     // "Toast preview" prop fires one example of each toast variant.
     if (pp && this.props.toastPreview !== pp.toastPreview) {
       const ex = { Success: ['tMatchSaved', 'success'], Error: ['tSomethingWrong', 'error'], Info: ['tNoConnection', 'info'] }[this.props.toastPreview];
