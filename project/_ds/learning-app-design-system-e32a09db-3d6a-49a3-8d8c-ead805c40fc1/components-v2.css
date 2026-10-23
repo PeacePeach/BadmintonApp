@@ -12,6 +12,7 @@
      Button / Secondary, Medium ... .rw-btn.rw-btn-secondary (fill by context: page purplegrey-500, tile/banner Highlight Fill); PlayerTags .rw-tags
      Pills (Medium, Small; Active)  .rw-surface.rw-pill[.rw-pill-sm][.is-active]
      Metric ....................... .rw-eyebrow + .rw-metric-value + .rw-subtitle | .rw-bar
+     Record value ................. .rw-metric-value.rw-record > n + .rw-record-unit + .rw-record-sep + n + .rw-record-unit
      Graphs / Simple bar .......... .rw-bar
      Match ........................ .rw-surface.rw-tile.rw-match (+ .rw-caption, .rw-name, .rw-score)
      Match Result (Win, Loss) ..... .rw-result.is-win | .is-loss
@@ -102,6 +103,9 @@
 .rw-greeting>.rw-title{align-self:flex-start;} /* hug the text so the highlight gradient spans it */
 .rw-lead{font:var(--rw-type-lead);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);margin:0;}
 .rw-text-gradient{background:var(--rw-text-gradient);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;}
+.rw-record{display:flex;align-items:baseline;white-space:nowrap;}  /* Record value "3 W · 2 L": big numbers, small N400 units, N300 dot */
+.rw-record-unit{font:var(--rw-type-record-unit);color:var(--rw-text-secondary);margin-left:2px;}
+.rw-record-sep{color:var(--rw-color-text-tertiary);margin:0 6px;}  /* metric-size middle dot */
 .rw-subtitle{font:var(--rw-type-subtitle);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
 .rw-bar{height:13px;display:flex;flex-direction:column;justify-content:flex-end;}
 .rw-bar>div{height:8px;border-radius:99px;background:var(--rw-bar-track);overflow:hidden;}

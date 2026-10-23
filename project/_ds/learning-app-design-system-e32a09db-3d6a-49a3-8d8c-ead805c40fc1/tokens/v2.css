@@ -354,6 +354,7 @@
   --rw-type-eyebrow: 500 12px/13px var(--font-sans);
   --rw-type-metric: 500 32px/1 var(--font-sans);
   --rw-type-subtitle: 500 12px/13px var(--font-sans);
+  --rw-type-record-unit: 500 16px/1 var(--font-sans);  /* W / L after a record number (Han picked, 2026-10-23) */
   --rw-type-caption: 500 12px/12px var(--font-sans);
   --rw-type-result: 600 12px/12px var(--font-sans);
   --rw-type-name: 500 14px/18.2px var(--font-sans);
