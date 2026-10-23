@@ -2685,7 +2685,9 @@ class Component extends DCLogic {
     if (this._rec !== rec) return;
     this._rec = null; clearInterval(this._recT);
     const MIC = { 'not-allowed': 'micBlocked', 'service-not-allowed': 'micOff', 'audio-capture': 'micNone', network: 'micNetwork', 'language-not-supported': 'micLang' };
-    this.setVoice({ phase: 'idle', text: this.joinText(rec.lead, rec.done) });
+    this.setState(state => state.voice ? { voice: { ...state.voice, phase: 'idle', awaitingStop: false, text: this.joinText(rec.lead, rec.done) } } : null, () => {
+      if (rec.advance && !rec.error && this.state.screen === 'voice') this.voiceNext();
+    });
     if (rec.error) this.flash(this.t(MIC[rec.error] || 'micFailed'), 'error');
     else if (!rec.done.trim()) this.flash(this.t('micNothing'), 'error');
   }
@@ -2736,7 +2738,14 @@ class Component extends DCLogic {
   // Continue: parse, then Review. Incomplete results still go to Review. Several lineups stay here with the
   // one-lineup notice and the transcript as it is. Re-parsing an edited transcript keeps any section already fixed by hand.
   async voiceNext() {
-    const v = this.state.voice; if (!v || v.parsing || this._rec) return;
+    const v = this.state.voice; if (!v || v.parsing || v.awaitingStop) return;
+    if (this._rec) {
+      this._rec.advance = true;
+      this.setVoice({ awaitingStop: true });
+      this.recStop();
+      return;
+    }
+    if (v.phase === 'rec') this.recStop(); // Mock recording: use the visible transcript.
     const text = v.text.trim();
     if (!text) return this.fillManually();
     this.recStop();
@@ -3775,7 +3784,7 @@ class Component extends DCLogic {
         waveCls: live ? 'is-live' : '', bars: VOICE_WAVE.map(([h, o], i) => ({ h: live ? h + 'px' : '4px', o: String(o), d: (-(i * 137) % 1100) + 'ms' })),
         recIcon: live ? 'Square' : 'Mic', recSize: live ? 29.33 : 28, recStroke: live ? 1.64 : 2, recLabel: this.t(live ? 'stopRec' : 'startRec'),
         // Empty transcript: Fill manually opens an empty Review. With text: Continue reads it.
-        nextLabel: this.t(vo.parsing ? 'reading' : has ? 'continue' : 'fillManually'), cantGo: !!vo.parsing, parsing: !!vo.parsing,
+        nextLabel: this.t(vo.parsing || vo.awaitingStop ? 'reading' : has ? 'continue' : 'fillManually'), cantGo: !!(vo.parsing || vo.awaitingStop), parsing: !!(vo.parsing || vo.awaitingStop),
         toggle: () => live ? this.recStop() : this.recStart(),
         onText: e => this.setVoice({ text: e.target.value }),
         next: () => this.voiceNext(),
