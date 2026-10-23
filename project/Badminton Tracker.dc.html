@@ -46,7 +46,9 @@ body{margin:0;background:var(--bg-primary);font-family:"Poppins",system-ui,sans-
 *::-webkit-scrollbar{display:none;}
 a{color:var(--action-primary);} a:hover{color:var(--text-primary);}
 input,textarea,button{font-family:inherit;}
-input::placeholder,textarea::placeholder{color:var(--input-field-text-default);}
+/* Placeholder is one visual step quieter than the default input text in both languages. */
+:root{--input-placeholder-text:#59595b;}
+input::placeholder,textarea::placeholder{color:var(--input-placeholder-text);opacity:1;}
 .search-field-outline{border:var(--control-outline-width) solid var(--control-outline);}
 .search-field-outline:focus-within{border-color:var(--ghost-button-outline-highlight);}
 /* App shell is full-screen by default. The physical iPhone supplies the device corners. */
