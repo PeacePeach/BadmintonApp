@@ -201,6 +201,7 @@
   --rw-trend-flat: var(--rw-color-text-secondary);
   /* Top Tab */
   --rw-tab-h: 48px;
+  --rw-tab-sm-h: 32px;                                /* Horizontal toggle, Figma 226:8787 (Singles / Doubles) */
   --rw-tab-fg: var(--rw-color-text-secondary);
   --rw-tab-active-border: var(--rw-color-border-selected);
   --rw-tab-active-fg: var(--rw-color-text-primary);
@@ -265,6 +266,7 @@
   --rw-type-avatar: 500 13px/13px var(--font-sans);
   --rw-type-nav: 500 11px/12px var(--font-sans);
   --rw-type-tab: 500 15px/15px var(--font-sans);
+  --rw-type-tab-sm: 500 12px/12px var(--font-sans);
   --rw-type-section: 500 16px/19.2px var(--font-sans);
   --rw-type-trend: 600 12px/13px var(--font-sans);
   --rw-type-chart-label: 500 12px/11px var(--font-sans);

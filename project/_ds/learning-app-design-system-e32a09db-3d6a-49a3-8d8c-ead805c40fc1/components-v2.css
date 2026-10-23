@@ -18,6 +18,7 @@
      App bar ...................... .rw-appbar-scrim (progressive blur + fade, shown once scrolled) + .rw-status + .rw-appbar-action; .rw-title-fade
      Greeting ..................... .rw-greeting > .rw-title.rw-text-gradient + .rw-lead
      Top Tab ...................... .rw-surface.rw-tabs > .rw-tab[.is-active]
+     Horizontal toggle ............ .rw-surface.rw-tabs.is-sm > .rw-tab[.is-active]  (Top Tab, small; active border N600 like every selected outline, Han 2026-10-23)
      Insight Subtitle (change) .... .rw-trend > .rw-trend-delta.is-up|.is-down|.is-flat
      Graphs / Large bar ........... .rw-form > .rw-form-bars > .rw-form-bar[.is-recent] + .rw-chart-label
      Performance breakdown ........ .rw-breakdown (label, .rw-bar, .rw-row-value + .rw-row-sub)
@@ -112,6 +113,7 @@
 /* Top Tab: segmented control. The bar is a surface; the active tab is glass with the selected outline. */
 .rw-tabs{display:flex;gap:12px;padding:4px;border-radius:100px;}
 .rw-tab{flex:1;min-width:0;height:var(--rw-tab-h);padding:0 16px;border-radius:100px;border:1px solid transparent;background:transparent;color:var(--rw-tab-fg);font:var(--rw-type-tab);letter-spacing:var(--rw-tracking);white-space:nowrap;cursor:pointer;transition:color var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out);}
+.rw-tabs.is-sm .rw-tab{height:var(--rw-tab-sm-h);padding:0 24px;font:var(--rw-type-tab-sm);}
 .rw-tab.is-active{background:var(--rw-glass-fill);-webkit-backdrop-filter:var(--rw-glass-effect);backdrop-filter:var(--rw-glass-effect);box-shadow:var(--rw-glass-rim);border-color:var(--rw-tab-active-border);color:var(--rw-tab-active-fg);}
 /* Insight Subtitle with change: arrow + value, then the comparison */
 .rw-trend{display:flex;align-items:center;gap:4px;font:var(--rw-type-subtitle);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);white-space:nowrap;}
