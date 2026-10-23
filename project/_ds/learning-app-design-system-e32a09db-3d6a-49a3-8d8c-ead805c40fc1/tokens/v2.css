@@ -20,7 +20,7 @@
   /* Orange */
   --rw-o50:               #fef3e6;
   --rw-o75:               #fccd99;
-  --rw-o100:              #fab86f;
+  --rw-o100:              #efb16a;
   --rw-o200:              #f89930;
   --rw-o300:              #f78406;
   --rw-o400:              #ad5c04;
@@ -354,7 +354,7 @@
   --rw-type-flag: 500 12px/15px var(--font-sans);   /* Pills State=Warning (Figma 329:7164) */
   --rw-type-row-text: 500 14px/20px var(--font-sans);   /* InputTile value (Figma 329:7089) */
   --rw-type-sheet-title: 500 16px/15px var(--font-sans);
-  --rw-type-check: 600 16px/15px var(--font-sans);    /* W / L letter (Figma CheckBoxes) */
+  --rw-type-check: 600 14px/15px var(--font-sans);    /* W / L letter, 胜 / 负 too (Figma CheckBoxes; 14px per Han 2026-10-23) */
   --rw-type-textarea: 500 14px/21px var(--font-sans); /* TextArea (Figma 349:4321) */
   --rw-type-meta: 500 13px/16.9px var(--font-sans);   /* 13px helper and score lines; Figma Regular -> Medium (Han N5) */
 }
