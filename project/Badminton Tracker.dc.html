@@ -1660,6 +1660,9 @@ button:disabled{cursor:default !important;}
                   <sc-if value="{{ g.canAddScore }}" hint-placeholder-val="{{ true }}">
                     <button type="button" class="rw-btn rw-btn-tertiary" onClick="{{ g.addScore }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 16 }}" strokeWidth="{{ 1.8 }}" hint-size="16px,16px"></x-import>{{ tx.addScore }}</button>
                   </sc-if>
+                  <sc-if value="{{ g.scorePending }}" hint-placeholder-val="{{ false }}">
+                    <span class="rw-score-placeholder" aria-label="{{ tx.selectResult }}">— : —</span>
+                  </sc-if>
                 </span>
               </div>
             </sc-for>
@@ -3796,7 +3799,7 @@ class Component extends DCLogic {
             return { label, w: this.t('dotW'), l: this.t('dotL'), wCls: g.w === 'us' ? 'is-win' : '', lCls: g.w === 'them' ? 'is-loss' : '', wOn: g.w === 'us', lOn: g.w === 'them',
               wLabel: this.t('gameNoScore', { game: label, r: this.t('resultWin') }), lLabel: this.t('gameNoScore', { game: label, r: this.t('resultLoss') }),
               setW: () => this.rsMark(i, 'us'), setL: () => this.rsMark(i, 'them'),
-              hasScore: !!sg, canAddScore: !!g.w && !sg, score: sg ? `${sg[0]} : ${sg[1]}` : '', addScore: () => this.rsAddScore(i),
+              hasScore: !!sg, canAddScore: !!g.w && !sg, scorePending: !g.w, score: sg ? `${sg[0]} : ${sg[1]}` : '', addScore: () => this.rsAddScore(i),
               dec: () => this.rsStep(i, -1), inc: () => this.rsStep(i, 1), cantDec: !sg || g.l <= 0, cantInc: !sg || g.l >= cap - 1 };
           }),
           // IconButton has no disabled prop: the approved disabled look (.rw-btn:disabled, 40% opacity) and no taps.
