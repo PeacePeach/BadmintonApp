@@ -43,7 +43,7 @@ Hard rules
 
 Fields
 - language: "en", "zh" or "mixed".
-- match_type: "doubles" if doubles is stated or a partner/teammate is mentioned or two opponents are named together; "singles" if singles is stated or the speaker clearly played one-on-one against one named person. null if both singles and doubles were played. Otherwise null and add "match_type" to missing.
+- match_type: "doubles" if doubles is stated or a partner/teammate is mentioned or two opponents are named together; "singles" if singles is stated or a single opponent is named without any partner or doubles cue (e.g. "我跟龙奥天打了三局，输了两局赢了一局", "played three games with Alex, lost two and won one"). "跟/和/with X 打球" names a participant; when X is the ONLY named person and there is no partner/team/doubles clue, infer singles, not doubles. null if both singles and doubles were played. Otherwise null and add "match_type" to missing.
 - multiple_lineups: true if the description covers more than one lineup: the partner or opponents changed between games, or both singles and doubles were played. Otherwise false.
 - players: every other named person. role "partner" (on the speaker's side), "opponent", or "unknown" when the wording does not say (e.g. "played with Marcus" without saying singles/doubles).
   A role needs words that say it. Partner: "partner", "partnered with", "teamed up with", "paired with", "my teammate", "X and I against …", "搭档", "队友", "和X一组". Opponent: "against", "vs", "versus", "beat", "lost to", "opponents were", "对手", "对阵", "输给", or singles against one person. In doubles, once the partner is stated the other people named are the opponents, and once both opponents are stated the remaining person is the partner.
@@ -204,6 +204,12 @@ export function guard(out, transcript) {
     notes.push('flagged more than one lineup'); out.multiple_lineups = true;
   }
   if (bothTypes && out.match_type) { notes.push('cleared match_type: singles and doubles both mentioned'); out.match_type = null; }
+  // One named opponent and no indication of a team: default to singles, never invent a partner.
+  const doublesCue = /\\bdoubles?\\b|双打|混双|搭档|队友|组队|一组|partner|teammate|paired with|teamed up/i;
+  if (!out.multiple_lineups && !bothTypes && out.players.length === 1 && out.match_type === 'doubles' && !doublesCue.test(transcript)) {
+    notes.push('single named player with no doubles cue: doubles -> singles');
+    out.match_type = 'singles'; out.players[0].role = 'opponent';
+  }
   // Sides need words that say them. In one doubles lineup, a partner or opponent the transcript doesn't support becomes
   // "unknown" so the app asks "Who is your partner?" instead of showing a guessed lineup.
   if (!out.multiple_lineups && out.match_type !== 'singles' && out.players.length >= 2) notes.push(...guardRoles(out, transcript));
