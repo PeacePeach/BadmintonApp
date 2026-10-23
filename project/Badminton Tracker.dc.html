@@ -2837,13 +2837,25 @@ class Component extends DCLogic {
   // optional, and a heard aggregate is kept as it is, counting whenever it fits the games.
   rsOpen() {
     const l = this.state.log; if (!l) return;
-    const games = l.games.length ? l.games.map(g => ({ w: g.w || null, l: g.l == null ? null : g.l })) : [{ w: null, l: null }];
+    const games = l.games.length ? l.games.map(g => ({ w: g.w || null, l: g.l == null ? null : g.l, ...(g.u ? { u: 1 } : {}) })) : [{ w: null, l: null }];
+    // When only an aggregate is known, display a usable W...W,L...L default while
+    // marking each generated result as unknown-order (u). Never invent scores.
+    const totals = l.voice.totals;
+    if (totals && window.RallywiseVoice.fits(games, totals)) {
+      let wins = totals.w - games.filter(g => g.w === 'us').length;
+      let losses = totals.l - games.filter(g => g.w === 'them').length;
+      for (const g of games) if (!g.w) {
+        g.w = wins > 0 ? 'us' : 'them';
+        if (wins > 0) wins--; else losses--;
+        g.u = 1;
+      }
+    }
     this.setState({ rs: { games, totals: l.voice.totals || null, format: l.format, max: Math.max(3, l.games.length) } });
   }
   setRs(fn) { this.setState(s => s.rs ? { rs: { ...s.rs, ...fn(s.rs) } } : null); }
   rsGame(i, fn) { this.setRs(r => ({ games: r.games.map((g, j) => j === i ? fn(g) : g) })); }
   // Tapping the selected letter again clears it; a game with no result has no score.
-  rsMark(i, w) { this.rsGame(i, g => g.w === w ? { w: null, l: null } : { ...g, w }); }
+  rsMark(i, w) { this.rsGame(i, g => g.w === w && !g.u ? { w: null, l: null } : { ...g, w, u: undefined }); }
   rsAddScore(i) { this.rsGame(i, g => ({ ...g, l: this.state.rs.format - 6 })); }
   rsStep(i, d) { const cap = this.cap(this.state.rs.format); this.rsGame(i, g => ({ ...g, l: Math.max(0, Math.min(cap - 1, g.l + d)) })); }
   rsAdd() { this.setRs(r => r.games.length < r.max ? { games: r.games.concat([{ w: null, l: null }]) } : {}); }
