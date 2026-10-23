@@ -2,7 +2,7 @@
 // Plain ES module with no dependencies, shared by the parse-voice-log edge function (Deno) and the
 // eval runner in voice-eval/ (Node 18+), so both exercise exactly the same prompt, schema and guards.
 
-export const PROMPT_VERSION = '2026-10-23-v4';
+export const PROMPT_VERSION = '2026-10-23-v5';
 export const AREAS = ['Serve', 'Return', 'Net', 'Smash', 'Defence', 'Footwork', 'Placement', 'Other'];
 const MISSING = ['match_type', 'opponents', 'partners', 'game_count', 'results', 'scores', 'game_order'];
 const AMBIG = ['match_type', 'players', 'games', 'results', 'scores', 'observations'];
@@ -60,13 +60,15 @@ Fields
   CRITICAL — semantic cleanup of observation text: the text must be a clean, natural, readable note, NOT a verbatim speech-recognition transcript. In this SAME parsing call, infer obvious ASR homophones and badminton vocabulary from context, remove repeated syllables/false starts, and lightly fix grammar in Mandarin, English, and code-switched speech. Keep the speaker's meaning, evaluation, technical detail and language; do not add new facts or new observations. If uncertain, keep the original wording rather than guessing. Never silently normalize names, scores, match outcomes, or player roles.
   Context-sensitive examples (these are illustrations, not unconditional search-and-replace rules):
   - "今天往前搓球手杆比上周好" -> "今天网前搓球的手感比上周好" (Net); but "往前移动太慢" stays "往前移动太慢" (Footwork).
+  - "我往前小球打得不好" -> "我的网前小球打得不好。" (lost_points, Net).
   - "我往前小球和吊球发挥得不好" -> two distinct observations: "我的网前小球发挥得不好" (lost_points, Net) and "我的吊球发挥得不好" (lost_points, Placement). "往前小球" in a shot-quality context usually means 网前小球, not forward movement. Do not label both as Placement.
   - "My net shots and drop shots were inconsistent" -> two observations: "My net shots were inconsistent" (lost_points, Net) and "My drop shots were inconsistent" (lost_points, Placement). Split an observation containing multiple independently taggable techniques, preserving the original evaluation for each, without inventing a new weakness.
   - "揭发总是太被动" -> "接发球总是太被动" (Return).
   - "反反手后场还是比较被动" -> "反手后场还是比较被动" (Defence).
   - "I struggled internet" -> "I struggled at the net" (Net); "my surf was weak" -> "my serve was weak" (Serve), when the badminton context supports it.
-  - "my my backhand was slow" -> "My backhand was slow"; "I was good smash" -> "My smashes were good".
-  When a single sentence evaluates multiple different badminton skills, split into one observation per distinct skill so both skill tags survive; do not force the whole sentence under one area. The observation's area and category MUST reflect the cleaned text, not a misleading literal reading of an ASR error. Use the exact uncorrected heard player name in about if one is mentioned; do not fabricate a corrected player identity.
+  - "my my backhand was slow" -> "My backhand was slow"; "I was good smash" -> "My smashes were good"; "My net shots were not consistency" -> "My net shots were inconsistent." (Net).
+  - Mixed speech: "我的net shots和吊球都不太稳定" -> "我的net shots不太稳定" (Net) and "我的吊球不太稳定" (Placement).
+  When a single sentence evaluates multiple different badminton skills, split into one observation per distinct skill so both skill tags survive; do not force the whole sentence under one area. Each part keeps the same evaluation and category. Do not split a note about how two skills work together ("网前和后场的衔接太慢", "my net-to-smash transition"), and do not split two strokes of the same area ("clears and drops" are both Placement). The observation's area and category MUST reflect the cleaned text, not a misleading literal reading of an ASR error. Use the exact uncorrected heard player name in about if one is mentioned; do not fabricate a corrected player identity.
 
   Badminton terminology glossary (semantic hints, not literal replacement rules). Use these meanings in BOTH Chinese and English, including mixed speech:
   - Serve / 发球: short serve 发小球/发短球 (short serve, low serve), high serve 发高远球 (high serve), flick serve 偷后场/偷发后场 (flick serve), serve too high/发球冒高, serve fault/发球违例.
@@ -82,7 +84,7 @@ Fields
   Negative controls: "往前移动" is movement, not net play; "网前扑球" is Net, not Footwork; "我打得不好" does not establish a particular area; "his serve was good" is opponent observation, not the speaker's Serve strength. A bare ambiguous homophone should remain unchanged.
 
   category: "won_points" for strengths, things that worked or won points; "lost_points" for mistakes, weaknesses, things that cost points; "opponent" for an opponent's tendencies, strengths or weaknesses; "unsure" when the speaker is uncertain or it could go either way.
-  area: one of ${AREAS.join(', ')} that best fits, "Other" if none fits, null for opponent observations. When the observation names where or which stroke, use it: 网前/net → Net (a mistake at the net is Net, not Footwork), 杀球/smash → Smash, 发球/发小球/发短球/serve → Serve, 接发/return → Return, 步法/footwork → Footwork, 防守/defence → Defence, 落点/clears/drops/length → Placement. Lifts under pressure count as Defence. about: the opponent's name for opponent observations, else null.
+  area: chosen from the cleaned meaning, never from the raw ASR words. One of ${AREAS.join(', ')} that best fits, "Other" if none fits, null for opponent observations. When the observation names where or which stroke, use it: 网前/net → Net (a mistake at the net is Net, not Footwork), 杀球/smash → Smash, 发球/发小球/发短球/serve → Serve, 接发/return → Return, 步法/footwork → Footwork, 防守/defence → Defence, 移动/启动/回中/footwork → Footwork, 落点/线路/吊球/高远球/clears/drops/drives/length → Placement. Lifts under pressure count as Defence. about: the opponent's name for opponent observations, else null.
 - missing: what a match log usually needs that the description does not give: ${MISSING.join(', ')}. Only include items that apply; if there was no match at all, include nothing about results. Never list "game_order" when order_known is true, or "partners" for singles.
 - ambiguities: short English notes on anything unclear or contradictory, for example a player whose role is unclear or a partner switch without a name.
 
@@ -147,13 +149,70 @@ export function numbersIn(text) {
 export const AREA_TERMS = [
   ['Return', /接发|\breturns?\b|\breceiv/i],
   ['Serve', /(?<!接)发(小|短|长|高远|后场|平快)?球|\bserv(e|es|ing)\b/i],
-  ['Net', /网前|放网|搓球|\bnet\b/i],
-  ['Smash', /杀球|扣杀|\bsmash/i],
+  ['Net', /网前|放网|搓球|扑球|勾对角|封网|\bnet\b/i],
+  ['Smash', /杀球|扣杀|(点|劈|重|跳)杀|\bsmash/i],
   ['Defence', /防守|接杀|\bdefen[cs]e|\bdefend/i],
-  ['Footwork', /步法|脚步|\bfootwork\b/i],
-  ['Placement', /落点|高远球|吊球|\bclears?\b|\bdrops?\b|\bplacement\b/i]
+  ['Footwork', /步法|脚步|移动|跑动|启动|回中|交叉步|并步|蹬跨|\bfootwork\b|\bmovement\b|\bsplit[- ]?steps?\b/i],
+  ['Placement', /落点|线路|高远球|平高球|吊球|劈吊|平抽|\bclears?\b|\bdrops?\b|\bdrop shots?\b|\bplacement\b/i]
 ];
 export function namedAreas(text) { return AREA_TERMS.filter(([, re]) => re.test(text)).map(([a]) => a); }
+
+// ---- Observation text: the model cleans it in the same call; these are the safety net for ASR errors it can leave ----
+// Each rule is narrow and only fires in a badminton context, so ordinary phrases ("往前移动", "internet connection") stay.
+// A match that overlaps a player's name is never changed.
+const NOTE_FIXES = [
+  [/往前(?=小球|搓球|扑球|放网|勾球|勾对角|封网|技术|处理|手感)/g, '网前'],
+  [/^我(?=网前(?:小球|搓球|扑球|技术|处理))/g, '我的'],
+  [/揭发球?/g, '接发球'], [/杀球事物/g, '杀球失误'], [/(搓球|网前|球)?手杆/g, '$1手感'], [/发晓球/g, '发小球'],
+  [/后厂/g, '后场'], [/千场/g, '前场'], [/回钟/g, '回中'], [/补喂/g, '补位'],
+  [/反反手/g, '反手'], [/正正手/g, '正手'], [/(网前|杀球|吊球|发球|接发|步法|防守|反手|正手)\1/g, '$1'],
+  [/\b(my|the|i|a|our|net|serve|smash|drop|clear|backhand|forehand)(\s+\1)+\b/gi, '$1'],
+  [/\b(struggled|struggling|struggle|errors?|mistakes?|weak|poor|good|great|bad|faults?|lost points|slow)\s+internet\b(?!.*\b(connection|wi-?fi|online|web)\b)/gi, '$1 at the net'],
+  [/\b(my|short|low|high|flick|long)\s+surf(s)?\b(?!.*\b(web|board|beach|waves?)\b)/gi, (m, a, pl) => `${a} serve${pl || ''}`],
+  [/\bdrop shop(s)?\b/gi, 'drop shot$1'], [/\bneck kill(s)?\b/gi, 'net kill$1'], [/\bflip serve(s)?\b/gi, 'flick serve$1'],
+  [/\bback hand\b/gi, 'backhand'], [/\bfore hand\b/gi, 'forehand'],
+  [/\b(was|were|is|are)\s+not\s+consistency\b/gi, '$1 inconsistent'], [/\b(was|were|is|are)\s+((?:very|quite|pretty)\s+)?consistency\b/gi, '$1 $2consistent']
+];
+export function cleanNote(text, names = []) {
+  const keep = names.map(n => (n || '').trim().toLowerCase()).filter(Boolean);
+  let t = text;
+  for (const [re, to] of NOTE_FIXES) {
+    t = t.replace(re, (...a) => {
+      const m = a[0], at = a[a.length - 2], whole = a[a.length - 1].toLowerCase();
+      const hitsName = keep.some(n => { for (let i = whole.indexOf(n); i >= 0; i = whole.indexOf(n, i + 1)) if (i < at + m.length && at < i + n.length) return true; return false; });
+      if (hitsName) return m;
+      return typeof to === 'function' ? to(...a) : to.replace(/\$(\d)/g, (_, i) => typeof a[+i] === 'string' ? a[+i] : '');
+    });
+  }
+  return t === text ? t : t.replace(/^[a-z]/, c => c.toUpperCase());
+}
+
+// One note that rates two different skills the same way ("我网前小球和吊球都发挥得不好", "My net shots and drop shots were
+// inconsistent") becomes one note per skill, so both tags survive. Only a plain "A and B + one evaluation" sentence is split.
+const ZH_SPLIT = /^(我们的?|我的?)?([^，,。；;！!？?和跟与及、]{1,12}?)(?:和|跟|与|以及|还有|、)([^，,。；;！!？?和跟与及、]{1,12}?)(都|也都|也)?((?:发挥|打|处理|做|表现|不|很|太|比较|有点|还|挺|非常|没|一般|稳定|失误|出错|差|好|强|弱)[^，,。；;]*?)([。！!.]?)$/;
+const EN_SPLIT = /^(?:(my|our|the)\s+)?([a-z][a-z' -]{1,30}?)\s+(?:and|&)\s+(?:(?:my|our|the)\s+)?([a-z][a-z' -]{1,30}?)\s+(were|was|are|is|felt|looked|kept|got|went)\b([^,;]*)$/i;
+// Words that rate how two skills work together, not each skill: such a note stays whole.
+const LINKED = /得|的|之间|衔接|配合|结合|转换|连贯|\b(combination|combo|transition|connection|link|between|together|mix)\b/i;
+const plural = w => /s$/i.test(w) && !/ss$/i.test(w);
+const oneArea = t => { const a = namedAreas(t); return a.length === 1 ? a[0] : null; };
+export function splitSkills(text) {
+  let m = ZH_SPLIT.exec(text);
+  if (m) {
+    const [, who, a, b, both, rest, end] = m, A = oneArea(a), B = oneArea(b);
+    if (!A || !B || A === B || namedAreas(rest).length || LINKED.test(a + b) || /之间|衔接|配合|结合/.test(rest)) return null;
+    const subj = who ? (who.startsWith('我们') ? '我们的' : '我的') : '', also = both && both.includes('也') ? '也' : '';
+    return [[a, A], [b, B]].map(([x, area]) => ({ text: `${subj}${x.trim()}${also}${rest}${end}`, area }));
+  }
+  m = EN_SPLIT.exec(text.trim());
+  if (m) {
+    const [, det, a, b, verb, rest] = m, A = oneArea(a), B = oneArea(b);
+    if (!A || !B || A === B || namedAreas(rest).length || LINKED.test(a + b + rest)) return null;
+    const agree = (x, v) => /^(was|were)$/i.test(v) ? (plural(x) ? 'were' : 'was') : /^(is|are)$/i.test(v) ? (plural(x) ? 'are' : 'is') : v;
+    const cap = t => t.replace(/^[a-z]/, c => c.toUpperCase());
+    return [[a, A], [b, B]].map(([x, area]) => ({ text: cap(`${det ? det + ' ' : ''}${x.trim()} ${agree(x.trim(), verb)}${rest}`), area }));
+  }
+  return null;
+}
 const GAME_WORDS = /\bgames?\b|\bsets?\b|\bmatch(es)?\b|局|盘|比赛|\d{1,2}\s*[-–:比]\s*\d{1,2}/i;
 const NO_GAMES = /\bno (proper |real )?(games|matches)\b|\bdidn'?t play (any )?(games|matches)\b|没有比赛|没打比赛|没比赛|没打/i;
 
@@ -282,12 +341,7 @@ export function guard(out, transcript) {
   const t = out.totals;
   if (out.game_count != null && (t.wins || 0) + (t.losses || 0) > out.game_count) { notes.push('totals exceed game_count'); out.ambiguities.push({ field: 'results', note: 'Wins and losses add up to more than the number of games.' }); }
   out.order_known = out.game_count != null && out.game_count > 0 && out.games.length === out.game_count && out.games.every(g => g.result);
-  out.observations = out.observations.filter(o => o.text.trim());
-  for (const o of out.observations) {
-    if (o.category === 'opponent') { o.area = null; continue; }
-    const named = namedAreas(o.text);
-    if (named.length && !named.includes(o.area)) { notes.push(`area ${o.area} -> ${named[0]} (named in text)`); o.area = named[0]; }
-  }
+  notes.push(...guardNotes(out));
   notes.push(...guardMissing(out));
   return notes;
 }
@@ -358,6 +412,28 @@ function guardRoles(out, transcript) {
   }
   if (doubles && out.players.some(p => p.role === 'unknown') && !out.players.some(p => p.role === 'partner') && !out.ambiguities.some(a => a.field === 'players')) {
     out.ambiguities.push({ field: 'players', note: 'Partner not stated.' });
+  }
+  return notes;
+}
+
+// Notes: fix leftover ASR errors, give each rated skill its own note, then tag from the cleaned text.
+function guardNotes(out) {
+  const notes = [], names = out.players.map(p => p.name).concat(out.observations.map(o => o.about || ''));
+  const list = [];
+  for (const o of out.observations) {
+    if (!o.text.trim()) continue;
+    const text = cleanNote(o.text, names);
+    if (text !== o.text) { notes.push(`note cleaned: ${o.text} -> ${text}`); o.text = text; }
+    const parts = o.category === 'opponent' ? null : splitSkills(o.text);
+    if (parts) { notes.push(`note split by skill: ${parts.map(p => p.area).join(' + ')}`); for (const p of parts) list.push({ ...o, text: p.text, area: p.area }); }
+    else list.push(o);
+  }
+  const seen = new Set();
+  out.observations = list.filter(o => { const k = o.category + '|' + o.text.trim(); return !seen.has(k) && seen.add(k); });
+  for (const o of out.observations) {
+    if (o.category === 'opponent') { o.area = null; continue; }
+    const named = namedAreas(o.text);
+    if (named.length && !named.includes(o.area)) { notes.push(`area ${o.area} -> ${named[0]} (named in text)`); o.area = named[0]; }
   }
   return notes;
 }

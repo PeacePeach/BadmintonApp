@@ -22,7 +22,9 @@ Speak or type a session, let a language model turn it into match data, fix anyth
    - never gives an interrupted game (没打完, "ran out of time", injury) a result from its score; only an explicit retirement decides it
    - applies spoken corrections ("18-21, no wait, 19-21", "说错了"), reads "2115" as 21-15, and treats "won 2-1" as a game tally
    - flags descriptions with more than one lineup (changed partners or opponents, singles and doubles together)
-   - tags a note with the area its text names, e.g. 网前 or "at the net" is Net
+   - fixes speech-recognition errors the model left in a note, only in a badminton context and never inside a player's name (往前小球 → 网前小球, 揭发 → 接发球, "struggled internet" → "struggled at the net", "my surf" → "my serve")
+   - splits a note that rates two skills the same way into one note per skill ("我网前小球和吊球都发挥得不好" → Net + Placement), but keeps notes about how two skills link (衔接, "combination") whole
+   - tags a note with the area its cleaned text names, e.g. 网前 or "at the net" is Net
 3. **Screens.** The result fills Match Details and Notes. One record holds one lineup, matching the Rallywise match model: if the description has more than one, players are left empty with a notice instead of being merged. Totals without game order show as one summary line (Edit Games opens the individual games). Input with only notes skips Match Details and opens Notes. Edits never call the model again. If you go back and change the text, sections you haven't edited refresh, and edited sections are kept.
 
 ## Deploy (one time)

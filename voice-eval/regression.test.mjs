@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
-import { guard, validate, namedAreas, statedRoles } from '../supabase/functions/_shared/voice-parse-core.js';
+import { guard, validate, namedAreas, statedRoles, cleanNote, splitSkills } from '../supabase/functions/_shared/voice-parse-core.js';
 
 const { mapResult, notesOnly } = createRequire(import.meta.url)('../project/voice-v2/map-result.js');
 
@@ -338,4 +338,77 @@ test('players, ambiguities and missing tell the same story for unclear doubles',
   assert.ok(!out.missing.includes('game_order'));
   const d = mapResult(out, deps);
   assert.equal(d.partners.length, 0);
+});
+
+// ---- Notes: semantic cleanup and skill tags, English / Chinese / mixed (Han, 2026-10-23) ----
+// The model cleans notes in the same call; the guard catches ASR errors it leaves and tags from the cleaned text.
+const notesOf = out => out.observations.map(o => [o.text, o.category, o.area]);
+const session = (observations, players = [], lang = 'zh') => base({ language: lang, match_type: 'singles', game_count: 2, order_known: true, totals: { wins: 1, losses: 1 },
+  players, games: [game(1, 'win', 21, 15), game(2, 'loss', 18, 21)], observations });
+
+test('Chinese homophones: 往前小球 is 网前小球 (Net), 揭发 is 接发 (Return), and the tag follows the cleaned text', () => {
+  const out = parse(session([obs('我往前小球打得不好', 'Footwork'), obs('揭发总是太被动', 'Other'), obs('今天往前搓球手杆比上周好', 'Footwork', 'won_points')]),
+    '21比15赢了，18比21输了。我往前小球打得不好，揭发总是太被动，今天往前搓球手杆比上周好。');
+  assert.deepEqual(notesOf(out), [['我的网前小球打得不好', 'lost_points', 'Net'], ['接发球总是太被动', 'lost_points', 'Return'], ['今天网前搓球手感比上周好', 'won_points', 'Net']]);
+});
+
+test('English homophones and grammar: internet, surf, consistency, repeated words', () => {
+  const out = parse(session([obs('I struggled internet', 'Other'), obs('My surf was weak', 'Other'), obs('My net shots were not consistency', 'Other'), obs('my my backhand was slow', 'Other')], [], 'en'),
+    'Won 21-15, lost 18-21. I struggled internet. My surf was weak. My net shots were not consistency. my my backhand was slow.');
+  assert.deepEqual(notesOf(out), [['I struggled at the net', 'lost_points', 'Net'], ['My serve was weak', 'lost_points', 'Serve'],
+    ['My net shots were inconsistent', 'lost_points', 'Net'], ['My backhand was slow', 'lost_points', 'Other']]);
+});
+
+test('single-skill notes keep one tag in each language', () => {
+  const out = parse(session([obs('杀球很有效', 'Other', 'won_points'), obs('往前移动太慢', 'Net'), obs('My drop shots were too high', 'Other'), obs('我的clear不够深', 'Other')], [], 'mixed'),
+    '赢了21比15，输了18比21。杀球很有效，往前移动太慢。My drop shots were too high. 我的clear不够深。');
+  assert.deepEqual(out.observations.map(o => o.area), ['Smash', 'Footwork', 'Placement', 'Placement']);
+});
+
+test('one note rating two skills becomes one note per skill with the same evaluation (zh)', () => {
+  const t = '21比15赢了，18比21输了。我往前小球和吊球都发挥得不好。';
+  const out = parse(session([obs('我往前小球和吊球都发挥得不好。', 'Placement')]), t);
+  assert.deepEqual(notesOf(out), [['我的网前小球发挥得不好。', 'lost_points', 'Net'], ['我的吊球发挥得不好。', 'lost_points', 'Placement']]);
+  const d = mapResult(out, deps);
+  assert.equal(d.notes.length, 2);
+  assert.deepEqual(d.notes.map(n => n.tag), ['Net', 'Placement']);
+});
+
+test('one note rating two skills becomes one note per skill (en and mixed)', () => {
+  const en = parse(session([obs('My net shots and drop shots were inconsistent.', 'Net')], [], 'en'), 'Won 21-15, lost 18-21. My net shots and drop shots were inconsistent.');
+  assert.deepEqual(notesOf(en), [['My net shots were inconsistent.', 'lost_points', 'Net'], ['My drop shots were inconsistent.', 'lost_points', 'Placement']]);
+  const won = parse(session([obs('My serve and smash were good', 'Serve', 'won_points')], [], 'en'), 'Won 21-15, lost 18-21. My serve and smash were good');
+  assert.deepEqual(notesOf(won), [['My serve was good', 'won_points', 'Serve'], ['My smash was good', 'won_points', 'Smash']]);
+  const mixed = parse(session([obs('我的net shots和吊球都不太稳定', 'Net')], [], 'mixed'), '21比15赢了，18比21输了。我的net shots和吊球都不太稳定。');
+  assert.deepEqual(notesOf(mixed), [['我的net shots不太稳定', 'lost_points', 'Net'], ['我的吊球不太稳定', 'lost_points', 'Placement']]);
+});
+
+test('a model that already split the skills is left alone, with no duplicates', () => {
+  const out = parse(session([obs('我的网前小球发挥得不好', 'Net'), obs('我的吊球发挥得不好', 'Placement'), obs('我的吊球发挥得不好', 'Placement')]), '我往前小球和吊球都发挥得不好。');
+  assert.deepEqual(notesOf(out), [['我的网前小球发挥得不好', 'lost_points', 'Net'], ['我的吊球发挥得不好', 'lost_points', 'Placement']]);
+});
+
+test('ambiguous or ordinary wording is not overcorrected or split', () => {
+  for (const t of ['往前移动太慢', '我打得不好', 'I lost my internet connection before the game', 'I want to surf the web', '网前和后场的衔接太慢',
+    'My net and smash combination was weak', 'My clears and drops were short', 'My partner and I were slow', '他的发球很好']) {
+    assert.equal(cleanNote(t), t, t);
+    assert.equal(splitSkills(t), null, t);
+  }
+  const out = parse(session([obs('我打得不好', 'Other'), obs('My clears and drops were short', 'Placement')], [], 'mixed'), '我打得不好。My clears and drops were short.');
+  assert.deepEqual(notesOf(out), [['我打得不好', 'lost_points', 'Other'], ['My clears and drops were short', 'lost_points', 'Placement']]);
+});
+
+test('note cleanup never touches player names, scores, results or roles', () => {
+  // A player whose name looks like an ASR error keeps it, in players and in opponent notes.
+  const t = 'Singles against Surf. Won 21-15, lost 18-21. Surf kept serving short. My surf was weak.';
+  const out = parse(session([{ text: 'Surf kept serving short', category: 'opponent', area: 'Serve', about: 'Surf' }, obs('My surf was weak', 'Other')], [P('Surf', 'opponent')], 'en'), t);
+  assert.deepEqual(roles(out), [['Surf', 'opponent']]);
+  assert.deepEqual(notesOf(out), [['Surf kept serving short', 'opponent', null], ['My surf was weak', 'lost_points', 'Other']]);
+  assert.equal(out.observations[0].about, 'Surf');
+  assert.deepEqual(out.games.map(g => [g.result, g.my_score, g.their_score]), [['win', 21, 15], ['loss', 18, 21]]);
+  assert.deepEqual(out.totals, { wins: 1, losses: 1 });
+  // Chinese: a name containing a homophone is kept.
+  const zh = parse(session([{ text: '往前小球很稳', category: 'opponent', area: null, about: '往前小球' }], [P('往前小球', 'opponent')]), '对手是往前小球，21比15赢了，18比21输了。往前小球很稳。');
+  assert.equal(zh.observations[0].text, '往前小球很稳');
+  assert.equal(zh.players[0].name, '往前小球');
 });
