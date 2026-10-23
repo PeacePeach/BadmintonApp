@@ -1543,7 +1543,7 @@ button:disabled{cursor:default !important;}
       </sc-if>
       <button type="button" class="rw-btn rw-btn-primary" onClick="{{ rv.next }}" aria-busy="{{ rv.saving }}" disabled="{{ rv.cantSave }}">
         <sc-if value="{{ rv.saving }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 22 }}" strokeWidth="{{ 2 }}" hint-size="22px,22px"></x-import></span><span class="sr-only">{{ tx.savingMatch }}</span></sc-if>
-        <sc-if value="{{ rv.idle }}" hint-placeholder-val="{{ true }}">{{ rv.ctaLabel }}<x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ArrowRight" size="{{ 22 }}" hint-size="22px,22px"></x-import></sc-if>
+        <sc-if value="{{ rv.idle }}" hint-placeholder-val="{{ true }}">{{ rv.ctaLabel }}</sc-if>
       </button>
     </div>
   </sc-if>
@@ -2017,7 +2017,7 @@ const I18N = {
     tConfirmEmail: 'Check your email to confirm your account', tResent: 'Reset link sent again',
     tMigrated: 'Your matches are now saved to your account', tUnsaved: "Some changes couldn't be saved",
     tSaveOffline: "Couldn't save. Check your connection.", tSaveFailed: "Couldn't save your changes",
-    tSocialOff: "{provider} sign-in isn't available yet", tMatchSaved: 'Match saved', tChangesSaved: 'Changes saved',
+    logMatch: 'Log Match', tSocialOff: "{provider} sign-in isn't available yet", tMatchSaved: 'Match successfully logged', tChangesSaved: 'Changes saved',
     tDeleteOffline: "Couldn't delete. Check your connection.", tDeleteFailed: "Couldn't delete match", tMatchDeleted: 'Match deleted',
     tProfileSaved: 'Profile saved', tPasswordUpdated: 'Password updated', tAccountDeleted: 'Account deleted', tPlayerAdded: 'Player added',
     tSomethingWrong: 'Something went wrong', tNoConnection: 'No connection',
@@ -2173,7 +2173,7 @@ const I18N = {
     tConfirmEmail: '请查收邮件，确认你的账号', tResent: '重置链接已重新发送',
     tMigrated: '你的比赛已保存到账号', tUnsaved: '部分修改未能保存',
     tSaveOffline: '保存失败，请检查网络连接。', tSaveFailed: '修改未能保存',
-    tSocialOff: '暂不支持 {provider} 登录', tMatchSaved: '比赛已保存', tChangesSaved: '修改已保存',
+    logMatch: '录入比赛', tSocialOff: '暂不支持 {provider} 登录', tMatchSaved: '比赛录入成功', tChangesSaved: '修改已保存',
     tDeleteOffline: '删除失败，请检查网络连接。', tDeleteFailed: '比赛未能删除', tMatchDeleted: '比赛已删除',
     tProfileSaved: '资料已保存', tPasswordUpdated: '密码已更新', tAccountDeleted: '账号已删除', tPlayerAdded: '球友已添加',
     tSomethingWrong: '出了点问题', tNoConnection: '没有网络连接',
@@ -3200,6 +3200,11 @@ class Component extends DCLogic {
       this.setState(s => ({ matches, screen: 'detail', detailId: m.id, back: s.back.slice(0, -1), log: null }));
       return this.flash(this.t('tChangesSaved'));
     }
+    if (this.state.log && this.state.log.voice) {
+      // Voice Review is the final confirmation. Return to the home (Matches) tab, not a duplicate detail view.
+      this.setState({ matches, screen: 'matches', detailId: null, back: [], log: null, voice: null, filter: 'All' });
+      return this.flash(this.t('tMatchSaved'), 'success');
+    }
     this.setState({ matches, screen: 'detail', detailId: m.id, back: [{ screen: 'matches' }], log: null, filter: 'All' });
     this.flash(this.t('tMatchSaved'));
   }
@@ -3813,7 +3818,7 @@ class Component extends DCLogic {
           row('result', 'rvResult', wl.state === 'missing' ? this.t('notMentioned') : this.t(wl.open ? 'rvWLOpen' : 'rvWL', { w: wl.w, l: wl.l, n: wl.open }), wl.state === 'missing',
             f.result === 'conflict' ? 'flagConflict' : !wl.ok ? 'flagResult' : f.result === 'scores' && 'flagScores'),
           row('notes', 'rvNotes', notes || log.wt.concat(log.lt).map(t => this.tagLabel(t)).join(sep) || this.t('noNotes'), !notes && !log.wt.length && !log.lt.length, f.notes && 'flagNotes')],
-        saving: !!log.saving, idle: !log.saving, saveErr: !!log.saveErr, ctaLabel: this.t(log.saveErr ? 'saveAgain' : 'continue'), cantSave: !ready || !!log.saving,
+        saving: !!log.saving, idle: !log.saving, saveErr: !!log.saveErr, ctaLabel: this.t(log.saveErr ? 'saveAgain' : 'logMatch'), cantSave: !ready || !!log.saving,
         next: () => { if (this.reviewReady(this.state.log)) this.save(); } };
       v.hasRs = !!s.rs;
       if (s.rs) {
