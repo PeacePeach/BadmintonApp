@@ -245,7 +245,7 @@
   --rw-sheet-bg: var(--rw-color-bg-app);
   --rw-sheet-radius: 34px;
   --rw-sheet-scrim: var(--rw-color-scrim);
-  --rw-sheet-grabber: var(--rw-purplegrey-400);       /* Figma #4F4E53 is unbound; nearest primitive, pending Han (decision 7) */
+  --rw-sheet-grabber: var(--rw-purplegrey-400);       /* Figma #4F4E53 is unbound; nearest Foundation primitive (Han, 2026-10-23) */
   --rw-sheet-divider: var(--rw-purplegrey-600);
   --rw-cue-h: 24px;                                   /* Figma Pills Type=Indicator 216:8356 */
   --rw-cue-done-bg: var(--rw-color-surface-done);
