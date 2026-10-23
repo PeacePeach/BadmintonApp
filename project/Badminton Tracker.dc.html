@@ -3138,7 +3138,9 @@ class Component extends DCLogic {
     const pl = log.voice ? window.RallywiseVoice.savedPlayers(type, log.voice.slots || {}, log.voice.pool || [], k => log[k])
       : { partner: type === 'Doubles' ? log.partner : null, opps: type === 'Doubles' ? [log.opp1, log.opp2] : [log.opp1] };
     const m = { id: log.editId || 'n' + Date.now(), createdAt: prev ? prev.createdAt : new Date().toISOString(), date: log.date || this.today(), type, partner: pl.partner,
-      opps: pl.opps, games: this.draftGames(log), wt: log.wt, lt: log.lt, worked: log.worked.trim(), lost: log.lost.trim(), on: log.on.trim() };
+      opps: pl.opps, games: this.draftGames(log), wt: log.wt, lt: log.lt, worked: log.worked.trim(), lost: log.lost.trim(),
+      // Do not attach opponent-specific notes to an unconfirmed/unknown opponent.
+      on: (type === 'Doubles' ? [log.opp1, log.opp2] : [log.opp1]).every(id => id && this.state.players.some(p => p.id === id)) ? log.on.trim() : '' };
     const matches = log.editId
       ? this.state.matches.map(x => x.id === m.id ? m : x).sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0)
       : [m, ...this.state.matches];
@@ -3808,7 +3810,7 @@ class Component extends DCLogic {
           dotCls: !wl.ok || wl.w === wl.l ? '' : wl.w > wl.l ? 'is-win' : 'is-loss',
           worked: tags('wt'), lost: tags('lt'), workedText: n.worked, lostText: n.lost, onText: n.on,
           onWorked: e => this.setNs({ worked: e.target.value }), onLost: e => this.setNs({ lost: e.target.value }), onOpp: e => this.setNs({ on: e.target.value }),
-          hasOpp: true, oppQ: this.t('oppQ', { name: oppQName }) };
+          hasOpp: (d ? ['opp1', 'opp2'] : ['opp1']).every(k => !!log[k] && s.players.some(p => p.id === log[k])), oppQ: this.t('oppQ', { name: oppQName }) };
       }
       v.hasPs = !!s.ps;
       if (s.ps) {
