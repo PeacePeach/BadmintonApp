@@ -30,6 +30,7 @@
      Waveform ..................... .rw-wave[.is-live] > i (one per bar; height, opacity and delay set per bar)
      Record controls .............. .rw-rec > .rw-rec-side + .rw-rec-btn + .rw-rec-side.is-end; .rw-rec-timer (.is-live: green dot)
      Review row (ListRow + chevron) .rw-surface.rw-tile.rw-review-row[.is-flagged] > .rw-flag
+   Bottom Sheet (Figma 319:6349) ... .rw-sheet-scrim + .rw-sheet > .rw-sheet-head (.rw-sheet-grabber, .rw-sheet-bar > spacer + .rw-sheet-title + IconButton glass, .rw-sheet-divider) + .rw-sheet-body + .rw-sheet-foot
    ========================================================= */
 /* Screen background: app background + glow. The glow stays fixed while the content scrolls over it. */
 .rw-scroll.is-v2{background:var(--rw-bg-app-glow) no-repeat scroll,var(--rw-bg-app);--empty-body-weight:var(--rw-weight-min);}
@@ -195,3 +196,17 @@
 .rw-flag{height:24px;padding:0 8px;border-radius:999px;display:flex;align-items:center;gap:4px;background:var(--rw-flag-bg);font:var(--rw-type-flag);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);white-space:nowrap;}
 .rw-flag>:first-child{color:var(--rw-flag-icon);flex-shrink:0;}
 @media (prefers-reduced-motion:reduce){.rw-wave.is-live>i{animation:none;}.rw-cue,.rw-wave>i,.rw-rec-btn{transition:none;}}
+/* Bottom Sheet: scrim, then the sheet pinned to the bottom of the phone. Header = grabber, title bar, full-bleed divider. */
+.rw-sheet-scrim{position:absolute;inset:0;background:var(--rw-sheet-scrim);animation:rw-fade var(--dur-base) var(--ease-out);}
+.rw-sheet{position:absolute;left:0;right:0;bottom:0;max-height:calc(100% - 44px);display:flex;flex-direction:column;gap:32px;padding:12px 20px 34px;background:var(--rw-sheet-bg);border-radius:var(--rw-sheet-radius) var(--rw-sheet-radius) 0 0;animation:rw-sheet-in var(--dur-base) var(--ease-out);}
+.rw-sheet-head{display:flex;flex-direction:column;align-items:center;gap:16px;flex-shrink:0;}
+.rw-sheet-grabber{width:40px;height:5px;border-radius:99px;background:var(--rw-sheet-grabber);}
+.rw-sheet-bar{width:100%;display:grid;grid-template-columns:40px minmax(0,1fr) 40px;align-items:center;min-height:40px;}
+.rw-sheet-bar>:last-child{justify-self:end;}
+.rw-sheet-title{margin:0;text-align:center;font:var(--rw-type-sheet-title);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);}
+.rw-sheet-divider{align-self:stretch;height:1px;margin:0 -20px;background:var(--rw-sheet-divider);}
+.rw-sheet-body{flex:1;min-height:0;overflow-y:auto;}
+.rw-sheet-foot{flex-shrink:0;display:flex;flex-direction:column;}
+@keyframes rw-sheet-in{from{transform:translateY(100%);}to{transform:none;}}
+@keyframes rw-fade{from{opacity:0;}to{opacity:1;}}
+@media (prefers-reduced-motion:reduce){.rw-sheet,.rw-sheet-scrim{animation:none;}}

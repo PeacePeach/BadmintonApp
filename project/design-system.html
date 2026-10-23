@@ -202,7 +202,8 @@
     .v2-iconbtn { width: var(--rw-icon-btn-size); height: var(--rw-icon-btn-size); border-radius: 50%; border: none; color: var(--rw-text-primary); display: flex; align-items: center; justify-content: center; }
     .v2-navwrap { position: relative; height: 96px; }
     @media (max-width: 600px) { .v2-table th:nth-child(4), .v2-table td:nth-child(4) { display: none; } }
-  </style>
+  .v2-slot{height:120px;border:1px dashed var(--rw-n200);border-radius:15px;display:flex;align-items:center;justify-content:center;color:var(--rw-n400);font:500 12px/1 var(--font-sans);}
+</style>
 </head>
 
 <body>
@@ -744,6 +745,16 @@
           <div style="display:flex;flex-direction:column;gap:16px;">
             <button class="rw-surface rw-tile rw-review-row is-flagged"><span class="rw-review-text"><span class="rw-eyebrow">Players</span><span class="rw-review-value">You, Priya Nair, Chris</span></span><span class="rw-review-end"><span class="rw-flag"><i data-lucide="circle-alert" style="width:14px;height:14px"></i>Missing players</span><i data-lucide="chevron-right" style="width:16px;height:16px"></i></span></button>
             <button class="rw-surface rw-tile rw-review-row"><span class="rw-review-text"><span class="rw-eyebrow">Result</span><span class="rw-review-value">1 Win : 2 Loss</span></span><span class="rw-review-end"><i data-lucide="chevron-right" style="width:16px;height:16px"></i></span></button>
+          </div>
+        </div>
+        <div class="v2-cell v2-wide"><div class="v2-label">Bottom Sheet (scrim, grabber, title + close, divider, content slot, primary action)</div>
+          <div style="position:relative;height:420px;border-radius:24px;overflow:hidden;background:var(--rw-bg-app);">
+            <div class="rw-sheet-scrim"></div>
+            <div class="rw-sheet" role="dialog" aria-label="Players">
+              <div class="rw-sheet-head"><span class="rw-sheet-grabber"></span><div class="rw-sheet-bar"><span></span><h2 class="rw-sheet-title">Players</h2><button class="rw-glass v2-iconbtn" aria-label="Close"><i data-lucide="x" style="width:18px;height:18px"></i></button></div><span class="rw-sheet-divider"></span></div>
+              <div class="rw-sheet-body"><div class="v2-slot">Content slot</div></div>
+              <div class="rw-sheet-foot"><button class="rw-btn rw-btn-primary">Save</button></div>
+            </div>
           </div>
         </div>
         <div class="v2-cell v2-wide"><div class="v2-label">Bottom Nav (Matches active)</div>

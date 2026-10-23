@@ -148,6 +148,7 @@
   --rw-color-status-warning: var(--rw-y400);
   --rw-color-border-warning: var(--rw-y500);
   --rw-color-surface-warning: color-mix(in srgb, var(--rw-o75) 8%, transparent); /* O75 at 8% */
+  --rw-color-scrim: color-mix(in srgb, var(--rw-n75) 50%, transparent);      /* behind a sheet: N75 at 50% (Figma 236:9207) */
   /* Avatars */
   --rw-color-avatar-bg: var(--rw-n150);
   --rw-color-avatar-fg: var(--rw-n800);
@@ -219,6 +220,12 @@
   --rw-voice-input-border: var(--rw-color-border-input-active);
   --rw-voice-input-radius: 26px;
   --rw-voice-input-h: 302px;
+  /* Bottom Sheet (Figma 319:6349; Han approved a reusable V2 sheet, 2026-10-23) */
+  --rw-sheet-bg: var(--rw-color-bg-app);
+  --rw-sheet-radius: 34px;
+  --rw-sheet-scrim: var(--rw-color-scrim);
+  --rw-sheet-grabber: var(--rw-purplegrey-400);       /* Figma #4F4E53 is unbound; nearest primitive, pending Han (decision 7) */
+  --rw-sheet-divider: var(--rw-purplegrey-600);
   --rw-cue-h: 24px;                                   /* Figma Pills Type=Indicator 216:8356 */
   --rw-cue-done-bg: var(--rw-color-surface-done);
   --rw-cue-done-fg: var(--rw-color-text-on-selected);
@@ -272,4 +279,5 @@
   --rw-type-timer: 500 14px/14px var(--font-sans);
   --rw-type-flag: 500 11px/15px var(--font-sans);
   --rw-type-row-text: 500 14px/1.4 var(--font-sans);
+  --rw-type-sheet-title: 500 16px/15px var(--font-sans);
 }
