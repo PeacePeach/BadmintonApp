@@ -3791,7 +3791,7 @@ class Component extends DCLogic {
         waveCls: live ? 'is-live' : '', bars: VOICE_WAVE.map(([h, o], i) => ({ h: live ? h + 'px' : '4px', o: String(o), d: (-(i * 137) % 1100) + 'ms' })),
         recIcon: live ? 'Square' : 'Mic', recSize: live ? 29.33 : 28, recStroke: live ? 1.64 : 2, recLabel: this.t(live ? 'stopRec' : 'startRec'),
         // Empty transcript: Fill manually opens an empty Review. With text: Continue reads it.
-        nextLabel: this.t(vo.parsing || vo.awaitingStop ? 'reading' : has ? 'continue' : 'fillManually'), cantGo: !!(vo.parsing || vo.awaitingStop), parsing: !!(vo.parsing || vo.awaitingStop), notParsing: !(vo.parsing || vo.awaitingStop),
+        nextLabel: this.t(vo.parsing || vo.awaitingStop ? 'reading' : 'continue'), cantGo: !!(vo.parsing || vo.awaitingStop), parsing: !!(vo.parsing || vo.awaitingStop), notParsing: !(vo.parsing || vo.awaitingStop),
         toggle: () => live ? this.recStop() : this.recStart(),
         editFocus: () => this.recEditFocus(),
         onText: e => { if (this._rec) this.recEditFocus(); this.setVoice({ text: e.target.value }); },
