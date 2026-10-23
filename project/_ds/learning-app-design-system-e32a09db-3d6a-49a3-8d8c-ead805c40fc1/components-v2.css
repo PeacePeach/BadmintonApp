@@ -276,6 +276,7 @@
 .rw-game-label{min-width:54px;font:var(--rw-type-row-value);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);white-space:nowrap;}
 .rw-game-checks{display:flex;gap:8px;}
 .rw-game-score{width:100px;display:flex;align-items:center;justify-content:flex-end;gap:8px;font:var(--rw-type-row-value);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);white-space:nowrap;font-variant-numeric:tabular-nums;}
+.rw-score-placeholder{color:var(--rw-placeholder-text);font:inherit;letter-spacing:inherit;white-space:nowrap;}
 /* Button / Tertiary, Medium (Figma Button 171:12474): no fill, 16px icon + 12px label, both N400. */
 .rw-btn-tertiary{position:relative;height:var(--rw-btn-tertiary-h);padding:4px;gap:4px;border-radius:99px;background:transparent;color:var(--rw-btn-tertiary-fg);font:var(--rw-type-btn-secondary);letter-spacing:var(--rw-tracking);white-space:nowrap;}
 .rw-btn-tertiary::after{content:"";position:absolute;inset:-10px 0;}
