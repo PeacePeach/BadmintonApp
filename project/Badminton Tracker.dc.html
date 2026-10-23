@@ -3795,15 +3795,17 @@ class Component extends DCLogic {
         const opps = d ? ['opp1', 'opp2'].map(nameOf) : [log.opp1 ? this.nm(log.opp1) : nameOf('opp1')], teamB = log.type ? opps.map(x => x || '?').join(' & ') : '';
         const TAGS = ['Serve', 'Return', 'Net', 'Smash', 'Defence', 'Footwork', 'Placement', 'Other'];
         const tags = k => TAGS.map(t => { const on = n[k].includes(t); return { label: this.tagLabel(t), on, cls: on ? 'is-active' : '', toggle: () => this.nsTag(k, t) }; });
-        // Opponent notes belong to a known opponent: hidden while every opponent is an Unknown Player (the text is kept).
-        const known = (d ? [log.opp1, log.opp2] : [log.opp1]).filter(id => id && !this.unknown(id));
+        // Opponent notes (Figma 349:3793, third section) are always offered. They belong to the match's opponents, so the
+        // question names whoever is in the opponent slot now: the chosen player, else the heard name, else "your opponent".
+        // Choosing players later changes only the name in the question; the note stays with the match.
+        const oppQName = d ? this.t('yourOpponents') : (log.opp1 ? this.first(log.opp1) : nameOf('opp1')) || this.t('yourOpponent');
         v.ns = { close: () => this.setState({ ns: null }), save: () => this.nsSave(),
           vs: log.type ? teamA + ' vs ' + teamB : teamA, scoreLine: this.scoreLine(this.draftGames(log)),
           hasPill: wl.state !== 'missing', pill: this.t('wlShort', { w: wl.w, l: wl.l }), pillState: this.t('rvWL', { w: wl.w, l: wl.l }),
           dotCls: !wl.ok || wl.w === wl.l ? '' : wl.w > wl.l ? 'is-win' : 'is-loss',
           worked: tags('wt'), lost: tags('lt'), workedText: n.worked, lostText: n.lost, onText: n.on,
           onWorked: e => this.setNs({ worked: e.target.value }), onLost: e => this.setNs({ lost: e.target.value }), onOpp: e => this.setNs({ on: e.target.value }),
-          hasOpp: known.length > 0, oppQ: this.t('oppQ', { name: d ? this.t('yourOpponents') : this.first(known[0] || '') }) };
+          hasOpp: true, oppQ: this.t('oppQ', { name: oppQName }) };
       }
       v.hasPs = !!s.ps;
       if (s.ps) {

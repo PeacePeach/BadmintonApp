@@ -182,3 +182,32 @@ test('real AI answers after the engine guard: unclear doubles asks for the partn
   const d = ai('今天和Priya搭档打双打，对手是Marcus和Jordan。', 'zh', [['Priya', 'partner'], ['Marcus', 'opponent'], ['Jordan', 'opponent']]);
   assert.deepEqual([d.partner, d.opp1, d.opp2], ['priya', 'marcus', 'jordan']); assert.equal(d.flags.players, null);
 });
+
+test('opponent notes: prefilled from opponent observations, kept apart from the other notes', () => {
+  for (const lang of ['en', 'zh']) {
+    const d = draft('opponent', lang);
+    assert.equal(d.opp1, 'alex');
+    assert.equal(d.on, lang === 'en' ? 'Alex kept attacking my backhand. His drop shots were hard to read.' : 'Alex一直压我反手。吊球很难判断。');
+    assert.deepEqual([d.wt, d.lt, d.lost], [['Smash'], [], '']);
+    assert.equal(d.flags.notes, null);
+  }
+});
+
+test('opponent notes stay with the match while the opponent is unresolved', () => {
+  const r = V.mockParse(V.sample('ambiguous', 'en').text, 'en');
+  r.observations.push({ text: 'Chris lifts a lot under pressure', category: 'opponent', area: null, about: 'Chris' });
+  const d = V.toDraft(r, players, 21);
+  assert.equal(d.slots.opp1.state, 'ambiguous'); assert.equal(d.opp1, null);
+  assert.equal(d.on, 'Chris lifts a lot under pressure.');
+  // Saved before resolution: the opponent is an Unknown Player placeholder, the note is kept on the match.
+  assert.deepEqual(V.savedPlayers(d.type, d.slots, d.pool, () => null), { partner: null, opps: ['unknown:Chris'] });
+});
+
+test('a note the parser says is about the partner never becomes an opponent note', () => {
+  const r = V.mockParse('', 'en');
+  Object.assign(r, { match_type: 'doubles', players: [{ name: 'Priya', role: 'partner' }, { name: 'Marcus', role: 'opponent' }, { name: 'Jordan', role: 'opponent' }],
+    observations: [{ text: 'Priya covered the back well', category: 'opponent', area: null, about: 'Priya' }, { text: 'Marcus serves short', category: 'opponent', area: null, about: 'Marcus' }] });
+  const d = V.toDraft(r, players, 21);
+  assert.equal(d.on, 'Marcus serves short.');
+  assert.equal(d.lost, 'Priya covered the back well.'); assert.equal(d.flags.notes, 'check');
+});

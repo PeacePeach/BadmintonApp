@@ -68,6 +68,19 @@
         result: base({ language: 'zh', match_type: 'doubles', multiple_lineups: true, game_count: 2, order_known: true, totals: { wins: 1, losses: 1 },
           players: [P('Priya', 'partner'), P('Marcus', 'opponent'), P('Jordan', 'opponent'), P('Leo', 'partner')], games: [game(1, 'win', 21, 15), game(2, 'loss', 18, 21)] }) }
     },
+    // Notes about the opponent: they prefill Opponent Notes ("What did you notice about Alex?").
+    opponent: {
+      en: { text: 'Singles against Alex tonight. Won 21-18, lost 17-21, won 21-16. Alex kept attacking my backhand, and his drop shots were hard to read. My smash was working.',
+        result: base({ match_type: 'singles', game_count: 3, order_known: true, totals: { wins: 2, losses: 1 }, players: [P('Alex', 'opponent')],
+          games: [game(1, 'win', 21, 18), game(2, 'loss', 17, 21), game(3, 'win', 21, 16)],
+          observations: [{ ...obs('Alex kept attacking my backhand', 'opponent', null), about: 'Alex' }, { ...obs('His drop shots were hard to read', 'opponent', null), about: 'Alex' },
+            obs('My smash was working', 'won_points', 'Smash')] }) },
+      zh: { text: '今晚和Alex打单打，21比18赢，17比21输，21比16赢。Alex一直压我反手，吊球很难判断。杀球不错。',
+        result: base({ language: 'zh', match_type: 'singles', game_count: 3, order_known: true, totals: { wins: 2, losses: 1 }, players: [P('Alex', 'opponent')],
+          games: [game(1, 'win', 21, 18), game(2, 'loss', 17, 21), game(3, 'win', 21, 16)],
+          observations: [{ ...obs('Alex一直压我反手', 'opponent', null), about: 'Alex' }, { ...obs('吊球很难判断', 'opponent', null), about: 'Alex' },
+            obs('杀球不错', 'won_points', 'Smash')] }) }
+    },
     // One name, nothing on singles or doubles or which side: the match type stays open.
     type: {
       en: { text: 'Played with Marcus today. Won 21-15, lost 19-21, won 21-18.',
@@ -283,9 +296,14 @@
     d.wt = tags(by('won_points')); d.lt = tags(by('lost_points'));
     const zh = r.language === 'zh', join = os => os.map(o => o.text.trim()).map(t => /[.!?。！？]$/.test(t) ? t : t + (zh ? '。' : '.')).join(zh ? '' : ' ');
     d.worked = join(by('won_points'));
-    d.lost = join(by('lost_points').concat(by('unsure')));
-    d.on = join(by('opponent'));
-    if (by('unsure').length) fp.notes = 'check';
+    // Opponent notes go to Opponent Notes. One the parser says is about the partner is not about an opponent: it joins
+    // the notes to check (like an unsure note) instead, so it is never shown as a note on the opponents.
+    const partnerHeard = ((d.slots.partner || {}).heard || '').trim().toLowerCase();
+    const aboutPartner = o => !!partnerHeard && (o.about || '').trim().toLowerCase() === partnerHeard;
+    const check = by('unsure').concat(by('opponent').filter(aboutPartner));
+    d.lost = join(by('lost_points').concat(check));
+    d.on = join(by('opponent').filter(o => !aboutPartner(o)));
+    if (check.length) fp.notes = 'check';
     return d;
   }
 
