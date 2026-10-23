@@ -107,10 +107,12 @@ Object.assign(__ds_scope, { Chip });
 
 // components/core/Icon.jsx
 try { (() => {
+// Every UI icon draws a 1.5px line on screen, whatever its size (Han, 2026-10-23). Lucide draws in a 24-unit box,
+// so the stroke is scaled by 24 / size. A strokeWidth prop is ignored.
+const ICON_STROKE_PX = 1.5;
 function Icon({
   name,
   size = 24,
-  strokeWidth = 2,
   color = 'currentColor',
   fill = 'none',
   style
@@ -124,7 +126,7 @@ function Icon({
     viewBox: "0 0 24 24",
     fill: fill,
     stroke: color,
-    strokeWidth: strokeWidth,
+    strokeWidth: ICON_STROKE_PX * 24 / size,
     strokeLinecap: "round",
     strokeLinejoin: "round",
     style: {
