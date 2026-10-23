@@ -181,7 +181,7 @@
   --rw-pill-h: 32px;
   --rw-pill-fg: var(--rw-color-text-secondary);
   --rw-pill-active-border: var(--rw-color-border-selected);
-  --rw-pill-active-fg: var(--rw-color-text-primary);
+  --rw-pill-active-fg: var(--rw-color-text-on-selected); /* active border, label and icon are all N600 (Han, 2026-10-23) */
   /* Graphs / Simple bar */
   --rw-bar-track: var(--rw-color-data-track);
   --rw-bar-fill: var(--rw-color-data-fill);
@@ -204,7 +204,7 @@
   --rw-tab-sm-h: 32px;                                /* Horizontal toggle, Figma 226:8787 (Singles / Doubles) */
   --rw-tab-fg: var(--rw-color-text-secondary);
   --rw-tab-active-border: var(--rw-color-border-selected);
-  --rw-tab-active-fg: var(--rw-color-text-primary);
+  --rw-tab-active-fg: var(--rw-color-text-on-selected);  /* active border, label and icon are all N600 (Han, 2026-10-23) */
   /* App bar: scrim height covers the status time and the 40px action (58 + 40) plus the fade */
   --rw-appbar-scrim-h: 124px;
   /* Bottom Nav */
