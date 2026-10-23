@@ -1627,6 +1627,102 @@ button:disabled{cursor:default !important;}
     </div>
   </sc-if>
 
+  <!-- Result sheet, opened from Review (Figma 349:3528): Win / Loss per game, optional score, add or remove games. -->
+  <sc-if value="{{ hasRs }}" hint-placeholder-val="{{ false }}">
+    <div class="rw-sheet-scrim" onClick="{{ rs.close }}"></div>
+    <div class="rw-sheet" role="dialog" aria-modal="true" aria-labelledby="rs-title" data-screen-label="Match Results">
+      <div class="rw-sheet-head">
+        <span class="rw-sheet-grabber" aria-hidden="true"></span>
+        <div class="rw-sheet-bar">
+          <span></span>
+          <h2 id="rs-title" class="rw-sheet-title">{{ tx.matchResults }}</h2>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="X" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.close }}" onClick="{{ rs.close }}" hint-size="44px,44px"></x-import>
+        </div>
+        <span class="rw-sheet-divider"></span>
+      </div>
+      <div class="rw-sheet-body">
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <sc-for list="{{ rs.rows }}" as="g" hint-placeholder-count="3">
+              <div class="rw-surface rw-game" role="group" aria-label="{{ g.label }}">
+                <span class="rw-game-label">{{ g.label }}</span>
+                <span class="rw-game-checks">
+                  <button type="button" class="rw-check {{ g.wCls }}" aria-pressed="{{ g.wOn }}" aria-label="{{ g.wLabel }}" onClick="{{ g.setW }}">{{ g.w }}</button>
+                  <button type="button" class="rw-check {{ g.lCls }}" aria-pressed="{{ g.lOn }}" aria-label="{{ g.lLabel }}" onClick="{{ g.setL }}">{{ g.l }}</button>
+                </span>
+                <span class="rw-game-score">
+                  <sc-if value="{{ g.hasScore }}" hint-placeholder-val="{{ false }}">
+                    <button type="button" class="rw-icon-btn-xs" aria-label="{{ tx.decrease }}" disabled="{{ g.cantDec }}" onClick="{{ g.dec }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Minus" size="{{ 12 }}" strokeWidth="{{ 2 }}" hint-size="12px,12px"></x-import></button>
+                    <span>{{ g.score }}</span>
+                    <button type="button" class="rw-icon-btn-xs" aria-label="{{ tx.increase }}" disabled="{{ g.cantInc }}" onClick="{{ g.inc }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 12 }}" strokeWidth="{{ 2 }}" hint-size="12px,12px"></x-import></button>
+                  </sc-if>
+                  <sc-if value="{{ g.canAddScore }}" hint-placeholder-val="{{ true }}">
+                    <button type="button" class="rw-btn rw-btn-tertiary" onClick="{{ g.addScore }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 16 }}" strokeWidth="{{ 1.8 }}" hint-size="16px,16px"></x-import>{{ tx.addScore }}</button>
+                  </sc-if>
+                </span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:0 4px;">
+            <span style="display:flex;opacity: {{ rs.removeOp }};pointer-events: {{ rs.removePe }};" aria-disabled="{{ rs.removeOff }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Minus" variant="add" size="{{ 40 }}" iconSize="{{ 18 }}" label="{{ tx.removeGame }}" onClick="{{ rs.remove }}" hint-size="40px,40px"></x-import></span>
+            <span style="display:flex;opacity: {{ rs.addOp }};pointer-events: {{ rs.addPe }};" aria-disabled="{{ rs.addOff }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Plus" variant="add" size="{{ 40 }}" iconSize="{{ 18 }}" label="{{ rs.addLabel }}" onClick="{{ rs.add }}" hint-size="40px,40px"></x-import></span>
+          </div>
+        </div>
+      </div>
+      <div class="rw-sheet-foot"><button type="button" class="rw-btn rw-btn-primary" onClick="{{ rs.save }}">{{ tx.save }}</button></div>
+    </div>
+  </sc-if>
+
+  <!-- Notes sheet, opened from Review (Figma 349:3793): what worked, what cost points, the opponent. Everything optional. -->
+  <sc-if value="{{ hasNs }}" hint-placeholder-val="{{ false }}">
+    <div class="rw-sheet-scrim" onClick="{{ ns.close }}"></div>
+    <div class="rw-sheet" role="dialog" aria-modal="true" aria-labelledby="ns-title" data-screen-label="Match Notes">
+      <div class="rw-sheet-head">
+        <span class="rw-sheet-grabber" aria-hidden="true"></span>
+        <div class="rw-sheet-bar">
+          <span></span>
+          <h2 id="ns-title" class="rw-sheet-title">{{ tx.matchNotes }}</h2>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="X" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.close }}" onClick="{{ ns.close }}" hint-size="44px,44px"></x-import>
+        </div>
+        <span class="rw-sheet-divider"></span>
+      </div>
+      <div class="rw-sheet-body">
+        <div style="display:flex;flex-direction:column;gap:32px;">
+          <div class="rw-surface rw-tile" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+            <div style="display:flex;flex-direction:column;gap:4px;min-width:0;">
+              <span class="rw-name">{{ ns.vs }}</span>
+              <sc-if value="{{ ns.scoreLine }}" hint-placeholder-val="{{ true }}"><span class="rw-meta">{{ ns.scoreLine }}</span></sc-if>
+            </div>
+            <sc-if value="{{ ns.hasPill }}" hint-placeholder-val="{{ true }}">
+              <div class="rw-pill rw-pill-sm rw-cue is-done" style="flex-shrink:0;"><span class="rw-cue-mark is-dot {{ ns.dotCls }}" aria-hidden="true"></span><span aria-hidden="true">{{ ns.pill }}</span><span class="sr-only">{{ ns.pillState }}</span></div>
+            </sc-if>
+          </div>
+          <div role="group" aria-labelledby="ns-worked" style="display:flex;flex-direction:column;gap:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;"><h3 id="ns-worked" class="rw-section-title">{{ tx.whatWorked }}</h3><span class="rw-meta">{{ tx.pickUpTo3 }}</span></div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <sc-for list="{{ ns.worked }}" as="t" hint-placeholder-count="8"><button type="button" class="rw-surface rw-pill rw-pill-xs {{ t.cls }}" aria-pressed="{{ t.on }}" onClick="{{ t.toggle }}">{{ t.label }}</button></sc-for>
+            </div>
+            <textarea class="rw-textarea" value="{{ ns.workedText }}" onChange="{{ ns.onWorked }}" placeholder="{{ tx.workedPh }}" aria-label="{{ tx.whatWorked }}"></textarea>
+          </div>
+          <div role="group" aria-labelledby="ns-lost" style="display:flex;flex-direction:column;gap:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;"><h3 id="ns-lost" class="rw-section-title">{{ tx.whatCost }}</h3><span class="rw-meta">{{ tx.pickUpTo3 }}</span></div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <sc-for list="{{ ns.lost }}" as="t" hint-placeholder-count="8"><button type="button" class="rw-surface rw-pill rw-pill-xs {{ t.cls }}" aria-pressed="{{ t.on }}" onClick="{{ t.toggle }}">{{ t.label }}</button></sc-for>
+            </div>
+            <textarea class="rw-textarea" value="{{ ns.lostText }}" onChange="{{ ns.onLost }}" placeholder="{{ tx.lostPh }}" aria-label="{{ tx.whatCost }}"></textarea>
+          </div>
+          <sc-if value="{{ ns.hasOpp }}" hint-placeholder-val="{{ true }}">
+            <div role="group" aria-labelledby="ns-opp" style="display:flex;flex-direction:column;gap:14px;">
+              <div style="display:flex;flex-direction:column;gap:4px;"><h3 id="ns-opp" class="rw-section-title">{{ ns.oppQ }}</h3><span class="rw-meta">{{ tx.oppSub }}</span></div>
+              <textarea class="rw-textarea" value="{{ ns.onText }}" onChange="{{ ns.onOpp }}" placeholder="{{ tx.oppPh }}" aria-label="{{ ns.oppQ }}"></textarea>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+      <div class="rw-sheet-foot"><button type="button" class="rw-btn rw-btn-primary" onClick="{{ ns.save }}">{{ tx.save }}</button></div>
+    </div>
+  </sc-if>
+
   <!-- Log footer -->
   <sc-if value="{{ isLog }}" hint-placeholder-val="{{ false }}">
     <sc-if value="{{ showLogCta }}" hint-placeholder-val="{{ false }}">
@@ -2025,7 +2121,10 @@ const I18N = {
     vErrSetup: 'Reading descriptions isn’t set up yet. Fill in the details yourself.', vErrFailed: 'Couldn’t read your description. Try again, or fill in the details yourself.',
     rvWL: '{w} Win : {l} Loss', notMentioned: 'Not mentioned', noNotes: 'No notes', doneEdit: 'Done',
     flagMissing: 'Missing players', flagNew: 'New player', flagCheck: 'Check players', flagLineup: 'More than one lineup',
-    flagResult: 'Missing result', flagScores: 'Check scores', flagNotes: 'Check notes'
+    flagResult: 'Missing result', flagScores: 'Check scores', flagNotes: 'Check notes', flagConflict: 'Check result',
+    rvWLOpen: '{w} Win : {l} Loss · {n} not set', wlShort: '{w}W : {l}L',
+    matchResults: 'Match Results', matchNotes: 'Match Notes', addScore: 'Add score', removeGame: 'Remove last game', yourOpponents: 'your opponents',
+    draw: 'Draw', resultDraw: 'Draw', gameNoScore: '{game} · {r}', gamesUnordered: 'Games won, order not known'
   },
   zh: {
     matches: '比赛', insights: '洞察', players: '球友', settings: '设置', profile: '个人资料', logOut: '退出登录',
@@ -2168,7 +2267,10 @@ const I18N = {
     vErrSetup: '读取描述的功能还没设置好，请手动填写。', vErrFailed: '没能读懂你的描述。请再试一次，或手动填写。',
     rvWL: '{w}胜 : {l}负', notMentioned: '没有提到', noNotes: '没有笔记', doneEdit: '完成',
     flagMissing: '缺少球员', flagNew: '新球员', flagCheck: '确认球员', flagLineup: '不止一组对阵',
-    flagResult: '缺少结果', flagScores: '确认比分', flagNotes: '确认笔记'
+    flagResult: '缺少结果', flagScores: '确认比分', flagNotes: '确认笔记', flagConflict: '确认结果',
+    rvWLOpen: '{w}胜 : {l}负 · {n}局未填', wlShort: '{w}胜 : {l}负',
+    matchResults: '比赛结果', matchNotes: '比赛笔记', addScore: '添加比分', removeGame: '删除最后一局', yourOpponents: '对手',
+    draw: '平', resultDraw: '平局', gameNoScore: '{game} · {r}', gamesUnordered: '双方各赢局数（顺序未知）'
   }
 };
 function deviceLang() {
@@ -2613,7 +2715,7 @@ class Component extends DCLogic {
   fillManually() {
     this.recStop(true);
     const base = this.newLog();
-    this.go('review', { log: { ...base, step: 'review', startedAt: (this.state.voice && this.state.voice.startedAt) || Date.now(), active: null,
+    this.go('review', { log: { ...base, games: [], step: 'review', startedAt: (this.state.voice && this.state.voice.startedAt) || Date.now(), active: null,
       voice: { flags: { players: 'type', result: 'missing', notes: null }, slots: {}, pool: [], people: [], dirty: {}, from: '' } } });
   }
   // Continue: parse, then Review. Incomplete results still go to Review. Several lineups stay here with the
@@ -2655,16 +2757,14 @@ class Component extends DCLogic {
   }
   // Review -> back to the transcript. The draft is kept so an unchanged transcript returns to it as it was.
   voiceBack() { this.setState(x => ({ screen: 'voice', voice: { ...x.voice, prev: x.log }, log: null, back: x.back.slice(0, -1) })); }
-  // Review can save once the match type is known and the games give a winner. Players may stay unknown.
+  // Review can save once the match type is known and every game has a Win or Loss, or a heard aggregate covers the open
+  // ones. A tie is valid; missing or contradicting results block (Han, 2026-10-23). Players may stay unknown, scores and notes are optional.
   reviewReady(log) {
-    if (!log.type || log.voice.flags.result === 'missing') return false;
-    const r = this.res(this.draftGames(log)); return r.us !== r.them;
+    if (!log.type || log.voice.flags.result === 'conflict') return false;
+    return window.RallywiseVoice.tally(log.games, log.voice.totals).ok;
   }
-  // Result and Notes open the existing Log Match steps; Done comes back to Review.
-  reviewOpen(part) {
-    const log = this.state.log; if (!log) return;
-    this.setState({ screen: 'log', log: { ...log, step: part === 'result' ? 3 : 4, ret: part }, search: '' });
-  }
+  // Result and Notes open their bottom sheets (Figma 349:3528, 349:3793).
+  reviewOpen(part) { if (part === 'result') this.rsOpen(); else if (part === 'notes') this.nsOpen(); }
   reviewReturn(save) {
     this.setState(s => {
       const l = s.log, f = { ...l.voice.flags }, dirty = { ...l.voice.dirty };
@@ -2719,6 +2819,39 @@ class Component extends DCLogic {
       voice: { ...s.log.voice, slots, pool: p.pool, people: p.people, dirty: { ...s.log.voice.dirty, players: true },
         flags: { ...s.log.voice.flags, players: !p.type ? 'type' : V.unresolved(p.type, slots, p.pool) ? 'unknown' : null } } } }));
   }
+  // Result sheet (Figma 349:3528). Like the Players sheet it edits a copy: W / L, scores and games change only the copy;
+  // Save writes it to the draft, Close throws it away. An open game stays open (never a silent Win or Loss), scores are
+  // optional, and a heard aggregate is kept as it is, counting whenever it fits the games.
+  rsOpen() {
+    const l = this.state.log; if (!l) return;
+    const games = l.games.length ? l.games.map(g => ({ w: g.w || null, l: g.l == null ? null : g.l })) : [{ w: null, l: null }];
+    this.setState({ rs: { games, totals: l.voice.totals || null, format: l.format, max: Math.max(3, l.games.length) } });
+  }
+  setRs(fn) { this.setState(s => s.rs ? { rs: { ...s.rs, ...fn(s.rs) } } : null); }
+  rsGame(i, fn) { this.setRs(r => ({ games: r.games.map((g, j) => j === i ? fn(g) : g) })); }
+  // Tapping the selected letter again clears it; a game with no result has no score.
+  rsMark(i, w) { this.rsGame(i, g => g.w === w ? { w: null, l: null } : { ...g, w }); }
+  rsAddScore(i) { this.rsGame(i, g => ({ ...g, l: this.state.rs.format - 6 })); }
+  rsStep(i, d) { const cap = this.cap(this.state.rs.format); this.rsGame(i, g => ({ ...g, l: Math.max(0, Math.min(cap - 1, g.l + d)) })); }
+  rsAdd() { this.setRs(r => r.games.length < r.max ? { games: r.games.concat([{ w: null, l: null }]) } : {}); }
+  rsRemove() { this.setRs(r => r.games.length > 1 ? { games: r.games.slice(0, -1) } : {}); }
+  rsSave() {
+    const r = this.state.rs;
+    this.setState(s => ({ rs: null, log: { ...s.log, games: r.games, voice: { ...s.log.voice, totals: r.totals,
+      dirty: { ...s.log.voice.dirty, result: true }, flags: { ...s.log.voice.flags, result: null } } } }));
+  }
+  // Notes sheet (Figma 349:3793): tags (up to 3 a side) and three notes, edited as a copy like the other sheets.
+  nsOpen() {
+    const l = this.state.log; if (!l) return;
+    this.setState({ ns: { wt: l.wt.slice(), lt: l.lt.slice(), worked: l.worked || '', lost: l.lost || '', on: l.on || '' } });
+  }
+  setNs(patch) { this.setState(s => s.ns ? { ns: { ...s.ns, ...(typeof patch === 'function' ? patch(s.ns) : patch) } } : null); }
+  nsTag(k, t) { this.setNs(n => ({ [k]: n[k].includes(t) ? n[k].filter(x => x !== t) : n[k].length >= 3 ? n[k] : n[k].concat([t]) })); }
+  nsSave() {
+    const n = this.state.ns;
+    this.setState(s => ({ ns: null, log: { ...s.log, wt: n.wt, lt: n.lt, worked: n.worked, lost: n.lost, on: n.on,
+      voice: { ...s.log.voice, dirty: { ...s.log.voice.dirty, notes: true }, flags: { ...s.log.voice.flags, notes: null } } } }));
+  }
   // What an edit changed, for match_edited (names only, never the values).
   changedParts(a, b) {
     const J = JSON.stringify;
@@ -2741,12 +2874,13 @@ class Component extends DCLogic {
 
   // Edit reuses the Log Match flow: the draft is the match turned back into log fields.
   editLog(m) {
-    const t = [21, 15, 11].find(f => m.games.every(g => { const w = g[0] > g[1] ? 'us' : 'them', l = Math.min(g[0], g[1]); return this.scoreOf({ w, l }, f).join() === g.join(); })) || this.fmt();
+    const sc = this.scored(m.games);
+    const t = (sc.length && [21, 15, 11].find(f => sc.every(g => { const w = g[0] > g[1] ? 'us' : 'them', l = Math.min(g[0], g[1]); return this.scoreOf({ w, l }, f).join() === g.join(); }))) || this.fmt();
     // Edit starts at Who Played: the match type is fixed once logged, so the type step is skipped.
     // Participants whose side was never confirmed are not placed; Who Played asks for every empty slot.
     const o = this.sides(m).opps;
     return { step: 2, editId: m.id, date: m.date, type: m.type, partner: m.partner, opp1: o[0] || null, opp2: o[1] || null, active: null, format: t,
-      games: m.games.map(g => ({ w: g[0] > g[1] ? 'us' : 'them', l: Math.min(g[0], g[1]) })), wt: m.wt.slice(), lt: m.lt.slice(), worked: m.worked, lost: m.lost, on: m.on };
+      games: m.games.map(g => ({ w: this.gameRes(g) === 'W' ? 'us' : 'them', l: Array.isArray(g) ? Math.min(g[0], g[1]) : null, ...(g && g.u ? { u: 1 } : {}) })), wt: m.wt.slice(), lt: m.lt.slice(), worked: m.worked, lost: m.lost, on: m.on };
   }
 
   newOb() { return { step: 1, name: '', level: null }; }
@@ -2875,7 +3009,15 @@ class Component extends DCLogic {
   }
   first(id) { return id === 'me' ? this.t('you') : this.nm(id).split(' ')[0]; }
   ini(id, name) { if (!id || this.unknown(id)) return '?'; return (name || this.nm(id)).split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase(); }
-  res(games) { const us = games.filter(g => g[0] > g[1]).length; return { us, them: games.length - us, win: us > games.length - us }; }
+  // A saved game is [your points, their points], or { r: 'W' | 'L' } when no score was given ({ r, u: 1 }: order not known).
+  // Equal games won is a draw (Han, 2026-10-23: a tied result is valid).
+  gameRes(g) { return window.RallywiseVoice ? window.RallywiseVoice.gameResult(g) : g[0] > g[1] ? 'W' : 'L'; }
+  res(games) {
+    const us = games.filter(g => this.gameRes(g) === 'W').length, them = games.filter(g => this.gameRes(g) === 'L').length;
+    return { us, them, win: us > them, draw: us === them && us + them > 0 };
+  }
+  scoreLine(games, sep) { return this.scored(games).map(g => g.join('–')).join(sep || ' · '); }
+  scored(games) { return games.filter(g => Array.isArray(g) && typeof g[0] === 'number' && typeof g[1] === 'number'); }
   date(iso, long) {
     const d = new Date(iso + 'T12:00:00');
     if (this.lang() === 'zh') return (long ? d.getFullYear() + '年' : '') + (d.getMonth() + 1) + '月' + d.getDate() + '日';
@@ -2894,10 +3036,10 @@ class Component extends DCLogic {
     const r = this.res(m.games);
     return {
       id: m.id, type: this.typeLabel(m.type), dateLabel: this.date(m.date), teamA: this.teamA(m), teamB: this.teamB(m), gamesWon: `${r.us}–${r.them}`,
-      ...this.badge(r.win),
-      games: m.games.map(g => ({ s: `${g[0]}–${g[1]}`, fg: 'var(--text-secondary)' })),
+      ...this.badge(r.win), ...(r.draw ? { resultLabel: this.t('draw') } : {}),
+      games: this.scored(m.games).map(g => ({ s: `${g[0]}–${g[1]}`, fg: 'var(--text-secondary)' })),
       // V2 Match card: result dot, Letter avatars (you, partner, then opponents) and the "2 : 1" score.
-      resultCls: r.win ? 'is-win' : 'is-loss', score: `${r.us} : ${r.them}`,
+      resultCls: r.draw ? 'is-draw' : r.win ? 'is-win' : 'is-loss', score: `${r.us} : ${r.them}`,
       playersCls: m.type === 'Doubles' ? 'is-doubles' : '',
       players: (m.type === 'Doubles' ? ['me', m.partner, this.sides(m).opps[0], this.sides(m).opps[1]] : ['me', this.sides(m).opps[0]]).map(id => ({ ini: this.ini(id) })),
       open: () => this.go('detail', { detailId: m.id })
@@ -2950,11 +3092,13 @@ class Component extends DCLogic {
     });
   }
   scoreOf(g, t) {
+    if (g.l == null) return { r: g.w === 'us' ? 'W' : 'L', ...(g.u ? { u: 1 } : {}) };
     const cap = this.cap(t);
     const ws = g.l >= t - 1 ? Math.min(g.l + 2, cap) : t;
     return g.w === 'us' ? [ws, g.l] : [g.l, ws];
   }
-  draftGames(log) { return log.games.map(g => this.scoreOf(g, log.format)); }
+  // Voice drafts may hold open games covered by a heard aggregate (log.voice.totals); see RallywiseVoice.savedGames.
+  draftGames(log) { return log.voice ? window.RallywiseVoice.savedGames(log.games, log.voice.totals, log.format) : log.games.map(g => this.scoreOf(g, log.format)); }
   canNext(log) {
     if (log.step === 1) return !!log.type;
     if (log.step === 2) return this.slotKeys(log.type).every(k => log[k]);
@@ -2985,7 +3129,7 @@ class Component extends DCLogic {
     if (log.editId) this.track('match_edited', { match_type: m.type.toLowerCase(), changed: prev ? this.changedParts(prev, m) : [] });
     else {
       const r = this.res(m.games);
-      this.track('match_logged', { match_type: m.type.toLowerCase(), format: log.format, result: r.win ? 'win' : 'loss', games: m.games.length,
+      this.track('match_logged', { match_type: m.type.toLowerCase(), format: log.format, result: r.draw ? 'draw' : r.win ? 'win' : 'loss', games: m.games.length,
         has_notes: !!(m.worked || m.lost || m.on), tag_count: m.wt.length + m.lt.length, match_count: matches.length,
         log_seconds: log.startedAt ? Math.round((Date.now() - log.startedAt) / 1000) : null });
     }
@@ -3386,7 +3530,7 @@ class Component extends DCLogic {
       {
         const byT = t => this.rec(all.filter(m => m.type === t));
         const sg = byT('Singles'), db = byT('Doubles');
-        const games = all.flatMap(m => m.games), cg = games.filter(x => Math.abs(x[0] - x[1]) <= 3), cw = cg.filter(x => x[0] > x[1]).length;
+        const games = this.scored(all.flatMap(m => m.games)), cg = games.filter(x => Math.abs(x[0] - x[1]) <= 3), cw = cg.filter(x => x[0] > x[1]).length;
         const mg = games.length ? games.reduce((t, x) => t + x[0] - x[1], 0) / games.length : 0;
         const today = new Date(this.today() + 'T12:00:00'), cutoff = new Date(today - 30 * 864e5).toISOString().slice(0, 10);
         const last5 = this.rec(chron.slice(-5));
@@ -3543,7 +3687,7 @@ class Component extends DCLogic {
       const bName = log.type === 'Doubles' ? [log.opp1, log.opp2].map(o => o ? this.first(o) : '—').join(' & ') : (log.opp1 ? this.first(log.opp1) : this.t('opponent'));
       const upd = (i, fn) => this.setLog(l => ({ games: l.games.map((g, j) => j === i ? fn(g) : g) }));
       v.gameRows = log.games.map((g, i) => {
-        const [a, b] = this.scoreOf(g, t), us = g.w === 'us';
+        const sg = this.scoreOf(g, t), [a, b] = Array.isArray(sg) ? sg : ['–', '–'], us = g.w === 'us';
         return { label: this.t('game', { n: i + 1 }), a: String(a), b: String(b), aName, bName,
           aFg: a > b ? 'var(--text-primary)' : 'var(--text-secondary)', bFg: b > a ? 'var(--text-primary)' : 'var(--text-secondary)',
           usLabel: this.t(log.type === 'Doubles' ? 'weWon' : 'iWon'), themLabel: this.t('theyWon'),
@@ -3551,7 +3695,7 @@ class Component extends DCLogic {
           themBg: 'transparent', themFg: !us ? 'var(--text-primary)' : 'var(--text-secondary)', themBorder: !us ? 'var(--ghost-button-outline-highlight)' : 'transparent',
           loserLabel: this.t('score', { name: us ? bName : aName }),
           setUs: () => upd(i, x => ({ ...x, w: 'us' })), setThem: () => upd(i, x => ({ ...x, w: 'them' })),
-          dec: () => upd(i, x => ({ ...x, l: Math.max(0, x.l - 1) })), inc: () => upd(i, x => ({ ...x, l: Math.min(cap - 1, x.l + 1) })),
+          dec: () => upd(i, x => ({ ...x, l: x.l == null ? t - 6 : Math.max(0, x.l - 1) })), inc: () => upd(i, x => ({ ...x, l: x.l == null ? t - 6 : Math.min(cap - 1, x.l + 1) })),
           canRemove: i > 0 && i === log.games.length - 1, remove: () => this.setLog(l => ({ games: l.games.slice(0, -1) })) };
       });
       v.canAddGame = log.games.length < 3; v.addGameLabel = this.t('addGame', { n: log.games.length + 1 });
@@ -3560,7 +3704,7 @@ class Component extends DCLogic {
       v.liveResult = this.t(dr.us === dr.them ? 'levelAt' : dr.win ? 'youWin' : 'youLose', { r: `${dr.us}–${dr.them}` });
       v.liveResultColor = dr.us === dr.them ? 'var(--text-secondary)' : dr.win ? 'var(--status-win)' : 'var(--status-loss)';
       const dm = { type: log.type, partner: log.partner, opps: [log.opp1, log.opp2].filter(Boolean) };
-      v.draft = { teamA: log.type ? this.teamA(dm) : '', teamB: dm.opps.length ? this.teamB(dm) : '', scoreLine: this.draftGames(log).map(g => g.join('–')).join('  ·  '), ...this.badge(dr.win) };
+      v.draft = { teamA: log.type ? this.teamA(dm) : '', teamB: dm.opps.length ? this.teamB(dm) : '', scoreLine: this.scoreLine(this.draftGames(log), '  ·  '), ...this.badge(dr.win) };
       v.onWorked = e => this.setLog({ worked: e.target.value });
       v.onLost = e => this.setLog({ lost: e.target.value });
       const TAGS = ['Serve', 'Return', 'Net', 'Smash', 'Defence', 'Footwork', 'Placement', 'Other'];
@@ -3598,17 +3742,54 @@ class Component extends DCLogic {
       const V = window.RallywiseVoice, log = s.log, vo = log.voice, f = vo.flags, sep = this.lang() === 'zh' ? '、' : ', ';
       const who = k => { const sl = (vo.slots || {})[k] || {}; return log[k] ? this.nm(log[k]) : sl.heard || ''; };
       const names = log.type ? [this.t('you')].concat(V.slotKeys(log.type).map(who), (vo.pool || []).map(x => x.id ? this.nm(x.id) : x.heard)).filter(Boolean) : [];
-      const wl = this.res(this.draftGames(log));
+      const wl = V.tally(log.games, vo.totals);
       const notes = [log.worked, log.lost, log.on].map(x => (x || '').trim()).filter(Boolean).join(this.lang() === 'zh' ? '' : ' ');
       const row = (part, label, value, muted, flag, warn, open) => ({ label: this.t(label), value, valueCls: muted ? 'is-muted' : '', flag: flag ? this.t(flag) : '',
         cls: flag || warn ? 'is-warning' : '', open: open || (() => this.reviewOpen(part)) });
       const ready = this.reviewReady(log);
       v.rv = { back: () => this.voiceBack(),
         rows: [row('players', 'rvPlayers', log.type ? names.join(sep) : this.t('selectType'), !log.type, f.players === 'unknown' && 'flagUnknown', !log.type, () => this.psOpen()),
-          row('result', 'rvResult', f.result === 'missing' ? this.t('notMentioned') : this.t('rvWL', { w: wl.us, l: wl.them }), f.result === 'missing', f.result && (f.result === 'missing' ? 'flagResult' : 'flagScores')),
+          row('result', 'rvResult', wl.state === 'missing' ? this.t('notMentioned') : this.t(wl.open ? 'rvWLOpen' : 'rvWL', { w: wl.w, l: wl.l, n: wl.open }), wl.state === 'missing',
+            f.result === 'conflict' ? 'flagConflict' : !wl.ok ? 'flagResult' : f.result === 'scores' && 'flagScores'),
           row('notes', 'rvNotes', notes || log.wt.concat(log.lt).map(t => this.tagLabel(t)).join(sep) || this.t('noNotes'), !notes && !log.wt.length && !log.lt.length, f.notes && 'flagNotes')],
         saving: !!log.saving, idle: !log.saving, saveErr: !!log.saveErr, ctaLabel: this.t(log.saveErr ? 'saveAgain' : 'continue'), cantSave: !ready || !!log.saving,
         next: () => { if (this.reviewReady(this.state.log)) this.save(); } };
+      v.hasRs = !!s.rs;
+      if (s.rs) {
+        const r = s.rs, cap = this.cap(r.format);
+        v.rs = { close: () => this.setState({ rs: null }), save: () => this.rsSave(),
+          rows: r.games.map((g, i) => {
+            const label = this.t('game', { n: i + 1 }), sg = g.w && g.l != null ? this.scoreOf(g, r.format) : null;
+            return { label, w: this.t('dotW'), l: this.t('dotL'), wCls: g.w === 'us' ? 'is-win' : '', lCls: g.w === 'them' ? 'is-loss' : '', wOn: g.w === 'us', lOn: g.w === 'them',
+              wLabel: this.t('gameNoScore', { game: label, r: this.t('resultWin') }), lLabel: this.t('gameNoScore', { game: label, r: this.t('resultLoss') }),
+              setW: () => this.rsMark(i, 'us'), setL: () => this.rsMark(i, 'them'),
+              hasScore: !!sg, canAddScore: !!g.w && !sg, score: sg ? `${sg[0]} : ${sg[1]}` : '', addScore: () => this.rsAddScore(i),
+              dec: () => this.rsStep(i, -1), inc: () => this.rsStep(i, 1), cantDec: !sg || g.l <= 0, cantInc: !sg || g.l >= cap - 1 };
+          }),
+          // IconButton has no disabled prop: the approved disabled look (.rw-btn:disabled, 40% opacity) and no taps.
+          ...[['remove', r.games.length <= 1], ['add', r.games.length >= r.max]].reduce((o, [k, off]) => ({ ...o, [k + 'Off']: off, [k + 'Op']: off ? '.4' : '1', [k + 'Pe']: off ? 'none' : 'auto' }), {}),
+          remove: () => this.rsRemove(), add: () => this.rsAdd(),
+          addLabel: this.t('addGame', { n: r.games.length + 1 }) };
+      }
+      v.hasNs = !!s.ns;
+      if (s.ns) {
+        const n = s.ns, d = log.type === 'Doubles';
+        const nameOf = k => log[k] ? this.first(log[k]) : ((vo.slots || {})[k] || {}).heard || '';
+        const teamA = d ? this.t('you') + ' & ' + (nameOf('partner') || '?') : this.t('you');
+        // Singles names the opponent in full (Figma "You vs Alex Chen"); doubles uses first names.
+        const opps = d ? ['opp1', 'opp2'].map(nameOf) : [log.opp1 ? this.nm(log.opp1) : nameOf('opp1')], teamB = log.type ? opps.map(x => x || '?').join(' & ') : '';
+        const TAGS = ['Serve', 'Return', 'Net', 'Smash', 'Defence', 'Footwork', 'Placement', 'Other'];
+        const tags = k => TAGS.map(t => { const on = n[k].includes(t); return { label: this.tagLabel(t), on, cls: on ? 'is-active' : '', toggle: () => this.nsTag(k, t) }; });
+        // Opponent notes belong to a known opponent: hidden while every opponent is an Unknown Player (the text is kept).
+        const known = (d ? [log.opp1, log.opp2] : [log.opp1]).filter(id => id && !this.unknown(id));
+        v.ns = { close: () => this.setState({ ns: null }), save: () => this.nsSave(),
+          vs: log.type ? teamA + ' vs ' + teamB : teamA, scoreLine: this.scoreLine(this.draftGames(log)),
+          hasPill: wl.state !== 'missing', pill: this.t('wlShort', { w: wl.w, l: wl.l }), pillState: this.t('rvWL', { w: wl.w, l: wl.l }),
+          dotCls: !wl.ok || wl.w === wl.l ? '' : wl.w > wl.l ? 'is-win' : 'is-loss',
+          worked: tags('wt'), lost: tags('lt'), workedText: n.worked, lostText: n.lost, onText: n.on,
+          onWorked: e => this.setNs({ worked: e.target.value }), onLost: e => this.setNs({ lost: e.target.value }), onOpp: e => this.setNs({ on: e.target.value }),
+          hasOpp: known.length > 0, oppQ: this.t('oppQ', { name: d ? this.t('yourOpponents') : this.first(known[0] || '') }) };
+      }
       v.hasPs = !!s.ps;
       if (s.ps) {
         const p = s.ps, d = p.type === 'Doubles', k0 = p.picking;
@@ -3654,13 +3835,19 @@ class Component extends DCLogic {
       const r = this.res(m.games);
       const openP = id => () => { if (!this.unknown(id)) this.go('player', { playerId: id }); };
       v.detail = {
-        dateLong: this.date(m.date, true), type: this.typeLabel(m.type), resultWord: this.t(r.win ? 'resultWin' : 'resultLoss'), gamesWon: `${r.us}–${r.them}`,
+        dateLong: this.date(m.date, true), type: this.typeLabel(m.type), resultWord: this.t(r.draw ? 'resultDraw' : r.win ? 'resultWin' : 'resultLoss'), gamesWon: `${r.us}–${r.them}`,
         sideA: [{ name: this.t('you') + ' · ' + this.nm('me'), initials: this.ini('me'), avBg: A, avFg: 'var(--action-on-primary)' }]
           .concat(m.partner ? [{ name: this.nm(m.partner), initials: this.ini(m.partner), avBg: 'var(--icon-badge-bg)', avFg: 'var(--icon-badge-fg)' }] : []),
         sideB: this.sides(m).opps.map(id => ({ name: this.nm(id), initials: this.ini(id), open: openP(id) })),
         others: this.sides(m).others.map(id => ({ name: this.nm(id), initials: this.ini(id) })), hasOthers: this.sides(m).others.length > 0, hasSideB: this.sides(m).opps.length > 0,
         aShort: m.partner ? this.t('you') + ' & ' + this.first(m.partner).slice(0, 1) : this.t('you'),
-        rows: m.games.map((g, i) => ({ label: this.t('game', { n: i + 1 }), a: String(g[0]), b: String(g[1]), aFg: g[0] > g[1] ? 'var(--text-primary)' : 'var(--text-secondary)', bFg: g[1] > g[0] ? 'var(--text-primary)' : 'var(--text-secondary)' })),
+        // A game without a score shows its result; games whose order isn't known are one line of games won by each side.
+        rows: m.games.map((g, i) => ({ g, i })).filter(x => !(x.g && x.g.u)).map(({ g, i }) => {
+          const k = this.gameRes(g), sc = Array.isArray(g), hi = 'var(--text-primary)', lo = 'var(--text-secondary)';
+          return { label: sc ? this.t('game', { n: i + 1 }) : this.t('gameNoScore', { game: this.t('game', { n: i + 1 }), r: this.t(k === 'W' ? 'resultWin' : 'resultLoss') }),
+            a: sc ? String(g[0]) : '–', b: sc ? String(g[1]) : '–', aFg: k === 'W' ? hi : lo, bFg: k === 'L' ? hi : lo };
+        }).concat(m.games.some(g => g && g.u) ? [{ label: this.t('gamesUnordered'), a: String(m.games.filter(g => g && g.u && g.r === 'W').length),
+          b: String(m.games.filter(g => g && g.u && g.r === 'L').length), aFg: 'var(--text-primary)', bFg: 'var(--text-primary)' }] : []),
         hasNotes: !!(m.wt.length || m.lt.length || m.worked || m.lost || m.on),
         noteRows: [
           (m.wt.length || m.worked) && { label: this.t('noteWorked'), labelFg: 'var(--text-secondary)', tags: m.wt.map(t => this.tagLabel(t)).join(' · '), text: m.worked },

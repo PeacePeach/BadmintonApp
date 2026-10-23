@@ -76,6 +76,24 @@
       zh: { text: '今天和Marcus打球，21比15赢，19比21输，21比18赢。',
         result: base({ language: 'zh', game_count: 3, order_known: true, totals: { wins: 2, losses: 1 }, players: [P('Marcus', 'unknown')],
           games: [game(1, 'win', 21, 15), game(2, 'loss', 19, 21), game(3, 'win', 21, 18)], missing: ['match_type'] }) }
+    },
+    // Only the overall result, no game order or scores: a valid aggregate (Han, 2026-10-23).
+    totals: {
+      en: { text: 'Played singles against Alex tonight. Five games, I won three and lost two. My net play was good, my serve kept going long.',
+        result: base({ match_type: 'singles', game_count: 5, totals: { wins: 3, losses: 2 }, players: [P('Alex', 'opponent')], missing: ['scores'],
+          observations: [obs('My net play was good', 'won_points', 'Net'), obs('My serve kept going long', 'lost_points', 'Serve')] }) },
+      zh: { text: '今晚和Alex打单打，一共五局，我赢了三局输了两局。网前不错，发球老是出界。',
+        result: base({ language: 'zh', match_type: 'singles', game_count: 5, totals: { wins: 3, losses: 2 }, players: [P('Alex', 'opponent')], missing: ['scores'],
+          observations: [obs('网前不错', 'won_points', 'Net'), obs('发球老是出界', 'lost_points', 'Serve')] }) }
+    },
+    // A tie and a game whose result wasn't said: Review asks for it.
+    partial: {
+      en: { text: 'Singles with Alex. Won the first 21-17, lost the second, and the third one I forget.',
+        result: base({ match_type: 'singles', game_count: 3, order_known: true, players: [P('Alex', 'opponent')], missing: ['results'],
+          games: [game(1, 'win', 21, 17), game(2, 'loss', null, null)] }) },
+      zh: { text: '和Alex打单打。第一局21比17赢，第二局输了，第三局忘了。',
+        result: base({ language: 'zh', match_type: 'singles', game_count: 3, order_known: true, players: [P('Alex', 'opponent')], missing: ['results'],
+          games: [game(1, 'win', 21, 17), game(2, 'loss', null, null)] }) }
     }
   };
   const SCENARIOS = Object.keys(SAMPLES);
@@ -182,6 +200,44 @@
   // The app's 21-point scoring from Log Match: a game stores the winner and the loser's points.
   const cap = t => ({ 21: 30, 15: 21, 11: 15 }[t]);
   const winnerScore = (l, t) => l >= t - 1 ? Math.min(l + 2, cap(t)) : t;
+  const MAX_GAMES = 9;
+
+  // ---------- Result (Result sheet, Figma 349:3528; Han 2026-10-23) ----------
+  // A draft game is { w: 'us' | 'them' | null, l: the loser's points | null }: w null = result not known, l null = no score.
+  // totals { w, l } is a heard aggregate ("won 3, lost 2"). It counts only while it fits the games: the results still open
+  // add up to exactly what the aggregate leaves. Open games are never filled in from it, so no game outcome is invented,
+  // and an aggregate that stops fitting (a game added) counts again once it fits (the game removed).
+  function fits(games, totals) {
+    if (!totals) return false;
+    const rw = totals.w - games.filter(g => g.w === 'us').length, rl = totals.l - games.filter(g => g.w === 'them').length;
+    return rw >= 0 && rl >= 0 && rw + rl === games.filter(g => !g.w).length;
+  }
+  // Win / Loss count and whether it is enough to save. A tie is a valid result; open games without an aggregate are not.
+  function tally(games, totals) {
+    if (!games.length) return { w: 0, l: 0, open: 0, ok: false, state: 'missing' };
+    if (fits(games, totals)) return { w: totals.w, l: totals.l, open: 0, ok: true, state: 'ok' };
+    const w = games.filter(g => g.w === 'us').length, l = games.filter(g => g.w === 'them').length, open = games.length - w - l;
+    return { w, l, open, ok: !open, state: open ? 'incomplete' : 'ok' };
+  }
+  // Saved form of a game: [your points, their points] with a score; { r: 'W' | 'L' } without one. Games covered only by the
+  // aggregate are saved as { r, u: 1 }: their results count, but their order is not known and is never shown per game.
+  function savedGames(games, totals, format) {
+    const rem = fits(games, totals) ? { W: totals.w - games.filter(g => g.w === 'us').length, L: totals.l - games.filter(g => g.w === 'them').length } : { W: 0, L: 0 };
+    return games.map(g => {
+      if (!g.w) { const r = rem.W > 0 ? 'W' : 'L'; rem[r]--; return { r, u: 1 }; }
+      if (g.l == null) return { r: g.w === 'us' ? 'W' : 'L' };
+      const ws = winnerScore(g.l, format);
+      return g.w === 'us' ? [ws, g.l] : [g.l, ws];
+    });
+  }
+  const gameResult = g => Array.isArray(g) ? (g[0] > g[1] ? 'W' : g[0] < g[1] ? 'L' : null) : g && (g.r === 'W' || g.r === 'L') ? g.r : null;
+  const hasScore = g => Array.isArray(g) && typeof g[0] === 'number' && typeof g[1] === 'number';
+  // A saved match's games back to draft games + aggregate (Edit).
+  function fromSaved(games) {
+    const out = games.map(g => g && g.u ? { w: null, l: null } : { w: gameResult(g) === 'W' ? 'us' : gameResult(g) === 'L' ? 'them' : null, l: hasScore(g) ? Math.min(g[0], g[1]) : null });
+    const any = games.some(g => g && g.u);
+    return { games: out, totals: any ? { w: games.filter(g => gameResult(g) === 'W').length, l: games.filter(g => gameResult(g) === 'L').length } : null };
+  }
 
   // Parse result -> Log Match draft fields + what Review must ask about. Never invents a player, score or order:
   // anything the result lacks stays empty and is flagged. A result with several lineups never becomes a draft
@@ -198,20 +254,29 @@
     // People heard before the type is known are kept so choosing Singles or Doubles can place them.
     if (!type) d.people = people;
     fp.players = !type ? 'type' : unresolved(type, d.slots, d.pool) ? 'unknown' : null;
-    // Games: only games whose results are known, in order, with scores the app can store.
-    const games = r.games.filter(g => g.result && !g.interrupted);
-    for (const g of games.slice(0, 3)) {
-      const has = g.my_score != null && g.their_score != null, w = g.result === 'win' ? 'us' : 'them';
-      const l = has ? Math.min(g.my_score, g.their_score) : format - 6;
-      if (!has || winnerScore(l, format) !== Math.max(g.my_score, g.their_score)) fp.result = 'scores';
+    // Games, in order, never invented (Han, 2026-10-23). A game heard without a score keeps l = null (scores are optional);
+    // a game whose result wasn't said stays open (w = null). Spoken totals that fit the games are kept as the aggregate,
+    // so "won 3, lost 2" is a valid result without a result per game. Interrupted games are left out.
+    const informative = g => g.result || g.my_score != null || g.their_score != null;
+    const heard = r.games.filter(g => informative(g) && !g.interrupted), cut = new Set(r.games.filter(g => g.interrupted).map(g => g.number));
+    const t = r.totals || {}, tot = t.wins != null && t.losses != null ? { w: t.wins, l: t.losses } : null;
+    let n = Math.max(r.game_count > 0 ? r.game_count : 0, ...heard.map(g => g.number || 0));
+    if (!n && tot) n = tot.w + tot.l;
+    const byNum = Object.fromEntries(heard.map(g => [g.number, g]));
+    for (let i = 1; i <= Math.min(n, MAX_GAMES); i++) {
+      if (cut.has(i)) continue;
+      const g = byNum[i] || {}, has = g.my_score != null && g.their_score != null;
+      const w = g.result === 'win' ? 'us' : g.result === 'loss' ? 'them' : has && g.my_score !== g.their_score ? (g.my_score > g.their_score ? 'us' : 'them') : null;
+      let l = has ? Math.min(g.my_score, g.their_score) : null;
+      // A score the app can't store (or one that disagrees with the result) is dropped and flagged, never altered.
+      if (l != null && (!w || winnerScore(l, format) !== Math.max(g.my_score, g.their_score) || (w === 'us') !== (g.my_score > g.their_score))) { l = null; fp.result = 'scores'; }
       d.games.push({ w, l });
     }
-    const t = r.totals || {};
-    d.totals = t.wins != null && t.losses != null ? { w: t.wins, l: t.losses } : null;
-    if (!d.games.length) { d.games = [{ w: 'us', l: format - 6 }]; fp.result = 'missing'; }
-    else if (games.length > 3 || r.games.some(g => g.interrupted) || (r.game_count != null && r.game_count !== games.length)) fp.result = 'scores';
-    const wl = d.games.reduce((a, g) => (g.w === 'us' ? a.w++ : a.l++, a), { w: 0, l: 0 });
-    if (!fp.result && wl.w === wl.l) fp.result = 'scores';
+    // Only one side of the total and no count ("won two"): those games all share one result, so no order is invented.
+    if (!d.games.length && !n && (t.wins || t.losses)) for (let i = 0; i < Math.min(t.wins || t.losses, MAX_GAMES); i++) d.games.push({ w: t.wins ? 'us' : 'them', l: null });
+    d.totals = tot;
+    if (!d.games.length) fp.result = 'missing';
+    else if (tot && !fits(d.games, tot)) fp.result = 'conflict';
     // Notes: V1 taxonomy. Up to 3 tags per side; "unsure" notes need the player to pick a side.
     const by = c => r.observations.filter(o => o.category === c);
     const tags = os => [...new Set(os.map(o => o.area || 'Other'))].slice(0, 3);
@@ -225,7 +290,7 @@
   }
 
   const api = { SAMPLES, SCENARIOS, sample, chunks, cues, mockParse, resolve, inferType, lineup, choosePartner, unresolved, slotKeys,
-    toDraft, UNKNOWN, isUnknown, unknownId, heardOf, isParticipant, participantId, sidesOf, savedPlayers };
+    toDraft, fits, tally, savedGames, gameResult, hasScore, fromSaved, winnerScore, MAX_GAMES, UNKNOWN, isUnknown, unknownId, heardOf, isParticipant, participantId, sidesOf, savedPlayers };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.RallywiseVoice = api;
 })(typeof window !== 'undefined' ? window : globalThis);

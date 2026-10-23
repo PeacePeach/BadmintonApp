@@ -36,6 +36,16 @@
    Player row (Figma 228:8835) ... .rw-surface.rw-player[.is-empty][.is-warning] > .rw-avatar | IconButton variant "add" + .rw-name + .rw-caption
    Search bar (Figma 329:7330) ... .rw-search[.is-filled] > Search icon + .rw-search-input + .rw-search-clear (states: Unfilled, Filled Inactive, Active Typing = :focus-within)
    Bottom Sheet (Figma 319:6349) ... .rw-sheet-scrim + .rw-sheet > .rw-sheet-head (.rw-sheet-grabber, .rw-sheet-bar > spacer + .rw-sheet-title + IconButton glass, .rw-sheet-divider) + .rw-sheet-body (body copy .rw-sheet-text) + .rw-sheet-foot
+   Result and Notes sheets (Figma 349:3528, 349:3793; Han approved 2026-10-23):
+     W / L check (CheckBoxes) ..... .rw-check[.is-win|.is-loss]  (no class = unselected, dashed ring)
+     Game row ..................... .rw-surface.rw-game > .rw-game-label + .rw-game-checks (.rw-check x2) + .rw-game-score
+     Button / Tertiary, Medium .... .rw-btn.rw-btn-tertiary (16px icon + label, N400)
+     IconButton XSmall (20px) ..... .rw-icon-btn-xs (score stepper)
+     Pills XSmall (Selectable) .... .rw-surface.rw-pill.rw-pill-xs[.is-active]
+     TextArea ..................... .rw-textarea (Unfilled, Filled Inactive, Typing = :focus)
+     Helper / meta text 13px ...... .rw-meta
+     Result cue (plain dot) ....... .rw-pill.rw-pill-sm.rw-cue.is-done > .rw-cue-mark.is-dot[.is-win|.is-loss]
+     Match Result, tied ........... .rw-result.is-draw
    ========================================================= */
 /* Screen background: app background + glow. The glow stays fixed while the content scrolls over it. */
 .rw-scroll.is-v2{background:var(--rw-bg-app-glow) no-repeat scroll,var(--rw-bg-app);--empty-body-weight:var(--rw-weight-min);}
@@ -86,6 +96,7 @@
 .rw-result::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor;}
 .rw-result.is-win{color:var(--rw-win);}
 .rw-result.is-loss{color:var(--rw-loss);}
+.rw-result.is-draw{color:var(--rw-draw);}
 /* Avatar / Letter (40px); Match Players uses the 32px size. */
 .rw-avatar{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--rw-avatar-bg);color:var(--rw-avatar-fg);font:var(--rw-type-avatar);letter-spacing:var(--rw-tracking);}
 .rw-avatar-sm{width:32px;height:32px;}
@@ -249,3 +260,41 @@
 .rw-search:focus-within .rw-search-input{color:var(--rw-search-fg-active);}
 .rw-search-clear{flex-shrink:0;width:20px;height:20px;padding:0;border:none;background:transparent;color:inherit;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;}
 .rw-search-clear::after{content:"";position:absolute;inset:-12px;}
+/* ---------- Result and Notes sheets (Figma 349:3528, 349:3793) ---------- */
+/* W / L check (Figma CheckBoxes 348:13628): 32px circle. Selected = solid fill and N75 letter; unselected = 1px dashed N400 ring
+   (2px dash / 2px gap, drawn like the cue ring) and N400 letter. Selection is a fill, so the N600 outline rule does not apply. */
+.rw-check{position:relative;width:var(--rw-check-size);height:var(--rw-check-size);flex-shrink:0;padding:0;border:none;border-radius:50%;background:transparent;color:var(--rw-check-fg);font:var(--rw-type-check);letter-spacing:var(--rw-tracking);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out),transform var(--dur-fast) var(--ease-out);}
+.rw-check::before{content:"";position:absolute;inset:0;border-radius:50%;background:repeating-conic-gradient(var(--rw-check-ring) 0 7.5deg,transparent 0 15deg);-webkit-mask:radial-gradient(closest-side,transparent calc(100% - 1px),#000 calc(100% - 1px));mask:radial-gradient(closest-side,transparent calc(100% - 1px),#000 calc(100% - 1px));pointer-events:none;}
+.rw-check::after{content:"";position:absolute;inset:-6px;}
+.rw-check:active{transform:scale(.94);}
+.rw-check.is-win,.rw-check.is-loss{color:var(--rw-check-on-fg);}
+.rw-check.is-win{background:var(--rw-check-win-bg);}
+.rw-check.is-loss{background:var(--rw-check-loss-bg);}
+.rw-check.is-win::before,.rw-check.is-loss::before{content:none;}
+/* Game row: 64px pill. Label | W L | score (100px, right aligned). */
+.rw-game{min-height:64px;padding:16px;border-radius:999px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.rw-game-label{min-width:54px;font:var(--rw-type-row-value);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);white-space:nowrap;}
+.rw-game-checks{display:flex;gap:8px;}
+.rw-game-score{width:100px;display:flex;align-items:center;justify-content:flex-end;gap:8px;font:var(--rw-type-row-value);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);white-space:nowrap;font-variant-numeric:tabular-nums;}
+/* Button / Tertiary, Medium (Figma Button 171:12474): no fill, 16px icon + 12px label, both N400. */
+.rw-btn-tertiary{position:relative;height:var(--rw-btn-tertiary-h);padding:4px;gap:4px;border-radius:99px;background:transparent;color:var(--rw-btn-tertiary-fg);font:var(--rw-type-btn-secondary);letter-spacing:var(--rw-tracking);white-space:nowrap;}
+.rw-btn-tertiary::after{content:"";position:absolute;inset:-10px 0;}
+/* IconButton XSmall: 20px Glass Fill circle with a 12px icon (score stepper). The tap area extends to 44px. */
+.rw-icon-btn-xs{position:relative;width:var(--rw-icon-btn-xs-size);height:var(--rw-icon-btn-xs-size);flex-shrink:0;padding:0;border:none;border-radius:50%;background:var(--rw-icon-btn-xs-bg);color:var(--rw-icon-btn-xs-fg);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform var(--dur-fast) var(--ease-out),opacity var(--dur-fast);}
+.rw-icon-btn-xs::after{content:"";position:absolute;inset:-12px;}
+.rw-icon-btn-xs:active{transform:scale(.9);}
+.rw-icon-btn-xs:disabled{opacity:.4;transform:none;cursor:default;}
+/* Pills XSmall (Selectable): 24px, padding 0 10, 12px label. Active = N600 outline and label like every Pill. */
+.rw-pill-xs{height:var(--rw-pill-xs-h);padding:0 10px;font:var(--rw-type-pill-sm);letter-spacing:var(--rw-tracking);}
+.rw-pill-xs::after{inset:-10px 0;}
+.rw-pill-xs:disabled{cursor:default;}
+/* TextArea (Figma 349:4322). Unfilled: placeholder N400. Filled Inactive: N600 text. Typing: Highlight Fill + N600 ring, N800 text. */
+.rw-textarea{display:block;width:100%;height:var(--rw-textarea-h);margin:0;padding:14px 18px;border-radius:var(--rw-textarea-radius);border:1px solid transparent;background:var(--rw-textarea-bg);color:var(--rw-textarea-fg);font:var(--rw-type-textarea);letter-spacing:var(--rw-tracking);resize:none;outline:none;caret-color:var(--rw-textarea-fg-active);transition:background var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out);}
+.rw-textarea::placeholder{color:var(--rw-textarea-placeholder);opacity:1;}
+.rw-textarea:focus{background:var(--rw-textarea-bg-active);border-color:var(--rw-textarea-border-active);color:var(--rw-textarea-fg-active);}
+/* Helper and score lines: 13px Medium, secondary. */
+.rw-meta{margin:0;font:var(--rw-type-meta);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
+/* Result cue: the Indicator pill with a plain dot instead of the check. More wins B75, more losses O100, tied or unresolved neutral. */
+.rw-cue.is-done .rw-cue-mark.is-dot{background:var(--rw-cue-dot-even);}
+.rw-cue.is-done .rw-cue-mark.is-dot.is-win{background:var(--rw-cue-dot-win);}
+.rw-cue.is-done .rw-cue-mark.is-dot.is-loss{background:var(--rw-cue-dot-loss);}

@@ -87,10 +87,63 @@ test('text the mock cannot read: no invented match data, words kept as a note to
   assert.equal(d.flags.notes, 'check'); assert.equal(d.lost, 'Good session today.');
 });
 
-test('totals without game order or scores never become invented games', () => {
-  const r = V.mockParse('x', 'en'); Object.assign(r, { match_type: 'singles', game_count: 6, totals: { wins: 4, losses: 2 } });
+test('totals without game order or scores: a valid aggregate, no game outcome invented (Han, 2026-10-23)', () => {
+  const r = V.mockParse('x', 'en'); Object.assign(r, { match_type: 'singles', game_count: 5, totals: { wins: 3, losses: 2 } });
   const d = V.toDraft(r, players, 21);
-  assert.equal(d.flags.result, 'missing'); assert.equal(d.games.length, 1);
+  assert.equal(d.flags.result, null); assert.equal(d.games.length, 5);
+  assert.ok(d.games.every(g => g.w === null && g.l === null)); assert.deepEqual(d.totals, { w: 3, l: 2 });
+  assert.deepEqual(V.tally(d.games, d.totals), { w: 3, l: 2, open: 0, ok: true, state: 'ok' });
+  // Saved: every result counts, none is placed on a game number.
+  const saved = V.savedGames(d.games, d.totals, 21);
+  assert.deepEqual(saved.map(g => g.r).sort(), ['L', 'L', 'W', 'W', 'W']); assert.ok(saved.every(g => g.u === 1));
+  assert.deepEqual(V.fromSaved(saved), { games: d.games, totals: d.totals });
+});
+
+test('result: games heard without scores keep their result and no score', () => {
+  const r = V.mockParse('x', 'en'); Object.assign(r, { match_type: 'singles', game_count: 2, totals: { wins: 1, losses: 1 },
+    games: [{ number: 1, result: 'win', my_score: null, their_score: null, interrupted: false }, { number: 2, result: 'loss', my_score: 19, their_score: 21, interrupted: false }] });
+  const d = V.toDraft(r, players, 21);
+  assert.deepEqual(d.games, [{ w: 'us', l: null }, { w: 'them', l: 19 }]);
+  assert.equal(d.flags.result, null);
+  assert.deepEqual(V.tally(d.games, d.totals), { w: 1, l: 1, open: 0, ok: true, state: 'ok' }); // a tie is valid
+  assert.deepEqual(V.savedGames(d.games, d.totals, 21), [{ r: 'W' }, [19, 21]]);
+});
+
+test('result: a game whose result was not said stays open and blocks until set', () => {
+  const r = V.mockParse('x', 'en'); Object.assign(r, { match_type: 'singles', game_count: 3,
+    games: [{ number: 1, result: 'win', my_score: 21, their_score: 15, interrupted: false }, { number: 2, result: 'loss', my_score: null, their_score: null, interrupted: false }] });
+  const d = V.toDraft(r, players, 21);
+  assert.deepEqual(d.games, [{ w: 'us', l: 15 }, { w: 'them', l: null }, { w: null, l: null }]);
+  assert.equal(d.totals, null);
+  assert.deepEqual(V.tally(d.games, d.totals), { w: 1, l: 1, open: 1, ok: false, state: 'incomplete' });
+});
+
+test('result: totals that contradict the games are flagged and do not count; games kept as heard', () => {
+  const r = V.mockParse('x', 'en'); Object.assign(r, { match_type: 'singles', game_count: 2, totals: { wins: 2, losses: 0 },
+    games: [{ number: 1, result: 'win', my_score: 21, their_score: 15, interrupted: false }, { number: 2, result: 'loss', my_score: 18, their_score: 21, interrupted: false }] });
+  const d = V.toDraft(r, players, 21);
+  assert.equal(d.flags.result, 'conflict'); assert.equal(V.fits(d.games, d.totals), false);
+  assert.deepEqual(d.games, [{ w: 'us', l: 15 }, { w: 'them', l: 18 }]);
+  assert.deepEqual(V.tally(d.games, d.totals), { w: 1, l: 1, open: 0, ok: true, state: 'ok' });
+});
+
+test('result: an aggregate counts only while it fits, and never fills a game in', () => {
+  const open = n => Array.from({ length: n }, () => ({ w: null, l: null }));
+  const t = { w: 3, l: 2 }, W = { w: 'us', l: null }, L = { w: 'them', l: null };
+  assert.equal(V.fits([W].concat(open(4)), t), true);
+  assert.deepEqual(V.tally([W, W, W].concat(open(2)), t), { w: 3, l: 2, open: 0, ok: true, state: 'ok' });
+  assert.equal(V.fits([L, L, L].concat(open(2)), t), false);
+  assert.deepEqual(V.tally([L, L, L].concat(open(2)), t), { w: 0, l: 3, open: 2, ok: false, state: 'incomplete' });
+  assert.equal(V.fits(open(6), t), false); // a game added: 3 + 2 no longer covers 6 games
+  assert.equal(V.fits(open(5), t), true);  // ...and counts again once it is removed
+  assert.deepEqual(V.savedGames([W, W, W].concat(open(2)), t, 21), [{ r: 'W' }, { r: 'W' }, { r: 'W' }, { r: 'L', u: 1 }, { r: 'L', u: 1 }]);
+});
+
+test('result: an unstorable score is dropped and flagged, the result is kept', () => {
+  const r = V.mockParse('x', 'en'); Object.assign(r, { match_type: 'singles', game_count: 1,
+    games: [{ number: 1, result: 'win', my_score: 21, their_score: 20, interrupted: false }] });
+  const d = V.toDraft(r, players, 21);
+  assert.deepEqual(d.games, [{ w: 'us', l: null }]); assert.equal(d.flags.result, 'scores');
 });
 
 test('live cues', () => {

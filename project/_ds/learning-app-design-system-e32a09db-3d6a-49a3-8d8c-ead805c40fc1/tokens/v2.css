@@ -160,6 +160,8 @@
   --rw-color-avatar-me-bg: var(--rw-b75);             /* your own avatar (Han, 2026-10-23: Figma Player 228:8826) */
   --rw-color-avatar-me-fg: var(--rw-n75);             /* Figma #1B1A1D is unbound; nearest Foundation N75 */
   --rw-color-surface-input-filled: var(--rw-purplegrey-500); /* search field holding a value (Figma 329:7330) */
+  /* Result and Notes sheets (Figma 349:3528, 349:3793; Han approved 2026-10-23) */
+  --rw-color-select-win: var(--rw-b75);              /* selected W on the W / L check (Figma CheckBoxes 348:13628) */
 
   /* Back-compat names used by screens and the IconButton component */
   --rw-bg-app: var(--rw-color-bg-app);
@@ -216,6 +218,7 @@
   /* Match Result */
   --rw-win: var(--rw-color-status-win);
   --rw-loss: var(--rw-color-status-loss);
+  --rw-draw: var(--rw-color-text-secondary);          /* tied match (1W : 1L), neutral N400 (pending Han's choice, 2026-10-23) */
   /* Avatar / Letter */
   --rw-avatar-bg: var(--rw-color-avatar-bg);
   --rw-avatar-fg: var(--rw-color-avatar-fg);
@@ -265,6 +268,35 @@
   --rw-sheet-scrim: var(--rw-color-scrim);
   --rw-sheet-grabber: var(--rw-purplegrey-400);       /* Figma #4F4E53 is unbound; nearest Foundation primitive (Han, 2026-10-23) */
   --rw-sheet-divider: var(--rw-purplegrey-600);
+  /* W / L check (Figma CheckBoxes 348:13628). Selected = fill (no outline); unselected = dashed N400 ring. Letter N75 (Figma N150, Han R4) */
+  --rw-check-size: 32px;
+  --rw-check-win-bg: var(--rw-color-select-win);
+  --rw-check-loss-bg: var(--rw-color-status-loss);
+  --rw-check-on-fg: var(--rw-color-text-on-action);
+  --rw-check-fg: var(--rw-color-text-secondary);
+  --rw-check-ring: var(--rw-color-border-pending);
+  /* Button / Tertiary, Medium (Figma Button 171:12474): no fill, 16px icon + label, both N400 */
+  --rw-btn-tertiary-h: 24px;
+  --rw-btn-tertiary-fg: var(--rw-color-text-secondary);
+  /* IconButton XSmall (score stepper, Figma 349:3787): 20px, Glass Fill, 12px icon N600 */
+  --rw-icon-btn-xs-size: 20px;
+  --rw-icon-btn-xs-bg: var(--rw-color-surface);
+  --rw-icon-btn-xs-fg: var(--rw-color-text-body);
+  /* Pills XSmall (Figma Pills Size=XSmall, Type=Selectable 349:4195 / 349:4201): 24px, 12px label */
+  --rw-pill-xs-h: 24px;
+  /* TextArea (Figma 349:4322): Unfilled / Filled Inactive on Inactive Fill; Typing = Highlight Fill + N600 ring (Han N3). Placeholder N400 (Han N4) */
+  --rw-textarea-h: 124px;
+  --rw-textarea-radius: 10px;
+  --rw-textarea-bg: var(--rw-color-surface-input);
+  --rw-textarea-bg-active: var(--rw-color-surface-highlight);
+  --rw-textarea-border-active: var(--rw-color-border-selected);
+  --rw-textarea-fg: var(--rw-color-text-body);
+  --rw-textarea-fg-active: var(--rw-color-text-primary);
+  --rw-textarea-placeholder: var(--rw-color-text-secondary);
+  /* Result indicator on a cue pill (Figma 349:4144): plain dot. More wins B75, more losses O100, tied or unresolved neutral (Han N7) */
+  --rw-cue-dot-win: var(--rw-color-select-win);
+  --rw-cue-dot-loss: var(--rw-color-status-loss);
+  --rw-cue-dot-even: var(--rw-color-text-secondary);
   --rw-cue-h: 24px;                                   /* Figma Pills Type=Indicator 216:8356 */
   --rw-cue-done-bg: var(--rw-color-surface-done);
   --rw-cue-done-fg: var(--rw-color-text-on-selected);
@@ -321,4 +353,7 @@
   --rw-type-flag: 500 12px/15px var(--font-sans);   /* Pills State=Warning (Figma 329:7164) */
   --rw-type-row-text: 500 14px/20px var(--font-sans);   /* InputTile value (Figma 329:7089) */
   --rw-type-sheet-title: 500 16px/15px var(--font-sans);
+  --rw-type-check: 600 16px/15px var(--font-sans);    /* W / L letter (Figma CheckBoxes) */
+  --rw-type-textarea: 500 14px/21px var(--font-sans); /* TextArea (Figma 349:4321) */
+  --rw-type-meta: 500 13px/16.9px var(--font-sans);   /* 13px helper and score lines; Figma Regular -> Medium (Han N5) */
 }
