@@ -65,6 +65,20 @@ Fields
   - "I struggled internet" -> "I struggled at the net" (Net); "my surf was weak" -> "my serve was weak" (Serve), when the badminton context supports it.
   - "my my backhand was slow" -> "My backhand was slow"; "I was good smash" -> "My smashes were good".
   The observation's area and category MUST reflect the cleaned text, not a misleading literal reading of an ASR error. Use the exact uncorrected heard player name in about if one is mentioned; do not fabricate a corrected player identity.
+
+  Badminton terminology glossary (semantic hints, not literal replacement rules). Use these meanings in BOTH Chinese and English, including mixed speech:
+  - Serve / 发球: short serve 发小球/发短球 (short serve, low serve), high serve 发高远球 (high serve), flick serve 偷后场/偷发后场 (flick serve), serve too high/发球冒高, serve fault/发球违例.
+  - Receive / 接发: 接发球/接发, attacking the return/抢接发, return of serve, receive too passive/接发被动, push return/推接发.
+  - Net / 网前: 网前搓球/搓球 (net spin/net shot), 勾对角 (cross-net shot), 扑球 (net kill), 封网 (net interception), 放网 (net drop), 回放/贴网; "往前搓球" likely 网前搓球, while "往前跑/移动" is Footwork.
+  - Smash / 杀球: 杀球, 点杀 (stick smash), 劈杀 (slice smash), 重杀 (power smash), 连续进攻 (follow-up attack), smash into net/杀球下网, smash long/杀球出界.
+  - Defence / 防守: 接杀 (smash defence), 挡网 (block to net), 挑球 (lift), 被动防守 (defensive under pressure), 反手防守 (backhand defence), 反手后场 (rear-court backhand), block, drive defence.
+  - Footwork / 步法: 启动 (split-step/first step), 回中 (recovery to base), 交叉步 (cross-over step), 并步 (chassé), 蹬跨 (lunge), 后退步法 (rear-court footwork), 跑不到位 (late to shuttle).
+  - Placement / 落点线路: 吊球 (drop shot), 劈吊 (slice drop), 高远球 (clear), 平高球 (attacking clear), 平抽 (drive), 推球 (push), 直线/斜线 (straight/cross-court), 追身 (body shot), 压底线 (deep to baseline), 出界 (out).
+  - Strategy / 轮转: 补位 (covering), 轮转 (rotation), 前后站位 (front-back), 平行站位 (side-by-side), 抢网 (take the net), controlling tempo/控制节奏; choose the best-fitting area, Other if no suitable tag.
+  Common Mandarin speech-recognition confusions when the context supports correction: 往前/网前, 揭发/接发, 杀球事物/杀球失误, 手杆/手感, 掉球/吊球, 调球/吊球, 放手/防守, 反反手/反手, 后厂/后场, 千场/前场, 发晓球/发小球, 补喂/补位, 佳速/加速, 回钟/回中.
+  Common English speech-recognition confusions when context supports correction: internet/in the net/at the net; surf/serve; smash/mash; drop shop/drop shot; clear/clears; lift/lifts; back hand/backhand; fore hand/forehand; net kill/neck kill; flick serve/flip serve; drive/drive shot; split step/split-step; shuttle/shuttlecock. Do NOT convert ordinary English phrases (e.g., internet connection, surf the web, drive home) to badminton terms if that context is absent.
+  Negative controls: "往前移动" is movement, not net play; "网前扑球" is Net, not Footwork; "我打得不好" does not establish a particular area; "his serve was good" is opponent observation, not the speaker's Serve strength. A bare ambiguous homophone should remain unchanged.
+
   category: "won_points" for strengths, things that worked or won points; "lost_points" for mistakes, weaknesses, things that cost points; "opponent" for an opponent's tendencies, strengths or weaknesses; "unsure" when the speaker is uncertain or it could go either way.
   area: one of ${AREAS.join(', ')} that best fits, "Other" if none fits, null for opponent observations. When the observation names where or which stroke, use it: 网前/net → Net (a mistake at the net is Net, not Footwork), 杀球/smash → Smash, 发球/发小球/发短球/serve → Serve, 接发/return → Return, 步法/footwork → Footwork, 防守/defence → Defence, 落点/clears/drops/length → Placement. Lifts under pressure count as Defence. about: the opponent's name for opponent observations, else null.
 - missing: what a match log usually needs that the description does not give: ${MISSING.join(', ')}. Only include items that apply; if there was no match at all, include nothing about results. Never list "game_order" when order_known is true, or "partners" for singles.
