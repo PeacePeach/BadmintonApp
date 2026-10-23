@@ -895,7 +895,7 @@ button:disabled{cursor:default !important;}
                   <span class="rw-input-tile-value {{ r.valueCls }}">{{ r.value }}</span>
                 </span>
                 <span class="rw-input-tile-end">
-                  <sc-if value="{{ r.flag }}" hint-placeholder-val="{{ false }}"><span class="rw-flag"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 14 }}" hint-size="14px,14px"></x-import>{{ r.flag }}</span></sc-if>
+                  <sc-if value="{{ r.flag }}" hint-placeholder-val="{{ false }}"><span class="rw-flag"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 14 }}" strokeWidth="{{ 2.06 }}" hint-size="14px,14px"></x-import>{{ r.flag }}</span></sc-if>
                   <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 16 }}" strokeWidth="{{ 3 }}" hint-size="16px,16px"></x-import>
                 </span>
               </button>
@@ -1560,7 +1560,7 @@ button:disabled{cursor:default !important;}
               <div role="group" aria-label="{{ g.label }}" style="display:flex;flex-direction:column;gap:12px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:24px;padding-left:6px;">
                   <span class="rw-hint">{{ g.label }}</span>
-                  <sc-if value="{{ g.warn }}" hint-placeholder-val="{{ false }}"><span class="rw-flag"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 14 }}" hint-size="14px,14px"></x-import>{{ tx.flagUnknown }}</span></sc-if>
+                  <sc-if value="{{ g.warn }}" hint-placeholder-val="{{ false }}"><span class="rw-flag"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 14 }}" strokeWidth="{{ 2.06 }}" hint-size="14px,14px"></x-import>{{ tx.flagUnknown }}</span></sc-if>
                 </div>
                 <sc-for list="{{ g.rows }}" as="p" hint-placeholder-count="1">
                   <sc-if value="{{ p.me }}" hint-placeholder-val="{{ false }}">

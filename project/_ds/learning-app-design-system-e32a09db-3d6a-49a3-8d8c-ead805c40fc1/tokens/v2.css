@@ -281,6 +281,7 @@
   --rw-flag-bg: var(--rw-color-surface-warning);
   --rw-flag-icon: var(--rw-color-status-warning);
   --rw-flag-border: var(--rw-color-border-warning);
+  --rw-flag-fg: var(--rw-n600);                      /* Pills State=Warning label N600 (Figma 329:7164, Han 2026-10-23) */
 
   /* ---------- Type: Poppins, -0.16px tracking except tracked eyebrows ----------
      V2 never goes below Medium (500): no Regular weight anywhere on a V2 screen. Text colour is N800 (primary) or
@@ -315,7 +316,7 @@
   --rw-type-hint: 500 14px/1.2 var(--font-sans);        /* Figma Regular -> Medium (V2 minimum) */
   --rw-type-transcript: 500 16px/26.4px var(--font-sans); /* Figma Regular -> Medium (V2 minimum) */
   --rw-type-timer: 500 14px/14px var(--font-sans);
-  --rw-type-flag: 500 11px/15px var(--font-sans);
+  --rw-type-flag: 500 12px/15px var(--font-sans);   /* Pills State=Warning (Figma 329:7164) */
   --rw-type-row-text: 500 14px/20px var(--font-sans);   /* InputTile value (Figma 329:7089) */
   --rw-type-sheet-title: 500 16px/15px var(--font-sans);
 }
