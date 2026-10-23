@@ -2871,7 +2871,7 @@ class Component extends DCLogic {
         g.u = 1;
       }
     }
-    this.setState({ rs: { games, totals: l.voice.totals || null, format: l.format, max: Math.max(3, l.games.length) } });
+    this.setState({ rs: { games, totals: l.voice.totals || null, format: l.format, max: window.RallywiseVoice.MAX_GAMES } });
   }
   setRs(fn) { this.setState(s => s.rs ? { rs: { ...s.rs, ...fn(s.rs) } } : null); }
   rsGame(i, fn) { this.setRs(r => ({ games: r.games.map((g, j) => j === i ? fn(g) : g) })); }
