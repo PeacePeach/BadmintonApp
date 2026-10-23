@@ -218,7 +218,7 @@
   /* Match Result */
   --rw-win: var(--rw-color-status-win);
   --rw-loss: var(--rw-color-status-loss);
-  --rw-draw: var(--rw-color-text-secondary);          /* tied match (1W : 1L), neutral N400 (pending Han's choice, 2026-10-23) */
+  --rw-draw: var(--rw-color-text-secondary);          /* tied record (shown as "1W : 1L", not "Draw"), neutral N400 (Han, 2026-10-23) */
   /* Avatar / Letter */
   --rw-avatar-bg: var(--rw-color-avatar-bg);
   --rw-avatar-fg: var(--rw-color-avatar-fg);

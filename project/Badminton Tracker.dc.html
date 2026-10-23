@@ -2124,7 +2124,7 @@ const I18N = {
     flagResult: 'Missing result', flagScores: 'Check scores', flagNotes: 'Check notes', flagConflict: 'Check result',
     rvWLOpen: '{w} Win : {l} Loss · {n} not set', wlShort: '{w}W : {l}L',
     matchResults: 'Match Results', matchNotes: 'Match Notes', addScore: 'Add score', removeGame: 'Remove last game', yourOpponents: 'your opponents',
-    draw: 'Draw', resultDraw: 'Draw', gameNoScore: '{game} · {r}', gamesUnordered: 'Games won, order not known'
+    gameNoScore: '{game} · {r}', gamesUnordered: 'Games won, order not known'
   },
   zh: {
     matches: '比赛', insights: '洞察', players: '球友', settings: '设置', profile: '个人资料', logOut: '退出登录',
@@ -2270,7 +2270,7 @@ const I18N = {
     flagResult: '缺少结果', flagScores: '确认比分', flagNotes: '确认笔记', flagConflict: '确认结果',
     rvWLOpen: '{w}胜 : {l}负 · {n}局未填', wlShort: '{w}胜 : {l}负',
     matchResults: '比赛结果', matchNotes: '比赛笔记', addScore: '添加比分', removeGame: '删除最后一局', yourOpponents: '对手',
-    draw: '平', resultDraw: '平局', gameNoScore: '{game} · {r}', gamesUnordered: '双方各赢局数（顺序未知）'
+    gameNoScore: '{game} · {r}', gamesUnordered: '双方各赢局数（顺序未知）'
   }
 };
 function deviceLang() {
@@ -3010,11 +3010,11 @@ class Component extends DCLogic {
   first(id) { return id === 'me' ? this.t('you') : this.nm(id).split(' ')[0]; }
   ini(id, name) { if (!id || this.unknown(id)) return '?'; return (name || this.nm(id)).split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase(); }
   // A saved game is [your points, their points], or { r: 'W' | 'L' } when no score was given ({ r, u: 1 }: order not known).
-  // Equal games won is a draw (Han, 2026-10-23: a tied result is valid).
+  // Equal games won is a tie, shown as the record ("1W : 1L"), never as Win, Loss or Draw (Han, 2026-10-23).
   gameRes(g) { return window.RallywiseVoice ? window.RallywiseVoice.gameResult(g) : g[0] > g[1] ? 'W' : 'L'; }
   res(games) {
     const us = games.filter(g => this.gameRes(g) === 'W').length, them = games.filter(g => this.gameRes(g) === 'L').length;
-    return { us, them, win: us > them, draw: us === them && us + them > 0 };
+    return { us, them, win: us > them, even: us === them && us + them > 0 };
   }
   scoreLine(games, sep) { return this.scored(games).map(g => g.join('–')).join(sep || ' · '); }
   scored(games) { return games.filter(g => Array.isArray(g) && typeof g[0] === 'number' && typeof g[1] === 'number'); }
@@ -3036,10 +3036,10 @@ class Component extends DCLogic {
     const r = this.res(m.games);
     return {
       id: m.id, type: this.typeLabel(m.type), dateLabel: this.date(m.date), teamA: this.teamA(m), teamB: this.teamB(m), gamesWon: `${r.us}–${r.them}`,
-      ...this.badge(r.win), ...(r.draw ? { resultLabel: this.t('draw') } : {}),
+      ...this.badge(r.win), ...(r.even ? { resultLabel: this.t('wlShort', { w: r.us, l: r.them }) } : {}),
       games: this.scored(m.games).map(g => ({ s: `${g[0]}–${g[1]}`, fg: 'var(--text-secondary)' })),
       // V2 Match card: result dot, Letter avatars (you, partner, then opponents) and the "2 : 1" score.
-      resultCls: r.draw ? 'is-draw' : r.win ? 'is-win' : 'is-loss', score: `${r.us} : ${r.them}`,
+      resultCls: r.even ? 'is-draw' : r.win ? 'is-win' : 'is-loss', score: `${r.us} : ${r.them}`,
       playersCls: m.type === 'Doubles' ? 'is-doubles' : '',
       players: (m.type === 'Doubles' ? ['me', m.partner, this.sides(m).opps[0], this.sides(m).opps[1]] : ['me', this.sides(m).opps[0]]).map(id => ({ ini: this.ini(id) })),
       open: () => this.go('detail', { detailId: m.id })
@@ -3129,7 +3129,7 @@ class Component extends DCLogic {
     if (log.editId) this.track('match_edited', { match_type: m.type.toLowerCase(), changed: prev ? this.changedParts(prev, m) : [] });
     else {
       const r = this.res(m.games);
-      this.track('match_logged', { match_type: m.type.toLowerCase(), format: log.format, result: r.draw ? 'draw' : r.win ? 'win' : 'loss', games: m.games.length,
+      this.track('match_logged', { match_type: m.type.toLowerCase(), format: log.format, result: r.even ? 'tie' : r.win ? 'win' : 'loss', games: m.games.length,
         has_notes: !!(m.worked || m.lost || m.on), tag_count: m.wt.length + m.lt.length, match_count: matches.length,
         log_seconds: log.startedAt ? Math.round((Date.now() - log.startedAt) / 1000) : null });
     }
@@ -3835,7 +3835,7 @@ class Component extends DCLogic {
       const r = this.res(m.games);
       const openP = id => () => { if (!this.unknown(id)) this.go('player', { playerId: id }); };
       v.detail = {
-        dateLong: this.date(m.date, true), type: this.typeLabel(m.type), resultWord: this.t(r.draw ? 'resultDraw' : r.win ? 'resultWin' : 'resultLoss'), gamesWon: `${r.us}–${r.them}`,
+        dateLong: this.date(m.date, true), type: this.typeLabel(m.type), resultWord: r.even ? this.t('wlShort', { w: r.us, l: r.them }) : this.t(r.win ? 'resultWin' : 'resultLoss'), gamesWon: `${r.us}–${r.them}`,
         sideA: [{ name: this.t('you') + ' · ' + this.nm('me'), initials: this.ini('me'), avBg: A, avFg: 'var(--action-on-primary)' }]
           .concat(m.partner ? [{ name: this.nm(m.partner), initials: this.ini(m.partner), avBg: 'var(--icon-badge-bg)', avFg: 'var(--icon-badge-fg)' }] : []),
         sideB: this.sides(m).opps.map(id => ({ name: this.nm(id), initials: this.ini(id), open: openP(id) })),
