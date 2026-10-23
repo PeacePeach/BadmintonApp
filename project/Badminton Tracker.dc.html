@@ -84,7 +84,8 @@ button:disabled{cursor:default !important;}
 @keyframes sheet-up{from{transform:translateY(100%);}to{transform:none;}}
 .sheet{animation:sheet-up .22s var(--ease-out) both;}
 @media (prefers-reduced-motion:reduce){.sheet{animation:none;}}
-/* Toast: one global feedback pill at the top of the screen, slides down in and back up out. */
+/* Toast: one global feedback bar at the top of the screen, full width inside the 20px page margins (up to two lines),
+   slides down in and back up out. */
 @keyframes toast-in{from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:none;}}
 @keyframes toast-out{from{opacity:1;transform:none;}to{opacity:0;transform:translateY(-12px);}}
 .toast{animation:toast-in .22s var(--ease-out) both;}
@@ -1953,9 +1954,9 @@ button:disabled{cursor:default !important;}
   <!-- Toast: the one global feedback message. Call flash(text, 'success' | 'error' | 'info') from anywhere. -->
   <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
     <div role="{{ toast.role }}" aria-live="{{ toast.live }}" style="position:absolute;left:20px;right:20px;top:calc(48px + env(safe-area-inset-top, 0px));display:flex;justify-content:center;pointer-events:none;">
-      <div class="toast {{ toast.cls }}" style="height:44px;max-width:100%;padding:0 18px 0 14px;border-radius:99px;background:var(--text-primary);color:var(--text-inverse);display:flex;align-items:center;gap:8px;font:500 14px/1 var(--font-sans);box-shadow:0 8px 24px rgba(0,0,0,.35);">
-        <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ toast.icon }}" size="{{ 18 }}" color="{{ toast.iconFg }}" hint-size="18px,18px"></x-import>
-        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ toast.text }}</span>
+      <div class="toast {{ toast.cls }}" style="width:100%;min-height:44px;box-sizing:border-box;padding:12px 18px 12px 14px;border-radius:22px;background:var(--text-primary);color:var(--text-inverse);display:flex;align-items:center;gap:8px;font:500 14px/1.3 var(--font-sans);box-shadow:0 8px 24px rgba(0,0,0,.35);">
+        <span style="flex-shrink:0;display:flex;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ toast.icon }}" size="{{ 18 }}" color="{{ toast.iconFg }}" hint-size="18px,18px"></x-import></span>
+        <span style="min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ toast.text }}</span>
       </div>
     </div>
   </sc-if>
