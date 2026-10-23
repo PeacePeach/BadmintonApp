@@ -3139,18 +3139,26 @@ class Component extends DCLogic {
   // Global toast. kind is 'success' (default), 'error' or 'info'; it auto-dismisses after ~2.5s.
   // The one global toast (Figma 360:7533). kind: success | error | info | warning. opts.sub is the secondary copy;
   // without it, a message of two or more sentences shows its first sentence as the headline and the rest below.
-  // opts.dismissible (default true) adds the close button; it still hides on its own.
+  // Dismissal (Han, 2026-10-23): Success hides itself after 2.6s and its × is optional (opts.dismissible, default on;
+  // off for "Match successfully logged"). Info, Warning and Error stay until × is tapped or another toast replaces them,
+  // and always show ×. A new toast cancels the previous one's timers.
   flash(text, kind, opts) {
-    clearTimeout(this._t); clearTimeout(this._tOut);
-    const o = opts || {}, m = o.sub == null && /^(.+?(?:[.!?](?=\s)|[。！？]))\s*(\S[\s\S]*)$/.exec(String(text || ''));
-    this.setState({ toast: { text: m ? m[1] : text, sub: m ? m[2] : o.sub || '', kind: kind || 'success', dismissible: o.dismissible !== false, out: false } });
-    this._tOut = setTimeout(() => this.setState(s => s.toast ? { toast: { ...s.toast, out: true } } : null), 2400);
-    this._t = setTimeout(() => this.setState({ toast: null }), 2600);
+    this.clearToastTimers();
+    const o = opts || {}, k = ['success', 'error', 'info', 'warning'].includes(kind) ? kind : 'success', id = (this._toastId || 0) + 1;
+    const m = o.sub == null && /^(.+?(?:[.!?](?=\s)|[。！？]))\s*(\S[\s\S]*)$/.exec(String(text || ''));
+    this._toastId = id;
+    this.setState({ toast: { id, text: m ? m[1] : text, sub: m ? m[2] : o.sub || '', kind: k, dismissible: k !== 'success' || o.dismissible !== false, out: false } });
+    if (k === 'success') this.hideToast(id, 2400);
   }
+  // Slides the toast out after delay ms, then removes it. Only the toast with this id is touched.
+  hideToast(id, delay) {
+    this._tOut = setTimeout(() => this.setState(s => s.toast && s.toast.id === id ? { toast: { ...s.toast, out: true } } : null), delay);
+    this._t = setTimeout(() => this.setState(s => s.toast && s.toast.id === id ? { toast: null } : null), delay + 200);
+  }
+  clearToastTimers() { clearTimeout(this._t); clearTimeout(this._tOut); }
   closeToast() {
-    clearTimeout(this._t); clearTimeout(this._tOut);
-    this.setState(s => s.toast ? { toast: { ...s.toast, out: true } } : null);
-    this._t = setTimeout(() => this.setState({ toast: null }), 200);
+    const t = this.state.toast; if (!t || t.out) return;
+    this.clearToastTimers(); this.hideToast(t.id, 0);
   }
   setLog(patch) { this.setState(s => ({ log: { ...s.log, ...(typeof patch === 'function' ? patch(s.log) : patch) } })); }
 
