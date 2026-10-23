@@ -7,6 +7,8 @@
      Tile Container ............... .rw-surface.rw-tile
      Glass (floating controls) .... .rw-glass   (IconButton variant "glass" in _ds_bundle.js uses the same tokens)
      Button / Primary, Large ...... .rw-btn.rw-btn-primary
+     InlineBanner (Figma 333:8797) .rw-inline-banner > .rw-inline-banner-title (CircleHelp 18 + text) + slot
+     Button / Secondary, Medium ... .rw-btn.rw-btn-secondary (fill by context: page purplegrey-500, tile/banner Highlight Fill); PlayerTags .rw-tags
      Pills (Medium, Small; Active)  .rw-surface.rw-pill[.rw-pill-sm][.is-active]
      Metric ....................... .rw-eyebrow + .rw-metric-value + .rw-subtitle | .rw-bar
      Graphs / Simple bar .......... .rw-bar
@@ -50,6 +52,17 @@
 /* Button / Primary, Large */
 .rw-btn{border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform var(--dur-fast) var(--ease-out),opacity var(--dur-fast);}
 .rw-btn-primary{height:var(--rw-btn-primary-h);border-radius:999px;padding:1px 24px;background:var(--rw-btn-primary-bg);color:var(--rw-btn-primary-fg);font:var(--rw-type-button);}
+/* Button / Secondary, Medium: text, or a 16px icon + text. On a tile or banner it takes the on-surface fill. */
+.rw-btn-secondary{position:relative;height:var(--rw-btn-secondary-h);border-radius:999px;padding:0 12px;gap:4px;background:var(--rw-btn-secondary-bg);color:var(--rw-btn-secondary-fg);font:var(--rw-type-btn-secondary);letter-spacing:var(--rw-tracking);white-space:nowrap;}
+.rw-btn-secondary:has(svg){padding-left:10px;}
+.rw-btn-secondary::after{content:"";position:absolute;inset:-6px 0;}
+.rw-tile .rw-btn-secondary,.rw-inline-banner .rw-btn-secondary{background:var(--rw-btn-secondary-bg-on-surface);}
+/* InlineBanner: question or notice inside content, with a slot below (PlayerTags in Players). */
+.rw-inline-banner{display:flex;flex-direction:column;gap:16px;padding:16px;border-radius:var(--rw-banner-radius);border:1px solid var(--rw-banner-border);background:var(--rw-banner-bg);}
+.rw-inline-banner-title{display:flex;align-items:center;gap:4px;margin:0;font:var(--rw-type-banner-title);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);}
+.rw-inline-banner-title>:first-child{flex-shrink:0;}
+/* PlayerTags: a wrapping row of Secondary buttons. */
+.rw-tags{display:flex;flex-wrap:wrap;gap:8px 4px;}
 .rw-btn:active{transform:scale(.97);}
 .rw-btn:disabled{opacity:.4;transform:none;}
 /* Pills: Medium (14px) and Small (12px); Active adds the light outline. The tap area extends to 44px. */

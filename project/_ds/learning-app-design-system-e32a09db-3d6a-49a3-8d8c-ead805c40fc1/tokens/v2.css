@@ -105,6 +105,7 @@
   --rw-highlightfill: rgba(255, 255, 255, .08);                          /* Highlight Fill: #FFFFFF at 8% (Log Match, 207:7730) */
   --rw-inactivefill: rgba(255, 255, 255, .03);                           /* Inactive Fill: #FFFFFF at 3% */
   --rw-blue-gradient-01: linear-gradient(90deg, #5b9dff 0%, #2c3f5c 100%); /* Blue Gradient 01 */
+  --rw-blue-gradient-01-8: linear-gradient(90deg, rgba(91, 157, 255, .08) 0%, rgba(44, 63, 92, .08) 100%); /* Blue Gradient 01 at 8% (InlineBanner) */
   --rw-blue-gradient-02: linear-gradient(180deg, #5b9dff 0%, rgba(55, 94, 153, .8) 100%); /* Blue Gradient 02 (vertical) */
   /* Input Border Gradient (voice transcript card stroke, 213:7972): B100 at 50% -> clear at 51% -> B100 at 50%.
      Figma's middle stop is #C4DCFF at 0% alpha; it is fully transparent, so it is written as B100 at 0%.
@@ -138,6 +139,8 @@
   /* Voice Log Match (Figma 207:7730, Review 217:8404 / 248:2470) */
   --rw-color-surface-input: var(--rw-inactivefill);   /* Figma 207:7730 card uses Inactive Fill (Han, 2026-10-22) */
   --rw-color-surface-done: var(--rw-highlightfill);     /* a recognised item */
+  --rw-color-border-banner: var(--rw-n100);
+  --rw-color-surface-banner: var(--rw-blue-gradient-01-8);   /* in-content prompt, e.g. InlineBanner */
   --rw-color-surface-highlight: var(--rw-highlightfill); /* raised control inside a surface, e.g. the Plus button on an empty player slot */
   --rw-color-surface-pending: var(--rw-inactivefill);   /* an item not heard yet */
   --rw-color-border-input-active: var(--rw-input-border-gradient);
@@ -181,6 +184,19 @@
   --rw-btn-primary-fg: var(--rw-color-text-on-action);
   --rw-btn-primary-h: 52px;
   --rw-icon-btn-size: 40px;
+  /* InlineBanner (Figma Foundation 333:8797): a reusable in-content prompt, e.g. "Who is “Chris”?" (Han, 2026-10-23).
+     Fill is Blue Gradient 01 at 8% (unbound in Figma, same stops), border N100. */
+  --rw-banner-bg: var(--rw-color-surface-banner);
+  --rw-banner-border: var(--rw-color-border-banner);
+  --rw-banner-radius: 10px;
+  --rw-type-banner-title: 600 16px/14px var(--font-sans);
+  /* Button: Secondary/Medium (Figma Button 171:12473). The fill follows its surface (Han, 2026-10-23):
+     purplegrey-500 on the page, Highlight Fill on a tile or banner. */
+  --rw-btn-secondary-h: 32px;
+  --rw-btn-secondary-bg: var(--rw-color-surface-input-filled);
+  --rw-btn-secondary-bg-on-surface: var(--rw-color-surface-highlight);
+  --rw-btn-secondary-fg: var(--rw-color-text-primary);
+  --rw-type-btn-secondary: 500 12px/13px var(--font-sans);
   /* IconButton "add" (Figma Player, State=Unselected 228:8836): Highlight Fill, N600 ring and icon (Han: active border, label and icon N600) */
   --rw-icon-btn-add-bg: var(--rw-color-surface-highlight);
   --rw-icon-btn-add-border: var(--rw-color-border-selected);
