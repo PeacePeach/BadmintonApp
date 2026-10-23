@@ -3041,7 +3041,15 @@ class Component extends DCLogic {
     const p = this.state.players.find(x => x.id === id); return p ? p.name : '';
   }
   first(id) { return id === 'me' ? this.t('you') : this.nm(id).split(' ')[0]; }
-  ini(id, name) { if (!id || this.unknown(id)) return '?'; return (name || this.nm(id)).split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase(); }
+  ini(id, name) {
+    // A new-player draft has a name but no persisted ID yet. Only genuinely unknown
+    // identities should show '?'; confirmed and pending-create names show initials.
+    if (this.unknown(id)) return '?';
+    const display = (name || (id ? this.nm(id) : '')).trim();
+    if (!display) return '?';
+    if (/^[\u3400-\u9fff]/u.test(display)) return Array.from(display)[0];
+    return display.split(/\s+/).filter(Boolean).map(part => Array.from(part)[0]).join('').slice(0, 2).toUpperCase();
+  }
   // A saved game is [your points, their points], or { r: 'W' | 'L' } when no score was given ({ r, u: 1 }: order not known).
   // Equal games won is a tie, shown as the record ("1W : 1L"), never as Win, Loss or Draw (Han, 2026-10-23).
   gameRes(g) { return window.RallywiseVoice ? window.RallywiseVoice.gameResult(g) : g[0] > g[1] ? 'W' : 'L'; }
