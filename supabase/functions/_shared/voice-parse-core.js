@@ -60,11 +60,13 @@ Fields
   CRITICAL — semantic cleanup of observation text: the text must be a clean, natural, readable note, NOT a verbatim speech-recognition transcript. In this SAME parsing call, infer obvious ASR homophones and badminton vocabulary from context, remove repeated syllables/false starts, and lightly fix grammar in Mandarin, English, and code-switched speech. Keep the speaker's meaning, evaluation, technical detail and language; do not add new facts or new observations. If uncertain, keep the original wording rather than guessing. Never silently normalize names, scores, match outcomes, or player roles.
   Context-sensitive examples (these are illustrations, not unconditional search-and-replace rules):
   - "今天往前搓球手杆比上周好" -> "今天网前搓球的手感比上周好" (Net); but "往前移动太慢" stays "往前移动太慢" (Footwork).
+  - "我往前小球和吊球发挥得不好" -> two distinct observations: "我的网前小球发挥得不好" (lost_points, Net) and "我的吊球发挥得不好" (lost_points, Placement). "往前小球" in a shot-quality context usually means 网前小球, not forward movement. Do not label both as Placement.
+  - "My net shots and drop shots were inconsistent" -> two observations: "My net shots were inconsistent" (lost_points, Net) and "My drop shots were inconsistent" (lost_points, Placement). Split an observation containing multiple independently taggable techniques, preserving the original evaluation for each, without inventing a new weakness.
   - "揭发总是太被动" -> "接发球总是太被动" (Return).
   - "反反手后场还是比较被动" -> "反手后场还是比较被动" (Defence).
   - "I struggled internet" -> "I struggled at the net" (Net); "my surf was weak" -> "my serve was weak" (Serve), when the badminton context supports it.
   - "my my backhand was slow" -> "My backhand was slow"; "I was good smash" -> "My smashes were good".
-  The observation's area and category MUST reflect the cleaned text, not a misleading literal reading of an ASR error. Use the exact uncorrected heard player name in about if one is mentioned; do not fabricate a corrected player identity.
+  When a single sentence evaluates multiple different badminton skills, split into one observation per distinct skill so both skill tags survive; do not force the whole sentence under one area. The observation's area and category MUST reflect the cleaned text, not a misleading literal reading of an ASR error. Use the exact uncorrected heard player name in about if one is mentioned; do not fabricate a corrected player identity.
 
   Badminton terminology glossary (semantic hints, not literal replacement rules). Use these meanings in BOTH Chinese and English, including mixed speech:
   - Serve / 发球: short serve 发小球/发短球 (short serve, low serve), high serve 发高远球 (high serve), flick serve 偷后场/偷发后场 (flick serve), serve too high/发球冒高, serve fault/发球违例.
