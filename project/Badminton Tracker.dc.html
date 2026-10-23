@@ -1495,9 +1495,27 @@ button:disabled{cursor:default !important;}
           <button type="button" class="rw-rec-btn" onClick="{{ vc.toggle }}" aria-label="{{ vc.recLabel }}" aria-pressed="{{ vc.live }}">
             <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ vc.recIcon }}" size="{{ vc.recSize }}" strokeWidth="{{ vc.recStroke }}" hint-size="28px,28px"></x-import>
           </button>
-          <div class="rw-rec-side is-end"><button type="button" class="rw-rec-link" disabled="{{ vc.cantGo }}" onClick="{{ vc.next }}">{{ tx.continue }}</button></div>
+          <div class="rw-rec-side is-end"><button type="button" class="rw-rec-link" disabled="{{ vc.cantGo }}" aria-busy="{{ vc.parsing }}" onClick="{{ vc.next }}">{{ vc.nextLabel }}</button></div>
         </div>
       </div>
+    </div>
+  </sc-if>
+
+  <!-- One lineup per match (Figma 342:12303): shown instead of Review when the description has several lineups. -->
+  <sc-if value="{{ vc.lineup }}" hint-placeholder-val="{{ false }}">
+    <div class="rw-sheet-scrim" onClick="{{ vc.closeLineup }}"></div>
+    <div class="rw-sheet" role="dialog" aria-modal="true" aria-labelledby="lineup-title" aria-describedby="lineup-body" data-screen-label="One lineup">
+      <div class="rw-sheet-head">
+        <span class="rw-sheet-grabber" aria-hidden="true"></span>
+        <div class="rw-sheet-bar">
+          <span></span>
+          <h2 id="lineup-title" class="rw-sheet-title">{{ tx.lineupTitle }}</h2>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="X" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.close }}" onClick="{{ vc.closeLineup }}" hint-size="44px,44px"></x-import>
+        </div>
+        <span class="rw-sheet-divider"></span>
+      </div>
+      <p id="lineup-body" class="rw-sheet-text">{{ tx.lineupBody }}</p>
+      <div class="rw-sheet-foot"><button type="button" class="rw-btn rw-btn-primary" onClick="{{ vc.closeLineup }}">{{ tx.gotIt }}</button></div>
     </div>
   </sc-if>
 
@@ -1510,7 +1528,7 @@ button:disabled{cursor:default !important;}
           <div style="font:400 14px/1.45 var(--font-sans);color:var(--text-primary);">{{ tx.saveErr }}</div>
         </div>
       </sc-if>
-      <button type="button" class="rw-btn rw-btn-primary" onClick="{{ rv.next }}" aria-busy="{{ rv.saving }}" disabled="{{ rv.saving }}">
+      <button type="button" class="rw-btn rw-btn-primary" onClick="{{ rv.next }}" aria-busy="{{ rv.saving }}" disabled="{{ rv.cantSave }}">
         <sc-if value="{{ rv.saving }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 22 }}" strokeWidth="{{ 2 }}" hint-size="22px,22px"></x-import></span><span class="sr-only">{{ tx.savingMatch }}</span></sc-if>
         <sc-if value="{{ rv.idle }}" hint-placeholder-val="{{ true }}">{{ rv.ctaLabel }}<x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ArrowRight" size="{{ 22 }}" hint-size="22px,22px"></x-import></sc-if>
       </button>
@@ -1540,7 +1558,10 @@ button:disabled{cursor:default !important;}
             </div>
             <sc-for list="{{ ps.sides }}" as="g" hint-placeholder-count="2">
               <div role="group" aria-label="{{ g.label }}" style="display:flex;flex-direction:column;gap:12px;">
-                <div class="rw-hint" style="padding:0 6px;">{{ g.label }}</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:24px;padding-left:6px;">
+                  <span class="rw-hint">{{ g.label }}</span>
+                  <sc-if value="{{ g.warn }}" hint-placeholder-val="{{ false }}"><span class="rw-flag"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 14 }}" hint-size="14px,14px"></x-import>{{ tx.flagUnknown }}</span></sc-if>
+                </div>
                 <sc-for list="{{ g.rows }}" as="p" hint-placeholder-count="1">
                   <sc-if value="{{ p.me }}" hint-placeholder-val="{{ false }}">
                     <div class="rw-surface rw-player" style="cursor:default;"><span class="rw-avatar is-me" aria-hidden="true">{{ p.initials }}</span><span class="rw-name">{{ p.name }}</span><span class="rw-caption">{{ p.caption }}</span></div>
@@ -1548,8 +1569,18 @@ button:disabled{cursor:default !important;}
                   <sc-if value="{{ p.filled }}" hint-placeholder-val="{{ true }}">
                     <button type="button" class="rw-surface rw-player" onClick="{{ p.open }}"><span class="rw-avatar" aria-hidden="true">{{ p.initials }}</span><span class="rw-name">{{ p.name }}</span><span class="rw-caption">{{ p.caption }}</span></button>
                   </sc-if>
+                  <sc-if value="{{ p.ask }}" hint-placeholder-val="{{ false }}">
+                    <div class="rw-inline-banner" role="group" aria-label="{{ p.title }}">
+                      <div class="rw-inline-banner-title"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleHelp" size="{{ 18 }}" strokeWidth="{{ 1.6 }}" hint-size="18px,18px"></x-import><span>{{ p.title }}</span></div>
+                      <div class="rw-tags">
+                        <sc-for list="{{ p.tags }}" as="t" hint-placeholder-count="3"><button type="button" class="rw-btn rw-btn-secondary" onClick="{{ t.pick }}">{{ t.label }}</button></sc-for>
+                        <sc-if value="{{ p.hasAdd }}" hint-placeholder-val="{{ true }}"><button type="button" class="rw-btn rw-btn-secondary" onClick="{{ p.add }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 16 }}" strokeWidth="{{ 1.8 }}" hint-size="16px,16px"></x-import>{{ p.addLabel }}</button></sc-if>
+                        <button type="button" class="rw-btn rw-btn-secondary" onClick="{{ p.search }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Search" size="{{ 16 }}" strokeWidth="{{ 1.8 }}" hint-size="16px,16px"></x-import>{{ tx.searchAnother }}</button>
+                      </div>
+                    </div>
+                  </sc-if>
                   <sc-if value="{{ p.empty }}" hint-placeholder-val="{{ false }}">
-                    <div class="rw-surface rw-player is-empty" onClick="{{ p.open }}">
+                    <div class="rw-surface rw-player is-empty is-warning" onClick="{{ p.open }}">
                       <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Plus" variant="add" size="{{ 40 }}" iconSize="{{ 18 }}" label="{{ p.name }}" onClick="{{ p.open }}" hint-size="40px,40px"></x-import>
                       <span class="rw-name" aria-hidden="true">{{ p.name }}</span><span class="rw-caption">{{ p.caption }}</span>
                     </div>
@@ -1567,6 +1598,12 @@ button:disabled{cursor:default !important;}
               <input class="rw-search-input" value="{{ ps.q }}" onChange="{{ ps.onQ }}" placeholder="{{ tx.searchPlayers }}" aria-describedby="ps-slot" autocomplete="off">
               <sc-if value="{{ ps.hasQ }}" hint-placeholder-val="{{ false }}"><button type="button" class="rw-search-clear" aria-label="{{ tx.clearSearch }}" onClick="{{ ps.clearQ }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleX" size="{{ 20 }}" strokeWidth="{{ 1.44 }}" hint-size="20px,20px"></x-import></button></sc-if>
             </label>
+            <sc-if value="{{ ps.canAdd }}" hint-placeholder-val="{{ false }}">
+              <div class="rw-surface rw-player is-empty" onClick="{{ ps.add }}">
+                <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Plus" variant="add" size="{{ 40 }}" iconSize="{{ 18 }}" label="{{ ps.addLabel }}" onClick="{{ ps.add }}" hint-size="40px,40px"></x-import>
+                <span class="rw-name" aria-hidden="true">{{ ps.addLabel }}</span>
+              </div>
+            </sc-if>
             <sc-for list="{{ ps.list }}" as="p" hint-placeholder-count="5">
               <button type="button" class="rw-surface rw-player" onClick="{{ p.pick }}"><span class="rw-avatar" aria-hidden="true">{{ p.initials }}</span><span class="rw-name">{{ p.name }}</span><span class="rw-caption">{{ p.sub }}</span></button>
             </sc-for>
@@ -1962,7 +1999,18 @@ const I18N = {
     cuesLabel: 'What we heard', cuePlayers: 'Players', cueGames: 'Number of games', cueResult: 'Win vs Loss', cueNotes: 'Reflection', cueHeard: 'heard', cueNotHeard: 'not heard yet',
     startRec: 'Start recording', stopRec: 'Stop recording', recFor: 'Recording, {t}', recLength: 'Recorded {t}',
     reviewTitle: 'Review the Match Details', reviewHint: 'Tap a section to fix anything we got wrong.', rvPlayers: 'Players', rvResult: 'Result', rvNotes: 'Notes',
-    yourPartner: 'Your partner', searchPlayers: 'Search players', clearSearch: 'Clear search',
+    yourPartner: 'Your partner', searchPlayers: 'Search or add a new player', clearSearch: 'Clear search',
+    fillManually: 'Fill manually', reading: 'Reading…', selectType: 'Select match type', flagUnknown: 'Unknown players', unknownPlayer: 'Unknown player',
+    whoIs: 'Who is “{name}”?', whoPartner: 'Who is your partner?', addName: 'Add “{name}”', searchAnother: 'Search or add another',
+    lineupTitle: 'Log one matchup at a time', gotIt: 'Okay, got it',
+    lineupBody: 'It looks like you played with different opponents or partners. Please log each lineup separately so we can track your results and notes accurately.',
+    micNone: 'Voice input isn’t available here. Type instead.', micBlocked: 'Microphone access is blocked. Allow it in Settings, or type instead.',
+    micOff: 'Speech recognition is turned off on this device. On iPhone, turn on Siri, or type instead.', micNetwork: 'Speech recognition needs an internet connection. Type instead.',
+    micLang: 'This device can’t recognise this language. Type instead.', micFailed: 'Speech recognition stopped. Try again, or type instead.',
+    micNothing: 'Nothing was recognised. Try again a little closer to the mic.',
+    vErrSignin: 'Sign in again to read your description.', vErrTooLong: 'That description is too long. Shorten it a little and try again.',
+    vErrRate: 'Too many requests in a short time. Wait a minute and try again.', vErrNetwork: 'Couldn’t reach the server. Check your connection and try again.',
+    vErrSetup: 'Reading descriptions isn’t set up yet. Fill in the details yourself.', vErrFailed: 'Couldn’t read your description. Try again, or fill in the details yourself.',
     rvWL: '{w} Win : {l} Loss', notMentioned: 'Not mentioned', noNotes: 'No notes', doneEdit: 'Done',
     flagMissing: 'Missing players', flagNew: 'New player', flagCheck: 'Check players', flagLineup: 'More than one lineup',
     flagResult: 'Missing result', flagScores: 'Check scores', flagNotes: 'Check notes'
@@ -2094,7 +2142,18 @@ const I18N = {
     cuesLabel: '已听到', cuePlayers: '球员', cueGames: '局数', cueResult: '输赢', cueNotes: '复盘', cueHeard: '已听到', cueNotHeard: '还没听到',
     startRec: '开始录音', stopRec: '停止录音', recFor: '录音中，{t}', recLength: '已录音 {t}',
     reviewTitle: '核对比赛信息', reviewHint: '点任意一项即可修改。', rvPlayers: '球员', rvResult: '结果', rvNotes: '笔记',
-    yourPartner: '你的搭档', searchPlayers: '搜索球友', clearSearch: '清除搜索',
+    yourPartner: '你的搭档', searchPlayers: '搜索或添加新球友', clearSearch: '清除搜索',
+    fillManually: '手动填写', reading: '正在读取…', selectType: '选择比赛类型', flagUnknown: '未知球员', unknownPlayer: '未知球员',
+    whoIs: '“{name}”是谁？', whoPartner: '谁是你的搭档？', addName: '添加“{name}”', searchAnother: '搜索或添加其他人',
+    lineupTitle: '一次记录一组对阵', gotIt: '好的，知道了',
+    lineupBody: '看起来你和不同的对手或搭档打了球。请把每组对阵分开记录，这样才能准确统计你的成绩和笔记。',
+    micNone: '这里不能用语音输入，请直接打字。', micBlocked: '麦克风权限被关闭了。请在设置里打开，或直接打字。',
+    micOff: '这台设备关闭了语音识别。iPhone 上请打开 Siri，或直接打字。', micNetwork: '语音识别需要联网，请直接打字。',
+    micLang: '这台设备不能识别这种语言，请直接打字。', micFailed: '语音识别中断了。请再试一次，或直接打字。',
+    micNothing: '没有识别到内容。靠近麦克风再试一次。',
+    vErrSignin: '请重新登录后再读取描述。', vErrTooLong: '描述太长了，请稍微删减后再试。',
+    vErrRate: '短时间内请求太多，请等一分钟再试。', vErrNetwork: '连不上服务器，请检查网络后再试。',
+    vErrSetup: '读取描述的功能还没设置好，请手动填写。', vErrFailed: '没能读懂你的描述。请再试一次，或手动填写。',
     rvWL: '{w}胜 : {l}负', notMentioned: '没有提到', noNotes: '没有笔记', doneEdit: '完成',
     flagMissing: '缺少球员', flagNew: '新球员', flagCheck: '确认球员', flagLineup: '不止一组对阵',
     flagResult: '缺少结果', flagScores: '确认比分', flagNotes: '确认笔记'
@@ -2125,7 +2184,7 @@ class Component extends DCLogic {
     const players = [
       { id: 'me', name: 'Sam Rivera', level: 'Intermediate' }, { id: 'alex', name: 'Alex Chen' }, { id: 'priya', name: 'Priya Nair' },
       { id: 'marcus', name: 'Marcus Lee' }, { id: 'jordan', name: 'Jordan Kim' }, { id: 'leo', name: 'Leo Park' },
-      { id: 'mei', name: 'Mei Tan' }, { id: 'ravi', name: 'Ravi Shah' }
+      { id: 'mei', name: 'Mei Tan' }, { id: 'ravi', name: 'Ravi Shah' }, { id: 'chris', name: 'Chris Wong' }, { id: 'chrisl', name: 'Chris Lam' }
     ];
     const M = (id, date, type, partner, opps, games, wt, lt, worked, lost, on) => ({ id, date, type, partner, opps, games, wt, lt, worked: worked || '', lost: lost || '', on: on || '' });
     const matches = [
@@ -2435,26 +2494,81 @@ class Component extends DCLogic {
     return { ...this.newLog(), startedAt: Date.now() };
   }
 
-  // Voice Log Match (Figma 207:7730 -> Review 217:8404). Phase 1: speech and parsing are mocks in rallywise-voice.js,
-  // shaped like the parse-voice-log result, so the real engine can replace them without touching these screens.
-  // Review turns the result into an ordinary Log Match draft; each row opens the existing Log Match step to fix it.
+  // Voice Log Match (Figma 207:7730 -> Review 217:8404 -> Players sheet). Speech is the browser's own recognizer and
+  // parsing is the parse-voice-log edge function, both from voice-v2-live; rallywise-voice.js turns the parse result
+  // into an ordinary Log Match draft. Design previews and tests use canned speech and results (voiceMock()).
   newVoice() { return { phase: 'idle', text: '', secs: 0 }; }
+  // Mock speech and parsing: design previews, the voiceMock prop, and ?voice=<scenario> on preview hosts
+  // (so a signed-in preview can be tried without a paid parse).
+  voiceMock() {
+    if ((this.props || {}).voiceMock || !this.live() || this.previewData()) return true;
+    return typeof location !== 'undefined' && this.previewHost() && new URLSearchParams(location.search).has('voice');
+  }
   voiceScenario() {
-    const p = (this.props || {}).voiceMock;
-    if (p && p !== 'Complete') return 'missing';
-    // Branch previews and localhost can pick the scenario with ?voice=missing, like ?preview= for the start screen.
-    if (typeof location === 'undefined' || !this.previewHost()) return 'complete';
-    return /^missing/i.test(new URLSearchParams(location.search).get('voice') || '') ? 'missing' : 'complete';
+    const V = window.RallywiseVoice, p = (this.props || {}).voiceMock;
+    if (p && p !== 'Complete') return String(p).toLowerCase();
+    const q = typeof location !== 'undefined' && this.previewHost() ? (new URLSearchParams(location.search).get('voice') || '').toLowerCase() : '';
+    return V && V.SCENARIOS.includes(q) ? q : 'complete';
   }
   openVoice(source) { if (!this.dataReady()) return; const l = this.logStart(source); this.go('voice', { voice: { ...this.newVoice(), startedAt: l.startedAt }, log: null }); }
-  setVoice(patch) { this.setState(s => ({ voice: { ...s.voice, ...(typeof patch === 'function' ? patch(s.voice) : patch) } })); }
+  setVoice(patch) { this.setState(s => s.voice ? { voice: { ...s.voice, ...(typeof patch === 'function' ? patch(s.voice) : patch) } } : null); }
+  // Joins recognized pieces: a space between words, none around Chinese.
+  joinText(a, b) {
+    const cjk = /[　-〿㐀-鿿＀-￯]/;
+    a = (a || '').replace(/\s+$/, ''); b = (b || '').trim();
+    if (!a) return b; if (!b) return a;
+    return a + (cjk.test(a.slice(-1)) || cjk.test(b[0]) ? '' : ' ') + b;
+  }
   recStart() {
-    const V = window.RallywiseVoice; if (!V || !this.state.voice) return;
+    if (!this.state.voice || this.state.voice.phase === 'rec') return;
+    this._recT = setInterval(() => this.setVoice(v => ({ secs: v.secs + 1 })), 1000);
+    if (this.voiceMock()) return this.mockRec();
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { clearInterval(this._recT); return this.flash(this.t('micNone'), 'error'); }
+    const rec = { lead: this.state.voice.text.trim(), done: '', seg: '', interim: '', stopping: false, error: null, start: Date.now() };
+    this._rec = rec;
+    this.setVoice({ phase: 'rec' });
+    try { this.newRecognizer(rec, SR); } catch (e) { this._rec = null; clearInterval(this._recT); this.setVoice({ phase: 'idle' }); this.flash(this.t('micFailed'), 'error'); }
+  }
+  // voice-v2-live's recognizer: continuous with interim results; browsers end it after a pause, so it restarts
+  // until the user taps stop (at most 5 minutes). Audio stays with the browser's recognizer.
+  newRecognizer(rec, SR) {
+    const r = new SR();
+    r.lang = this.lang() === 'zh' ? 'zh-CN' : 'en-US'; r.continuous = true; r.interimResults = true; r.maxAlternatives = 1;
+    r.onresult = e => {
+      if (this._rec !== rec) return;
+      const fin = []; let interim = '';
+      for (let i = 0; i < e.results.length; i++) { const t = e.results[i][0].transcript; if (e.results[i].isFinal) fin.push(t); else interim += t; }
+      // Some Android builds repeat earlier final text cumulatively; keep the longest version.
+      const out = [];
+      fin.forEach(t => { const p = out[out.length - 1]; if (p && t.trim().startsWith(p.trim())) out[out.length - 1] = t; else out.push(t); });
+      rec.seg = out.reduce((a, b) => this.joinText(a, b), ''); rec.interim = interim;
+      this.setVoice({ text: this.joinText(rec.lead, this.joinText(rec.done, this.joinText(rec.seg, rec.interim))) });
+      const el = this.voiceRef.current; if (el) el.scrollTop = el.scrollHeight;
+    };
+    r.onerror = e => { if (this._rec === rec && e.error !== 'no-speech' && e.error !== 'aborted') rec.error = e.error; };
+    r.onend = () => {
+      if (this._rec !== rec) return;
+      rec.done = this.joinText(rec.done, rec.stopping ? this.joinText(rec.seg, rec.interim) : rec.seg); rec.seg = ''; rec.interim = '';
+      if (!rec.stopping && !rec.error && Date.now() - rec.start < 5 * 60e3) { try { this.newRecognizer(rec, SR); return; } catch (e) {} }
+      this.recFinish(rec);
+    };
+    rec.r = r; r.start();
+  }
+  recFinish(rec) {
+    if (this._rec !== rec) return;
+    this._rec = null; clearInterval(this._recT);
+    const MIC = { 'not-allowed': 'micBlocked', 'service-not-allowed': 'micOff', 'audio-capture': 'micNone', network: 'micNetwork', 'language-not-supported': 'micLang' };
+    this.setVoice({ phase: 'idle', text: this.joinText(rec.lead, rec.done) });
+    if (rec.error) this.flash(this.t(MIC[rec.error] || 'micFailed'), 'error');
+    else if (!rec.done.trim()) this.flash(this.t('micNothing'), 'error');
+  }
+  mockRec() {
+    const V = window.RallywiseVoice;
     const parts = V.chunks(V.sample(this.voiceScenario(), this.lang()).text);
-    const lead = this.state.voice.text.trim(), cjk = /[\u3400-\u9fff]/;
+    const lead = this.state.voice.text.trim(), cjk = /[㐀-鿿]/;
     let i = 0;
     this.setVoice({ phase: 'rec', text: lead && !cjk.test(lead.slice(-1)) && !cjk.test(parts[0] || '') ? lead + ' ' : lead });
-    this._recT = setInterval(() => this.setVoice(v => ({ secs: v.secs + 1 })), 1000);
     this._recS = setInterval(() => {
       if (i >= parts.length) return clearInterval(this._recS);
       const part = parts[i++];
@@ -2462,49 +2576,136 @@ class Component extends DCLogic {
       const el = this.voiceRef.current; if (el) el.scrollTop = el.scrollHeight;
     }, 140);
   }
-  recStop(quiet) { clearInterval(this._recT); clearInterval(this._recS); if (!quiet && this.state.voice && this.state.voice.phase === 'rec') this.setVoice(v => ({ phase: 'idle', text: v.text.trim() })); }
-  // Continue: parse (mock), then Review. One record holds one lineup; nothing the result lacks is filled in.
-  voiceNext() {
-    const v = this.state.voice; if (!v || !v.text.trim()) return;
-    this.recStop();
-    const V = window.RallywiseVoice, base = this.newLog();
-    const r = V.mockParse(v.text.trim(), this.lang(), this.voiceScenario());
-    const d = V.toDraft(r, this.state.players, base.format);
-    const { flags, heard, totals, ...fields } = d;
-    this.go('review', { log: { ...base, ...fields, step: 'review', voice: { flags, heard, totals }, startedAt: v.startedAt || Date.now(), active: null } });
+  // quiet: leaving the screen, so nothing is kept or reported.
+  recStop(quiet) {
+    clearInterval(this._recS);
+    const rec = this._rec;
+    if (rec) {
+      if (quiet) { this._rec = null; clearInterval(this._recT); try { rec.r.abort(); } catch (e) {} return; }
+      if (rec.stopping) return;
+      rec.stopping = true;
+      try { rec.r.stop(); } catch (e) { this.recFinish(rec); }
+      setTimeout(() => { if (this._rec === rec) { rec.done = this.joinText(rec.done, this.joinText(rec.seg, rec.interim)); this.recFinish(rec); } }, 3000);
+      return;
+    }
+    clearInterval(this._recT);
+    if (!quiet && this.state.voice && this.state.voice.phase === 'rec') this.setVoice(v => ({ phase: 'idle', text: v.text.trim() }));
   }
-  // Opens a Log Match step from Review. Players with a name we couldn't link start with that name in the search,
-  // so the existing list shows the matches (ambiguous) or "Add as new player" (new).
+  async parseVoice(text) {
+    if (this.voiceMock()) return { result: window.RallywiseVoice.mockParse(text, this.lang(), this.voiceScenario()) };
+    const b = await this.api();
+    if (!b.voice) return { result: window.RallywiseVoice.mockParse(text, this.lang(), this.voiceScenario()) };
+    return b.voice.parse(text);
+  }
+  // Fill manually (empty transcript): an empty Review; nothing is assumed, not even the match type.
+  fillManually() {
+    this.recStop(true);
+    const base = this.newLog();
+    this.go('review', { log: { ...base, step: 'review', startedAt: (this.state.voice && this.state.voice.startedAt) || Date.now(), active: null,
+      voice: { flags: { players: 'type', result: 'missing', notes: null }, slots: {}, pool: [], people: [], dirty: {}, from: '' } } });
+  }
+  // Continue: parse, then Review. Incomplete results still go to Review. Several lineups stay here with the
+  // one-lineup notice and the transcript as it is. Re-parsing an edited transcript keeps any section already fixed by hand.
+  async voiceNext() {
+    const v = this.state.voice; if (!v || v.parsing || this._rec) return;
+    const text = v.text.trim();
+    if (!text) return this.fillManually();
+    this.recStop();
+    if (text.length > 3000) return this.flash(this.t('vErrTooLong'), 'error');
+    if (v.prev && v.prev.voice.from === text) return this.go('review', { log: v.prev });
+    this.setVoice({ parsing: true, lineup: false });
+    let res;
+    try { res = await this.parseVoice(text); }
+    catch (e) {
+      this.setVoice({ parsing: false });
+      const ERR = { unauthorized: 'vErrSignin', too_long: 'vErrTooLong', too_large: 'vErrTooLong', rate_limited: 'vErrRate', network: 'vErrNetwork', ai_not_configured: 'vErrSetup' };
+      return this.flash(this.t(ERR[e && e.code] || 'vErrFailed'), 'error');
+    }
+    if (!this.state.voice || this.state.screen !== 'voice') return;
+    const r = res.result;
+    if (r.multiple_lineups) return this.setVoice({ parsing: false, lineup: true });
+    const V = window.RallywiseVoice, base = this.newLog();
+    const { flags, slots, pool, people, totals, ...fields } = V.toDraft(r, this.state.players, base.format);
+    let log = { ...base, ...fields, step: 'review', startedAt: v.startedAt || Date.now(), active: null,
+      voice: { flags, slots, pool, people: people || [], totals, dirty: {}, from: text } };
+    if (v.prev) log = this.keepEdits(v.prev, log);
+    this.setVoice({ parsing: false, prev: null });
+    this.go('review', { log });
+  }
+  // Sections the user already fixed in Review survive a re-parse.
+  keepEdits(old, log) {
+    const d = old.voice.dirty || {}, f = { ...log.voice.flags }, vo = { ...log.voice, dirty: d };
+    const take = keys => keys.forEach(k => { log[k] = old[k]; });
+    if (d.players) { take(['type', 'partner', 'opp1', 'opp2']); Object.assign(vo, { slots: old.voice.slots, pool: old.voice.pool, people: old.voice.people }); f.players = old.voice.flags.players; }
+    if (d.result) { take(['games', 'format']); vo.totals = old.voice.totals; f.result = old.voice.flags.result; }
+    if (d.notes) { take(['wt', 'lt', 'worked', 'lost', 'on']); f.notes = old.voice.flags.notes; }
+    return { ...log, voice: { ...vo, flags: f } };
+  }
+  // Review -> back to the transcript. The draft is kept so an unchanged transcript returns to it as it was.
+  voiceBack() { this.setState(x => ({ screen: 'voice', voice: { ...x.voice, prev: x.log }, log: null, back: x.back.slice(0, -1) })); }
+  // Review can save once the match type is known and the games give a winner. Players may stay unknown.
+  reviewReady(log) {
+    if (!log.type || log.voice.flags.result === 'missing') return false;
+    const r = this.res(this.draftGames(log)); return r.us !== r.them;
+  }
+  // Result and Notes open the existing Log Match steps; Done comes back to Review.
   reviewOpen(part) {
     const log = this.state.log; if (!log) return;
-    const heard = (log.voice.heard || []).find(h => !h.done);
-    const step = part === 'players' ? (log.type ? 2 : 1) : part === 'result' ? 3 : 4;
-    const patch = { step, ret: part };
-    if (step === 2) patch.active = this.nextEmpty(log);
-    this.setState({ screen: 'log', log: { ...log, ...patch }, search: step === 2 && heard && patch.active ? heard.heard : '' });
+    this.setState({ screen: 'log', log: { ...log, step: part === 'result' ? 3 : 4, ret: part }, search: '' });
   }
   reviewReturn(save) {
     this.setState(s => {
-      const l = s.log, f = { ...l.voice.flags };
-      if (save) { f[l.ret === 'players' ? 'players' : l.ret] = null; }
-      const heard = save && l.ret === 'players' ? [] : l.voice.heard;
-      return { screen: 'review', search: '', log: { ...l, step: 'review', ret: null, active: null, voice: { ...l.voice, flags: f, heard } } };
+      const l = s.log, f = { ...l.voice.flags }, dirty = { ...l.voice.dirty };
+      if (save) { f[l.ret] = null; dirty[l.ret] = true; }
+      return { screen: 'review', search: '', log: { ...l, step: 'review', ret: null, active: null, voice: { ...l.voice, flags: f, dirty } } };
     });
   }
-  // Players sheet from Review: edits a copy of the lineup, and Save writes it to the draft. Switching
-  // Singles/Doubles keeps the other slots in the copy, so switching back loses nothing.
+
+  // Players sheet from Review (Figma 236:9207, 329:7412, 333:10176; unknown players 342:11639, 342:12971).
+  // It edits a copy of the lineup: picking, choosing a partner or adding a player changes only the copy, and the sheet
+  // stays open. Save writes it to the draft (new players are created then); Close throws it away.
   psOpen() {
     const l = this.state.log; if (!l) return;
-    this.setState({ ps: { type: l.type || 'Singles', partner: l.partner || null, opp1: l.opp1 || null, opp2: l.opp2 || null, picking: null, q: '' } });
+    const vo = l.voice, slots = { ...vo.slots };
+    // A slot the user filled by hand before (Edit, manual steps) has no identity record yet.
+    for (const k of ['partner', 'opp1', 'opp2']) if (l[k] && (!slots[k] || slots[k].id !== l[k])) slots[k] = { heard: '', id: l[k], cands: [], state: 'confirmed' };
+    this.setState({ ps: { type: l.type, slots, pool: vo.pool || [], people: vo.people || [], picking: null, q: '' } });
   }
-  setPs(patch) { this.setState(s => s.ps ? { ps: { ...s.ps, ...patch } } : null); }
-  psPick(k) { this.setPs({ picking: k, q: '' }); }
+  setPs(patch) { this.setState(s => s.ps ? { ps: { ...s.ps, ...(typeof patch === 'function' ? patch(s.ps) : patch) } } : null); }
+  psType(type) {
+    const V = window.RallywiseVoice;
+    this.setPs(p => {
+      if (p.type === type) return {};
+      // People heard before the type was known are placed once it is chosen; anything already set is kept.
+      const placed = V.slotKeys(p.type).some(k => p.slots[k] && p.slots[k].state !== 'missing');
+      if (!placed && !p.type && p.people.length) { const l = V.lineup(type, p.people); return { type, slots: { ...p.slots, ...l.slots }, pool: l.pool }; }
+      const slots = { ...p.slots };
+      for (const k of V.slotKeys(type)) if (!slots[k]) slots[k] = { heard: '', id: null, cands: [], state: 'missing' };
+      return { type, slots };
+    });
+  }
+  // Fills slot k (or, for the partner question, the partner) with someone the user picked or added.
+  psFill(k, who) {
+    const V = window.RallywiseVoice;
+    this.setPs(p => {
+      const heard = p.slots[k] ? p.slots[k].heard : '';
+      if (k === 'partner' && p.pool.length) {
+        const i = p.pool.findIndex(x => x === who);
+        const pool = i >= 0 ? p.pool : p.pool.concat([who]);
+        return { slots: V.choosePartner(p.slots, pool, i >= 0 ? i : pool.length - 1), pool: [], picking: null, q: '' };
+      }
+      return { slots: { ...p.slots, [k]: { heard: who.heard || heard, ...who } }, picking: null, q: '' };
+    });
+  }
+  psPickId(k, id) { const heard = this.state.ps.slots[k] ? this.state.ps.slots[k].heard : ''; this.psFill(k, { heard, id, cands: [], state: 'confirmed' }); }
+  psAddNew(k, name) { this.psFill(k, { heard: name, id: null, cands: [], state: 'create', name: name.trim() }); }
   psSave() {
-    const p = this.state.ps, miss = this.slotKeys(p.type).find(k => !p[k]);
-    if (miss) return this.psPick(miss);
-    const d = p.type === 'Doubles';
-    this.setState(s => ({ ps: null, log: { ...s.log, type: p.type, partner: d ? p.partner : null, opp1: p.opp1, opp2: d ? p.opp2 : null,
-      voice: { ...s.log.voice, flags: { ...s.log.voice.flags, players: null }, heard: [] } } }));
+    const V = window.RallywiseVoice, p = this.state.ps, slots = { ...p.slots };
+    for (const k of V.slotKeys(p.type)) if (slots[k].state === 'create') slots[k] = { ...slots[k], id: this.addPlayer(slots[k].name, 'log_match'), state: 'confirmed' };
+    const id = k => V.slotKeys(p.type).includes(k) && slots[k].state === 'confirmed' ? slots[k].id : null;
+    this.setState(s => ({ ps: null, log: { ...s.log, type: p.type, partner: id('partner'), opp1: id('opp1'), opp2: id('opp2'),
+      voice: { ...s.log.voice, slots, pool: p.pool, people: p.people, dirty: { ...s.log.voice.dirty, players: true },
+        flags: { ...s.log.voice.flags, players: !p.type ? 'type' : V.unresolved(p.type, slots, p.pool) ? 'unknown' : null } } } }));
   }
   // What an edit changed, for match_edited (names only, never the values).
   changedParts(a, b) {
@@ -2652,9 +2853,14 @@ class Component extends DCLogic {
     this.onScroll();
   }
 
-  nm(id) { const p = this.state.players.find(x => x.id === id); return p ? p.name : ''; }
+  // An unknown player (placeholder id "unknown:<heard name>") shows the name that was heard, or "Unknown player".
+  unknown(id) { return !!(window.RallywiseVoice && window.RallywiseVoice.isUnknown(id)); }
+  nm(id) {
+    if (this.unknown(id)) return window.RallywiseVoice.heardOf(id) || this.t('unknownPlayer');
+    const p = this.state.players.find(x => x.id === id); return p ? p.name : '';
+  }
   first(id) { return id === 'me' ? this.t('you') : this.nm(id).split(' ')[0]; }
-  ini(id) { return this.nm(id).split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase(); }
+  ini(id, name) { if (this.unknown(id)) return '?'; return (name || this.nm(id)).split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase(); }
   res(games) { const us = games.filter(g => g[0] > g[1]).length; return { us, them: games.length - us, win: us > games.length - us }; }
   date(iso, long) {
     const d = new Date(iso + 'T12:00:00');
@@ -2750,8 +2956,10 @@ class Component extends DCLogic {
     const prev = log.editId && this.state.matches.find(x => x.id === log.editId);
     // Edits keep the original match type; createdAt is when the match was first logged. Sample matches have none.
     const type = prev ? prev.type : log.type;
-    const m = { id: log.editId || 'n' + Date.now(), createdAt: prev ? prev.createdAt : new Date().toISOString(), date: log.date || this.today(), type, partner: type === 'Doubles' ? log.partner : null,
-      opps: type === 'Doubles' ? [log.opp1, log.opp2] : [log.opp1], games: this.draftGames(log), wt: log.wt, lt: log.lt, worked: log.worked.trim(), lost: log.lost.trim(), on: log.on.trim() };
+    // A voice-logged player nobody identified is saved as an Unknown Player placeholder, never as a new player.
+    const sl = (log.voice && log.voice.slots) || {}, who = k => log[k] || (log.voice ? window.RallywiseVoice.unknownId(sl[k] && sl[k].heard) : null);
+    const m = { id: log.editId || 'n' + Date.now(), createdAt: prev ? prev.createdAt : new Date().toISOString(), date: log.date || this.today(), type, partner: type === 'Doubles' ? who('partner') : null,
+      opps: type === 'Doubles' ? [who('opp1'), who('opp2')] : [who('opp1')], games: this.draftGames(log), wt: log.wt, lt: log.lt, worked: log.worked.trim(), lost: log.lost.trim(), on: log.on.trim() };
     const matches = log.editId
       ? this.state.matches.map(x => x.id === m.id ? m : x).sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0)
       : [m, ...this.state.matches];
@@ -3168,8 +3376,8 @@ class Component extends DCLogic {
           return { h: Math.max(10, Math.round(w * 100)) + '%', cls: i >= arr.length - 5 ? 'is-recent' : '' }; });
         const row = (label, r, sub) => ({ label, value: r.pctStr, sub, l: '0%', w: pct(r.pct) + '%', mid: 0 });
         const mw = Math.min(50, Math.abs(mg) * 5);
-        const partners = [...new Set(all.map(m => m.partner).filter(Boolean))].map(id => ({ id, r: this.with(id) })).filter(o => o.r.n >= 2).sort((a, b) => b.r.pct - a.r.pct || b.r.n - a.r.n);
-        const foes = [...new Set(all.flatMap(m => m.opps))].map(id => ({ id, r: this.vs(id) })).filter(o => o.r.n >= 3).sort((a, b) => a.r.pct - b.r.pct || b.r.n - a.r.n);
+        const partners = [...new Set(all.map(m => m.partner).filter(id => id && !this.unknown(id)))].map(id => ({ id, r: this.with(id) })).filter(o => o.r.n >= 2).sort((a, b) => b.r.pct - a.r.pct || b.r.n - a.r.n);
+        const foes = [...new Set(all.flatMap(m => m.opps).filter(id => !this.unknown(id)))].map(id => ({ id, r: this.vs(id) })).filter(o => o.r.n >= 3).sort((a, b) => a.r.pct - b.r.pct || b.r.n - a.r.n);
         const bp = partners[0], tf = foes[0];
         const others = s.players.filter(p => p.id !== 'me' && (!bp || p.id !== bp.id) && (!tf || p.id !== tf.id)).map(p => ({ id: p.id, n: all.filter(m => m.partner === p.id || m.opps.includes(p.id)).length })).filter(o => o.n).sort((a, b) => b.n - a.n);
         const mp = others[0];
@@ -3238,7 +3446,7 @@ class Component extends DCLogic {
             .filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]).slice(0, 2);
           const build = top(tagged, 'lt').map(([t, n]) => ({ name: this.tagLabel(t), evidence: this.t('costPoints', { n, total: tagged.length }), action: '' }));
           const strengths = top(wins, 'wt').map(([t, n]) => ({ name: this.tagLabel(t), signal: this.t('workingIn', { n, total: wins.length }), action: '' }));
-          const opps = [...new Set(all.flatMap(m => m.opps))].map(id => ({ id, r: this.vs(id), note: all.find(m => m.on && m.opps.includes(id)) }))
+          const opps = [...new Set(all.flatMap(m => m.opps).filter(id => !this.unknown(id)))].map(id => ({ id, r: this.vs(id), note: all.find(m => m.on && m.opps.includes(id)) }))
             .filter(o => o.note && this.nm(o.id)).sort((a, b) => a.r.pct - b.r.pct || b.r.n - a.r.n).slice(0, 2).map(o => op(o.id, o.note.on));
           v.grow = { keyTitle: '', keyBody: '', keyCurrent: '0%', keyPrevious: '0%', showKeyChart: false, build, strengths, opps, doubles: [], showKey: false, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: false,
             empty: !build.length && !strengths.length && !opps.length && empty('no-insights', this.t('notEnough'), this.t('notEnoughBody')) };
@@ -3351,56 +3559,71 @@ class Component extends DCLogic {
       v.linkHint = this.t('linkHint', { name: oppName });
     }
 
-    // Voice Log Match: describe (Figma 207:7730) and Review (217:8404, 248:2470).
+    // Voice Log Match: describe (Figma 207:7730) and Review (217:8404).
     if (v.isVoice) {
-      const vo = s.voice, V = window.RallywiseVoice, live = vo.phase === 'rec';
+      const vo = s.voice, V = window.RallywiseVoice, live = vo.phase === 'rec', has = !!vo.text.trim();
       const c = V ? V.cues(vo.text, s.players.filter(p => p.id !== 'me').flatMap(p => [p.name, p.name.split(' ')[0]])) : {};
       const clock = Math.floor(vo.secs / 60) + ':' + String(vo.secs % 60).padStart(2, '0');
       v.vc = { text: vo.text, live, clock, timerCls: 'rw-rec-timer' + (live ? ' is-live' : ''), timerLabel: this.t(live ? 'recFor' : 'recLength', { t: clock }),
         cues: [['players', 'cuePlayers'], ['games', 'cueGames'], ['results', 'cueResult'], ['notes', 'cueNotes']].map(([k, l]) => ({ label: this.t(l), cls: c[k] ? 'is-done' : '', state: this.t(c[k] ? 'cueHeard' : 'cueNotHeard') })),
         waveCls: live ? 'is-live' : '', bars: VOICE_WAVE.map(([h, o], i) => ({ h: live ? h + 'px' : '4px', o: String(o), d: (-(i * 137) % 1100) + 'ms' })),
-        recIcon: live ? 'Square' : 'Mic', recSize: live ? 29.33 : 28, recStroke: live ? 1.64 : 2, recLabel: this.t(live ? 'stopRec' : 'startRec'), cantGo: !vo.text.trim(),
+        recIcon: live ? 'Square' : 'Mic', recSize: live ? 29.33 : 28, recStroke: live ? 1.64 : 2, recLabel: this.t(live ? 'stopRec' : 'startRec'),
+        // Empty transcript: Fill manually opens an empty Review. With text: Continue reads it.
+        nextLabel: this.t(vo.parsing ? 'reading' : has ? 'continue' : 'fillManually'), cantGo: !!vo.parsing, parsing: !!vo.parsing,
         toggle: () => live ? this.recStop() : this.recStart(),
         onText: e => this.setVoice({ text: e.target.value }),
         next: () => this.voiceNext(),
+        lineup: !!vo.lineup, closeLineup: () => this.setVoice({ lineup: false }),
         close: () => { this.recStop(true); this.setState({ screen: 'matches', voice: null, log: null, back: [] }); } };
     }
     if (v.isReview) {
-      const log = s.log, f = log.voice.flags, sep = this.lang() === 'zh' ? '、' : ', ';
-      const names = ['me', log.type === 'Doubles' ? log.partner : null, log.opp1, log.type === 'Doubles' ? log.opp2 : null].filter(Boolean).map(id => id === 'me' ? this.t('you') : this.nm(id))
-        .concat((log.voice.heard || []).map(h => h.heard));
+      const V = window.RallywiseVoice, log = s.log, vo = log.voice, f = vo.flags, sep = this.lang() === 'zh' ? '、' : ', ';
+      const who = k => { const sl = (vo.slots || {})[k] || {}; return log[k] ? this.nm(log[k]) : sl.heard || ''; };
+      const names = log.type ? [this.t('you')].concat(V.slotKeys(log.type).map(who), (vo.pool || []).map(x => x.id ? this.nm(x.id) : x.heard)).filter(Boolean) : [];
       const wl = this.res(this.draftGames(log));
       const notes = [log.worked, log.lost, log.on].map(x => (x || '').trim()).filter(Boolean).join(this.lang() === 'zh' ? '' : ' ');
-      const flag = { missing: 'flagMissing', new: 'flagNew', check: 'flagCheck', lineup: 'flagLineup', scores: 'flagScores' };
-      const row = (part, label, value, muted, fk) => ({ label: this.t(label), value, valueCls: muted ? 'is-muted' : '', flag: fk ? this.t(fk) : '', cls: fk ? 'is-warning' : '', open: () => this.reviewOpen(part) });
-      const blocking = f.players ? 'players' : f.result ? 'result' : null;
-      v.rv = { back: () => this.setState(x => ({ screen: 'voice', log: null, back: x.back.slice(0, -1) })),
-        rows: [row('players', 'rvPlayers', names.join(sep), false, f.players && flag[f.players]),
+      const row = (part, label, value, muted, flag, warn, open) => ({ label: this.t(label), value, valueCls: muted ? 'is-muted' : '', flag: flag ? this.t(flag) : '',
+        cls: flag || warn ? 'is-warning' : '', open: open || (() => this.reviewOpen(part)) });
+      const ready = this.reviewReady(log);
+      v.rv = { back: () => this.voiceBack(),
+        rows: [row('players', 'rvPlayers', log.type ? names.join(sep) : this.t('selectType'), !log.type, f.players === 'unknown' && 'flagUnknown', !log.type, () => this.psOpen()),
           row('result', 'rvResult', f.result === 'missing' ? this.t('notMentioned') : this.t('rvWL', { w: wl.us, l: wl.them }), f.result === 'missing', f.result && (f.result === 'missing' ? 'flagResult' : 'flagScores')),
           row('notes', 'rvNotes', notes || log.wt.concat(log.lt).map(t => this.tagLabel(t)).join(sep) || this.t('noNotes'), !notes && !log.wt.length && !log.lt.length, f.notes && 'flagNotes')],
-        saving: !!log.saving, idle: !log.saving, saveErr: !!log.saveErr, ctaLabel: this.t(log.saveErr ? 'saveAgain' : 'continue'),
-        next: () => blocking === 'players' ? this.psOpen() : blocking ? this.reviewOpen(blocking) : this.save() };
-      v.rv.rows[0].open = () => this.psOpen();
+        saving: !!log.saving, idle: !log.saving, saveErr: !!log.saveErr, ctaLabel: this.t(log.saveErr ? 'saveAgain' : 'continue'), cantSave: !ready || !!log.saving,
+        next: () => { if (this.reviewReady(this.state.log)) this.save(); } };
       v.hasPs = !!s.ps;
       if (s.ps) {
         const p = s.ps, d = p.type === 'Doubles', k0 = p.picking;
         const roles = { partner: this.t('yourPartner'), opp1: this.t(d ? 'opponent1' : 'opponent'), opp2: this.t('opponent2') };
-        const row = k => p[k]
-          ? { filled: true, name: this.nm(p[k]), initials: this.ini(p[k]), caption: roles[k], open: () => this.psPick(k) }
-          : { empty: true, name: this.t('selectRole', { role: this.t(k === 'partner' ? 'partner' : 'opponent') }), caption: d ? roles[k] : '', open: () => this.psPick(k) };
+        const pick = k => () => this.setPs({ picking: k, q: '' });
+        const ask = (title, tags, add, k) => ({ ask: true, title, tags, hasAdd: !!add, addLabel: add ? this.t('addName', { name: add }) : '', add: () => add && this.psAddNew(k, add), search: pick(k) });
+        const slotRow = k => {
+          const sl = p.slots[k] || { state: 'missing' };
+          if (sl.state === 'confirmed' || sl.state === 'create') {
+            const name = sl.state === 'create' ? sl.name : this.nm(sl.id);
+            return { filled: true, name, initials: sl.state === 'create' ? this.ini(null, name) : this.ini(sl.id), caption: roles[k], open: pick(k) };
+          }
+          if (sl.state === 'ambiguous') return ask(this.t('whoIs', { name: sl.heard }), sl.cands.map(id => ({ label: this.nm(id), pick: () => this.psPickId(k, id) })), sl.heard, k);
+          if (sl.state === 'new') return ask(this.t('whoIs', { name: sl.heard }), [], sl.heard, k);
+          return { empty: true, warn: true, name: this.t('selectRole', { role: this.t(k === 'partner' ? 'partner' : 'opponent') }), caption: d ? roles[k] : '', open: pick(k) };
+        };
         const me = { me: true, name: this.nm('me'), initials: this.ini('me'), caption: this.t('me') };
-        const chosen = this.slotKeys(p.type).filter(k => k !== k0).map(k => p[k]).filter(Boolean), q = p.q.trim().toLowerCase();
+        const partnerRow = p.pool.length ? ask(this.t('whoPartner'), p.pool.map(x => ({ label: x.id ? this.nm(x.id) : x.heard, pick: () => this.psFill('partner', x) })), '', 'partner') : slotRow('partner');
+        const mine = d ? [me, partnerRow] : [me], theirs = !p.type ? [] : d ? [slotRow('opp1'), slotRow('opp2')] : [slotRow('opp1')];
+        const warn = rows => rows.some(r => r.ask || r.empty);
+        const chosen = V.slotKeys(p.type).filter(k => k !== k0).map(k => p.slots[k] && p.slots[k].id).filter(Boolean), q = p.q.trim(), ql = q.toLowerCase();
         v.ps = { main: !k0, picking: !!k0, screen: k0 ? this.t('selectRole', { role: roles[k0] }) : this.t('rvPlayers'), gap: d ? '24px' : '32px',
-          types: ['Singles', 'Doubles'].map(t => ({ label: this.typeLabel(t), on: t === p.type, cls: t === p.type ? 'is-active' : '', select: () => this.setPs({ type: t }) })),
-          sides: [{ label: this.t('yourSide'), rows: d ? [me, row('partner')] : [me] }, { label: this.t('opponents'), rows: d ? [row('opp1'), row('opp2')] : [row('opp1')] }],
+          types: ['Singles', 'Doubles'].map(t => ({ label: this.typeLabel(t), on: t === p.type, cls: t === p.type ? 'is-active' : '', select: () => this.psType(t) })),
+          sides: p.type ? [{ label: this.t('yourSide'), warn: warn(mine), rows: mine }, { label: this.t('opponents'), warn: warn(theirs), rows: theirs }] : [],
           slotLabel: k0 ? roles[k0] : '', q: p.q, hasQ: !!p.q, searchCls: p.q ? 'is-filled' : '',
           onQ: e => this.setPs({ q: e.target.value }), clearQ: e => { e.preventDefault(); this.setPs({ q: '' }); },
-          list: k0 ? s.players.filter(x => x.id !== 'me' && !chosen.includes(x.id) && x.name.toLowerCase().includes(q)).map(x => {
+          canAdd: !!k0 && !!q && !s.players.some(x => x.name.toLowerCase() === ql), addLabel: this.t('addAsNew', { name: q }), add: () => this.psAddNew(k0, q),
+          list: k0 ? s.players.filter(x => x.id !== 'me' && !chosen.includes(x.id) && x.name.toLowerCase().includes(ql)).map(x => {
             const r = k0 === 'partner' ? this.with(x.id) : this.vs(x.id);
-            return { name: x.name, initials: this.ini(x.id), sub: r.n ? this.t(k0 === 'partner' ? 'together' : 'h2h', { r: this.recWords(r) }) : this.t('newPlayer'), pick: () => this.setPs({ [k0]: x.id, picking: null, q: '' }) };
+            return { name: x.name, initials: this.ini(x.id), sub: r.n ? this.t(k0 === 'partner' ? 'together' : 'h2h', { r: this.recWords(r) }) : this.t('newPlayer'), pick: () => k0 === 'partner' && p.pool.length ? this.psFill('partner', { heard: '', id: x.id, cands: [], state: 'confirmed' }) : this.psPickId(k0, x.id) };
           }) : [],
           back: () => this.setPs({ picking: null, q: '' }), close: () => this.setState({ ps: null }), save: () => this.psSave() };
-        v.ps.none = !!k0 && !v.ps.list.length;
+        v.ps.none = !!k0 && !v.ps.list.length && !v.ps.canAdd;
       }
     }
 
@@ -3411,7 +3634,7 @@ class Component extends DCLogic {
     if (v.isDetail && !s.loading && all.length) {
       const m = all.find(x => x.id === s.detailId) || all[0];
       const r = this.res(m.games);
-      const openP = id => () => this.go('player', { playerId: id });
+      const openP = id => () => { if (!this.unknown(id)) this.go('player', { playerId: id }); };
       v.detail = {
         dateLong: this.date(m.date, true), type: this.typeLabel(m.type), resultWord: this.t(r.win ? 'resultWin' : 'resultLoss'), gamesWon: `${r.us}–${r.them}`,
         sideA: [{ name: this.t('you') + ' · ' + this.nm('me'), initials: this.ini('me'), avBg: A, avFg: 'var(--action-on-primary)' }]
@@ -3425,7 +3648,7 @@ class Component extends DCLogic {
           (m.lt.length || m.lost) && { label: this.t('noteCost'), labelFg: 'var(--text-secondary)', tags: m.lt.map(t => this.tagLabel(t)).join(' · '), text: m.lost },
           m.on && { label: this.t('noteOn', { name: this.teamB(m) }), labelFg: 'var(--text-secondary)', tags: '', text: m.on }
         ].filter(Boolean),
-        h2h: m.opps.map(id => {
+        h2h: m.opps.filter(id => !this.unknown(id)).map(id => {
           const tot = this.vs(id), si = this.vs(id, 'Singles'), du = this.vs(id, 'Doubles');
           const recent = all.filter(x => x.opps.includes(id)).slice(0, 5).reverse();
           return { name: this.nm(id), vsLabel: this.t('youVs', { name: this.nm(id) }), label: tot.label, sub: this.t('h2hSub', { s: this.recWords(si), d: this.recWords(du) }), form: recent.map(x => this.dot(this.res(x.games).win)), open: openP(id) };

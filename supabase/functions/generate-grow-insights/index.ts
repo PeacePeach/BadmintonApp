@@ -99,7 +99,9 @@ Deno.serve(async req => {
 
     const names:any = Object.fromEntries((players || []).map((p:any)=>[p.id,p.name]));
     const opponents:any = {};
-    for (const m of recent) for (const pid of (m.opps || [])) {
+    // "unknown:<heard name>" is a voice-logged opponent nobody identified: the match still counts everywhere else,
+    // but it never becomes an opponent profile with notes or weaknesses.
+    for (const m of recent) for (const pid of (m.opps || []).filter((p:string) => !String(p).startsWith("unknown:"))) {
       const o = opponents[pid] ||= {player_id:pid,name:names[pid] || "Opponent",wins:0,losses:0,notes:[],cost:{}};
       resultOf(m.games)==="win" ? o.wins++ : o.losses++;
       if (m.opp_notes) o.notes.push(safe(m.opp_notes));

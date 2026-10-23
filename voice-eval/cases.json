@@ -1,0 +1,167 @@
+[
+  {
+    "id": "en-aggregate-4-games", "lang": "en", "tags": ["aggregate", "no-order"],
+    "transcript": "I played four games and lost three.",
+    "expect": { "match_type": null, "game_count": 4, "totals": { "wins": 1, "losses": 3 }, "order_known": false, "games": [], "players": [], "observations": [] }
+  },
+  {
+    "id": "zh-xiaowang-6-games", "lang": "zh", "tags": ["aggregate", "no-order", "observations"],
+    "transcript": "今天和小王打了六局，赢了四局，输了两局。杀球不错，但是网前失误比较多。",
+    "expect": { "match_type": { "any": [null, "singles"] }, "game_count": 6, "totals": { "wins": 4, "losses": 2 }, "order_known": false, "games": [], "players": [{ "name": "小王", "role": "opponent" }], "observations": [{ "category": "won_points", "any": ["杀球"] }, { "category": "lost_points", "any": ["网前"] }], "multiple_lineups": false }
+  },
+  {
+    "id": "en-doubles-switch-unnamed", "lang": "en", "tags": ["doubles", "changing-partners", "ambiguous"],
+    "transcript": "Played doubles with Alex, then switched partners for the last two games.",
+    "expect": { "match_type": "doubles", "game_count": null, "totals": { "wins": null, "losses": null }, "order_known": false, "no_results": true, "players": [{ "name": "Alex", "role": "partner" }], "observations": [], "multiple_lineups": true }
+  },
+  {
+    "id": "en-fast-entry", "lang": "en", "tags": ["singles", "scores"],
+    "transcript": "Quick singles game against Jordan after training. Won 21-15. My smash was working well.",
+    "expect": { "match_type": "singles", "game_count": 1, "totals": { "wins": 1, "losses": 0 }, "order_known": true, "games": [{ "number": 1, "result": "win", "my_score": 21, "their_score": 15 }], "players": [{ "name": "Jordan", "role": "opponent" }], "observations": [{ "category": "won_points", "any": ["smash"] }], "multiple_lineups": false }
+  },
+  {
+    "id": "en-six-games-mixed-scores", "lang": "en", "tags": ["singles", "multiple-games", "partial-scores"],
+    "transcript": "Played six games of singles against Alex tonight. Won the first two 21-18 and 21-16, lost the third 17-21, won the fourth 21-19, lost the fifth, won the last one 21-14. My deep clears to his backhand kept him under pressure.",
+    "expect": { "match_type": "singles", "game_count": 6, "totals": { "wins": 4, "losses": 2 }, "order_known": true, "games": [{ "number": 1, "result": "win", "my_score": 21, "their_score": 18 }, { "number": 2, "result": "win", "my_score": 21, "their_score": 16 }, { "number": 3, "result": "loss", "my_score": 17, "their_score": 21 }, { "number": 4, "result": "win", "my_score": 21, "their_score": 19 }, { "number": 5, "result": "loss", "my_score": null, "their_score": null }, { "number": 6, "result": "win", "my_score": 21, "their_score": 14 }], "players": [{ "name": "Alex", "role": "opponent" }], "observations": [{ "category": "won_points", "any": ["clear"] }] }
+  },
+  {
+    "id": "en-court-time-1-1", "lang": "en", "tags": ["singles", "scores", "draw"],
+    "transcript": "Singles against Leo. I won the first game 21-17, lost the second 18-21, and then court time ran out, so it ended one game each.",
+    "expect": { "match_type": "singles", "game_count": 2, "totals": { "wins": 1, "losses": 1 }, "order_known": true, "games": [{ "number": 1, "result": "win", "my_score": 21, "their_score": 17 }, { "number": 2, "result": "loss", "my_score": 18, "their_score": 21 }], "players": [{ "name": "Leo", "role": "opponent" }], "observations": [] }
+  },
+  {
+    "id": "en-no-scores-no-order", "lang": "en", "tags": ["singles", "aggregate", "no-order", "observations"],
+    "transcript": "Played six games of singles against Ravi this morning. I won four and lost two, but I don't remember the scores or the order. My footwork felt slow in the back corners. Net play was solid though.",
+    "expect": { "match_type": "singles", "game_count": 6, "totals": { "wins": 4, "losses": 2 }, "order_known": false, "games": [], "players": [{ "name": "Ravi", "role": "opponent" }], "observations": [{ "category": "lost_points", "any": ["footwork"] }, { "category": "won_points", "any": ["net"] }] }
+  },
+  {
+    "id": "en-observations-only", "lang": "en", "tags": ["observations-only"],
+    "transcript": "No proper games today, we just did drills and some rallies, nothing scored. My backhand clears kept landing short. Drop shots from the back felt really good.",
+    "expect": { "match_type": null, "game_count": null, "totals": { "wins": null, "losses": null }, "order_known": false, "games": [], "players": [], "observations": [{ "category": "lost_points", "any": ["clear"] }, { "category": "won_points", "any": ["drop"] }] }
+  },
+  {
+    "id": "en-doubles-changing-partners", "lang": "en", "tags": ["doubles", "changing-partners", "scores"],
+    "transcript": "Doubles tonight against Marcus and Jordan. First two games with Priya, we won both, 21-17 and 21-19. Then I switched partners and played the last game with Kai, lost 15-21. Priya's net play was great. I kept lifting short when we were behind. Jordan smashes hard, but his backhand defence is weak.",
+    "expect": { "match_type": "doubles", "game_count": 3, "totals": { "wins": 2, "losses": 1 }, "order_known": true, "games": [{ "number": 1, "result": "win", "my_score": 21, "their_score": 17 }, { "number": 2, "result": "win", "my_score": 21, "their_score": 19 }, { "number": 3, "result": "loss", "my_score": 15, "their_score": 21 }], "players": [{ "name": "Marcus", "role": "opponent" }, { "name": "Jordan", "role": "opponent" }, { "name": "Priya", "role": "partner" }, { "name": "Kai", "role": "partner" }], "observations": [{ "category": "won_points", "any": ["net"] }, { "category": "lost_points", "any": ["lift"] }, { "category": "opponent", "any": ["Jordan", "smash", "backhand"] }], "multiple_lineups": true }
+  },
+  {
+    "id": "zh-singles-three-scores", "lang": "zh", "tags": ["singles", "scores", "multiple-games"],
+    "transcript": "单打对阿杰，打了三局，21比18赢了第一局，第二局19比21输了，第三局21比16赢了。",
+    "expect": { "match_type": "singles", "game_count": 3, "totals": { "wins": 2, "losses": 1 }, "order_known": true, "games": [{ "number": 1, "result": "win", "my_score": 21, "their_score": 18 }, { "number": 2, "result": "loss", "my_score": 19, "their_score": 21 }, { "number": 3, "result": "win", "my_score": 21, "their_score": 16 }], "players": [{ "name": "阿杰", "role": "opponent" }], "observations": [] }
+  },
+  {
+    "id": "zh-chinese-numerals", "lang": "zh", "tags": ["scores", "chinese-numerals"],
+    "transcript": "第一局二十一比十五赢了，第二局十八比二十一输了。对手是老陈。",
+    "expect": { "match_type": { "any": [null, "singles"] }, "game_count": 2, "totals": { "wins": 1, "losses": 1 }, "order_known": true, "games": [{ "number": 1, "result": "win", "my_score": 21, "their_score": 15 }, { "number": 2, "result": "loss", "my_score": 18, "their_score": 21 }], "players": [{ "name": "老陈", "role": "opponent" }], "observations": [] }
+  },
+  {
+    "id": "zh-doubles-both-won", "lang": "zh", "tags": ["doubles", "observations"],
+    "transcript": "今天打双打，搭档是小李，对手是阿明和阿强。我们打了两局都赢了。小李后场进攻很猛。我发球有点高。",
+    "expect": { "match_type": "doubles", "game_count": 2, "totals": { "wins": 2, "losses": 0 }, "players": [{ "name": "小李", "role": "partner" }, { "name": "阿明", "role": "opponent" }, { "name": "阿强", "role": "opponent" }], "observations": [{ "category": "won_points", "any": ["后场", "进攻"] }, { "category": "lost_points", "any": ["发球"] }], "multiple_lineups": false }
+  },
+  {
+    "id": "mixed-doubles-codeswitch", "lang": "mixed", "tags": ["doubles", "scores", "mixed-language"],
+    "transcript": "今天 doubles with Kevin，对手是 Leo 和 Sam，21-19 赢了，然后 15-21 输了。My net kills were good 但是 backhand clear 太短了。",
+    "expect": { "match_type": "doubles", "game_count": 2, "totals": { "wins": 1, "losses": 1 }, "order_known": true, "games": [{ "number": 1, "result": "win", "my_score": 21, "their_score": 19 }, { "number": 2, "result": "loss", "my_score": 15, "their_score": 21 }], "players": [{ "name": "Kevin", "role": "partner" }, { "name": "Leo", "role": "opponent" }, { "name": "Sam", "role": "opponent" }], "observations": [{ "category": "won_points", "any": ["net"] }, { "category": "lost_points", "any": ["clear"] }], "multiple_lineups": false }
+  },
+  {
+    "id": "en-correction-score", "lang": "en", "tags": ["correction", "scores"],
+    "transcript": "Lost the first game 18-21, no wait, it was 19-21. Then won the second 21-12 against Priya.",
+    "expect": { "game_count": 2, "totals": { "wins": 1, "losses": 1 }, "order_known": true, "games": [{ "number": 1, "result": "loss", "my_score": 19, "their_score": 21 }, { "number": 2, "result": "win", "my_score": 21, "their_score": 12 }], "players": [{ "name": "Priya", "role": "opponent" }], "observations": [] }
+  },
+  {
+    "id": "zh-correction-totals", "lang": "zh", "tags": ["correction", "aggregate", "no-order"],
+    "transcript": "跟小王打了三局，赢了两局，不对，是赢了一局输了两局。",
+    "expect": { "game_count": 3, "totals": { "wins": 1, "losses": 2 }, "order_known": false, "games": [], "players": [{ "name": "小王", "role": { "any": ["opponent", "unknown"] } }], "observations": [] }
+  },
+  {
+    "id": "en-ambiguous-role", "lang": "en", "tags": ["ambiguous", "aggregate"],
+    "transcript": "Played with Marcus today, won two games.",
+    "expect": { "match_type": null, "game_count": null, "totals": { "wins": 2, "losses": null }, "order_known": false, "players": [{ "name": "Marcus", "role": { "any": ["unknown", "partner"] } }], "observations": [] }
+  },
+  {
+    "id": "en-score-list", "lang": "en", "tags": ["singles", "scores", "multiple-games"],
+    "transcript": "Three games against Ravi: 21-17, 14-21, 21-19.",
+    "expect": { "match_type": { "any": ["singles", null] }, "game_count": 3, "totals": { "wins": 2, "losses": 1 }, "order_known": true, "games": [{ "number": 1, "result": "win", "my_score": 21, "their_score": 17 }, { "number": 2, "result": "loss", "my_score": 14, "their_score": 21 }, { "number": 3, "result": "win", "my_score": 21, "their_score": 19 }], "players": [{ "name": "Ravi", "role": "opponent" }], "observations": [] }
+  },
+  {
+    "id": "en-vague-count", "lang": "en", "tags": ["ambiguous", "observations"],
+    "transcript": "Won most of my games today, maybe five or six. Footwork felt sharp.",
+    "expect": { "game_count": null, "totals": { "wins": null, "losses": null }, "order_known": false, "games": [], "players": [], "observations": [{ "category": "won_points", "any": ["footwork"] }] }
+  },
+  {
+    "id": "en-coaching-observations", "lang": "en", "tags": ["observations-only"],
+    "transcript": "Didn't play any matches, just a coaching session. Worked on my backhand serve, it's still too high. My smash timing is improving.",
+    "expect": { "match_type": null, "game_count": null, "totals": { "wins": null, "losses": null }, "order_known": false, "games": [], "players": [], "observations": [{ "category": "lost_points", "any": ["serve"] }, { "category": "won_points", "any": ["smash"] }] }
+  },
+  {
+    "id": "zh-observations-only", "lang": "zh", "tags": ["observations-only"],
+    "transcript": "今天没有比赛，只练了步法。后场步法还是慢，网前小球手感不错。",
+    "expect": { "match_type": null, "game_count": null, "totals": { "wins": null, "losses": null }, "order_known": false, "games": [], "players": [], "observations": [{ "category": "lost_points", "any": ["步法"] }, { "category": "won_points", "any": ["网前"] }] }
+  },
+  {
+    "id": "en-doubles-partner-per-game", "lang": "en", "tags": ["doubles", "changing-partners", "scores"],
+    "transcript": "Doubles night. First game with Priya we lost 17-21, then with Mei we won two games 21-15 and 21-18. Opponents were Alex and Ravi the whole time.",
+    "expect": { "match_type": "doubles", "game_count": 3, "totals": { "wins": 2, "losses": 1 }, "order_known": true, "games": [{ "number": 1, "result": "loss", "my_score": 17, "their_score": 21 }, { "number": 2, "result": "win", "my_score": 21, "their_score": 15 }, { "number": 3, "result": "win", "my_score": 21, "their_score": 18 }], "players": [{ "name": "Priya", "role": "partner" }, { "name": "Mei", "role": "partner" }, { "name": "Alex", "role": "opponent" }, { "name": "Ravi", "role": "opponent" }], "observations": [], "multiple_lineups": true }
+  },
+  {
+    "id": "en-count-and-wins", "lang": "en", "tags": ["aggregate", "no-order"],
+    "transcript": "Played eight games, won five.",
+    "expect": { "match_type": null, "game_count": 8, "totals": { "wins": 5, "losses": 3 }, "order_known": false, "games": [], "players": [], "observations": [] }
+  },
+  {
+    "id": "en-singles-opponent-notes", "lang": "en", "tags": ["singles", "aggregate", "opponent-notes"],
+    "transcript": "Singles with Leo, lost two games to one. Leo kept attacking my backhand, and his drop shot is really deceptive. My defence held up better than last week.",
+    "expect": { "match_type": "singles", "game_count": 3, "totals": { "wins": 1, "losses": 2 }, "order_known": false, "games": [], "players": [{ "name": "Leo", "role": "opponent" }], "observations": [{ "category": "opponent", "any": ["backhand", "drop"] }, { "category": "won_points", "any": ["defence", "defense"] }] }
+  },
+  {
+    "id": "mixed-aggregate", "lang": "mixed", "tags": ["aggregate", "mixed-language", "no-order"],
+    "transcript": "Today played 5 games against 阿伟, 赢了三局. 接发球 not consistent.",
+    "expect": { "match_type": { "any": [null, "singles"] }, "game_count": 5, "totals": { "wins": 3, "losses": 2 }, "order_known": false, "games": [], "players": [{ "name": "阿伟", "role": "opponent" }], "observations": [{ "category": "lost_points", "any": ["接发"] }] }
+  },
+  {
+    "id": "zh-partial-last-game", "lang": "zh", "tags": ["singles", "aggregate", "partial-order"],
+    "transcript": "和小张打单打，打了四局，二比二。最后一局21比23输了，很可惜。",
+    "expect": { "match_type": "singles", "game_count": 4, "totals": { "wins": 2, "losses": 2 }, "order_known": false, "games": [{ "number": 4, "result": "loss", "my_score": 21, "their_score": 23 }], "players": [{ "name": "小张", "role": "opponent" }], "observations": [] }
+  },
+  {
+    "id": "en-interrupted-game", "lang": "en", "tags": ["interrupted", "scores"],
+    "transcript": "Singles against Leo. Won the first 21-16, lost the second 19-21, and the third was interrupted at 15-12 when the hall closed.",
+    "expect": { "match_type": "singles", "game_count": 3, "totals": { "wins": 1, "losses": 1 }, "order_known": false, "games": [{ "number": 1, "result": "win", "my_score": 21, "their_score": 16 }, { "number": 2, "result": "loss", "my_score": 19, "their_score": 21 }, { "number": 3, "result": null, "my_score": 15, "their_score": 12, "interrupted": true }], "players": [{ "name": "Leo", "role": "opponent" }], "observations": [] }
+  },
+  {
+    "id": "zh-interrupted-game", "lang": "zh", "tags": ["interrupted", "scores"],
+    "transcript": "和阿杰打了三局单打，第一局21比18赢了，第二局17比21输了，第三局我18比14领先的时候他受伤了，没打完。",
+    "expect": { "match_type": "singles", "game_count": 3, "totals": { "wins": 1, "losses": 1 }, "order_known": false, "games": [{ "number": 1, "result": "win", "my_score": 21, "their_score": 18 }, { "number": 2, "result": "loss", "my_score": 17, "their_score": 21 }, { "number": 3, "result": null, "my_score": 18, "their_score": 14, "interrupted": true }], "players": [{ "name": "阿杰", "role": "opponent" }], "observations": [] }
+  },
+  {
+    "id": "en-score-run-together", "lang": "en", "tags": ["scores", "speech"],
+    "transcript": "Beat Jordan 2115 in the first game of singles, then lost the second one 1921.",
+    "expect": { "match_type": "singles", "game_count": 2, "totals": { "wins": 1, "losses": 1 }, "order_known": true, "games": [{ "number": 1, "result": "win", "my_score": 21, "their_score": 15 }, { "number": 2, "result": "loss", "my_score": 19, "their_score": 21 }], "players": [{ "name": "Jordan", "role": "opponent" }], "observations": [] }
+  },
+  {
+    "id": "en-winner-first-loss", "lang": "en", "tags": ["scores"],
+    "transcript": "Two games against Ravi. Lost the first one 21-15, then won the second 21-18.",
+    "expect": { "game_count": 2, "totals": { "wins": 1, "losses": 1 }, "order_known": true, "games": [{ "number": 1, "result": "loss", "my_score": 15, "their_score": 21 }, { "number": 2, "result": "win", "my_score": 21, "their_score": 18 }], "players": [{ "name": "Ravi", "role": "opponent" }], "observations": [] }
+  },
+  {
+    "id": "en-games-tally", "lang": "en", "tags": ["aggregate", "scores"],
+    "transcript": "Beat Leo 2-1 in singles today.",
+    "expect": { "match_type": "singles", "game_count": 3, "totals": { "wins": 2, "losses": 1 }, "order_known": false, "games": [], "players": [{ "name": "Leo", "role": "opponent" }], "observations": [] }
+  },
+  {
+    "id": "zh-score-correction", "lang": "zh", "tags": ["correction", "scores"],
+    "transcript": "第一局21比17赢了，说错了，是21比19。第二局15比21输了。",
+    "expect": { "game_count": 2, "totals": { "wins": 1, "losses": 1 }, "order_known": true, "games": [{ "number": 1, "result": "win", "my_score": 21, "their_score": 19 }, { "number": 2, "result": "loss", "my_score": 15, "their_score": 21 }], "players": [], "observations": [] }
+  },
+  {
+    "id": "en-running-score", "lang": "en", "tags": ["scores"],
+    "transcript": "Only played one game against Mei. I was up 20-18 but she came back and I lost 22-24.",
+    "expect": { "game_count": 1, "totals": { "wins": 0, "losses": 1 }, "order_known": true, "games": [{ "number": 1, "result": "loss", "my_score": 22, "their_score": 24 }], "players": [{ "name": "Mei", "role": "opponent" }], "observations": [] }
+  },
+  {
+    "id": "en-singles-then-doubles", "lang": "en", "tags": ["lineup"],
+    "transcript": "Played singles against Leo first and won 21-17, then doubles with Priya against Alex and Ravi, lost 18-21.",
+    "expect": { "match_type": null, "multiple_lineups": true, "observations": [] }
+  }
+]

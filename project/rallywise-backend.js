@@ -317,8 +317,23 @@
     }
   };
 
+  // Voice Log Match: the parse-voice-log edge function (from voice-v2-live). The server checks the session,
+  // the length (3,000 characters) and the rate, calls the model and runs the deterministic guards.
+  // Throws { code }: the function's own error (unauthorized, too_long, rate_limited, ai_not_configured,
+  // ai_failed, schema_failed, ...) or network.
+  const voice = {
+    async parse(transcript) {
+      const { data, error } = await sb().functions.invoke('parse-voice-log', { body: { transcript } });
+      if (!error) return data;
+      if (error.name === 'FunctionsFetchError') throw { code: 'network' };
+      let code = 'ai_failed';
+      try { const j = await error.context.json(); if (j && j.error) code = j.error; } catch (e) {}
+      throw { code };
+    }
+  };
+
   // The mocked session record from the localStorage version is meaningless now.
   try { localStorage.removeItem('rallywise.v1.session'); } catch (e) {}
 
-  window.RallywiseBackend = { ready, auth, data, analytics, insights };
+  window.RallywiseBackend = { ready, auth, data, analytics, insights, voice };
 })();
