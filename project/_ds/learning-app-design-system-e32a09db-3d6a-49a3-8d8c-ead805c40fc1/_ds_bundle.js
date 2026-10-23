@@ -179,6 +179,12 @@ const V = {
     color: 'var(--rw-text-primary)',
     border: '2px solid transparent',
     margin: -2
+  },
+  // V2 Button / Icon on an empty player slot: Highlight Fill with an N600 ring and icon.
+  add: {
+    background: 'var(--rw-icon-btn-add-bg)',
+    color: 'var(--rw-icon-btn-add-fg)',
+    border: '1px solid var(--rw-icon-btn-add-border)'
   }
 };
 function IconButton({

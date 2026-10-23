@@ -138,6 +138,7 @@
   /* Voice Log Match (Figma 207:7730, Review 217:8404 / 248:2470) */
   --rw-color-surface-input: var(--rw-inactivefill);   /* Figma 207:7730 card uses Inactive Fill (Han, 2026-10-22) */
   --rw-color-surface-done: var(--rw-highlightfill);     /* a recognised item */
+  --rw-color-surface-highlight: var(--rw-highlightfill); /* raised control inside a surface, e.g. the Plus button on an empty player slot */
   --rw-color-surface-pending: var(--rw-inactivefill);   /* an item not heard yet */
   --rw-color-border-input-active: var(--rw-input-border-gradient);
   --rw-color-border-pending: var(--rw-n400);           /* dashed ring (Figma N400) */
@@ -177,6 +178,12 @@
   --rw-btn-primary-fg: var(--rw-color-text-on-action);
   --rw-btn-primary-h: 52px;
   --rw-icon-btn-size: 40px;
+  /* IconButton "add" (Figma Player, State=Unselected 228:8836): Highlight Fill, N600 ring and icon (Han: active border, label and icon N600) */
+  --rw-icon-btn-add-bg: var(--rw-color-surface-highlight);
+  --rw-icon-btn-add-border: var(--rw-color-border-selected);
+  --rw-icon-btn-add-fg: var(--rw-color-text-on-selected);
+  /* Player row (Figma Player 228:8835; Han approved 2026-10-23, reuses Avatar and IconButton) */
+  --rw-player-h: 48px;
   /* Pills */
   --rw-pill-h: 32px;
   --rw-pill-fg: var(--rw-color-text-secondary);
