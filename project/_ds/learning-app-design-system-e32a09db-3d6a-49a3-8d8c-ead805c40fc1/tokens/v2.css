@@ -161,7 +161,7 @@
   /* Avatars */
   --rw-color-avatar-bg: var(--rw-n150);              /* the gradient end colour (at 10%) */
   --rw-color-avatar-grad-from: #3e3e3e;               /* gradient start: Figma 360:8020 unbound #3E3E3E kept as is (Han approved, 2026-10-23) */
-  --rw-color-avatar-grad-to: color-mix(in srgb, var(--rw-color-avatar-bg) 10%, transparent); /* gradient end: N150 at 10% */
+  --rw-color-avatar-grad-to: var(--rw-color-avatar-bg);  /* gradient end: solid N150 (Figma has 10%; Han chose 100% so the circle edge shows on every side, 2026-10-23) */
   --rw-color-avatar-fg: var(--rw-n600);               /* letter N600 (Figma 360:8022) */
   --rw-color-avatar-me-bg: var(--rw-b75);             /* your own avatar (Han, 2026-10-23: Figma Player 228:8826) */
   --rw-color-avatar-me-fg: var(--rw-n75);             /* Figma #1B1A1D is unbound; nearest Foundation N75 */
@@ -358,8 +358,7 @@
   --rw-type-button: 600 15px/15px var(--font-sans);
   --rw-type-pill: 500 14px/15px var(--font-sans);
   --rw-type-pill-sm: 500 12px/15px var(--font-sans);
-  --rw-type-avatar: 700 16px/13px var(--font-sans);    /* Figma 360:8022: Bold 16px */
-  --rw-type-avatar-sm: 700 13px/13px var(--font-sans); /* 32px Match Players avatar, scaled down */
+  --rw-type-avatar: 700 14px/14px var(--font-sans);    /* Bold 14px on both sizes (Han, 2026-10-23; Figma 360:8022 shows 16px) */
   --rw-type-nav: 500 11px/12px var(--font-sans);
   --rw-type-tab: 500 15px/15px var(--font-sans);
   --rw-type-tab-sm: 500 12px/12px var(--font-sans);
