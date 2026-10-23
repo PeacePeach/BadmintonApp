@@ -205,12 +205,15 @@
 @keyframes rw-wave{from{transform:scaleY(.5);}to{transform:scaleY(1);}}
 /* Record controls: timer or secondary action | record/stop | Continue */
 .rw-rec{display:grid;grid-template-columns:minmax(0,1fr) var(--rw-rec-btn-size) minmax(0,1fr);align-items:center;}
-.rw-rec-side{justify-self:start;display:flex;align-items:center;min-width:0;}
-.rw-rec-side.is-end{justify-self:end;}
-.rw-rec-link{position:relative;border:none;background:transparent;padding:0;cursor:pointer;font:var(--rw-type-timer);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);white-space:nowrap;}
+/* Strict 3 columns: two equal side columns fill their width, the record button sits exactly in the middle.
+   The timer starts at the left edge of its column and the Continue label ends at the right edge of its column. */
+.rw-rec-side{justify-self:stretch;height:36px;display:flex;align-items:center;justify-content:flex-start;min-width:0;}
+.rw-rec-side.is-end{justify-content:flex-end;}
+.rw-rec>.rw-rec-btn{justify-self:center;}
+.rw-rec-link{position:relative;height:36px;display:flex;align-items:center;border:none;background:transparent;padding:0;cursor:pointer;font:var(--rw-type-timer);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);white-space:nowrap;}
 .rw-rec-link::after{content:"";position:absolute;inset:-15px -8px;}
 .rw-rec-link:disabled{opacity:.4;cursor:default;}
-.rw-rec-timer{height:36px;padding:0 14px;display:flex;align-items:center;gap:4px;font:var(--rw-type-timer);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);font-variant-numeric:tabular-nums;}
+.rw-rec-timer{height:36px;padding:0;display:flex;align-items:center;gap:4px;font:var(--rw-type-timer);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);font-variant-numeric:tabular-nums;}
 .rw-rec-timer::before{content:"";width:8px;height:8px;border-radius:4px;background:var(--rw-rec-dot-idle);transition:background-color var(--dur-fast) var(--ease-out);}
 .rw-rec-timer.is-live::before{background:var(--rw-rec-dot);}
 .rw-rec-btn{width:var(--rw-rec-btn-size);height:var(--rw-rec-btn-size);border-radius:50%;border:none;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--rw-rec-btn-bg);color:var(--rw-rec-btn-fg);transition:transform var(--dur-fast) var(--ease-out);}
