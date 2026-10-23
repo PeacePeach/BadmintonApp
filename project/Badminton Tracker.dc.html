@@ -865,7 +865,7 @@ button:disabled{cursor:default !important;}
             <p class="rw-hint">{{ tx.voiceHint }}</p>
           </div>
           <div class="rw-voice-input">
-            <textarea ref="{{ voiceRef }}" class="rw-voice-text" value="{{ vc.text }}" onChange="{{ vc.onText }}" readOnly="{{ vc.live }}" placeholder="{{ tx.voicePh }}" aria-label="{{ tx.voiceTitle }}"></textarea>
+            <textarea ref="{{ voiceRef }}" class="rw-voice-text" value="{{ vc.text }}" onChange="{{ vc.onText }}" onFocus="{{ vc.editFocus }}" placeholder="{{ tx.voicePh }}" aria-label="{{ tx.voiceTitle }}"></textarea>
             <div class="rw-cues" role="list" aria-label="{{ tx.cuesLabel }}">
               <sc-for list="{{ vc.cues }}" as="c" hint-placeholder-count="4">
                 <div role="listitem" class="rw-pill rw-pill-sm rw-cue {{ c.cls }}"><span class="rw-cue-mark" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 10 }}" strokeWidth="{{ 2.88 }}" hint-size="10px,10px"></x-import></span><span>{{ c.label }}</span><span class="sr-only">{{ c.state }}</span></div>
@@ -2704,6 +2704,13 @@ class Component extends DCLogic {
       const el = this.voiceRef.current; if (el) el.scrollTop = el.scrollHeight;
     }, 140);
   }
+  // Editing takes precedence over the microphone: keep the transcript currently visible,
+  // including interim words, and abort recognition before the user can type.
+  recEditFocus() {
+    if (!this._rec && (!this.state.voice || this.state.voice.phase !== 'rec')) return;
+    this.recStop(true);
+    this.setVoice({ phase: 'idle', awaitingStop: false });
+  }
   // quiet: leaving the screen, so nothing is kept or reported.
   recStop(quiet) {
     clearInterval(this._recS);
@@ -3786,7 +3793,8 @@ class Component extends DCLogic {
         // Empty transcript: Fill manually opens an empty Review. With text: Continue reads it.
         nextLabel: this.t(vo.parsing || vo.awaitingStop ? 'reading' : has ? 'continue' : 'fillManually'), cantGo: !!(vo.parsing || vo.awaitingStop), parsing: !!(vo.parsing || vo.awaitingStop),
         toggle: () => live ? this.recStop() : this.recStart(),
-        onText: e => this.setVoice({ text: e.target.value }),
+        editFocus: () => this.recEditFocus(),
+        onText: e => { if (this._rec) this.recEditFocus(); this.setVoice({ text: e.target.value }); },
         next: () => this.voiceNext(),
         lineup: !!vo.lineup, closeLineup: () => this.setVoice({ lineup: false }),
         close: () => { this.recStop(true); this.setState({ screen: 'matches', voice: null, log: null, back: [] }); } };
