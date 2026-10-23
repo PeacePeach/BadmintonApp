@@ -397,11 +397,13 @@ button:disabled{cursor:default !important;}
           </button>
         </div>
         <div style="display:flex;flex-direction:column;gap:16px;">
+          <sc-if value="{{ hasMatches }}" hint-placeholder-val="{{ true }}">
           <div role="group" style="display:flex;gap:8px;">
             <sc-for list="{{ filters }}" as="f" hint-placeholder-count="3">
               <button class="rw-surface rw-pill {{ f.cls }}" aria-pressed="{{ f.active }}" onClick="{{ f.select }}">{{ f.label }}</button>
             </sc-for>
           </div>
+          </sc-if>
           <div style="display:flex;flex-direction:column;gap:10px;">
             <sc-for list="{{ matchCards }}" as="m" hint-placeholder-count="4">
               <div onClick="{{ m.open }}" class="rw-surface rw-tile rw-match rw-press">
@@ -3500,7 +3502,9 @@ class Component extends DCLogic {
         { label: this.t('logOut'), icon: 'LogOut', select: () => this.signOut() }
       ],
       filters: ['All', 'Singles', 'Doubles'].map(f => ({ label: f === 'All' ? this.t('all') : this.typeLabel(f), active: s.filter === f, cls: s.filter === f ? 'is-active' : '', select: () => this.setState({ filter: f }) })),
-      matchCards: all.filter(m => s.filter === 'All' || m.type === s.filter).map(m => this.card(m))
+      matchCards: all.filter(m => s.filter === 'All' || m.type === s.filter).map(m => this.card(m)),
+      // No matches at all: show only the empty state, no All / Singles / Doubles pills (Han, 2026-10-23).
+      hasMatches: all.length > 0
     };
 
     const empty = (illustration, title, body, actionLabel, onAction) => ({ illustration, title, body, actionLabel: actionLabel || null, onAction: onAction || null });
