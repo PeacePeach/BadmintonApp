@@ -412,7 +412,7 @@ button:disabled{cursor:default !important;}
                 <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;">
                   <div style="display:flex;align-items:center;gap:15px;min-width:0;">
                     <div class="rw-players {{ m.playersCls }}" aria-hidden="true">
-                      <sc-for list="{{ m.players }}" as="p" hint-placeholder-count="2"><div class="rw-avatar rw-avatar-sm">{{ p.ini }}</div></sc-for>
+                      <sc-for list="{{ m.players }}" as="p" hint-placeholder-count="2"><div class="rw-avatar rw-avatar-sm {{ p.avCls }}">{{ p.ini }}</div></sc-for>
                     </div>
                     <div style="display:flex;flex-direction:column;gap:3px;min-width:0;">
                       <div class="rw-name">{{ m.teamA }}</div>
@@ -552,7 +552,7 @@ button:disabled{cursor:default !important;}
               <sc-for list="{{ pf.people }}" as="p" hint-placeholder-count="3">
                 <div onClick="{{ p.open }}" class="rw-surface rw-tile rw-list-row rw-press">
                   <div class="rw-list-row-who">
-                    <div class="rw-avatar" aria-hidden="true">{{ p.initials }}</div>
+                    <div class="rw-avatar {{ p.avCls }}" aria-hidden="true">{{ p.initials }}</div>
                     <div class="rw-list-row-text">
                       <div class="rw-eyebrow tl">{{ p.role }}</div>
                       <div class="rw-name">{{ p.name }}</div>
@@ -1580,7 +1580,7 @@ button:disabled{cursor:default !important;}
                     <div class="rw-surface rw-player" style="cursor:default;"><span class="rw-avatar is-me" aria-hidden="true">{{ p.initials }}</span><span class="rw-name">{{ p.name }}</span><span class="rw-caption">{{ p.caption }}</span></div>
                   </sc-if>
                   <sc-if value="{{ p.filled }}" hint-placeholder-val="{{ true }}">
-                    <button type="button" class="rw-surface rw-player" onClick="{{ p.open }}"><span class="rw-avatar" aria-hidden="true">{{ p.initials }}</span><span class="rw-name">{{ p.name }}</span><span class="rw-caption">{{ p.caption }}</span></button>
+                    <button type="button" class="rw-surface rw-player" onClick="{{ p.open }}"><span class="rw-avatar {{ p.avCls }}" aria-hidden="true">{{ p.initials }}</span><span class="rw-name">{{ p.name }}</span><span class="rw-caption">{{ p.caption }}</span></button>
                   </sc-if>
                   <sc-if value="{{ p.ask }}" hint-placeholder-val="{{ false }}">
                     <div class="rw-inline-banner" role="group" aria-label="{{ p.title }}">
@@ -1618,7 +1618,7 @@ button:disabled{cursor:default !important;}
               </div>
             </sc-if>
             <sc-for list="{{ ps.list }}" as="p" hint-placeholder-count="5">
-              <button type="button" class="rw-surface rw-player" onClick="{{ p.pick }}"><span class="rw-avatar" aria-hidden="true">{{ p.initials }}</span><span class="rw-name">{{ p.name }}</span><span class="rw-caption">{{ p.sub }}</span></button>
+              <button type="button" class="rw-surface rw-player" onClick="{{ p.pick }}"><span class="rw-avatar {{ p.avCls }}" aria-hidden="true">{{ p.initials }}</span><span class="rw-name">{{ p.name }}</span><span class="rw-caption">{{ p.sub }}</span></button>
             </sc-for>
             <sc-if value="{{ ps.none }}" hint-placeholder-val="{{ false }}"><p class="rw-hint" style="padding:0 6px;">{{ tx.noPlayersFound }}</p></sc-if>
           </div>
@@ -3063,6 +3063,14 @@ class Component extends DCLogic {
     const p = this.state.players.find(x => x.id === id); return p ? p.name : '';
   }
   first(id) { return id === 'me' ? this.t('you') : this.nm(id).split(' ')[0]; }
+  // Letter avatar gradient direction (.is-dir-1 ... .is-dir-6): picked from a hash of the player ID, or the
+  // typed name for a player not saved yet, so each player keeps the same direction on every screen.
+  avDir(id, name) {
+    const key = String(id || name || '');
+    let h = 0;
+    for (const ch of key) h = (h * 31 + ch.codePointAt(0)) >>> 0;
+    return 'is-dir-' + (h % 6 + 1);
+  }
   ini(id, name) {
     // A new-player draft has a name but no persisted ID yet. Only genuinely unknown
     // identities should show '?'; confirmed and pending-create names show initials.
@@ -3104,7 +3112,7 @@ class Component extends DCLogic {
       // V2 Match card: result dot, Letter avatars (you, partner, then opponents) and the "2 : 1" score.
       resultCls: r.even ? 'is-draw' : r.win ? 'is-win' : 'is-loss', score: `${r.us} : ${r.them}`,
       playersCls: m.type === 'Doubles' ? 'is-doubles' : '',
-      players: (m.type === 'Doubles' ? ['me', m.partner, this.sides(m).opps[0], this.sides(m).opps[1]] : ['me', this.sides(m).opps[0]]).map(id => ({ ini: this.ini(id) })),
+      players: (m.type === 'Doubles' ? ['me', m.partner, this.sides(m).opps[0], this.sides(m).opps[1]] : ['me', this.sides(m).opps[0]]).map(id => ({ ini: this.ini(id), avCls: this.avDir(id) })),
       open: () => this.go('detail', { detailId: m.id })
     };
   }
@@ -3631,7 +3639,7 @@ class Component extends DCLogic {
         const bp = partners[0], tf = foes[0];
         const others = s.players.filter(p => p.id !== 'me' && (!bp || p.id !== bp.id) && (!tf || p.id !== tf.id)).map(p => ({ id: p.id, n: all.filter(m => m.partner === p.id || m.opps.includes(p.id)).length })).filter(o => o.n).sort((a, b) => b.n - a.n);
         const mp = others[0];
-        const person = (role, id, value, sub) => ({ role, name: this.nm(id), initials: this.ini(id), value, sub, open: () => this.go('player', { playerId: id }) });
+        const person = (role, id, value, sub) => ({ role, name: this.nm(id), initials: this.ini(id), avCls: this.avDir(id), value, sub, open: () => this.go('player', { playerId: id }) });
         // The headline Win Rate is the overall record, the same as Matches. The change compares the newer half of the
         // last 20 matches with the older half, and its arrow and colour follow the sign.
         v.pf = { win: this.rec(all).pctStr, delta: (dl > 0 ? '+' : '') + dl + '%', bars,
@@ -3891,7 +3899,7 @@ class Component extends DCLogic {
           const sl = p.slots[k] || { state: 'missing' };
           if (sl.state === 'confirmed' || sl.state === 'create') {
             const name = sl.state === 'create' ? sl.name : this.nm(sl.id);
-            return { filled: true, name, initials: sl.state === 'create' ? this.ini(null, name) : this.ini(sl.id), caption: roles[k], open: pick(k) };
+            return { filled: true, name, initials: sl.state === 'create' ? this.ini(null, name) : this.ini(sl.id), avCls: sl.state === 'create' ? this.avDir(null, name) : this.avDir(sl.id), caption: roles[k], open: pick(k) };
           }
           if (sl.state === 'ambiguous') return ask(this.t('whoIs', { name: sl.heard }), sl.cands.map(id => ({ label: this.nm(id), pick: () => this.psPickId(k, id) })), sl.heard, k);
           if (sl.state === 'new') return ask(this.t('whoIs', { name: sl.heard }), [], sl.heard, k);
@@ -3910,7 +3918,7 @@ class Component extends DCLogic {
           canAdd: !!k0 && !!q && !s.players.some(x => x.name.toLowerCase() === ql), addLabel: this.t('addAsNew', { name: q }), add: () => this.psAddNew(k0, q),
           list: k0 ? s.players.filter(x => x.id !== 'me' && !chosen.includes(x.id) && x.name.toLowerCase().includes(ql)).map(x => {
             const r = k0 === 'partner' ? this.with(x.id) : this.vs(x.id);
-            return { name: x.name, initials: this.ini(x.id), sub: r.n ? this.t(k0 === 'partner' ? 'together' : 'h2h', { r: this.recWords(r) }) : this.t('newPlayer'), pick: () => k0 === 'partner' && p.pool.length ? this.psFill('partner', { heard: '', id: x.id, cands: [], state: 'confirmed' }) : this.psPickId(k0, x.id) };
+            return { name: x.name, initials: this.ini(x.id), avCls: this.avDir(x.id), sub: r.n ? this.t(k0 === 'partner' ? 'together' : 'h2h', { r: this.recWords(r) }) : this.t('newPlayer'), pick: () => k0 === 'partner' && p.pool.length ? this.psFill('partner', { heard: '', id: x.id, cands: [], state: 'confirmed' }) : this.psPickId(k0, x.id) };
           }) : [],
           back: () => this.setPs({ picking: null, q: '' }), close: () => this.setState({ ps: null }), save: () => this.psSave() };
         v.ps.none = !!k0 && !v.ps.list.length && !v.ps.canAdd;
