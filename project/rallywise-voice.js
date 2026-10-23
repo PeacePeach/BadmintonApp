@@ -159,7 +159,25 @@
   const UNKNOWN = 'unknown:';
   const isUnknown = id => typeof id === 'string' && id.startsWith(UNKNOWN);
   const unknownId = heard => UNKNOWN + (heard || '').trim();
-  const heardOf = id => isUnknown(id) ? id.slice(UNKNOWN.length) : '';
+  // Doubles saved before "Who is your partner?" is answered: everyone in the pool is kept by the name that was heard,
+  // as a participant on no side ("unknown:?<heard>"). They are never placed as partner or opponent, and as unknown
+  // ids they stay out of H2H and player insights while the match still counts for the user's own record (Han, 2026-10-23).
+  const PARTICIPANT = UNKNOWN + '?';
+  const isParticipant = id => typeof id === 'string' && id.startsWith(PARTICIPANT);
+  const participantId = heard => PARTICIPANT + (heard || '').trim();
+  const heardOf = id => isParticipant(id) ? id.slice(PARTICIPANT.length) : isUnknown(id) ? id.slice(UNKNOWN.length) : '';
+  // A saved match's players: partner and opponents in their places, plus participants whose side wasn't confirmed.
+  const sidesOf = m => ({ partner: m.partner || null, opps: (m.opps || []).filter(id => !isParticipant(id)), others: (m.opps || []).filter(isParticipant) });
+  // What a voice draft saves as. pick(k) is the player chosen for slot k. An unidentified slot keeps its heard name as
+  // an unknown placeholder. With people still in the pool, an empty slot stays empty (they may be in the pool) and the
+  // pool is kept as participants.
+  function savedPlayers(type, slots, pool, pick) {
+    const open = type === 'Doubles' && (pool || []).length > 0;
+    const who = k => pick(k) || (open && (!slots[k] || slots[k].state === 'missing') ? null : unknownId(slots[k] && slots[k].heard));
+    if (type !== 'Doubles') return { partner: null, opps: [who('opp1')] };
+    if (!open) return { partner: who('partner'), opps: [who('opp1'), who('opp2')] };
+    return { partner: pick('partner') || null, opps: [who('opp1'), who('opp2')].filter(Boolean).concat(pool.map(p => participantId(p.heard))) };
+  }
 
   // The app's 21-point scoring from Log Match: a game stores the winner and the loser's points.
   const cap = t => ({ 21: 30, 15: 21, 11: 15 }[t]);
@@ -207,7 +225,7 @@
   }
 
   const api = { SAMPLES, SCENARIOS, sample, chunks, cues, mockParse, resolve, inferType, lineup, choosePartner, unresolved, slotKeys,
-    toDraft, UNKNOWN, isUnknown, unknownId, heardOf };
+    toDraft, UNKNOWN, isUnknown, unknownId, heardOf, isParticipant, participantId, sidesOf, savedPlayers };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.RallywiseVoice = api;
 })(typeof window !== 'undefined' ? window : globalThis);

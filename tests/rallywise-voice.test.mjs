@@ -97,3 +97,18 @@ test('live cues', () => {
   assert.deepEqual(V.cues('今天和小王打了六局单打，赢了四局。杀球不错', []), { players: true, games: true, results: true, notes: true });
   assert.deepEqual(V.cues('', []), { players: false, games: false, results: false, notes: false });
 });
+
+test('doubles saved before the partner is chosen: every heard name kept, nobody placed on a side', () => {
+  const d = draft('partner', 'en');
+  const pl = V.savedPlayers(d.type, d.slots, d.pool, () => null);
+  assert.deepEqual(pl, { partner: null, opps: ['unknown:?Leo', 'unknown:?Mei', 'unknown:?Ravi'] });
+  const m = { type: 'Doubles', ...pl };
+  assert.deepEqual(V.sidesOf(m), { partner: null, opps: [], others: pl.opps });
+  assert.ok(pl.opps.every(V.isUnknown)); assert.equal(V.heardOf('unknown:?Leo'), 'Leo');
+  // A named opponent keeps their side; only the unclear people stay unplaced.
+  const l = V.lineup('Doubles', [{ ...V.resolve('Leo', players), role: 'unknown' }, { ...V.resolve('Mei', players), role: 'unknown' }, { ...V.resolve('Alex', players), role: 'opponent' }]);
+  assert.deepEqual(V.savedPlayers('Doubles', l.slots, l.pool, k => l.slots[k].id), { partner: null, opps: ['alex', 'unknown:?Leo', 'unknown:?Mei'] });
+  // Once the partner is chosen, the regular placement applies.
+  const s = V.choosePartner(d.slots, d.pool, 1);
+  assert.deepEqual(V.savedPlayers('Doubles', s, [], k => s[k].id), { partner: 'mei', opps: ['leo', 'ravi'] });
+});
