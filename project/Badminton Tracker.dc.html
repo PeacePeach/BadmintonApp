@@ -84,8 +84,7 @@ button:disabled{cursor:default !important;}
 @keyframes sheet-up{from{transform:translateY(100%);}to{transform:none;}}
 .sheet{animation:sheet-up .22s var(--ease-out) both;}
 @media (prefers-reduced-motion:reduce){.sheet{animation:none;}}
-/* Toast: one global feedback bar at the top of the screen, full width inside the 20px page margins (up to two lines),
-   slides down in and back up out. */
+/* Toast (DS .rw-toast, Figma 360:7533): full width inside the 20px page margins; slides down in and back up out. */
 @keyframes toast-in{from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:none;}}
 @keyframes toast-out{from{opacity:1;transform:none;}to{opacity:0;transform:translateY(-12px);}}
 .toast{animation:toast-in .22s var(--ease-out) both;}
@@ -1953,17 +1952,23 @@ button:disabled{cursor:default !important;}
 
   <!-- Toast: the one global feedback message. Call flash(text, 'success' | 'error' | 'info') from anywhere. -->
   <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
-    <div role="{{ toast.role }}" aria-live="{{ toast.live }}" style="position:absolute;left:20px;right:20px;top:calc(48px + env(safe-area-inset-top, 0px));display:flex;justify-content:center;pointer-events:none;">
-      <div class="toast {{ toast.cls }}" style="width:100%;min-height:44px;box-sizing:border-box;padding:12px 18px 12px 14px;border-radius:22px;background:var(--text-primary);color:var(--text-inverse);display:flex;align-items:center;gap:8px;font:500 14px/1.3 var(--font-sans);box-shadow:0 8px 24px rgba(0,0,0,.35);">
-        <span style="flex-shrink:0;display:flex;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ toast.icon }}" size="{{ 18 }}" color="{{ toast.iconFg }}" hint-size="18px,18px"></x-import></span>
-        <span style="min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ toast.text }}</span>
+    <div role="{{ toast.role }}" aria-live="{{ toast.live }}" style="position:absolute;left:20px;right:20px;top:calc(48px + env(safe-area-inset-top, 0px));display:flex;justify-content:center;pointer-events:none;z-index:60;">
+      <div class="toast rw-toast {{ toast.typeCls }} {{ toast.cls }}">
+        <span class="rw-toast-badge" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ toast.icon }}" size="{{ 12 }}" hint-size="12px,12px"></x-import></span>
+        <div class="rw-toast-text">
+          <p class="rw-toast-title">{{ toast.text }}</p>
+          <sc-if value="{{ toast.hasSub }}" hint-placeholder-val="{{ true }}"><p class="rw-toast-body">{{ toast.sub }}</p></sc-if>
+        </div>
+        <sc-if value="{{ toast.dismissible }}" hint-placeholder-val="{{ true }}">
+          <button type="button" class="rw-toast-close" aria-label="{{ tx.close }}" onClick="{{ toast.close }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="X" size="{{ 18 }}" hint-size="18px,18px"></x-import></button>
+        </sc-if>
       </div>
     </div>
   </sc-if>
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Splash&quot;,&quot;options&quot;:[&quot;Splash&quot;,&quot;Log In&quot;,&quot;Sign Up&quot;,&quot;Forgot Password&quot;,&quot;Check Email&quot;,&quot;Onboarding&quot;,&quot;Matches&quot;,&quot;Match Detail&quot;,&quot;Insights&quot;,&quot;Log Match&quot;,&quot;Log Match (Voice)&quot;,&quot;Review Match (Voice)&quot;,&quot;Settings&quot;,&quot;Focus&quot;,&quot;Focus Detail&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;authError&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Invalid email&quot;,&quot;Incorrect email or password&quot;,&quot;Email already exists&quot;,&quot;Password too short&quot;,&quot;Network error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Normal&quot;,&quot;options&quot;:[&quot;Normal&quot;,&quot;Loading&quot;,&quot;Empty&quot;,&quot;Offline&quot;,&quot;Error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;saveMatch&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Succeeds&quot;,&quot;options&quot;:[&quot;Succeeds&quot;,&quot;Fails&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;voiceMock&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Complete&quot;,&quot;options&quot;:[&quot;Complete&quot;,&quot;Missing players&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;toastPreview&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Success&quot;,&quot;Error&quot;,&quot;Info&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Splash&quot;,&quot;options&quot;:[&quot;Splash&quot;,&quot;Log In&quot;,&quot;Sign Up&quot;,&quot;Forgot Password&quot;,&quot;Check Email&quot;,&quot;Onboarding&quot;,&quot;Matches&quot;,&quot;Match Detail&quot;,&quot;Insights&quot;,&quot;Log Match&quot;,&quot;Log Match (Voice)&quot;,&quot;Review Match (Voice)&quot;,&quot;Settings&quot;,&quot;Focus&quot;,&quot;Focus Detail&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;authError&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Invalid email&quot;,&quot;Incorrect email or password&quot;,&quot;Email already exists&quot;,&quot;Password too short&quot;,&quot;Network error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Normal&quot;,&quot;options&quot;:[&quot;Normal&quot;,&quot;Loading&quot;,&quot;Empty&quot;,&quot;Offline&quot;,&quot;Error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;saveMatch&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Succeeds&quot;,&quot;options&quot;:[&quot;Succeeds&quot;,&quot;Fails&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;voiceMock&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Complete&quot;,&quot;options&quot;:[&quot;Complete&quot;,&quot;Missing players&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;toastPreview&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Success&quot;,&quot;Error&quot;,&quot;Info&quot;,&quot;Warning&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
 // Localization. The app language is prefs.lang ('en' | 'zh', saved with the account's other prefs), with a copy
 // on this device under LANG_KEY so the right language shows before the account loads. With neither, the device
 // language decides: zh* means Simplified Chinese, anything else English. t(key, vars) fills {name}-style
@@ -3032,7 +3037,7 @@ class Component extends DCLogic {
     }
     // "Toast preview" prop fires one example of each toast variant.
     if (pp && this.props.toastPreview !== pp.toastPreview) {
-      const ex = { Success: ['tMatchSaved', 'success'], Error: ['tSomethingWrong', 'error'], Info: ['tNoConnection', 'info'] }[this.props.toastPreview];
+      const ex = { Success: ['tMatchSaved', 'success'], Error: ['tSomethingWrong', 'error'], Info: ['tNoConnection', 'info'], Warning: ['tSaveOffline', 'warning'] }[this.props.toastPreview];
       if (ex) this.flash(this.t(ex[0]), ex[1]);
     }
     if (pp && this.props.dataState !== pp.dataState) this.setState({ ...this.dataFor(this.props.dataState), filter: 'All', search: '' });
@@ -3132,11 +3137,20 @@ class Component extends DCLogic {
     return { back: b, search: '', screen: prev.screen === 'log' ? 'matches' : prev.screen, detailId: prev.detailId, playerId: prev.playerId, focusId: prev.focusId };
   });
   // Global toast. kind is 'success' (default), 'error' or 'info'; it auto-dismisses after ~2.5s.
-  flash(text, kind) {
+  // The one global toast (Figma 360:7533). kind: success | error | info | warning. opts.sub is the secondary copy;
+  // without it, a message of two or more sentences shows its first sentence as the headline and the rest below.
+  // opts.dismissible (default true) adds the close button; it still hides on its own.
+  flash(text, kind, opts) {
     clearTimeout(this._t); clearTimeout(this._tOut);
-    this.setState({ toast: { text, kind: kind || 'success', out: false } });
+    const o = opts || {}, m = o.sub == null && /^(.+?(?:[.!?](?=\s)|[。！？]))\s*(\S[\s\S]*)$/.exec(String(text || ''));
+    this.setState({ toast: { text: m ? m[1] : text, sub: m ? m[2] : o.sub || '', kind: kind || 'success', dismissible: o.dismissible !== false, out: false } });
     this._tOut = setTimeout(() => this.setState(s => s.toast ? { toast: { ...s.toast, out: true } } : null), 2400);
     this._t = setTimeout(() => this.setState({ toast: null }), 2600);
+  }
+  closeToast() {
+    clearTimeout(this._t); clearTimeout(this._tOut);
+    this.setState(s => s.toast ? { toast: { ...s.toast, out: true } } : null);
+    this._t = setTimeout(() => this.setState({ toast: null }), 200);
   }
   setLog(patch) { this.setState(s => ({ log: { ...s.log, ...(typeof patch === 'function' ? patch(s.log) : patch) } })); }
 
@@ -3204,10 +3218,10 @@ class Component extends DCLogic {
     if (this.state.log && this.state.log.voice) {
       // Voice Review is the final confirmation. Return to the home (Matches) tab, not a duplicate detail view.
       this.setState({ matches, screen: 'matches', detailId: null, back: [], log: null, voice: null, filter: 'All' });
-      return this.flash(this.t('tMatchSaved'), 'success');
+      return this.flash(this.t('tMatchSaved'), 'success', { dismissible: false });
     }
     this.setState({ matches, screen: 'detail', detailId: m.id, back: [{ screen: 'matches' }], log: null, filter: 'All' });
-    this.flash(this.t('tMatchSaved'));
+    this.flash(this.t('tMatchSaved'), 'success', { dismissible: false });
   }
   // Delete confirmation. requestDeleteMatch(id) opens the sheet for any match; Delete calls
   // deleteMatch(id), which removes it, returns to Matches and confirms with a toast.
@@ -4086,8 +4100,10 @@ class Component extends DCLogic {
         ctaBg: ok ? A : 'var(--surface-muted)', ctaFg: ok ? 'var(--action-on-primary)' : 'var(--text-tertiary)', save: () => this.saveFocusSheet() };
     }
     if (s.toast) {
-      const t = s.toast, K = { success: ['CircleCheck', 'var(--action-primary)'], error: ['CircleAlert', 'var(--status-error)'], info: ['Info', 'var(--text-inverse)'] }[t.kind] || [];
-      v.toast = { text: t.text, icon: K[0], iconFg: K[1], cls: t.out ? 'toast-out' : '', role: t.kind === 'error' ? 'alert' : 'status', live: t.kind === 'error' ? 'assertive' : 'polite' };
+      const t = s.toast, kind = ['success', 'error', 'info', 'warning'].includes(t.kind) ? t.kind : 'success';
+      const icon = { success: 'Check', error: 'Ban', info: 'CircleAlert', warning: 'CircleAlert' }[kind];
+      v.toast = { text: t.text, sub: t.sub, hasSub: !!t.sub, icon, typeCls: 'is-' + kind, dismissible: !!t.dismissible, close: () => this.closeToast(),
+        cls: t.out ? 'toast-out' : '', role: kind === 'error' ? 'alert' : 'status', live: kind === 'error' ? 'assertive' : 'polite' };
     }
     return v;
   }

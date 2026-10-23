@@ -65,6 +65,10 @@
   --rw-r300:              #ff5c5c;
   --rw-r400:              #b34040;
   --rw-r500:              #9c3838;
+  /* Red (second red family in the Foundation styles, "red-50/100/800"; used by the Toast, Figma 360:7533) */
+  --rw-red-50:            #ffebeb;
+  --rw-red-100:           #ffc2c2;
+  --rw-red-800:           #8c2020;
   /* Violet */
   --rw-violet-1:          #eaeaec;
   --rw-violet-2:          #cbccd1;
@@ -192,7 +196,19 @@
   --rw-banner-bg: var(--rw-color-surface-banner);
   --rw-banner-border: var(--rw-color-border-banner);
   --rw-banner-radius: 10px;
+  /* Toast (Figma 360:7533): light fill, dark badge with a light icon, dark text. */
+  --rw-toast-radius: 10px;
+  --rw-toast-pad: 16px;
+  --rw-toast-title-fg: var(--rw-n75);
+  --rw-toast-body-fg: var(--rw-n100);
+  --rw-toast-close-fg: var(--rw-n75);
+  --rw-toast-success-bg: var(--rw-g50);   --rw-toast-success-badge: var(--rw-g500);   --rw-toast-success-icon: var(--rw-g100);
+  --rw-toast-error-bg: var(--rw-red-50);  --rw-toast-error-badge: var(--rw-red-800);  --rw-toast-error-icon: var(--rw-red-100);
+  --rw-toast-info-bg: var(--rw-b50);      --rw-toast-info-badge: var(--rw-b400);      --rw-toast-info-icon: var(--rw-b75);
+  --rw-toast-warning-bg: var(--rw-y50);   --rw-toast-warning-badge: var(--rw-o500);   --rw-toast-warning-icon: var(--rw-y75);
   --rw-type-banner-title: 600 16px/14px var(--font-sans);
+  --rw-type-toast-title: 600 14px/14px var(--font-sans);   /* Toast headline (Figma 14px SemiBold) */
+  --rw-type-toast-body: 500 14px/14px var(--font-sans);    /* Toast secondary copy (Figma 14px Medium) */
   /* Button: Secondary/Medium (Figma Button 171:12473). The fill follows its surface (Han, 2026-10-23):
      purplegrey-500 on the page, Highlight Fill on a tile or banner. */
   --rw-btn-secondary-h: 32px;

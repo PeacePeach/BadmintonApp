@@ -7,6 +7,7 @@
      Tile Container ............... .rw-surface.rw-tile
      Glass (floating controls) .... .rw-glass   (IconButton variant "glass" in _ds_bundle.js uses the same tokens)
      Button / Primary, Large ...... .rw-btn.rw-btn-primary
+     Toast (Figma 360:7533) ....... .rw-toast.is-success|is-error|is-info|is-warning > .rw-toast-badge + .rw-toast-text (.rw-toast-title + optional .rw-toast-body) + optional .rw-toast-close
      InlineBanner (Figma 333:8797) .rw-inline-banner > .rw-inline-banner-title (CircleHelp 18 + text) + slot
      Button / Secondary, Medium ... .rw-btn.rw-btn-secondary (fill by context: page purplegrey-500, tile/banner Highlight Fill); PlayerTags .rw-tags
      Pills (Medium, Small; Active)  .rw-surface.rw-pill[.rw-pill-sm][.is-active]
@@ -67,6 +68,20 @@
 .rw-btn-secondary:has(svg){padding-left:10px;}
 .rw-btn-secondary::after{content:"";position:absolute;inset:-6px 0;}
 .rw-tile .rw-btn-secondary,.rw-inline-banner .rw-btn-secondary{background:var(--rw-btn-secondary-bg-on-surface);}
+/* Toast: one global message. Type sets the fill and the badge; secondary copy and the close button are optional. */
+.rw-toast{width:100%;box-sizing:border-box;display:flex;align-items:center;gap:16px;padding:var(--rw-toast-pad);border-radius:var(--rw-toast-radius);background:var(--rw-toast-bg);pointer-events:auto;}
+.rw-toast.is-success{--rw-toast-bg:var(--rw-toast-success-bg);--rw-toast-badge-bg:var(--rw-toast-success-badge);--rw-toast-badge-fg:var(--rw-toast-success-icon);}
+.rw-toast.is-error{--rw-toast-bg:var(--rw-toast-error-bg);--rw-toast-badge-bg:var(--rw-toast-error-badge);--rw-toast-badge-fg:var(--rw-toast-error-icon);}
+.rw-toast.is-info{--rw-toast-bg:var(--rw-toast-info-bg);--rw-toast-badge-bg:var(--rw-toast-info-badge);--rw-toast-badge-fg:var(--rw-toast-info-icon);}
+.rw-toast.is-warning{--rw-toast-bg:var(--rw-toast-warning-bg);--rw-toast-badge-bg:var(--rw-toast-warning-badge);--rw-toast-badge-fg:var(--rw-toast-warning-icon);}
+.rw-toast-badge{width:24px;height:24px;flex-shrink:0;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--rw-toast-badge-bg);color:var(--rw-toast-badge-fg);}
+.rw-toast-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;overflow-wrap:anywhere;}
+.rw-toast-title{margin:0;font:var(--rw-type-toast-title);letter-spacing:var(--rw-tracking);color:var(--rw-toast-title-fg);}
+.rw-toast-body{margin:0;font:var(--rw-type-toast-body);letter-spacing:var(--rw-tracking);color:var(--rw-toast-body-fg);}
+.rw-toast-close{position:relative;width:18px;height:18px;flex-shrink:0;padding:0;border:none;background:transparent;color:var(--rw-toast-close-fg);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.rw-toast-close::after{content:"";position:absolute;inset:-13px;}   /* 44px tap target */
+:root[lang="zh-Hans"] :is(.rw-toast-title,.rw-toast-body){line-height:1.25;}   /* Chinese glyphs need a full line box */
+
 /* InlineBanner: question or notice inside content, with a slot below (PlayerTags in Players). */
 .rw-inline-banner{display:flex;flex-direction:column;gap:16px;padding:16px;border-radius:var(--rw-banner-radius);border:1px solid var(--rw-banner-border);background:var(--rw-banner-bg);}
 .rw-inline-banner-title{display:flex;align-items:center;gap:4px;margin:0;font:var(--rw-type-banner-title);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);}
