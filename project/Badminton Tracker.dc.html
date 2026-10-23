@@ -1493,7 +1493,7 @@ button:disabled{cursor:default !important;}
             <div class="{{ vc.timerCls }}" role="timer" aria-label="{{ vc.timerLabel }}">{{ vc.clock }}</div>
           </div>
           <button type="button" class="rw-rec-btn" onClick="{{ vc.toggle }}" aria-label="{{ vc.recLabel }}" aria-pressed="{{ vc.live }}">
-            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ vc.recIcon }}" size="{{ 28 }}" hint-size="28px,28px"></x-import>
+            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ vc.recIcon }}" size="{{ vc.recSize }}" strokeWidth="{{ vc.recStroke }}" hint-size="28px,28px"></x-import>
           </button>
           <div class="rw-rec-side is-end"><button type="button" class="rw-rec-link" disabled="{{ vc.cantGo }}" onClick="{{ vc.next }}">{{ tx.continue }}</button></div>
         </div>
@@ -3281,7 +3281,7 @@ class Component extends DCLogic {
       v.vc = { text: vo.text, live, clock, timerCls: 'rw-rec-timer' + (live ? ' is-live' : ''), timerLabel: this.t(live ? 'recFor' : 'recLength', { t: clock }),
         cues: [['players', 'cuePlayers'], ['games', 'cueGames'], ['results', 'cueResult'], ['notes', 'cueNotes']].map(([k, l]) => ({ label: this.t(l), cls: c[k] ? 'is-done' : '', state: this.t(c[k] ? 'cueHeard' : 'cueNotHeard') })),
         waveCls: live ? 'is-live' : '', bars: VOICE_WAVE.map(([h, o], i) => ({ h: live ? h + 'px' : '4px', o: String(o), d: (-(i * 137) % 1100) + 'ms' })),
-        recIcon: live ? 'Square' : 'Mic', recLabel: this.t(live ? 'stopRec' : 'startRec'), cantGo: !vo.text.trim(),
+        recIcon: live ? 'Square' : 'Mic', recSize: live ? 29.33 : 28, recStroke: live ? 1.64 : 2, recLabel: this.t(live ? 'stopRec' : 'startRec'), cantGo: !vo.text.trim(),
         toggle: () => live ? this.recStop() : this.recStart(),
         onText: e => this.setVoice({ text: e.target.value }),
         next: () => this.voiceNext(),

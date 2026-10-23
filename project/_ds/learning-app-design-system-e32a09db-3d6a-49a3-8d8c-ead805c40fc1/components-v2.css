@@ -191,6 +191,8 @@
 .rw-rec-timer.is-live::before{background:var(--rw-rec-dot);}
 .rw-rec-btn{width:var(--rw-rec-btn-size);height:var(--rw-rec-btn-size);border-radius:50%;border:none;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--rw-rec-btn-bg);color:var(--rw-rec-btn-fg);transition:transform var(--dur-fast) var(--ease-out);}
 .rw-rec-btn:active{transform:scale(.95);}
+/* Stop glyph = Figma 22x22 square, radius 5, 2px stroke: Lucide Square drawn at 29.33px (its square is 18/24 of the box) with the corner radius set to match. */
+.rw-rec-btn svg rect{rx:4.09px;ry:4.09px;}
 /* Review row: Insight / ListRow content with a chevron. Flagged rows get the warning outline and a flag pill. */
 .rw-input-tile{display:flex;align-items:center;justify-content:space-between;gap:20px;border:1px solid transparent;text-align:left;width:100%;font:inherit;color:inherit;}
 .rw-input-tile.is-warning{border-color:var(--rw-flag-border);}
