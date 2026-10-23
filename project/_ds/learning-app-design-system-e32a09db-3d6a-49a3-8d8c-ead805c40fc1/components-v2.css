@@ -35,7 +35,7 @@
      InputTile (Figma 329:7089) ... .rw-surface.rw-tile.rw-input-tile[.is-warning] > .rw-input-tile-text (.rw-eyebrow + .rw-input-tile-value) + .rw-input-tile-end (.rw-flag, chevron 16px)
    Player row (Figma 228:8835) ... .rw-surface.rw-player[.is-empty] > .rw-avatar | IconButton variant "add" + .rw-name + .rw-caption
    Search bar (Figma 329:7330) ... .rw-search[.is-filled] > Search icon + .rw-search-input + .rw-search-clear (states: Unfilled, Filled Inactive, Active Typing = :focus-within)
-   Bottom Sheet (Figma 319:6349) ... .rw-sheet-scrim + .rw-sheet > .rw-sheet-head (.rw-sheet-grabber, .rw-sheet-bar > spacer + .rw-sheet-title + IconButton glass, .rw-sheet-divider) + .rw-sheet-body + .rw-sheet-foot
+   Bottom Sheet (Figma 319:6349) ... .rw-sheet-scrim + .rw-sheet > .rw-sheet-head (.rw-sheet-grabber, .rw-sheet-bar > spacer + .rw-sheet-title + IconButton glass, .rw-sheet-divider) + .rw-sheet-body (body copy .rw-sheet-text) + .rw-sheet-foot
    ========================================================= */
 /* Screen background: app background + glow. The glow stays fixed while the content scrolls over it. */
 .rw-scroll.is-v2{background:var(--rw-bg-app-glow) no-repeat scroll,var(--rw-bg-app);--empty-body-weight:var(--rw-weight-min);}
@@ -228,6 +228,7 @@
 .rw-sheet-title{margin:0;text-align:center;font:var(--rw-type-sheet-title);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);}
 .rw-sheet-divider{align-self:stretch;height:1px;margin:0 -20px;background:var(--rw-sheet-divider);}
 .rw-sheet-body{flex:1;min-height:0;overflow-y:auto;}
+.rw-sheet-text{margin:0;font:var(--rw-type-lead);letter-spacing:var(--rw-tracking);color:var(--rw-color-text-body);}
 .rw-sheet-foot{flex-shrink:0;display:flex;flex-direction:column;}
 @keyframes rw-sheet-in{from{transform:translateY(100%);}to{transform:none;}}
 @keyframes rw-fade{from{opacity:0;}to{opacity:1;}}

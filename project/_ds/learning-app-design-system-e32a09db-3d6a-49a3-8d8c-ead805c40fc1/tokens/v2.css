@@ -122,6 +122,7 @@
   /* Text */
   --rw-color-text-primary: var(--rw-n800);
   --rw-color-text-secondary: var(--rw-n400);
+  --rw-color-text-body: var(--rw-n600);       /* sheet body copy (Info sheet, Figma 342:12303) */
   --rw-color-text-tertiary: var(--rw-n300);           /* chart axis labels */
   --rw-color-text-inactive: var(--rw-n500);           /* unselected nav items */
   --rw-color-text-on-selected: var(--rw-n600);
