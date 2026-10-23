@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
-import { guard, validate, namedAreas } from '../supabase/functions/_shared/voice-parse-core.js';
+import { guard, validate, namedAreas, statedRoles } from '../supabase/functions/_shared/voice-parse-core.js';
 
 const { mapResult, notesOnly } = createRequire(import.meta.url)('../project/voice-v2/map-result.js');
 
@@ -208,4 +208,134 @@ test('guard leaves every correct eval answer unchanged', () => {
     const out = parse(structuredClone(ideal), c.transcript);
     assert.deepEqual(out, ideal, c.id);
   }
+});
+
+// ---- Sides in doubles: only what the transcript states (real AI test, 2026-10-23) ----
+const P = (name, role) => ({ name, role });
+const roles = out => out.players.map(p => [p.name, p.role]);
+const partnerAmbiguity = out => out.ambiguities.filter(a => a.field === 'players' && a.note === 'Partner not stated.').length;
+const doubles = (players, lang = 'en') => base({ language: lang, match_type: 'doubles', game_count: 2, order_known: true, totals: { wins: 2, losses: 0 },
+  players, games: [game(1, 'win', 21, 19), game(2, 'win', 21, 17)] });
+
+test('three names with no sides (English): roles become unknown and the partner is asked for', () => {
+  // The deployed model guessed Leo = partner, Mei and Ravi = opponents from the order the names were said.
+  const out = parse(doubles([P('Leo', 'partner'), P('Mei', 'opponent'), P('Ravi', 'opponent')]), 'Doubles tonight with Leo, Mei and Ravi. We won 21-19 and 21-17.');
+  assert.deepEqual(roles(out), [['Leo', 'unknown'], ['Mei', 'unknown'], ['Ravi', 'unknown']]);
+  assert.equal(partnerAmbiguity(out), 1);
+  assert.equal(out.multiple_lineups, false);
+});
+
+test('three names with no sides (Chinese): roles become unknown and the partner is asked for', () => {
+  const out = parse(doubles([P('Leo', 'partner'), P('Mei', 'opponent'), P('Ravi', 'opponent')], 'zh'), '今晚和Leo、Mei、Ravi打双打，21比19、21比17赢了。');
+  assert.deepEqual(roles(out), [['Leo', 'unknown'], ['Mei', 'unknown'], ['Ravi', 'unknown']]);
+  assert.equal(partnerAmbiguity(out), 1);
+});
+
+test('an existing "partner not stated" note is not repeated', () => {
+  const out = doubles([P('Leo', 'unknown'), P('Mei', 'unknown'), P('Ravi', 'unknown')]);
+  out.ambiguities.push({ field: 'players', note: 'Partner not stated.' });
+  parse(out, 'Doubles tonight with Leo, Mei and Ravi. We won 21-19 and 21-17.');
+  assert.equal(partnerAmbiguity(out), 1);
+});
+
+test('explicit partner and opponents in English are kept', () => {
+  for (const t of ['Doubles tonight, partnered with Priya against Marcus and Jordan. Won 21-19 and 21-17.',
+    'Teamed up with Priya against Marcus and Jordan, won 21-19, 21-17.',
+    'Doubles: Priya was my partner, opponents were Marcus and Jordan. 21-19, 21-17.',
+    'Priya and I beat Marcus and Jordan 21-19 and 21-17 in doubles.',
+    'Doubles with Priya against Marcus and Jordan. Won 21-19, 21-17.']) {
+    const out = parse(doubles([P('Priya', 'partner'), P('Marcus', 'opponent'), P('Jordan', 'opponent')]), t);
+    assert.deepEqual(roles(out), [['Priya', 'partner'], ['Marcus', 'opponent'], ['Jordan', 'opponent']], t);
+    assert.equal(partnerAmbiguity(out), 0, t);
+  }
+});
+
+test('explicit partner and opponents in Chinese are kept', () => {
+  for (const t of ['今天和Priya搭档打双打，对手是Marcus和Jordan。21比19、21比17赢了。',
+    '双打，队友是Priya，对阵Marcus和Jordan，21比19、21比17。',
+    '我和Priya一组，打败了Marcus和Jordan，21比19、21比17。',
+    '双打，搭档是Priya，Marcus和Jordan是对手，21比19、21比17赢了。']) {
+    const out = parse(doubles([P('Priya', 'partner'), P('Marcus', 'opponent'), P('Jordan', 'opponent')], 'zh'), t);
+    assert.deepEqual(roles(out), [['Priya', 'partner'], ['Marcus', 'opponent'], ['Jordan', 'opponent']], t);
+  }
+});
+
+test('a stated side wins over the model when they disagree', () => {
+  const out = parse(doubles([P('Priya', 'opponent'), P('Marcus', 'partner'), P('Jordan', 'opponent')]), 'Partnered with Priya against Marcus and Jordan. Won 21-19, 21-17.');
+  assert.deepEqual(roles(out), [['Priya', 'partner'], ['Marcus', 'opponent'], ['Jordan', 'opponent']]);
+});
+
+test('partly stated doubles: a stated partner or two stated opponents settle the rest, anything else stays unknown', () => {
+  // Partner stated: the other two are the opponents.
+  let out = parse(doubles([P('Priya', 'partner'), P('Marcus', 'opponent'), P('Jordan', 'opponent')]), 'Doubles, Priya was my partner. Marcus and Jordan were great fun. Won 21-19, 21-17.');
+  assert.deepEqual(roles(out), [['Priya', 'partner'], ['Marcus', 'opponent'], ['Jordan', 'opponent']]);
+  // Both opponents stated: the third person is the partner.
+  out = parse(doubles([P('Kevin', 'partner'), P('Leo', 'opponent'), P('Sam', 'opponent')], 'zh'), '今天和Kevin打双打，对手是Leo和Sam，21比19、21比17赢了。');
+  assert.deepEqual(roles(out), [['Kevin', 'partner'], ['Leo', 'opponent'], ['Sam', 'opponent']]);
+  // One opponent stated: the two others could be either side.
+  out = parse(doubles([P('Leo', 'partner'), P('Mei', 'opponent'), P('Marcus', 'opponent')]), 'Doubles against Marcus, with Leo and Mei there too. Won 21-19, 21-17.');
+  assert.deepEqual(roles(out), [['Leo', 'unknown'], ['Mei', 'unknown'], ['Marcus', 'opponent']]);
+  assert.equal(partnerAmbiguity(out), 1);
+});
+
+test('two names in doubles: an unstated partner becomes unknown, a stated one is kept', () => {
+  let out = parse(doubles([P('Leo', 'partner'), P('Mei', 'opponent')]), 'Doubles with Leo and Mei. Won 21-19, 21-17.');
+  assert.deepEqual(roles(out), [['Leo', 'unknown'], ['Mei', 'unknown']]);
+  out = parse(doubles([P('Leo', 'partner'), P('Mei', 'opponent')]), 'Doubles, Leo was my partner and we beat Mei and her friend. Won 21-19, 21-17.');
+  assert.deepEqual(roles(out), [['Leo', 'partner'], ['Mei', 'opponent']]);
+});
+
+test('multiple lineups keep their flag and the model roles', () => {
+  const zh = parse(doubles([P('Priya', 'partner'), P('Leo', 'partner'), P('Marcus', 'opponent'), P('Jordan', 'opponent')], 'zh'),
+    '先和Priya搭档打Marcus和Jordan，后来换了搭档和Leo打。21比15赢，18比21输。');
+  assert.equal(zh.multiple_lineups, true);
+  assert.deepEqual(roles(zh), [['Priya', 'partner'], ['Leo', 'partner'], ['Marcus', 'opponent'], ['Jordan', 'opponent']]);
+  const en = parse(doubles([P('Priya', 'partner'), P('Marcus', 'opponent'), P('Jordan', 'opponent'), P('Leo', 'unknown')]),
+    'Played doubles with Priya against Marcus and Jordan, then switched partners and played with Leo. Won 21-15, lost 18-21.');
+  assert.equal(en.multiple_lineups, true);
+  assert.equal(mapResult(en, deps).lineup.names.length, 4);
+});
+
+test('singles roles are left alone', () => {
+  const out = parse(base({ match_type: 'singles', players: [P('David', 'opponent')] }), 'Singles with David from work. Lost 15-21 and 19-21.');
+  assert.deepEqual(roles(out), [['David', 'opponent']]);
+  assert.equal(statedRoles('Singles against Alex today.', ['Alex']).get('alex'), 'opponent');
+});
+
+// ---- Serve terminology ----
+test('发小球 is Serve, and existing serve / return words keep their areas', () => {
+  const out = parse(base({ language: 'zh', match_type: 'singles', observations: [obs('发小球让对手一直起球', 'Other', 'won_points')] }), '早上打了单打，21比15、21比18两局都赢了。发小球让对手一直起球。');
+  assert.equal(out.observations[0].area, 'Serve');
+  assert.deepEqual(namedAreas('发小球让对手一直起球'), ['Serve']);
+  assert.deepEqual(namedAreas('发短球质量不错'), ['Serve']);
+  assert.deepEqual(namedAreas('发球下网两次'), ['Serve']);
+  assert.deepEqual(namedAreas('接发小球太被动'), ['Return']);
+  assert.deepEqual(namedAreas('接发球太被动'), ['Return']);
+  assert.deepEqual(namedAreas('Low serves kept them lifting'), ['Serve']);
+  assert.deepEqual(namedAreas('杀球不错'), ['Smash']);
+});
+
+// ---- missing / ambiguities agree with the parsed data ----
+test('missing never contradicts the result', () => {
+  // The deployed model's answer for the zh missing-opponent case.
+  const out = parse(base({ language: 'zh', match_type: 'singles', game_count: 2, order_known: true, totals: { wins: 2, losses: 0 },
+    games: [game(1, 'win', 21, 15), game(2, 'win', 21, 18)], missing: ['opponents', 'game_order', 'partners'] }), '早上打了单打，21比15、21比18两局都赢了。');
+  assert.equal(out.order_known, true);
+  assert.deepEqual(out.missing, ['opponents']);
+  // Order really unknown: game_order stays. Doubles without a partner: partners stays.
+  const open = parse(base({ match_type: 'doubles', game_count: 6, totals: { wins: 4, losses: 2 }, missing: ['game_order', 'partners', 'opponents'] }), 'Six games of doubles, won four.');
+  assert.deepEqual(open.missing, ['game_order', 'partners', 'opponents']);
+  // Filled fields are not missing.
+  const filled = parse(doubles([P('Priya', 'partner'), P('Marcus', 'opponent'), P('Jordan', 'opponent')]), 'Partnered with Priya against Marcus and Jordan. Won 21-19, 21-17.');
+  filled.missing.push('partners', 'opponents', 'match_type', 'game_count'); guard(filled, 'Partnered with Priya against Marcus and Jordan. Won 21-19, 21-17.');
+  assert.deepEqual(filled.missing, []);
+});
+
+test('players, ambiguities and missing tell the same story for unclear doubles', () => {
+  const out = parse(doubles([P('Leo', 'partner'), P('Mei', 'opponent'), P('Ravi', 'opponent')]), 'Doubles tonight with Leo, Mei and Ravi. We won 21-19 and 21-17.');
+  assert.ok(out.players.every(p => p.role === 'unknown'));
+  assert.equal(partnerAmbiguity(out), 1);
+  assert.ok(!out.missing.includes('game_order'));
+  const d = mapResult(out, deps);
+  assert.equal(d.partners.length, 0);
 });

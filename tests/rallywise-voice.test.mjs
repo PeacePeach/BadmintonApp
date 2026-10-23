@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 
 const V = createRequire(import.meta.url)('../project/rallywise-voice.js');
+import { guard } from '../supabase/functions/_shared/voice-parse-core.js';
 const players = [{ id: 'me', name: 'Sam Rivera' }, { id: 'alex', name: 'Alex Chen' }, { id: 'priya', name: 'Priya Nair' }, { id: 'marcus', name: 'Marcus Lee' },
   { id: 'jordan', name: 'Jordan Kim' }, { id: 'leo', name: 'Leo Park' }, { id: 'mei', name: 'Mei Tan' }, { id: 'ravi', name: 'Ravi Shah' },
   { id: 'chris', name: 'Chris Wong' }, { id: 'chrisl', name: 'Chris Lam' }];
@@ -164,4 +165,20 @@ test('doubles saved before the partner is chosen: every heard name kept, nobody 
   // Once the partner is chosen, the regular placement applies.
   const s = V.choosePartner(d.slots, d.pool, 1);
   assert.deepEqual(V.savedPlayers('Doubles', s, [], k => s[k].id), { partner: 'mei', opps: ['leo', 'ravi'] });
+});
+
+test('real AI answers after the engine guard: unclear doubles asks for the partner, explicit doubles is confirmed', () => {
+  // What the deployed model returned on 2026-10-23 (roles guessed from name order) goes through the guard first.
+  const ai = (text, lang, ps) => { const r = V.mockParse('', lang); Object.assign(r, { language: lang, match_type: 'doubles', game_count: 2, order_known: true,
+    totals: { wins: 2, losses: 0 }, missing: [], players: ps.map(([name, role]) => ({ name, role })),
+    games: [{ number: 1, result: 'win', my_score: 21, their_score: 19, interrupted: false }, { number: 2, result: 'win', my_score: 21, their_score: 17, interrupted: false }] });
+    guard(r, text); return V.toDraft(r, players, 21); };
+  for (const [t, lang] of [['Doubles tonight with Leo, Mei and Ravi. We won 21-19 and 21-17.', 'en'], ['今晚和Leo、Mei、Ravi打双打，21比19、21比17赢了。', 'zh']]) {
+    const d = ai(t, lang, [['Leo', 'partner'], ['Mei', 'opponent'], ['Ravi', 'opponent']]);
+    assert.deepEqual(d.pool.map(p => p.heard), ['Leo', 'Mei', 'Ravi']);
+    assert.deepEqual(states(d), { partner: 'missing', opp1: 'missing', opp2: 'missing' });
+    assert.equal(d.flags.players, 'unknown');
+  }
+  const d = ai('今天和Priya搭档打双打，对手是Marcus和Jordan。', 'zh', [['Priya', 'partner'], ['Marcus', 'opponent'], ['Jordan', 'opponent']]);
+  assert.deepEqual([d.partner, d.opp1, d.opp2], ['priya', 'marcus', 'jordan']); assert.equal(d.flags.players, null);
 });

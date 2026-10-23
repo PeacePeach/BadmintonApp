@@ -2,7 +2,7 @@
 // Plain ES module with no dependencies, shared by the parse-voice-log edge function (Deno) and the
 // eval runner in voice-eval/ (Node 18+), so both exercise exactly the same prompt, schema and guards.
 
-export const PROMPT_VERSION = '2026-10-18-v3';
+export const PROMPT_VERSION = '2026-10-23-v4';
 export const AREAS = ['Serve', 'Return', 'Net', 'Smash', 'Defence', 'Footwork', 'Placement', 'Other'];
 const MISSING = ['match_type', 'opponents', 'partners', 'game_count', 'results', 'scores', 'game_order'];
 const AMBIG = ['match_type', 'players', 'games', 'results', 'scores', 'observations'];
@@ -46,6 +46,8 @@ Fields
 - match_type: "doubles" if doubles is stated or a partner/teammate is mentioned or two opponents are named together; "singles" if singles is stated or the speaker clearly played one-on-one against one named person. null if both singles and doubles were played. Otherwise null and add "match_type" to missing.
 - multiple_lineups: true if the description covers more than one lineup: the partner or opponents changed between games, or both singles and doubles were played. Otherwise false.
 - players: every other named person. role "partner" (on the speaker's side), "opponent", or "unknown" when the wording does not say (e.g. "played with Marcus" without saying singles/doubles).
+  A role needs words that say it. Partner: "partner", "partnered with", "teamed up with", "paired with", "my teammate", "X and I against …", "搭档", "队友", "和X一组". Opponent: "against", "vs", "versus", "beat", "lost to", "opponents were", "对手", "对阵", "输给", or singles against one person. In doubles, once the partner is stated the other people named are the opponents, and once both opponents are stated the remaining person is the partner.
+  "with", "和", "跟" alone do not say which side someone was on, and the order names are said never does. "Doubles tonight with Leo, Mei and Ravi" and "今晚和Leo、Mei、Ravi打双打" give all three role "unknown" and the ambiguity {"field": "players", "note": "Partner not stated."}.
 - game_count: total games played, if stated or derivable (e.g. "won 4, lost 2" gives 6; "four games, lost three" gives 4). null if unknown, including vague counts like "five or six".
 - games: one entry per game, numbered in play order, ONLY for games whose position in the sequence is known from the description (e.g. "first game", "then", a list of scores, "the last game"). Fill result and scores only when stated. my_score is the speaker's side.
   interrupted: true when the speaker says this game was not finished (stopped, ran out of time, injury, 没打完, 中断, 时间到了). Record the score reached, but leave result null unless the speaker explicitly says who won it (e.g. the opponent retired). Never infer the result of an interrupted game from its score.
@@ -56,8 +58,8 @@ Fields
 - order_known: true only if the result of every game is known in sequence.
 - observations: technical or tactical reflections only (shots, movement, tactics, mistakes, an opponent's habits), not results or small talk. One item per distinct point, short, in the same language the speaker used for it, lightly cleaned up.
   category: "won_points" for strengths, things that worked or won points; "lost_points" for mistakes, weaknesses, things that cost points; "opponent" for an opponent's tendencies, strengths or weaknesses; "unsure" when the speaker is uncertain or it could go either way.
-  area: one of ${AREAS.join(', ')} that best fits, "Other" if none fits, null for opponent observations. When the observation names where or which stroke, use it: 网前/net → Net (a mistake at the net is Net, not Footwork), 杀球/smash → Smash, 发球/serve → Serve, 接发/return → Return, 步法/footwork → Footwork, 防守/defence → Defence, 落点/clears/drops/length → Placement. Lifts under pressure count as Defence. about: the opponent's name for opponent observations, else null.
-- missing: what a match log usually needs that the description does not give: ${MISSING.join(', ')}. Only include items that apply; if there was no match at all, include nothing about results.
+  area: one of ${AREAS.join(', ')} that best fits, "Other" if none fits, null for opponent observations. When the observation names where or which stroke, use it: 网前/net → Net (a mistake at the net is Net, not Footwork), 杀球/smash → Smash, 发球/发小球/发短球/serve → Serve, 接发/return → Return, 步法/footwork → Footwork, 防守/defence → Defence, 落点/clears/drops/length → Placement. Lifts under pressure count as Defence. about: the opponent's name for opponent observations, else null.
+- missing: what a match log usually needs that the description does not give: ${MISSING.join(', ')}. Only include items that apply; if there was no match at all, include nothing about results. Never list "game_order" when order_known is true, or "partners" for singles.
 - ambiguities: short English notes on anything unclear or contradictory, for example a player whose role is unclear or a partner switch without a name.
 
 If the description has observations but no match results (a practice, drills, or just reflections), return match_type null, game_count null, games [], totals nulls, order_known false. Never add a placeholder game.`;
@@ -120,7 +122,7 @@ export function numbersIn(text) {
 // the named one wins (e.g. "网前失误比较多" is Net). Several named areas: the model's pick stands if it is one of them.
 export const AREA_TERMS = [
   ['Return', /接发|\breturns?\b|\breceiv/i],
-  ['Serve', /(?<!接)发球|\bserv(e|es|ing)\b/i],
+  ['Serve', /(?<!接)发(小|短|长|高远|后场|平快)?球|\bserv(e|es|ing)\b/i],
   ['Net', /网前|放网|搓球|\bnet\b/i],
   ['Smash', /杀球|扣杀|\bsmash/i],
   ['Defence', /防守|接杀|\bdefen[cs]e|\bdefend/i],
@@ -180,6 +182,9 @@ export function guard(out, transcript) {
     notes.push('flagged more than one lineup'); out.multiple_lineups = true;
   }
   if (bothTypes && out.match_type) { notes.push('cleared match_type: singles and doubles both mentioned'); out.match_type = null; }
+  // Sides need words that say them. In one doubles lineup, a partner or opponent the transcript doesn't support becomes
+  // "unknown" so the app asks "Who is your partner?" instead of showing a guessed lineup.
+  if (!out.multiple_lineups && out.match_type !== 'singles' && out.players.length >= 2) notes.push(...guardRoles(out, transcript));
   // A tiny pair like "won 2-1" is the game tally, not a game's points.
   for (const g of out.games) {
     if (g.my_score == null || g.their_score == null || Math.max(g.my_score, g.their_score) > 5) continue;
@@ -253,7 +258,93 @@ export function guard(out, transcript) {
     const named = namedAreas(o.text);
     if (named.length && !named.includes(o.area)) { notes.push(`area ${o.area} -> ${named[0]} (named in text)`); o.area = named[0]; }
   }
+  notes.push(...guardMissing(out));
   return notes;
+}
+
+// ---- Sides (partner / opponent) stated in the transcript ----
+// Names said together ("Marcus and Jordan", "阿明和阿强", "Leo、Mei、Ravi") form one list (a comma ends it); the words just before or
+// after a list decide the side of everyone in it. "with" / "和" / "跟" alone never do.
+const LIST_GAP = /^\s*(、|\band\b|&|和|与|跟)?\s*$/i;
+const OPP_BEFORE = /(\bagainst|\bvs\.?|\bversus|\bbeat(ing)?|\blost to|\blosing to|\bfac(ed|ing)|\bopponents?\s*(were|was|are|is)?\s*:?|对手(是|为|有)?|对阵|对战|对上|(?<!不)对|打败了?|赢了|输给了?|(搭档|队友|一组|一队)(一起)?打)\s*(the\s+)?$/i;
+const OPP_AFTER = /^\s*((were|was|are|is)\s+(the\s+|our\s+|my\s+)?opponents?\b|(beat|won against) (us|me)\b|(是|做|当)?(我们的|我的)?对手)/i;
+const PARTNER_BEFORE = /(\bpartner(ed)?\s+(up\s+)?(with\s+)?|\bpartner\s+(was|is)\s+|\bteamed\s+(up\s+)?with\s+|\bpaired\s+(up\s+)?with\s+|\bteammates?\s*(was|is|were)?\s*:?\s*|搭档(是|为)?|队友(是|为)?)$/i;
+const PARTNER_AFTER = /^\s*((was|is)\s+(my\s+)?(partner|teammate)\b|as\s+(my\s+)?partner\b|(and|&)\s+(I|me)\b|(是|做|当)?(我的)?(搭档|队友)|(和|跟)?我?(一起)?(搭档|一组|一队))/i;
+const WITH_BEFORE = /(\bwith\s+|\b(me|I)\s+and\s+)$/i;
+const VERSUS = /\bagainst\b|\bvs\.?|\bversus\b|对手|对阵/i;
+const SENTENCE_END = /[.;!?。；！？]/;
+
+function nameLists(transcript, names) {
+  const lower = transcript.toLowerCase(), hits = [];
+  for (const name of names) {
+    const n = name.trim().toLowerCase(), latin = /^[a-z]/i.test(n);
+    for (let i = lower.indexOf(n); i >= 0; i = lower.indexOf(n, i + 1)) {
+      const end = i + n.length;
+      if (latin && (/[a-z]/i.test(lower[i - 1] || '') || /[a-z]/i.test(lower[end] || ''))) continue;
+      hits.push({ name, start: i, end });
+    }
+  }
+  hits.sort((a, b) => a.start - b.start);
+  const lists = [];
+  for (const h of hits) {
+    const last = lists[lists.length - 1];
+    if (last && h.start >= last.end && LIST_GAP.test(transcript.slice(last.end, h.start))) { last.names.push(h.name); last.end = h.end; }
+    else if (!last || h.start >= last.end) lists.push({ names: [h.name], start: h.start, end: h.end });
+  }
+  return lists;
+}
+
+// Side each name is given by the transcript: 'partner', 'opponent', or nothing.
+export function statedRoles(transcript, names) {
+  const said = new Map();
+  for (const l of nameLists(transcript, names)) {
+    const before = transcript.slice(Math.max(0, l.start - 30), l.start), after = transcript.slice(l.end, l.end + 40);
+    const rest = after.split(SENTENCE_END)[0];
+    let side = null;
+    if (OPP_BEFORE.test(before) || OPP_AFTER.test(after)) side = 'opponent';
+    else if (PARTNER_BEFORE.test(before) || PARTNER_AFTER.test(after) || (WITH_BEFORE.test(before) && l.names.length === 1 && VERSUS.test(rest))) side = 'partner';
+    if (!side) continue;
+    for (const n of l.names) { const k = n.trim().toLowerCase(); said.set(k, said.has(k) && said.get(k) !== side ? 'conflict' : side); }
+  }
+  for (const [k, v] of said) if (v === 'conflict') said.delete(k);
+  return said;
+}
+
+function guardRoles(out, transcript) {
+  const notes = [], said = statedRoles(transcript, out.players.map(p => p.name));
+  const stated = p => said.get(p.name.trim().toLowerCase()) || null;
+  // A side the transcript states wins over the model's.
+  for (const p of out.players) {
+    const s = stated(p);
+    if (s && p.role !== s) { notes.push(`${p.name}: role ${p.role} -> ${s} (stated)`); p.role = s; }
+  }
+  // In doubles a stated partner makes the other two the opponents, and two stated opponents make the third the partner.
+  const doubles = out.match_type === 'doubles', n = out.players.length;
+  const statedPartners = out.players.filter(p => stated(p) === 'partner').length, statedOpps = out.players.filter(p => stated(p) === 'opponent').length;
+  const settled = p => stated(p) || (doubles && n === 3 && ((statedPartners === 1 && p.role === 'opponent') || (statedOpps === 2 && p.role === 'partner')));
+  for (const p of out.players) {
+    if (p.role === 'unknown' || settled(p)) continue;
+    notes.push(`${p.name}: role ${p.role} -> unknown (not stated)`); p.role = 'unknown';
+  }
+  if (doubles && out.players.some(p => p.role === 'unknown') && !out.players.some(p => p.role === 'partner') && !out.ambiguities.some(a => a.field === 'players')) {
+    out.ambiguities.push({ field: 'players', note: 'Partner not stated.' });
+  }
+  return notes;
+}
+
+// "missing" must agree with what was parsed.
+function guardMissing(out) {
+  const has = { partners: out.players.some(p => p.role === 'partner'), opponents: out.players.filter(p => p.role === 'opponent').length };
+  const filled = {
+    match_type: out.match_type != null,
+    game_count: out.game_count != null,
+    game_order: out.order_known,
+    partners: out.match_type === 'singles' || has.partners,
+    opponents: out.match_type === 'singles' ? out.players.length > 0 : has.opponents >= 2
+  };
+  const before = out.missing.length;
+  out.missing = [...new Set(out.missing)].filter(m => !filled[m]);
+  return out.missing.length < before ? [`missing cleaned: ${before - out.missing.length} item(s) contradicted the result`] : [];
 }
 
 function readOutput(data) {
