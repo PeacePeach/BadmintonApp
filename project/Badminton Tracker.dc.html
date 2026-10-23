@@ -1517,6 +1517,67 @@ button:disabled{cursor:default !important;}
     </div>
   </sc-if>
 
+  <!-- Players sheet, opened from Review (Figma 236:9207 singles, 329:7412 doubles, 333:10176 choosing a player). -->
+  <sc-if value="{{ hasPs }}" hint-placeholder-val="{{ false }}">
+    <div class="rw-sheet-scrim" onClick="{{ ps.close }}"></div>
+    <div class="rw-sheet" role="dialog" aria-modal="true" aria-labelledby="ps-title" data-screen-label="{{ ps.screen }}">
+      <div class="rw-sheet-head">
+        <span class="rw-sheet-grabber" aria-hidden="true"></span>
+        <div class="rw-sheet-bar">
+          <span><sc-if value="{{ ps.picking }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ArrowLeft" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.back }}" onClick="{{ ps.back }}" hint-size="44px,44px"></x-import></sc-if></span>
+          <h2 id="ps-title" class="rw-sheet-title">{{ tx.rvPlayers }}</h2>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="X" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.close }}" onClick="{{ ps.close }}" hint-size="44px,44px"></x-import>
+        </div>
+        <span class="rw-sheet-divider"></span>
+      </div>
+      <div class="rw-sheet-body">
+        <sc-if value="{{ ps.main }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap: {{ ps.gap }};">
+            <div class="rw-surface rw-tabs is-sm" role="tablist">
+              <sc-for list="{{ ps.types }}" as="t" hint-placeholder-count="2">
+                <button type="button" class="rw-tab {{ t.cls }}" role="tab" aria-selected="{{ t.on }}" onClick="{{ t.select }}">{{ t.label }}</button>
+              </sc-for>
+            </div>
+            <sc-for list="{{ ps.sides }}" as="g" hint-placeholder-count="2">
+              <div role="group" aria-label="{{ g.label }}" style="display:flex;flex-direction:column;gap:12px;">
+                <div class="rw-hint" style="padding:0 6px;">{{ g.label }}</div>
+                <sc-for list="{{ g.rows }}" as="p" hint-placeholder-count="1">
+                  <sc-if value="{{ p.me }}" hint-placeholder-val="{{ false }}">
+                    <div class="rw-surface rw-player" style="cursor:default;"><span class="rw-avatar is-me" aria-hidden="true">{{ p.initials }}</span><span class="rw-name">{{ p.name }}</span><span class="rw-caption">{{ p.caption }}</span></div>
+                  </sc-if>
+                  <sc-if value="{{ p.filled }}" hint-placeholder-val="{{ true }}">
+                    <button type="button" class="rw-surface rw-player" onClick="{{ p.open }}"><span class="rw-avatar" aria-hidden="true">{{ p.initials }}</span><span class="rw-name">{{ p.name }}</span><span class="rw-caption">{{ p.caption }}</span></button>
+                  </sc-if>
+                  <sc-if value="{{ p.empty }}" hint-placeholder-val="{{ false }}">
+                    <div class="rw-surface rw-player is-empty" onClick="{{ p.open }}">
+                      <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Plus" variant="add" size="{{ 40 }}" iconSize="{{ 18 }}" label="{{ p.name }}" onClick="{{ p.open }}" hint-size="40px,40px"></x-import>
+                      <span class="rw-name" aria-hidden="true">{{ p.name }}</span><span class="rw-caption">{{ p.caption }}</span>
+                    </div>
+                  </sc-if>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ ps.picking }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="rw-hint" id="ps-slot" style="padding:0 6px;">{{ ps.slotLabel }}</div>
+            <label class="rw-search {{ ps.searchCls }}">
+              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Search" size="{{ 20 }}" strokeWidth="{{ 1.6 }}" hint-size="20px,20px"></x-import>
+              <input class="rw-search-input" value="{{ ps.q }}" onChange="{{ ps.onQ }}" placeholder="{{ tx.searchPlayers }}" aria-describedby="ps-slot" autocomplete="off">
+              <sc-if value="{{ ps.hasQ }}" hint-placeholder-val="{{ false }}"><button type="button" class="rw-search-clear" aria-label="{{ tx.clearSearch }}" onClick="{{ ps.clearQ }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleX" size="{{ 20 }}" strokeWidth="{{ 1.44 }}" hint-size="20px,20px"></x-import></button></sc-if>
+            </label>
+            <sc-for list="{{ ps.list }}" as="p" hint-placeholder-count="5">
+              <button type="button" class="rw-surface rw-player" onClick="{{ p.pick }}"><span class="rw-avatar" aria-hidden="true">{{ p.initials }}</span><span class="rw-name">{{ p.name }}</span><span class="rw-caption">{{ p.sub }}</span></button>
+            </sc-for>
+            <sc-if value="{{ ps.none }}" hint-placeholder-val="{{ false }}"><p class="rw-hint" style="padding:0 6px;">{{ tx.noPlayersFound }}</p></sc-if>
+          </div>
+        </sc-if>
+      </div>
+      <div class="rw-sheet-foot"><button type="button" class="rw-btn rw-btn-primary" onClick="{{ ps.save }}">{{ tx.save }}</button></div>
+    </div>
+  </sc-if>
+
   <!-- Log footer -->
   <sc-if value="{{ isLog }}" hint-placeholder-val="{{ false }}">
     <sc-if value="{{ showLogCta }}" hint-placeholder-val="{{ false }}">
@@ -1901,6 +1962,7 @@ const I18N = {
     cuesLabel: 'What we heard', cuePlayers: 'Players', cueGames: 'Number of games', cueResult: 'Win vs Loss', cueNotes: 'Reflection', cueHeard: 'heard', cueNotHeard: 'not heard yet',
     startRec: 'Start recording', stopRec: 'Stop recording', recFor: 'Recording, {t}', recLength: 'Recorded {t}',
     reviewTitle: 'Review the Match Details', reviewHint: 'Tap a section to fix anything we got wrong.', rvPlayers: 'Players', rvResult: 'Result', rvNotes: 'Notes',
+    yourPartner: 'Your partner', searchPlayers: 'Search players', clearSearch: 'Clear search',
     rvWL: '{w} Win : {l} Loss', notMentioned: 'Not mentioned', noNotes: 'No notes', doneEdit: 'Done',
     flagMissing: 'Missing players', flagNew: 'New player', flagCheck: 'Check players', flagLineup: 'More than one lineup',
     flagResult: 'Missing result', flagScores: 'Check scores', flagNotes: 'Check notes'
@@ -2032,6 +2094,7 @@ const I18N = {
     cuesLabel: '已听到', cuePlayers: '球员', cueGames: '局数', cueResult: '输赢', cueNotes: '复盘', cueHeard: '已听到', cueNotHeard: '还没听到',
     startRec: '开始录音', stopRec: '停止录音', recFor: '录音中，{t}', recLength: '已录音 {t}',
     reviewTitle: '核对比赛信息', reviewHint: '点任意一项即可修改。', rvPlayers: '球员', rvResult: '结果', rvNotes: '笔记',
+    yourPartner: '你的搭档', searchPlayers: '搜索球友', clearSearch: '清除搜索',
     rvWL: '{w}胜 : {l}负', notMentioned: '没有提到', noNotes: '没有笔记', doneEdit: '完成',
     flagMissing: '缺少球员', flagNew: '新球员', flagCheck: '确认球员', flagLineup: '不止一组对阵',
     flagResult: '缺少结果', flagScores: '确认比分', flagNotes: '确认笔记'
@@ -2427,6 +2490,21 @@ class Component extends DCLogic {
       const heard = save && l.ret === 'players' ? [] : l.voice.heard;
       return { screen: 'review', search: '', log: { ...l, step: 'review', ret: null, active: null, voice: { ...l.voice, flags: f, heard } } };
     });
+  }
+  // Players sheet from Review: edits a copy of the lineup, and Save writes it to the draft. Switching
+  // Singles/Doubles keeps the other slots in the copy, so switching back loses nothing.
+  psOpen() {
+    const l = this.state.log; if (!l) return;
+    this.setState({ ps: { type: l.type || 'Singles', partner: l.partner || null, opp1: l.opp1 || null, opp2: l.opp2 || null, picking: null, q: '' } });
+  }
+  setPs(patch) { this.setState(s => s.ps ? { ps: { ...s.ps, ...patch } } : null); }
+  psPick(k) { this.setPs({ picking: k, q: '' }); }
+  psSave() {
+    const p = this.state.ps, miss = this.slotKeys(p.type).find(k => !p[k]);
+    if (miss) return this.psPick(miss);
+    const d = p.type === 'Doubles';
+    this.setState(s => ({ ps: null, log: { ...s.log, type: p.type, partner: d ? p.partner : null, opp1: p.opp1, opp2: d ? p.opp2 : null,
+      voice: { ...s.log.voice, flags: { ...s.log.voice.flags, players: null }, heard: [] } } }));
   }
   // What an edit changed, for match_edited (names only, never the values).
   changedParts(a, b) {
@@ -3301,7 +3379,29 @@ class Component extends DCLogic {
           row('result', 'rvResult', f.result === 'missing' ? this.t('notMentioned') : this.t('rvWL', { w: wl.us, l: wl.them }), f.result === 'missing', f.result && (f.result === 'missing' ? 'flagResult' : 'flagScores')),
           row('notes', 'rvNotes', notes || log.wt.concat(log.lt).map(t => this.tagLabel(t)).join(sep) || this.t('noNotes'), !notes && !log.wt.length && !log.lt.length, f.notes && 'flagNotes')],
         saving: !!log.saving, idle: !log.saving, saveErr: !!log.saveErr, ctaLabel: this.t(log.saveErr ? 'saveAgain' : 'continue'),
-        next: () => blocking ? this.reviewOpen(blocking) : this.save() };
+        next: () => blocking === 'players' ? this.psOpen() : blocking ? this.reviewOpen(blocking) : this.save() };
+      v.rv.rows[0].open = () => this.psOpen();
+      v.hasPs = !!s.ps;
+      if (s.ps) {
+        const p = s.ps, d = p.type === 'Doubles', k0 = p.picking;
+        const roles = { partner: this.t('yourPartner'), opp1: this.t(d ? 'opponent1' : 'opponent'), opp2: this.t('opponent2') };
+        const row = k => p[k]
+          ? { filled: true, name: this.nm(p[k]), initials: this.ini(p[k]), caption: roles[k], open: () => this.psPick(k) }
+          : { empty: true, name: this.t('selectRole', { role: this.t(k === 'partner' ? 'partner' : 'opponent') }), caption: d ? roles[k] : '', open: () => this.psPick(k) };
+        const me = { me: true, name: this.nm('me'), initials: this.ini('me'), caption: this.t('me') };
+        const chosen = this.slotKeys(p.type).filter(k => k !== k0).map(k => p[k]).filter(Boolean), q = p.q.trim().toLowerCase();
+        v.ps = { main: !k0, picking: !!k0, screen: k0 ? this.t('selectRole', { role: roles[k0] }) : this.t('rvPlayers'), gap: d ? '24px' : '32px',
+          types: ['Singles', 'Doubles'].map(t => ({ label: this.typeLabel(t), on: t === p.type, cls: t === p.type ? 'is-active' : '', select: () => this.setPs({ type: t }) })),
+          sides: [{ label: this.t('yourSide'), rows: d ? [me, row('partner')] : [me] }, { label: this.t('opponents'), rows: d ? [row('opp1'), row('opp2')] : [row('opp1')] }],
+          slotLabel: k0 ? roles[k0] : '', q: p.q, hasQ: !!p.q, searchCls: p.q ? 'is-filled' : '',
+          onQ: e => this.setPs({ q: e.target.value }), clearQ: e => { e.preventDefault(); this.setPs({ q: '' }); },
+          list: k0 ? s.players.filter(x => x.id !== 'me' && !chosen.includes(x.id) && x.name.toLowerCase().includes(q)).map(x => {
+            const r = k0 === 'partner' ? this.with(x.id) : this.vs(x.id);
+            return { name: x.name, initials: this.ini(x.id), sub: r.n ? this.t(k0 === 'partner' ? 'together' : 'h2h', { r: this.recWords(r) }) : this.t('newPlayer'), pick: () => this.setPs({ [k0]: x.id, picking: null, q: '' }) };
+          }) : [],
+          back: () => this.setPs({ picking: null, q: '' }), close: () => this.setState({ ps: null }), save: () => this.psSave() };
+        v.ps.none = !!k0 && !v.ps.list.length;
+      }
     }
 
     v.confirmDelete = !!s.confirmDelete;
