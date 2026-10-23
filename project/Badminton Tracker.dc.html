@@ -3181,7 +3181,8 @@ class Component extends DCLogic {
   setAcct(patch, errKey) { this.setState(x => ({ acct: { ...x.acct, ...patch }, errors: { ...x.errors, [errKey]: null }, banner: null })); }
   addPlayer(name, source) {
     this.track('player_added', { source, player_count: this.state.players.filter(p => p.id !== 'me').length + 1 });
-    const id = 'p' + Date.now(); this.setState(s => ({ players: [...s.players, { id, name }] })); return id; }
+    const tick = Date.now(); this._lastPlayerIdTick = Math.max(tick, (this._lastPlayerIdTick || 0) + 1);
+    const id = 'p' + this._lastPlayerIdTick; this.setState(s => ({ players: [...s.players, { id, name }] })); return id; }
 
   // ---- Focus ----
   // A Focus is one thing the user is improving. Users act on the current period and see the whole plan.
