@@ -1508,7 +1508,7 @@ button:disabled{cursor:default !important;}
           <button type="button" class="rw-rec-btn" onClick="{{ vc.toggle }}" aria-label="{{ vc.recLabel }}" aria-pressed="{{ vc.live }}">
             <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ vc.recIcon }}" size="{{ vc.recSize }}" strokeWidth="{{ vc.recStroke }}" hint-size="28px,28px"></x-import>
           </button>
-          <div class="rw-rec-side is-end"><button type="button" class="rw-rec-link" disabled="{{ vc.cantGo }}" aria-busy="{{ vc.parsing }}" onClick="{{ vc.next }}">{{ vc.nextLabel }}</button></div>
+          <div class="rw-rec-side is-end"><button type="button" class="rw-rec-link" disabled="{{ vc.cantGo }}" aria-busy="{{ vc.parsing }}" onClick="{{ vc.next }}"><sc-if value="{{ vc.parsing }}" hint-placeholder-val="{{ false }}"><span class="rw-reading-dots" role="status" aria-label="{{ vc.nextLabel }}"><i></i><i></i><i></i></span></sc-if><sc-if value="{{ vc.notParsing }}" hint-placeholder-val="{{ true }}">{{ vc.nextLabel }}</sc-if></button></div>
         </div>
       </div>
     </div>
@@ -3791,7 +3791,7 @@ class Component extends DCLogic {
         waveCls: live ? 'is-live' : '', bars: VOICE_WAVE.map(([h, o], i) => ({ h: live ? h + 'px' : '4px', o: String(o), d: (-(i * 137) % 1100) + 'ms' })),
         recIcon: live ? 'Square' : 'Mic', recSize: live ? 29.33 : 28, recStroke: live ? 1.64 : 2, recLabel: this.t(live ? 'stopRec' : 'startRec'),
         // Empty transcript: Fill manually opens an empty Review. With text: Continue reads it.
-        nextLabel: this.t(vo.parsing || vo.awaitingStop ? 'reading' : has ? 'continue' : 'fillManually'), cantGo: !!(vo.parsing || vo.awaitingStop), parsing: !!(vo.parsing || vo.awaitingStop),
+        nextLabel: this.t(vo.parsing || vo.awaitingStop ? 'reading' : has ? 'continue' : 'fillManually'), cantGo: !!(vo.parsing || vo.awaitingStop), parsing: !!(vo.parsing || vo.awaitingStop), notParsing: !(vo.parsing || vo.awaitingStop),
         toggle: () => live ? this.recStop() : this.recStart(),
         editFocus: () => this.recEditFocus(),
         onText: e => { if (this._rec) this.recEditFocus(); this.setVoice({ text: e.target.value }); },
