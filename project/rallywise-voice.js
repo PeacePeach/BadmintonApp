@@ -238,7 +238,7 @@
     const rem = fits(games, totals) ? { W: totals.w - games.filter(g => g.w === 'us').length, L: totals.l - games.filter(g => g.w === 'them').length } : { W: 0, L: 0 };
     return games.map(g => {
       if (!g.w) { const r = rem.W > 0 ? 'W' : 'L'; rem[r]--; return { r, u: 1 }; }
-      if (g.l == null) return { r: g.w === 'us' ? 'W' : 'L' };
+      if (g.l == null) return { r: g.w === 'us' ? 'W' : 'L', ...(g.u ? { u: 1 } : {}) };
       const ws = winnerScore(g.l, format);
       return g.w === 'us' ? [ws, g.l] : [g.l, ws];
     });
