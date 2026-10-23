@@ -507,7 +507,7 @@ button:disabled{cursor:default !important;}
                     </div>
                   </div>
                 </div>
-                <div class="rw-form" style="flex:1;justify-content:flex-end;">
+                <div class="rw-form {{ pf.formCls }}" style="flex:1;justify-content:flex-end;">
                   <div class="rw-form-bars" aria-hidden="true">
                     <sc-for list="{{ pf.bars }}" as="b" hint-placeholder-count="10">
                       <div class="rw-form-bar {{ b.cls }}" style="height: {{ b.h }};"></div>
@@ -3648,7 +3648,7 @@ class Component extends DCLogic {
         // last 20 matches with the older half, and its arrow and colour follow the sign.
         v.pf = { win: this.rec(all).pctStr, delta: (dl > 0 ? '+' : '') + dl + '%', bars,
           deltaIcon: dl > 0 ? 'ArrowUpRight' : dl < 0 ? 'ArrowDownRight' : 'Minus',
-          deltaCls: dl > 0 ? 'is-up' : dl < 0 ? 'is-down' : 'is-flat',
+          deltaCls: dl > 0 ? 'is-up' : dl < 0 ? 'is-down' : 'is-flat', formCls: dl < 0 ? 'is-down' : '',
           played: String(all.filter(m => m.date >= cutoff).length), record: this.t('wlShort', { w: last5.w, l: last5.l }),
           rows: [row(this.t('singlesWin'), sg, this.t('ofMatches', { w: sg.w, n: sg.n })), row(this.t('doublesWin'), db, this.t('ofMatches', { w: db.w, n: db.n })),
             row(this.t('closeGames'), { pct: cg.length ? cw / cg.length : 0, pctStr: (cg.length ? pct(cw / cg.length) : 0) + '%' }, this.t('ofGames', { w: cw, n: cg.length })),

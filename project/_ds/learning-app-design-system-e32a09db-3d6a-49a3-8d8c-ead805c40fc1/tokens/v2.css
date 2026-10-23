@@ -111,6 +111,7 @@
   --rw-blue-gradient-01: linear-gradient(90deg, #5b9dff 0%, #2c3f5c 100%); /* Blue Gradient 01 */
   --rw-blue-gradient-01-8: linear-gradient(90deg, rgba(91, 157, 255, .08) 0%, rgba(44, 63, 92, .08) 100%); /* Blue Gradient 01 at 8% (InlineBanner) */
   --rw-blue-gradient-02: linear-gradient(180deg, #5b9dff 0%, rgba(55, 94, 153, .8) 100%); /* Blue Gradient 02 (vertical) */
+  --rw-orange-gradient: linear-gradient(180deg, #efb16a 0%, #212328 100%); /* OrangeGrad (vertical): O100 -> #212328, Figma paint style */
   /* Input Border Gradient (voice transcript card stroke, 213:7972): B100 at 50% -> clear at 51% -> B100 at 50%.
      Figma's middle stop is #C4DCFF at 0% alpha; it is fully transparent, so it is written as B100 at 0%.
      Stops are Figma's 0 / 51% / 100% re-projected onto the CSS gradient line of the 350 x 302 card at 130deg. */
@@ -140,6 +141,7 @@
   --rw-color-status-loss: var(--rw-o100);
   --rw-color-data-fill: var(--rw-blue-gradient-01);
   --rw-color-data-fill-vertical: var(--rw-blue-gradient-02); /* vertical bars */
+  --rw-color-data-fill-vertical-down: var(--rw-orange-gradient); /* vertical bars when win rate is falling (Figma 360:7620) */
   --rw-color-data-track: var(--rw-purplegrey-500);
   /* Voice Log Match (Figma 207:7730, Review 217:8404 / 248:2470) */
   --rw-color-surface-input: var(--rw-inactivefill);   /* Figma 207:7730 card uses Inactive Fill (Han, 2026-10-22) */
@@ -258,6 +260,7 @@
   /* Graphs / Large bar (form chart) */
   --rw-form-bar-track: var(--rw-color-data-track);
   --rw-form-bar-fill: var(--rw-color-data-fill-vertical);
+  --rw-form-bar-fill-down: var(--rw-color-data-fill-vertical-down);
   --rw-chart-label-fg: var(--rw-color-text-tertiary);
   /* Trend (Insight Subtitle with change) */
   --rw-trend-up: var(--rw-color-status-win);

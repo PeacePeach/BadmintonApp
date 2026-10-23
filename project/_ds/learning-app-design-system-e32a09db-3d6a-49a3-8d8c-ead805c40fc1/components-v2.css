@@ -23,7 +23,7 @@
      Top Tab ...................... .rw-surface.rw-tabs > .rw-tab[.is-active]
      Horizontal toggle ............ .rw-surface.rw-tabs.is-sm > .rw-tab[.is-active]  (Top Tab, small; active border N600 like every selected outline, Han 2026-10-23)
      Insight Subtitle (change) .... .rw-trend > .rw-trend-delta.is-up|.is-down|.is-flat
-     Graphs / Large bar ........... .rw-form > .rw-form-bars > .rw-form-bar[.is-recent] + .rw-chart-label
+     Graphs / Large bar ........... .rw-form[.is-down] > .rw-form-bars > .rw-form-bar[.is-recent] + .rw-chart-label
      Performance breakdown ........ .rw-breakdown (label, .rw-bar, .rw-row-value + .rw-row-sub)
      Insight / ListRow ............ .rw-list-row (.rw-avatar, .rw-eyebrow, .rw-name, .rw-list-value, .rw-caption)
    Voice Log Match (Figma 207:7730 and Review 217:8404 / 248:2470):
@@ -173,7 +173,7 @@
 .rw-tab.is-active{background:var(--rw-glass-fill);-webkit-backdrop-filter:var(--rw-glass-effect);backdrop-filter:var(--rw-glass-effect);box-shadow:var(--rw-glass-rim);border-color:var(--rw-tab-active-border);color:var(--rw-tab-active-fg);}
 /* Insight Subtitle with change: arrow + value, then the comparison */
 .rw-trend{display:flex;align-items:center;gap:4px;font:var(--rw-type-subtitle);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);white-space:nowrap;}
-.rw-trend-delta{display:flex;align-items:center;gap:3px;font:var(--rw-type-trend);}
+.rw-trend-delta{display:flex;align-items:center;gap:0;font:var(--rw-type-trend);}  /* 15px icon sits right against the number (Figma Insight Subtitle 360:7911) */
 .rw-trend-delta.is-up{color:var(--rw-trend-up);}
 .rw-trend-delta.is-down{color:var(--rw-trend-down);}
 .rw-trend-delta.is-flat{color:var(--rw-trend-flat);}
@@ -182,6 +182,7 @@
 .rw-form-bars{height:81px;display:flex;align-items:flex-end;justify-content:space-between;}
 .rw-form-bar{width:8px;border-radius:99px;background:var(--rw-form-bar-track);transition:height .22s ease-out;}
 .rw-form-bar.is-recent{background:var(--rw-form-bar-fill);}
+.rw-form.is-down .rw-form-bar.is-recent{background:var(--rw-form-bar-fill-down);} /* win rate falling: recent bars in OrangeGrad, like the O100 delta */
 .rw-chart-label{display:flex;justify-content:space-between;font:var(--rw-type-chart-label);letter-spacing:var(--rw-tracking);color:var(--rw-chart-label-fg);}
 /* Section title inside a tile */
 .rw-section-title{font:var(--rw-type-section);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);margin:0;}
