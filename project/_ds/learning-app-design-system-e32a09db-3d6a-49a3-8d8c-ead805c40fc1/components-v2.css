@@ -299,3 +299,13 @@
 .rw-cue.is-done .rw-cue-mark.is-dot{background:var(--rw-cue-dot-even);}
 .rw-cue.is-done .rw-cue-mark.is-dot.is-win{background:var(--rw-cue-dot-win);}
 .rw-cue.is-done .rw-cue-mark.is-dot.is-loss{background:var(--rw-cue-dot-loss);}
+
+/* Chinese glyphs need a full line box; keep icon and text centred within the
+   existing flex component, without per-label positional offsets. */
+:root[lang="zh-Hans"] :is(.rw-btn,.rw-pill,.rw-flag,.rw-sheet-title,.rw-check){
+  line-height:1.25;
+}
+:root[lang="zh-Hans"] :is(.rw-btn,.rw-pill,.rw-flag) :is(svg,x-import){
+  flex-shrink:0;
+  vertical-align:middle;
+}
