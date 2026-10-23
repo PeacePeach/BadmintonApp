@@ -121,7 +121,7 @@
     players: (t, names) => names.some(n => n && t.toLowerCase().includes(n.toLowerCase())) || /\b(with|against|vs\.?|versus|partner)\s+\S/i.test(t) || /(和|跟|对手是?|搭档)\S/.test(t),
     games: t => /\bgames?\b|\bsets?\b|局|\b\d{1,2}\s*[-–:]\s*\d{1,2}\b|\d{1,2}\s*比\s*\d{1,2}/i.test(t),
     results: t => /\b(won|lost|win|loss|lose|beat)\b|赢|输|胜|负/i.test(t),
-    notes: t => /smash|serve|return|net|defen[cs]e|footwork|clear|drop|placement|mistake|error|working|weak|strong|杀球|发球|接发|网前|防守|步法|落点|失误|不错|需要/i.test(t)
+    notes: t => /smash|serve|return|net|defen[cs]e|footwork|clear|drop|placement|mistake|error|working|weak|strong|杀球|发球|接发|网前|往前小球|搓球|吊球|挑球|高远球|扑球|封网|点杀|启动|回中|移动|防守|步法|落点|失误|不错|需要|发挥得?(好|不好)|打得?(好|不好)/i.test(t)
   };
   function cues(text, names) { const t = text || ''; return { players: CUES.players(t, names || []), games: CUES.games(t), results: CUES.results(t), notes: CUES.notes(t) }; }
 
