@@ -116,6 +116,13 @@
    .is-dir-N picks one of six directions (the app sets it from the player ID). */
 .rw-avatar{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;--rw-avatar-angle:139deg;background:linear-gradient(var(--rw-avatar-angle),var(--rw-avatar-grad-from) 15%,var(--rw-avatar-grad-to) 88%);color:var(--rw-avatar-fg);font:var(--rw-type-avatar);letter-spacing:var(--rw-tracking);}
 .rw-avatar-sm{width:32px;height:32px;font:var(--rw-type-avatar-sm);}
+/* Centre the capital letter itself, not the font's line box: Poppins carries a tall ascender, so Safari drew
+   the letters about 2px above the middle of the circle (Han, 2026-10-23). Trim to cap height and baseline,
+   then split the remaining height evenly above and below. */
+@supports (text-box:trim-both cap alphabetic){
+  .rw-avatar{display:block;box-sizing:border-box;text-align:center;white-space:nowrap;text-box:trim-both cap alphabetic;padding-block:calc((40px - 1cap) / 2);}
+  .rw-avatar-sm{padding-block:calc((32px - 1cap) / 2);}
+}
 .rw-avatar.is-dir-1{--rw-avatar-angle:139deg;}
 .rw-avatar.is-dir-2{--rw-avatar-angle:224deg;}
 .rw-avatar.is-dir-3{--rw-avatar-angle:44deg;}
