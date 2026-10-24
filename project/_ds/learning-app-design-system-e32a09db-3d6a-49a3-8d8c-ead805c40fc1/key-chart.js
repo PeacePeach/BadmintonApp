@@ -45,9 +45,9 @@
       g += `<line class="rw-key-chart-grid-v" x1="${X(i)}" x2="${X(i)}" y1="${T}" y2="${H - B + (labels ? 3 : 0)}"/>`;
       if (labels) g += `<text x="${X(i)}" y="${H - 2}" text-anchor="middle">${o.xLabels[i] != null ? o.xLabels[i] : i + 1}</text>`;
     }
-    // Blue Gradient 01 stops (--rw-blue-gradient-01-stops), reversed so the latest match is bright; Blue Gradient 02 for bars.
-    const defs = `<linearGradient id="${id}h" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#2c3f5c"/><stop offset="1" stop-color="#5b9dff"/></linearGradient>
-      <linearGradient id="${id}v" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#5b9dff"/><stop offset="1" stop-color="rgba(55,94,153,.8)"/></linearGradient>`;
+    // Gradient stops come from tokens (--rw-key-chart-line-* = Blue Gradient 01 reversed, --rw-key-chart-bar-* = Blue Gradient 02).
+    const defs = `<linearGradient id="${id}h" x1="0" x2="1" y1="0" y2="0"><stop offset="0" style="stop-color:var(--rw-key-chart-line-from)"/><stop offset="1" style="stop-color:var(--rw-key-chart-line-to)"/></linearGradient>
+      <linearGradient id="${id}v" x1="0" x2="0" y1="0" y2="1"><stop offset="0" style="stop-color:var(--rw-key-chart-bar-from)"/><stop offset="1" style="stop-color:var(--rw-key-chart-bar-to)"/></linearGradient>`;
     if (o.kind === 'trend') {
       const pts = vals.map((v, i) => [X(i), Y(v)]);
       m += `<path d="${pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ')}" fill="none" stroke="url(#${id}h)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;

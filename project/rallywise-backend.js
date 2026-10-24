@@ -308,12 +308,13 @@
     async generate(lang) {
       const { data, error } = await sb().functions.invoke('generate-grow-insights', { body: { lang: lang === 'zh' ? 'zh' : 'en' } });
       if (error) throw dataFail(error);
-      return data && data.insight ? data.insight : null;
+      // _generatedAt: when the insight was made (Build Next uses it to tell new evidence from old).
+      return data && data.insight ? { ...data.insight, _generatedAt: data.generated_at || new Date().toISOString() } : null;
     },
     // The one cached insight, in whichever language it was last made: check .lang (none means English).
     async cached() {
       const row = await run(sb().from('ai_insights').select('insight_json,generated_at').maybeSingle());
-      return row ? row.insight_json : null;
+      return row ? { ...row.insight_json, _generatedAt: row.generated_at } : null;
     }
   };
 

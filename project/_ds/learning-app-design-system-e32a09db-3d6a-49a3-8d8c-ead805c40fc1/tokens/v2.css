@@ -108,10 +108,13 @@
   --rw-glassfill: rgba(255, 255, 255, .05);                              /* GlassFill: #FFFFFF at 5% */
   --rw-highlightfill: rgba(255, 255, 255, .08);                          /* Highlight Fill: #FFFFFF at 8% (Log Match, 207:7730) */
   --rw-inactivefill: rgba(255, 255, 255, .03);                           /* Inactive Fill: #FFFFFF at 3% */
-  --rw-blue-gradient-01-stops: #5b9dff 0%, #2c3f5c 100%;                 /* Blue Gradient 01 stops, reused at another angle */
+  --rw-blue-gradient-01-from: #5b9dff;                                   /* Blue Gradient 01 start (also Blue Gradient 02 start) */
+  --rw-blue-gradient-01-to: #2c3f5c;                                     /* Blue Gradient 01 end */
+  --rw-blue-gradient-02-to: rgba(55, 94, 153, .8);                       /* Blue Gradient 02 end */
+  --rw-blue-gradient-01-stops: var(--rw-blue-gradient-01-from) 0%, var(--rw-blue-gradient-01-to) 100%; /* Blue Gradient 01 stops, reused at another angle */
   --rw-blue-gradient-01: linear-gradient(90deg, var(--rw-blue-gradient-01-stops)); /* Blue Gradient 01 */
   --rw-blue-gradient-01-8: linear-gradient(90deg, rgba(91, 157, 255, .08) 0%, rgba(44, 63, 92, .08) 100%); /* Blue Gradient 01 at 8% (InlineBanner) */
-  --rw-blue-gradient-02: linear-gradient(180deg, #5b9dff 0%, rgba(55, 94, 153, .8) 100%); /* Blue Gradient 02 (vertical) */
+  --rw-blue-gradient-02: linear-gradient(180deg, var(--rw-blue-gradient-01-from) 0%, var(--rw-blue-gradient-02-to) 100%); /* Blue Gradient 02 (vertical) */
   --rw-orange-gradient-stops: #efb16a 0%, #212328 100%;                  /* OrangeGrad stops, reused at another angle */
   --rw-orange-gradient: linear-gradient(180deg, var(--rw-orange-gradient-stops)); /* OrangeGrad (vertical): O100 -> #212328, Figma paint style */
   /* Input Border Gradient (voice transcript card stroke, 213:7972): B100 at 50% -> clear at 51% -> B100 at 50%.
@@ -145,6 +148,8 @@
   --rw-color-data-fill-vertical: var(--rw-blue-gradient-02); /* vertical bars */
   --rw-color-data-fill-vertical-down: var(--rw-orange-gradient); /* vertical bars when win rate is falling (Figma 360:7620) */
   --rw-color-data-track: var(--rw-purplegrey-500);
+  --rw-color-data-neutral: var(--rw-n200);            /* a neutral / inactive data point, e.g. a match without the thing (Han, 2026-10-24) */
+  --rw-color-data-earlier: var(--rw-n300);            /* the previous / earlier series in a comparison (Han, 2026-10-24) */
   /* Voice Log Match (Figma 207:7730, Review 217:8404 / 248:2470) */
   --rw-color-surface-input: var(--rw-inactivefill);   /* Figma 207:7730 card uses Inactive Fill (Han, 2026-10-22) */
   --rw-color-surface-done: var(--rw-highlightfill);     /* a recognised item */
@@ -285,9 +290,13 @@
   --rw-key-chart-tick: var(--rw-chart-label-fg);       /* N300 */
   --rw-key-chart-dot: var(--rw-color-status-win);      /* B100, flat (Han: no shaded dots) */
   --rw-key-chart-latest: var(--rw-color-status-win);   /* the latest value's number */
-  --rw-key-chart-earlier: var(--rw-color-text-tertiary); /* N300 bars before the split (pending Han) */
+  --rw-key-chart-earlier: var(--rw-color-data-earlier); /* N300: bars before the split */
   --rw-key-chart-on: var(--rw-color-status-loss);      /* O100: it happened in this match */
-  --rw-key-chart-none: var(--rw-n200);                 /* N200: it didn't (pending Han) */
+  --rw-key-chart-none: var(--rw-color-data-neutral);   /* N200: it didn't happen in this match */
+  --rw-key-chart-line-from: var(--rw-blue-gradient-01-to);   /* trend line: Blue Gradient 01 reversed, latest match bright */
+  --rw-key-chart-line-to: var(--rw-blue-gradient-01-from);
+  --rw-key-chart-bar-from: var(--rw-blue-gradient-01-from);  /* recent bars: Blue Gradient 02 */
+  --rw-key-chart-bar-to: var(--rw-blue-gradient-02-to);
   --rw-advice-divider: var(--rw-color-divider);
   --rw-advice-label-accent: var(--rw-color-text-accent);
   --rw-icon-badge-size: 40px;
@@ -418,7 +427,7 @@
   --rw-type-meta: 500 13px/16.9px var(--font-sans);   /* 13px helper and score lines; Figma Regular -> Medium (Han N5) */
   --rw-type-key-title: 500 17px/22.1px var(--font-sans);  /* KeyInsight headline (Figma 203:5441) */
   --rw-type-body: 500 14px/21px var(--font-sans);         /* KeyInsight body; Figma Regular -> Medium (V2 minimum) */
-  --rw-type-key-chart-tick: 500 9px/1 var(--font-sans);  /* KeyInsight chart tick labels (pending Han) */
+  --rw-type-key-chart-tick: 500 9px/1 var(--font-sans);  /* micro-chart labels ONLY (KeyInsight chart ticks and values); 9px is not allowed anywhere else (Han, 2026-10-24) */
   --rw-type-tile-desc: 500 12px/16.8px var(--font-sans);  /* Tile half width evidence line (Figma 12px, 1.4) */
   --rw-type-tile-text: 500 12px/18.2px var(--font-sans);  /* advice under a tile label: TRY NEXT, KEEP GOING, GAME PLAN */
 }

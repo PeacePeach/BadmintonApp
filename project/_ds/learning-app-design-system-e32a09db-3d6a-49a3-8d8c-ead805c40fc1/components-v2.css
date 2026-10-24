@@ -32,7 +32,7 @@
      KeyInsight, split ............ .rw-key.is-split > .rw-key-head + .rw-key-split > .rw-key-split-text (.rw-key-title + .rw-key-body) + .rw-key-chart[data-kind=trend|compare|strip] (drawn by key-chart.js)
      Section header ............... .rw-section-head > .rw-section-title + .rw-hint
      Tile full wide ............... .rw-surface.rw-tile.rw-advice > .rw-advice-head (.rw-icon-badge | .rw-avatar + .rw-advice-text: .rw-name + .rw-meta) + .rw-advice-divider + .rw-advice-tip (.rw-label[.is-accent] + .rw-advice-tip-text)
-     Tile half width .............. .rw-surface.rw-tile.rw-advice.is-half > .rw-advice-body (.rw-advice-text: .rw-name + .rw-advice-desc, divider, tip) + .rw-btn-secondary | .rw-btn-tertiary
+     Tile half width .............. .rw-surface.rw-tile.rw-advice.is-half > .rw-advice-body (.rw-advice-text: .rw-name + .rw-advice-desc, divider, tip) + .rw-btn-secondary (Add to Focus; there is no In Focus state, Han 2026-10-24)
      Tile label (no tracking) ..... .rw-label[.is-accent: B100]  (Grow labels; Performance keeps the tracked .rw-eyebrow)
      Avatar / Fancy (icon badge) .. .rw-icon-badge (40px, gradient B100 ring, B100 icon 20px)
    Voice Log Match (Figma 207:7730 and Review 217:8404 / 248:2470):

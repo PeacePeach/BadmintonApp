@@ -62,13 +62,13 @@ const T = {
     eyebrow: 'Key insight', tabs: { trend: 'Trend', compare: 'Compare', strip: 'Strip' },
     all: 'Show all three', labels: 'Micro labels', lang: '中文',
     names: { trend: 'A · Trend Line', compare: 'B · Comparison Chart', strip: 'C · Match Strip' },
-    trend: { t: 'Your net game is getting stronger.', b: 'Net points won rose from 42% in match 1 to 64% in match 6.' },
-    compare: { t: 'Your defence is improving.', b: 'Defensive mistakes dropped from 7 in matches 1–3 to 3 in matches 4–6.' },
-    strip: { t: 'Serve errors keep showing up.', b: 'Serve errors showed up in 4 of your last 6 matches: 1, 3, 4 and 6.' },
+    trend: { t: 'Your net game is getting stronger.', b: 'Your share of net points won has climbed from 42% to 64% over your last 6 matches.' },
+    compare: { t: 'Your defence is improving.', b: 'You mentioned defensive mistakes 3 times in your last 3 matches, compared with 7 in the previous 3.' },
+    strip: { t: 'Serve errors keep showing up.', b: 'You made serve errors in 4 of your last 6 matches, 8 in total.' },
     notes: {
       trend: '<b>Trend Line</b>: net points won % per match, matches 1–6 (oldest left). The quoted values are written at their points.',
-      compare: '<b>Comparison Chart</b>: defensive mistakes per match. Matches 1–3 in grey (7 total), 4–6 in blue (3 total).',
-      strip: '<b>Match Strip</b>: serve errors per match. Orange = it happened (4 of 6), grey on the zero line = it didn\'t.'
+      compare: '<b>Comparison Chart</b>: defensive mistakes mentioned per match. Previous 3 in grey (7 in total), last 3 in blue (3 in total).',
+      strip: '<b>Match Strip</b>: serve errors per match. Orange = it happened (4 of 6 matches, 8 in total), grey on the zero line = it didn\'t.'
     }
   },
   zh: {
@@ -76,13 +76,13 @@ const T = {
     eyebrow: '关键洞察', tabs: { trend: '趋势线', compare: '对比图', strip: '比赛条' },
     all: '同时显示三个', labels: '小标签', lang: 'English',
     names: { trend: 'A · 趋势线', compare: 'B · 对比图', strip: 'C · 比赛条' },
-    trend: { t: '你的网前越来越强了。', b: '网前得分率从第 1 场的 42% 升到第 6 场的 64%。' },
-    compare: { t: '你的防守在进步。', b: '防守失误从第 1–3 场的 7 次降到第 4–6 场的 3 次。' },
-    strip: { t: '发球失误反复出现。', b: '最近 6 场里有 4 场出现发球失误：第 1、3、4、6 场。' },
+    trend: { t: '你的网前越来越强了。', b: '最近 6 场，你的网前得分率从 42% 升到了 64%。' },
+    compare: { t: '你的防守在进步。', b: '最近 3 场你提到防守失误 3 次，之前 3 场是 7 次。' },
+    strip: { t: '发球失误反复出现。', b: '最近 6 场里有 4 场出现发球失误，一共 8 次。' },
     notes: {
       trend: '<b>趋势线</b>：每场网前得分占比，第 1–6 场（左边最早）。文字引用的数值直接标在对应的点上。',
-      compare: '<b>对比图</b>：每场防守失误。第 1–3 场灰色（共 7 次），第 4–6 场蓝色（共 3 次）。',
-      strip: '<b>比赛条</b>：每场发球失误。橙色 = 出现了（6 场中 4 场），零线上的灰色 = 没有。'
+      compare: '<b>对比图</b>：每场提到的防守失误。之前 3 场灰色（共 7 次），最近 3 场蓝色（共 3 次）。',
+      strip: '<b>比赛条</b>：每场发球失误。橙色 = 出现了（6 场中 4 场，共 8 次），零线上的灰色 = 没有。'
     }
   }
 };

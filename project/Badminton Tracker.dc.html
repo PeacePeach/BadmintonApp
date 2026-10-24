@@ -1976,6 +1976,8 @@ const LANG_KEY = 'rallywise.lang';
 // The parser version a Real Voice test (?voiceMode=real) expects from the deployed parse-voice-log.
 const REAL_VOICE_ENGINE = '2026-10-23-v5';
 const LANGS = [['en', 'English'], ['zh', '简体中文']];
+// Skill Tags a match can carry under What Worked / What Cost You Points.
+const TAG_KEYS = ['Serve', 'Return', 'Net', 'Smash', 'Defence', 'Footwork', 'Placement', 'Other'];
 const I18N = {
   en: {
     matches: 'Matches', insights: 'Insights', players: 'Players', settings: 'Settings', profile: 'Profile', logOut: 'Log Out',
@@ -2107,7 +2109,7 @@ const I18N = {
     markActive: 'Move Back to Active', deleteFocusQ: 'Delete Focus?', deleteFocusBody: 'This removes “{title}” and its progress. Your matches and insights stay.',
     tFocusAdded: 'Added to Focus', tFocusUpdated: 'Focus updated', tFocusDeleted: 'Focus deleted', tFocusDeleteFailed: "Couldn't delete focus",
     tFocusCompleted: 'Marked complete', tFocusReopened: 'Moved back to Active',
-    addToFocus: 'Add to Focus', inFocus: 'In Focus', close: 'Close', improveQ: 'What do you want to improve?', focusName: 'Name', focusNamePh: 'Backhand clear',
+    addToFocus: 'Add to Focus', close: 'Close', improveQ: 'What do you want to improve?', focusName: 'Name', focusNamePh: 'Backhand clear',
     howQ: 'How will you work on it?',
     optPractice: 'Practice sessions', optMatches: 'Next matches', optNone: 'No schedule', howOften: 'How often?', howLong: 'For how long?',
     howManyMatches: 'For how many matches?', noneHint: "You decide when it's done. Mark it complete any time.",
@@ -2255,7 +2257,7 @@ const I18N = {
     markActive: '移回进行中', deleteFocusQ: '删除这个重点？', deleteFocusBody: '会删除“{title}”和它的进度，你的比赛和洞察不受影响。',
     tFocusAdded: '已加入重点', tFocusUpdated: '重点已更新', tFocusDeleted: '重点已删除', tFocusDeleteFailed: '重点未能删除',
     tFocusCompleted: '已标记为完成', tFocusReopened: '已移回进行中',
-    addToFocus: '加入重点', inFocus: '已加入重点', close: '关闭', improveQ: '你想提升什么？', focusName: '名称', focusNamePh: '反手高远球',
+    addToFocus: '加入重点', close: '关闭', improveQ: '你想提升什么？', focusName: '名称', focusNamePh: '反手高远球',
     howQ: '打算怎么练？',
     optPractice: '专项练习', optMatches: '接下来的比赛', optNone: '不设计划', howOften: '多久练一次？', howLong: '练多久？',
     howManyMatches: '跟进几场比赛？', noneHint: '什么时候完成由你决定，随时可以标记完成。',
@@ -3409,6 +3411,37 @@ class Component extends DCLogic {
     this.setState(s => ({ focuses: [f, ...s.focuses], sheet: null, ...(sh.mode === 'new' ? { screen: 'focusDetail', focusId: f.id, back: [{ screen: 'focus' }] } : {}) }));
     this.flash(this.t('tFocusAdded'));
   }
+  // Build Next vs Focus (Han, 2026-10-24): Build Next is for finding things to work on, Focus for the ones already
+  // picked. A recommendation's topic is its Skill Tag when it came from tags or its name is a tag in either language,
+  // otherwise its name with case, spacing and punctuation ignored. Engine V2 should send a stable topic id per
+  // recommendation (and Focus would need a column to keep it); until then this is the key both sides share.
+  topicKey(name, tag) {
+    if (tag) return 'tag:' + tag;
+    const norm = x => String(x || '').normalize('NFKC').toLowerCase().replace(/[\s\p{P}\p{S}]+/gu, '');
+    const n = norm(name);
+    if (!n) return '';
+    const t = TAG_KEYS.find(k => norm(k) === n || LANGS.some(([l]) => norm(I18N[l]['tag_' + k]) === n));
+    return t ? 'tag:' + t : 'text:' + n;
+  }
+  // The recommendations not in Focus, in order, at most `max`; the next one moves up when one is hidden. An active
+  // Focus on the same topic hides it. A completed one does too, until there is new evidence: 3 or more matches logged
+  // since it was completed, and the recommendation is newer than that (an AI insight made after it, or, for a tag,
+  // the tag picked again in 2 of those matches). Nothing is deleted; Focus history stays as it is.
+  openRecs(recs, { generatedAt, max = 2 } = {}) {
+    const FS = this.state.focuses || [], ms = this.state.matches || [];
+    const loggedAfter = iso => ms.filter(m => (m.createdAt || m.date + 'T23:59:59') > iso);
+    return recs.filter(r => {
+      const k = this.topicKey(r.name, r.tag);
+      if (!k) return true;
+      const same = FS.filter(f => this.topicKey(f.title) === k);
+      if (same.some(f => f.status === 'active')) return false;
+      return same.every(f => {
+        const after = loggedAfter(f.completedAt || f.createdAt || '');
+        if (after.length < 3) return false;
+        return r.tag ? after.filter(m => (m.lt || []).includes(r.tag)).length >= 2 : !!generatedAt && generatedAt > (f.completedAt || '');
+      });
+    }).slice(0, max);
+  }
   openFocusSheet(o) { this.setState({ menu: false, sheet: { mode: 'new', title: '', goal: '', cues: [], type: 'practice', perWeek: 3, weeks: 2, matches: 4, ...o } }); }
   setSheet(p) { this.setState(s => ({ sheet: { ...s.sheet, ...p } })); }
   // Mark Complete / Move Back to Active, for any type. A fixed plan that has ended can't be moved back; Edit
@@ -3674,7 +3707,11 @@ class Component extends DCLogic {
         const sample = {
           build: [
             { name: 'Backhand Defence', evidence: `Lost points in ${dh} of your last ${n6.length} matches.`, action: 'Keep your racket higher during flat exchanges.' },
-            { name: 'Serve Return', evidence: 'Won 38% of return points, lower than usual.', action: 'Return deeper and higher to slow their attack.' }
+            { name: 'Serve Return', evidence: 'Won 38% of return points, lower than usual.', action: 'Return deeper and higher to slow their attack.' },
+            // Next in line: Footwork Recovery matches a completed Focus with no new evidence, so it stays hidden;
+            // Rear-court Clears fills in when one of the first two goes to Focus.
+            { name: 'Footwork recovery', evidence: 'Late to the rear corners in 3 of your last 6 matches.', action: 'Push off the back foot after every lift.' },
+            { name: 'Rear-court Clears', evidence: 'Short clears let opponents attack in 4 of your last 6 matches.', action: 'Hit through the shuttle and aim past the back service line.' }
           ],
           strengths: [
             { name: 'Net Play', signal: 'Tagged as working in each of your last 6 wins.', action: 'Take the shuttle early and keep your replies tight.' },
@@ -3714,9 +3751,10 @@ class Component extends DCLogic {
           };
         } else {
           const tagged = chron.filter(m => m.wt.length || m.lt.length).slice(-6), wins = chron.filter(m => m.wt.length && this.res(m.games).win).slice(-6);
-          const top = (list, k) => Object.entries(list.flatMap(m => m[k]).filter(t => t !== 'Other').reduce((c, t) => ({ ...c, [t]: (c[t] || 0) + 1 }), {}))
-            .filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]).slice(0, 2);
-          const build = top(tagged, 'lt').map(([t, n]) => ({ name: this.tagLabel(t), evidence: this.t('costPoints', { n, total: tagged.length }), action: '' }));
+          const top = (list, k, max = 2) => Object.entries(list.flatMap(m => m[k]).filter(t => t !== 'Other').reduce((c, t) => ({ ...c, [t]: (c[t] || 0) + 1 }), {}))
+            .filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]).slice(0, max);
+          // Every qualifying tag is a candidate; Build Next shows the first two not already in Focus.
+          const build = top(tagged, 'lt', Infinity).map(([t, n]) => ({ name: this.tagLabel(t), tag: t, evidence: this.t('costPoints', { n, total: tagged.length }), action: '' }));
           const strengths = top(wins, 'wt').map(([t, n]) => ({ name: this.tagLabel(t), signal: this.t('workingIn', { n, total: wins.length }), action: '' }));
           const opps = [...new Set(all.flatMap(m => m.opps).filter(id => !this.unknown(id)))].map(id => ({ id, r: this.vs(id), note: all.find(m => m.on && m.opps.includes(id)) }))
             .filter(o => o.note && this.nm(o.id)).sort((a, b) => a.r.pct - b.r.pct || b.r.n - a.r.n).slice(0, 2).map(o => op(o.id, o.note.on));
@@ -3817,8 +3855,7 @@ class Component extends DCLogic {
       v.draft = { teamA: log.type ? this.teamA(dm) : '', teamB: dm.opps.length ? this.teamB(dm) : '', scoreLine: this.scoreLine(this.draftGames(log), '  ·  '), ...this.badge(dr.win) };
       v.onWorked = e => this.setLog({ worked: e.target.value });
       v.onLost = e => this.setLog({ lost: e.target.value });
-      const TAGS = ['Serve', 'Return', 'Net', 'Smash', 'Defence', 'Footwork', 'Placement', 'Other'];
-      const tagRow = (k, selBg, selFg) => TAGS.map(t => {
+      const tagRow = (k, selBg, selFg) => TAG_KEYS.map(t => {
         const sel = log[k].includes(t), full = log[k].length >= 3 && !sel;
         return { label: this.tagLabel(t), bg: sel ? selBg : 'var(--filter-pill-bg)', fg: sel ? selFg : full ? 'var(--text-tertiary)' : 'var(--filter-pill-text-default)',
           toggle: () => this.setLog(l => ({ [k]: l[k].includes(t) ? l[k].filter(x => x !== t) : l[k].length >= 3 ? l[k] : [...l[k], t] })) };
@@ -4006,13 +4043,13 @@ class Component extends DCLogic {
     // This week's row for an active practice Focus (made by syncFocus; drawn empty until then).
     const weekNow = f => { const cur = this.currentWeek(f, day); if (!cur) return null; return FP.find(r => r.id === cur.id) || { ...this.newWeekRow(f, cur.k), k: cur.k }; };
     const doneIn = r => r ? r.marks.filter(Boolean).length : 0;
-    if (v.grow && v.grow.build) v.grow.build = v.grow.build.map(b => {
-      const ex = FS.find(f => f.status === 'active' && f.title.trim().toLowerCase() === String(b.name).trim().toLowerCase());
-      return { ...b, ...(ex
-        ? { fLabel: this.t('inFocus'), fIcon: 'Check', fCls: 'rw-btn-tertiary', focus: () => this.go('focusDetail', { focusId: ex.id }) }
-        : { fLabel: this.t('addToFocus'), fIcon: 'Plus', fCls: 'rw-btn-secondary',
-            focus: () => this.openFocusSheet({ mode: 'grow', title: b.name, goal: b.action || '' }) }) };
-    });
+    // Build Next only offers what isn't in Focus; once added, the tile leaves (the next candidate, if any, moves up).
+    if (v.grow && v.grow.build) {
+      v.grow.build = this.openRecs(v.grow.build, { generatedAt: s.aiGrow && this.live() ? s.aiGrow._generatedAt : null }).map(b => ({ ...b,
+        fLabel: this.t('addToFocus'), fIcon: 'Plus', fCls: 'rw-btn-secondary',
+        focus: () => this.openFocusSheet({ mode: 'grow', title: b.name, goal: b.action || '' }) }));
+      v.grow.showBuild = !!v.grow.build.length;
+    }
     v.isFocus = s.screen === 'focus'; v.isFocusDetail = s.screen === 'focusDetail';
     v.newFocus = () => { if (this.dataReady()) this.openFocusSheet({ mode: 'new' }); };
     if (v.isFocus) {
