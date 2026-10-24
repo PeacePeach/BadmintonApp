@@ -571,118 +571,113 @@ button:disabled{cursor:default !important;}
         </sc-if>
 
         <sc-if value="{{ insCoach }}" hint-placeholder-val="{{ false }}">
-          <div data-screen-label="Grow" style="display:flex;flex-direction:column;gap:44px;padding-top:6px;">
+          <div data-screen-label="Grow" style="display:flex;flex-direction:column;gap:40px;">
             <sc-if value="{{ grow.empty }}" hint-placeholder-val="{{ false }}">
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ grow.empty.illustration }}" title="{{ grow.empty.title }}" body="{{ grow.empty.body }}" hint-size="350px,300px"></x-import>
             </sc-if>
             <sc-if value="{{ grow.showKey }}" hint-placeholder-val="{{ true }}">
-            <div style="background:var(--surface-primary);border-radius:26px;padding:24px;display:flex;flex-direction:column;gap:14px;">
-              <div style="display:flex;align-items:center;gap:8px;font:400 14px/1 var(--font-sans);color:var(--neutral-600);"><div style="width:6px;height:6px;border-radius:50%;background:var(--status-win);"></div>{{ tx.keyInsight }}</div>
-              <div style="font:500 22px/1.3 var(--font-sans);text-wrap:balance;">{{ grow.keyTitle }}</div>
-              <div style="font:400 15px/1.5 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">{{ grow.keyBody }}</div>
+            <div class="rw-surface rw-tile rw-key">
+              <div class="rw-key-head"><span class="rw-label">{{ tx.keyInsight }}</span></div>
+              <p class="rw-key-title">{{ grow.keyTitle }}</p>
+              <p class="rw-key-body">{{ grow.keyBody }}</p>
               <sc-if value="{{ grow.showKeyChart }}" hint-placeholder-val="{{ true }}">
-              <div style="position:relative;height:10px;display:flex;gap:6px;margin-top:10px;">
-                <div style="width: {{ grow.keyCurrent }};flex-shrink:0;border-radius:99px;background:var(--progress-active);"></div>
-                <div style="flex:1;border-radius:99px;background:repeating-linear-gradient(-60deg,var(--border-default) 0 1.5px,transparent 1.5px 5px);"></div>
-                <div style="position:absolute;left: {{ grow.keyPrevious }};top:-4px;bottom:-4px;width:2px;margin-left:-1px;border-radius:2px;background:var(--text-primary);"></div>
-              </div>
+              <div class="rw-bar rw-key-bar" role="img" aria-label="{{ grow.keyCurrent }}"><div><div style="width: {{ grow.keyCurrent }};"></div></div></div>
               </sc-if>
             </div>
             </sc-if>
 
             <sc-if value="{{ grow.showBuild }}" hint-placeholder-val="{{ true }}">
-            <div style="display:flex;flex-direction:column;gap:16px;">
-              <div style="display:flex;flex-direction:column;gap:6px;"><div style="font:500 19px/1.2 var(--font-sans);">{{ tx.buildNext }}</div><div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">{{ tx.buildNextSub }}</div></div>
+            <section style="display:flex;flex-direction:column;gap:16px;">
+              <div class="rw-section-head"><h2 class="rw-section-title">{{ tx.buildNext }}</h2><p class="rw-hint">{{ tx.buildNextSub }}</p></div>
               <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;">
                 <sc-for list="{{ grow.build }}" as="b" hint-placeholder-count="2">
-                  <div style="background:var(--surface-primary);border-radius:26px;padding:18px;display:flex;flex-direction:column;gap:14px;">
-                    <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
-                      <div style="font:500 16px/1.25 var(--font-sans);">{{ b.name }}</div>
-                      <div style="font:400 13px/1.4 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">{{ b.evidence }}</div>
+                  <div class="rw-surface rw-tile rw-advice is-half">
+                    <div class="rw-advice-body">
+                      <div class="rw-advice-text">
+                        <div class="rw-name">{{ b.name }}</div>
+                        <div class="rw-advice-desc">{{ b.evidence }}</div>
+                      </div>
+                      <sc-if value="{{ b.action }}" hint-placeholder-val="{{ true }}">
+                      <div class="rw-advice-divider"></div>
+                      <div class="rw-advice-tip">
+                        <div class="rw-label is-accent">{{ tx.tryNext }}</div>
+                        <div class="rw-advice-tip-text">{{ b.action }}</div>
+                      </div>
+                      </sc-if>
                     </div>
-                    <sc-if value="{{ b.action }}" hint-placeholder-val="{{ true }}">
-                    <div style="height:1px;background:var(--divider);"></div>
-                    <div style="display:flex;flex-direction:column;gap:6px;">
-                      <div style="font:400 12px/1 var(--font-sans);color:var(--status-win);">{{ tx.tryNext }}</div>
-                      <div style="font:400 14px/1.4 var(--font-sans);text-wrap:pretty;">{{ b.action }}</div>
-                    </div>
-                    </sc-if>
-                    <button onClick="{{ b.focus }}" style="height:44px;border:1px solid {{ b.fBorder }};border-radius:99px;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 16px 0 12px;font:500 12px/1 var(--font-sans);white-space:nowrap;cursor:pointer;background: {{ b.fBg }};color: {{ b.fFg }};" style-active="transform:scale(.96);">
-                      <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ b.fIcon }}" size="{{ 16 }}" hint-size="16px,16px"></x-import>{{ b.fLabel }}
-                    </button>
+                    <button type="button" class="rw-btn {{ b.fCls }}" onClick="{{ b.focus }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ b.fIcon }}" size="{{ 16 }}" hint-size="16px,16px"></x-import>{{ b.fLabel }}</button>
                   </div>
                 </sc-for>
               </div>
-            </div>
+            </section>
             </sc-if>
 
             <sc-if value="{{ grow.showStrengths }}" hint-placeholder-val="{{ true }}">
-            <div style="display:flex;flex-direction:column;gap:16px;">
-              <div style="display:flex;flex-direction:column;gap:6px;"><div style="font:500 19px/1.2 var(--font-sans);">{{ tx.strengths }}</div><div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">{{ tx.strengthsSub }}</div></div>
+            <section style="display:flex;flex-direction:column;gap:16px;">
+              <div class="rw-section-head"><h2 class="rw-section-title">{{ tx.strengths }}</h2><p class="rw-hint">{{ tx.strengthsSub }}</p></div>
               <sc-for list="{{ grow.strengths }}" as="k" hint-placeholder-count="2">
-                <div style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;">
-                  <div style="display:flex;align-items:center;gap:14px;">
-                    <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
-                    <div style="display:flex;flex-direction:column;gap:5px;min-width:0;">
-                      <div style="font:500 16px/1.2 var(--font-sans);">{{ k.name }}</div>
-                      <div style="font:400 13px/1.35 var(--font-sans);color:var(--text-secondary);">{{ k.signal }}</div>
+                <div class="rw-surface rw-tile rw-advice">
+                  <div class="rw-advice-head">
+                    <div class="rw-icon-badge" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 20 }}" hint-size="20px,20px"></x-import></div>
+                    <div class="rw-advice-text">
+                      <div class="rw-name">{{ k.name }}</div>
+                      <p class="rw-meta">{{ k.signal }}</p>
                     </div>
                   </div>
                   <sc-if value="{{ k.action }}" hint-placeholder-val="{{ true }}">
-                  <div style="height:1px;background:var(--divider);"></div>
-                  <div style="display:flex;flex-direction:column;gap:6px;">
-                    <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.keepDoing }}</div>
-                    <div style="font:400 15px/1.45 var(--font-sans);text-wrap:pretty;">{{ k.action }}</div>
+                  <div class="rw-advice-divider"></div>
+                  <div class="rw-advice-tip">
+                    <div class="rw-label">{{ tx.keepDoing }}</div>
+                    <div class="rw-advice-tip-text">{{ k.action }}</div>
                   </div>
                   </sc-if>
                 </div>
               </sc-for>
-            </div>
+            </section>
             </sc-if>
 
             <sc-if value="{{ grow.showOpps }}" hint-placeholder-val="{{ true }}">
-            <div style="display:flex;flex-direction:column;gap:16px;">
-              <div style="display:flex;flex-direction:column;gap:6px;"><div style="font:500 19px/1.2 var(--font-sans);">{{ tx.oppPlans }}</div><div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">{{ tx.oppPlansSub }}</div></div>
+            <section style="display:flex;flex-direction:column;gap:16px;">
+              <div class="rw-section-head"><h2 class="rw-section-title">{{ tx.oppPlans }}</h2><p class="rw-hint">{{ tx.oppPlansSub }}</p></div>
               <sc-for list="{{ grow.opps }}" as="o" hint-placeholder-count="2">
-                <div onClick="{{ o.open }}" style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;cursor:pointer;">
-                  <div style="display:flex;align-items:center;gap:14px;">
-                    <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);flex-shrink:0;">{{ o.initials }}</div>
-                    <div style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:0;">
-                      <div style="font:500 16px/1.2 var(--font-sans);">{{ o.name }}</div>
-                      <div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">{{ o.record }}</div>
+                <div onClick="{{ o.open }}" class="rw-surface rw-tile rw-advice rw-press">
+                  <div class="rw-advice-head">
+                    <div class="rw-avatar {{ o.avCls }}" aria-hidden="true">{{ o.initials }}</div>
+                    <div class="rw-advice-text">
+                      <div class="rw-name">{{ o.name }}</div>
+                      <p class="rw-meta">{{ o.record }}</p>
                     </div>
-                    <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 24 }}" color="var(--text-secondary)" hint-size="24px,24px"></x-import>
                   </div>
-                  <div style="height:1px;background:var(--divider);"></div>
-                  <div style="display:flex;flex-direction:column;gap:6px;">
-                    <div style="font:400 12px/1 var(--font-sans);color:var(--status-win);">{{ tx.gamePlan }}</div>
-                    <div style="font:400 15px/1.45 var(--font-sans);text-wrap:pretty;">{{ o.plan }}</div>
+                  <div class="rw-advice-divider"></div>
+                  <div class="rw-advice-tip">
+                    <div class="rw-label">{{ tx.gamePlan }}</div>
+                    <div class="rw-advice-tip-text">{{ o.plan }}</div>
                   </div>
                 </div>
               </sc-for>
-            </div>
+            </section>
             </sc-if>
 
             <sc-if value="{{ grow.showDoubles }}" hint-placeholder-val="{{ true }}">
-            <div style="display:flex;flex-direction:column;gap:16px;">
-              <div style="display:flex;flex-direction:column;gap:6px;"><div style="font:500 19px/1.2 var(--font-sans);">{{ tx.doublesPlay }}</div><div style="font:400 13px/1.3 var(--font-sans);color:var(--text-secondary);">{{ tx.doublesPlaySub }}</div></div>
+            <section style="display:flex;flex-direction:column;gap:16px;">
+              <div class="rw-section-head"><h2 class="rw-section-title">{{ tx.doublesPlay }}</h2><p class="rw-hint">{{ tx.doublesPlaySub }}</p></div>
               <sc-for list="{{ grow.doubles }}" as="d" hint-placeholder-count="2">
-                <div style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;">
-                  <div style="display:flex;align-items:flex-start;gap:14px;">
-                    <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Users" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
-                    <div style="display:flex;flex-direction:column;gap:5px;min-width:0;">
-                      <div style="font:500 16px/1.2 var(--font-sans);">{{ d.name }}</div>
-                      <div style="font:400 13px/1.4 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">{{ d.pattern }}</div>
+                <div class="rw-surface rw-tile rw-advice">
+                  <div class="rw-advice-head">
+                    <div class="rw-icon-badge" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Users" size="{{ 20 }}" hint-size="20px,20px"></x-import></div>
+                    <div class="rw-advice-text">
+                      <div class="rw-name">{{ d.name }}</div>
+                      <p class="rw-meta">{{ d.pattern }}</p>
                     </div>
                   </div>
-                  <div style="height:1px;background:var(--divider);"></div>
-                  <div style="display:flex;flex-direction:column;gap:6px;">
-                    <div style="font:400 12px/1 var(--font-sans);color: {{ d.labelFg }};">{{ d.label }}</div>
-                    <div style="font:400 15px/1.45 var(--font-sans);text-wrap:pretty;">{{ d.action }}</div>
+                  <div class="rw-advice-divider"></div>
+                  <div class="rw-advice-tip">
+                    <div class="rw-label">{{ d.label }}</div>
+                    <div class="rw-advice-tip-text">{{ d.action }}</div>
                   </div>
                 </div>
               </sc-for>
-            </div>
+            </section>
             </sc-if>
           </div>
         </sc-if>
@@ -3675,7 +3670,7 @@ class Component extends DCLogic {
       {
         const n6 = chron.filter(m => m.wt.length || m.lt.length).slice(-6), dh = n6.filter(m => m.lt.includes('Defence')).length;
         const recOf = id => { const r = this.vs(id); return this.t('oppRecord', { w: r.w, l: r.l, name: this.first(id) }); };
-        const op = (id, plan) => ({ name: this.nm(id), initials: this.ini(id), record: recOf(id), plan, open: () => this.go('player', { playerId: id }) });
+        const op = (id, plan) => ({ name: this.nm(id), initials: this.ini(id), avCls: this.avDir(id), record: recOf(id), plan, open: () => this.go('player', { playerId: id }) });
         const sample = {
           build: [
             { name: 'Backhand Defence', evidence: `Lost points in ${dh} of your last ${n6.length} matches.`, action: 'Keep your racket higher during flat exchanges.' },
@@ -4014,8 +4009,8 @@ class Component extends DCLogic {
     if (v.grow && v.grow.build) v.grow.build = v.grow.build.map(b => {
       const ex = FS.find(f => f.status === 'active' && f.title.trim().toLowerCase() === String(b.name).trim().toLowerCase());
       return { ...b, ...(ex
-        ? { fLabel: this.t('inFocus'), fIcon: 'Check', fBg: 'transparent', fFg: 'var(--text-tertiary)', fBorder: 'var(--ghost-button-outline)', focus: () => this.go('focusDetail', { focusId: ex.id }) }
-        : { fLabel: this.t('addToFocus'), fIcon: 'Plus', fBg: 'var(--surface-muted)', fFg: 'var(--text-primary)', fBorder: 'transparent',
+        ? { fLabel: this.t('inFocus'), fIcon: 'Check', fCls: 'rw-btn-tertiary', focus: () => this.go('focusDetail', { focusId: ex.id }) }
+        : { fLabel: this.t('addToFocus'), fIcon: 'Plus', fCls: 'rw-btn-secondary',
             focus: () => this.openFocusSheet({ mode: 'grow', title: b.name, goal: b.action || '' }) }) };
     });
     v.isFocus = s.screen === 'focus'; v.isFocusDetail = s.screen === 'focusDetail';

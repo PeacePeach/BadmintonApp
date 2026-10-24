@@ -171,6 +171,11 @@
   --rw-color-avatar-me-fg: var(--rw-n75);             /* Figma #1B1A1D is unbound; nearest Foundation N75 */
   --rw-color-surface-input-filled: var(--rw-purplegrey-500); /* search field holding a value (Figma 329:7330) */
   /* Result and Notes sheets (Figma 349:3528, 349:3793; Han approved 2026-10-23) */
+  /* Insights / Grow (Figma 203:5215; pending Han's review, 2026-10-24) */
+  --rw-color-divider: var(--rw-n150);                 /* line inside a tile (Figma Tile full wide / half width) */
+  --rw-color-text-accent: var(--rw-b100);             /* TRY NEXT label in Build Next (Figma #6BA6FF) */
+  --rw-color-icon-accent: var(--rw-b100);             /* icon in the Avatar "Fancy" badge */
+  --rw-color-border-icon-badge: linear-gradient(120deg, color-mix(in srgb, var(--rw-b100) 60%, transparent) 0%, color-mix(in srgb, var(--rw-b100) 5%, transparent) 100%); /* Figma shows B 5% at the faded end */
   --rw-color-select-win: var(--rw-b75);              /* selected W on the W / L check (Figma CheckBoxes 348:13628) */
 
   /* Back-compat names used by screens and the IconButton component */
@@ -270,6 +275,14 @@
   --rw-gap-fill-down: linear-gradient(270deg, var(--rw-orange-gradient-stops));
   --rw-gap-zero: var(--rw-color-text-tertiary);
   --rw-chart-label-fg: var(--rw-color-text-tertiary);
+  /* Insights / Grow: KeyInsight, section header, Tile full wide / half width (Figma 203:5215) */
+  --rw-key-dot: var(--rw-color-status-win);
+  --rw-key-bar-w: 212px;
+  --rw-advice-divider: var(--rw-color-divider);
+  --rw-advice-label-accent: var(--rw-color-text-accent);
+  --rw-icon-badge-size: 40px;
+  --rw-icon-badge-ring: var(--rw-color-border-icon-badge);
+  --rw-icon-badge-fg: var(--rw-color-icon-accent);
   /* Trend (Insight Subtitle with change) */
   --rw-trend-up: var(--rw-color-status-win);
   --rw-trend-down: var(--rw-color-status-loss);
@@ -393,4 +406,8 @@
   --rw-type-check: 600 14px/15px var(--font-sans);    /* W / L letter, 胜 / 负 too (Figma CheckBoxes; 14px per Han 2026-10-23) */
   --rw-type-textarea: 500 14px/21px var(--font-sans); /* TextArea (Figma 349:4321) */
   --rw-type-meta: 500 13px/16.9px var(--font-sans);   /* 13px helper and score lines; Figma Regular -> Medium (Han N5) */
+  --rw-type-key-title: 500 17px/22.1px var(--font-sans);  /* KeyInsight headline (Figma 203:5441) */
+  --rw-type-body: 500 14px/21px var(--font-sans);         /* KeyInsight body; Figma Regular -> Medium (V2 minimum) */
+  --rw-type-tile-desc: 500 12px/16.8px var(--font-sans);  /* Tile half width evidence line (Figma 12px, 1.4) */
+  --rw-type-tile-text: 500 12px/18.2px var(--font-sans);  /* advice under a tile label: TRY NEXT, KEEP GOING, GAME PLAN */
 }

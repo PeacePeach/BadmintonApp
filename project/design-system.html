@@ -612,6 +612,9 @@
         <tr><td><i class="v2-sw" style="background:var(--rw-color-data-fill)"></i></td><td>--rw-color-data-fill</td><td>--rw-blue-gradient-01</td><td>#5B9DFF → #2C3F5C</td><td>Simple bar fill</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-data-fill-vertical)"></i></td><td>--rw-color-data-fill-vertical</td><td>--rw-blue-gradient-02</td><td>#5B9DFF → #375E99 80%</td><td>Recent bars in the form chart</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-data-fill-vertical-down)"></i></td><td>--rw-color-data-fill-vertical-down</td><td>--rw-orange-gradient</td><td>#EFB16A → #212328 (OrangeGrad)</td><td>Recent bars when the win rate is falling (.rw-form.is-down)</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-divider)"></i></td><td>--rw-color-divider</td><td>--rw-n150</td><td>#2C2C2C</td><td>Line inside a Grow tile (.rw-advice-divider), pending Han</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-text-accent)"></i></td><td>--rw-color-text-accent</td><td>--rw-b100</td><td>#6BA6FF</td><td>TRY NEXT label in Build Next (.rw-label.is-accent), pending Han</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-border-icon-badge)"></i></td><td>--rw-color-border-icon-badge</td><td>--rw-b100</td><td>B100 60% → 5% (120deg)</td><td>Ring of the Avatar "Fancy" icon badge (.rw-icon-badge), icon B100, pending Han</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-data-track)"></i></td><td>--rw-color-data-track</td><td>--rw-purplegrey-500</td><td>#2A292E</td><td>Simple bar track, older bars in the form chart</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-banner)"></i></td><td>--rw-color-surface-banner</td><td>--rw-blue-gradient-01-8</td><td>Blue Gradient 01 at 8%</td><td>InlineBanner fill</td></tr>
         <tr><td><i class="v2-sw" style="background:var(--rw-color-border-banner)"></i></td><td>--rw-color-border-banner</td><td>--rw-n100</td><td>#242425</td><td>InlineBanner border</td></tr>
@@ -734,6 +737,22 @@
         </div>
         <div class="v2-cell"><div class="v2-label">Insight / ListRow</div>
           <div class="rw-surface rw-tile rw-list-row"><div class="rw-list-row-who"><div class="rw-avatar is-dir-1">PN</div><div class="rw-list-row-text"><div class="rw-eyebrow">Best partner</div><div class="rw-name">Priya Nair</div></div></div><div class="rw-list-row-end"><div class="rw-list-value">100%</div><div class="rw-caption">Win rate together</div></div></div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Insights / Grow: KeyInsight · Section header (Figma 203:5215)</div>
+          <div style="display:flex;flex-direction:column;gap:24px">
+            <div class="rw-surface rw-tile rw-key"><div class="rw-key-head"><span class="rw-label">Key insight</span></div><p class="rw-key-title">Your net game is getting stronger.</p><p class="rw-key-body">You've won a higher share of net points in your last 6 matches.</p><div class="rw-bar rw-key-bar"><div><div style="width:32%"></div></div></div></div>
+            <div class="rw-section-head"><h2 class="rw-section-title">Build Next</h2><p class="rw-hint">Top areas to improve from recent matches</p></div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Tile half width (Add to Focus · In Focus) · Tile full wide (Avatar Fancy icon badge · letter avatar)</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div class="rw-surface rw-tile rw-advice is-half"><div class="rw-advice-body"><div class="rw-advice-text"><div class="rw-name">Backhand Defence</div><div class="rw-advice-desc">Lost points in 4 of your last 6 matches.</div></div><div class="rw-advice-divider"></div><div class="rw-advice-tip"><div class="rw-label is-accent">Try next</div><div class="rw-advice-tip-text">Keep your racket higher during flat exchanges.</div></div></div><button class="rw-btn rw-btn-secondary"><i data-lucide="plus" style="width:16px;height:16px"></i>Add to Focus</button></div>
+              <div class="rw-surface rw-tile rw-advice is-half"><div class="rw-advice-body"><div class="rw-advice-text"><div class="rw-name">Serve Return</div><div class="rw-advice-desc">Won 38% of return points.</div></div><div class="rw-advice-divider"></div><div class="rw-advice-tip"><div class="rw-label is-accent">Try next</div><div class="rw-advice-tip-text">Return deeper and higher.</div></div></div><button class="rw-btn rw-btn-tertiary"><i data-lucide="check" style="width:16px;height:16px"></i>In Focus</button></div>
+            </div>
+            <div class="rw-surface rw-tile rw-advice"><div class="rw-advice-head"><div class="rw-icon-badge"><i data-lucide="check" style="width:20px;height:20px"></i></div><div class="rw-advice-text"><div class="rw-name">Net Play</div><p class="rw-meta">Tagged as working in each of your last 6 wins.</p></div></div><div class="rw-advice-divider"></div><div class="rw-advice-tip"><div class="rw-label">Keep doing</div><div class="rw-advice-tip-text">Keep your racket higher during flat exchanges.</div></div></div>
+            <div class="rw-surface rw-tile rw-advice"><div class="rw-advice-head"><div class="rw-avatar is-dir-2">AC</div><div class="rw-advice-text"><div class="rw-name">Alex Chen</div><p class="rw-meta">You're 2–5 against Alex.</p></div></div><div class="rw-advice-divider"></div><div class="rw-advice-tip"><div class="rw-label">Game plan</div><div class="rw-advice-tip-text">Push him deep first and avoid short lifts.</div></div></div>
+          </div>
         </div>
         <div class="v2-cell"><div class="v2-label">App bar title (Close / Back + screen name) · Page heading</div>
           <div style="display:flex;flex-direction:column;gap:24px;">

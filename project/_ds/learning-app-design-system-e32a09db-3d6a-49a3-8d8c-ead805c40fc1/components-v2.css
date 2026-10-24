@@ -27,6 +27,13 @@
      Graphs / Large bar ........... .rw-form[.is-down] > .rw-form-bars > .rw-form-bar[.is-recent] + .rw-chart-label
      Performance breakdown ........ .rw-breakdown (label, .rw-bar, .rw-row-value + .rw-row-sub); score gap row: fill .is-up|.is-down + .rw-breakdown-mid (dashed zero line)
      Insight / ListRow ............ .rw-list-row (.rw-avatar, .rw-eyebrow, .rw-name, .rw-list-value, .rw-caption)
+   Insights / Grow (Figma 203:5215):
+     KeyInsight ................... .rw-surface.rw-tile.rw-key > .rw-key-head (dot + .rw-label) + .rw-key-title + .rw-key-body + .rw-bar.rw-key-bar
+     Section header ............... .rw-section-head > .rw-section-title + .rw-hint
+     Tile full wide ............... .rw-surface.rw-tile.rw-advice > .rw-advice-head (.rw-icon-badge | .rw-avatar + .rw-advice-text: .rw-name + .rw-meta) + .rw-advice-divider + .rw-advice-tip (.rw-label[.is-accent] + .rw-advice-tip-text)
+     Tile half width .............. .rw-surface.rw-tile.rw-advice.is-half > .rw-advice-body (.rw-advice-text: .rw-name + .rw-advice-desc, divider, tip) + .rw-btn-secondary | .rw-btn-tertiary
+     Tile label (no tracking) ..... .rw-label[.is-accent: B100]  (Grow labels; Performance keeps the tracked .rw-eyebrow)
+     Avatar / Fancy (icon badge) .. .rw-icon-badge (40px, gradient B100 ring, B100 icon 20px)
    Voice Log Match (Figma 207:7730 and Review 217:8404 / 248:2470):
      App bar title (Back/Close + name) .rw-appbar-title > IconButton glass + .rw-appbar-name
      Page heading + hint .......... .rw-page-head > .rw-heading + .rw-hint
@@ -356,3 +363,28 @@
 .rw-reading-dots i:nth-child(3){animation-delay:.3s;}
 @keyframes rw-reading-pulse{0%,65%,100%{opacity:.35;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
 @media (prefers-reduced-motion:reduce){.rw-reading-dots i{animation:none;opacity:1;}}
+
+/* Insights / Grow (Figma 203:5215) */
+.rw-key{display:flex;flex-direction:column;gap:12px;}
+.rw-key-head{display:flex;align-items:center;gap:8px;}
+.rw-key-head::before{content:"";width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--rw-key-dot);}
+.rw-key-title{margin:0;font:var(--rw-type-key-title);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);text-wrap:balance;}
+.rw-key-body{margin:0;font:var(--rw-type-body);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);text-wrap:pretty;}
+.rw-bar.rw-key-bar{height:8px;width:100%;max-width:var(--rw-key-bar-w);}
+.rw-section-head{display:flex;flex-direction:column;gap:4px;}
+.rw-advice{display:flex;flex-direction:column;gap:12px;}
+.rw-advice.is-half{gap:16px;}
+.rw-advice-body{flex:1;display:flex;flex-direction:column;gap:12px;}
+.rw-advice-head{display:flex;align-items:center;gap:12px;}
+.rw-advice-text{display:flex;flex-direction:column;gap:5px;min-width:0;}
+.rw-advice.is-half .rw-advice-text{gap:4px;min-height:56px;}
+.rw-advice-desc{font:var(--rw-type-tile-desc);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);text-wrap:pretty;}
+.rw-advice-divider{height:1px;flex-shrink:0;background:var(--rw-advice-divider);}
+.rw-advice-tip{display:flex;flex-direction:column;gap:4px;}
+.rw-label{font:var(--rw-type-eyebrow);letter-spacing:var(--rw-tracking);text-transform:uppercase;color:var(--rw-text-secondary);}
+.rw-label.is-accent{color:var(--rw-advice-label-accent);}
+.rw-advice-tip-text{font:var(--rw-type-tile-text);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);text-wrap:pretty;}
+.rw-advice .rw-btn{width:100%;}
+.rw-icon-badge{position:relative;width:var(--rw-icon-badge-size);height:var(--rw-icon-badge-size);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--rw-icon-badge-fg);}
+.rw-icon-badge::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;background:var(--rw-icon-badge-ring);pointer-events:none;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);}
