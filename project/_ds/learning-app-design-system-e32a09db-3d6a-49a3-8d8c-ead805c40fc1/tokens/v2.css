@@ -298,6 +298,13 @@
   --rw-key-chart-bar-from: var(--rw-blue-gradient-01-from);  /* recent bars: Blue Gradient 02 */
   --rw-key-chart-bar-to: var(--rw-blue-gradient-02-to);
   --rw-advice-divider: var(--rw-color-divider);
+  /* Focus screen (Figma 203:6012): Focus ListRow 171:12403, Dots indicator 172:12646, Completed disclosure */
+  --rw-dots-size: 8px;
+  --rw-dots-gap: 4px;
+  --rw-dots-on: var(--rw-color-status-win);           /* B100; Figma #5B9DFF is unbound (Blue Gradient 01 start), nearest Foundation B100 */
+  --rw-dots-off: var(--rw-purplegrey-400);            /* Figma purplegrey-400 */
+  --rw-focus-tag-dot: var(--rw-color-status-win);     /* "From Grow" dot, same B100 as the Dots indicator */
+  --rw-focus-row-gap: 14px;                           /* text to dots, dots to chevron */
   --rw-advice-label-accent: var(--rw-color-text-accent);
   --rw-icon-badge-size: 40px;
   --rw-icon-badge-ring: var(--rw-color-border-icon-badge);
@@ -430,6 +437,8 @@
   --rw-type-check: 600 14px/15px var(--font-sans);    /* W / L letter, 胜 / 负 too (Figma CheckBoxes; 14px per Han 2026-10-23) */
   --rw-type-textarea: 500 14px/21px var(--font-sans); /* TextArea (Figma 349:4321) */
   --rw-type-meta: 500 13px/16.9px var(--font-sans);   /* 13px helper and score lines; Figma Regular -> Medium (Han N5) */
+  --rw-type-disclosure: 500 14px/14px var(--font-sans);   /* Completed · n (Figma 199:3668) */
+  --rw-type-focus-sub: 500 12px/16.9px var(--font-sans);   /* Focus ListRow progress line (Figma 171:12392); Figma Regular -> Medium (V2 minimum) */
   --rw-type-key-title: 500 17px/22.1px var(--font-sans);  /* KeyInsight headline (Figma 203:5441) */
   --rw-type-body: 500 14px/21px var(--font-sans);         /* KeyInsight body; Figma Regular -> Medium (V2 minimum) */
   --rw-type-key-chart-tick: 500 9px/1 var(--font-sans);  /* micro-chart labels ONLY (KeyInsight chart ticks and values); 9px is not allowed anywhere else (Han, 2026-10-24) */
