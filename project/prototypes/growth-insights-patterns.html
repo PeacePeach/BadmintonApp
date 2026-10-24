@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Growth Insights Patterns</title>
+<!--
+  PROTOTYPE ONLY (Han, 2026-10-24): three linear micro-visualizations inside the V2 Key Insight tile
+  (Figma 203:5442, Grow screen 203:5215). Demo data, not wired to the app, the Grow engine or Supabase.
+  Remove the whole project/prototypes/ folder to delete it.
+-->
+<link rel="stylesheet" href="../_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/fonts.css">
+<link rel="stylesheet" href="../_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/colors.css">
+<link rel="stylesheet" href="../_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/typography.css">
+<link rel="stylesheet" href="../_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/spacing.css">
+<link rel="stylesheet" href="../_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/effects.css">
+<link rel="stylesheet" href="../_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/v2.css">
+<link rel="stylesheet" href="../_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/components-v2.css">
+<style>
+  /* Prototype-local values. Typography comes from the Figma Key Insight tile (no V2 token for these sizes yet;
+     the Grow V2 migration will add them). Every colour is an existing V2 token. */
+  :root{
+    --gi-type-title: 500 17px/22.1px var(--font-sans);      /* Figma 17px Medium */
+    --gi-type-body: 500 14px/21px var(--font-sans);         /* Figma 14px Regular -> Medium (V2 minimum) */
+    --gi-graphic-w: 212px;                                  /* Figma graph area width in the 318px slot */
+    --gi-track: var(--rw-color-data-track);                 /* PurpleGrey 500: every unfilled part */
+    --gi-fill: linear-gradient(270deg, var(--rw-blue-gradient-01-stops)); /* Blue Gradient 01, bright end = latest */
+    --gi-fill-solid: var(--rw-win);                         /* B100: line end dot */
+    --gi-attention: var(--rw-loss);                         /* O100: the W/L loss colour, for recurring problems */
+    --gi-earlier: var(--rw-gap-zero);                       /* N300: the score-gap zero line colour, for "before" */
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;min-height:100%;background:var(--rw-bg-app);color:var(--rw-text-primary);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;}
+  .page{min-height:100vh;display:flex;justify-content:center;}
+  .phone{width:100%;max-width:390px;padding:24px 20px 48px;display:flex;flex-direction:column;gap:20px;}
+  .head{display:flex;flex-direction:column;gap:8px;}
+  .head h1{font:var(--rw-type-appbar-title);letter-spacing:var(--rw-tracking);margin:0;}
+  .demo{display:flex;align-items:center;gap:8px;font:var(--rw-type-caption);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
+  .demo i{width:6px;height:6px;border-radius:50%;background:var(--gi-attention);flex-shrink:0;}
+  .opts{display:flex;flex-wrap:wrap;gap:8px;}
+  .opts .rw-pill{background:var(--rw-surface-fill);}
+  .stack{display:flex;flex-direction:column;gap:16px;}
+  .label{font:var(--rw-type-caption);letter-spacing:var(--rw-tracking);color:var(--rw-chart-label-fg);margin:4px 0 -8px;}
+
+  /* Key Insight tile, as Figma 203:5442 */
+  .gi{display:flex;flex-direction:column;gap:12px;}
+  .gi-eyebrow{display:flex;align-items:center;gap:8px;}
+  .gi-eyebrow i{width:6px;height:6px;border-radius:3px;background:var(--gi-fill-solid);}
+  .gi-title{font:var(--gi-type-title);letter-spacing:var(--rw-tracking);text-wrap:balance;margin:0;}
+  .gi-body{font:var(--gi-type-body);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);text-wrap:pretty;margin:0;}
+  .gi-graphic{width:var(--gi-graphic-w);max-width:100%;display:flex;flex-direction:column;gap:6px;}
+  .gi-ends{display:flex;justify-content:space-between;font:var(--rw-type-row-sub);letter-spacing:var(--rw-tracking);color:var(--rw-chart-label-fg);}
+
+  /* A. Trend Line: 6 points, 2px line, the latest point marked */
+  .gi-spark{display:block;width:100%;height:28px;overflow:visible;}
+
+  /* B. Comparison Lines: two 6px bars on the track */
+  .gi-cmp{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;column-gap:10px;row-gap:8px;}
+  .gi-cmp-k{font:var(--rw-type-row-sub);letter-spacing:var(--rw-tracking);color:var(--rw-chart-label-fg);white-space:nowrap;}
+  .gi-cmp-v{font:var(--rw-type-row-sub);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);min-width:10px;text-align:right;font-variant-numeric:tabular-nums;}
+  .gi-line{height:6px;border-radius:99px;background:var(--gi-track);overflow:hidden;}
+  .gi-line>div{height:100%;border-radius:99px;}
+  .gi-line .is-earlier{background:var(--gi-earlier);}
+  .gi-line .is-recent{background:var(--gi-fill);}
+
+  /* C. Match Strip: one segment per match, oldest left */
+  .gi-strip{display:flex;gap:4px;height:6px;}
+  .gi-strip>div{flex:1;border-radius:99px;background:var(--gi-track);}
+  .gi-strip>div.is-on{background:var(--gi-attention);}
+
+  .note{display:flex;flex-direction:column;gap:6px;font:var(--rw-type-meta);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
+  .note b{font-weight:600;color:var(--rw-text-primary);}
+</style>
+</head>
+<body>
+<div class="page rw-scroll is-v2"><div class="phone">
+  <div class="head">
+    <h1 id="h-title"></h1>
+    <div class="demo"><i></i><span id="h-demo"></span></div>
+  </div>
+
+  <div class="rw-surface rw-tabs is-sm" role="tablist" id="tabs"></div>
+  <div class="opts" id="opts"></div>
+
+  <div class="stack" id="stack"></div>
+
+  <div class="rw-surface rw-tile note" id="note"></div>
+</div></div>
+
+<script>
+// Demo data only. Not real player analytics.
+const DEMO = {
+  trend: [42, 47, 45, 53, 58, 64],          // net points won %, oldest -> latest
+  compare: { earlier: 7, recent: 3 },        // defensive mistakes reported, previous 3 vs last 3 matches
+  strip: [1, 0, 1, 1, 0, 1]                  // serve errors mentioned per match, oldest -> latest
+};
+
+const T = {
+  en: {
+    title: 'Growth Insights Pattern Preview', demo: 'Demo data. Sample values, not real player analytics.',
+    eyebrow: 'Key insight', tabs: { trend: 'Trend', compare: 'Compare', strip: 'Strip' },
+    all: 'Show all three', labels: 'Micro labels', lang: '中文',
+    names: { trend: 'A · Trend Line', compare: 'B · Comparison Lines', strip: 'C · Match Strip' },
+    trend: { t: 'Your net game is getting stronger.', b: 'Your net play has improved across recent matches.' },
+    compare: { t: 'Your defence is improving.', b: 'You reported fewer defensive mistakes in your last 3 matches compared with the previous 3.', k1: 'Previous 3', k2: 'Last 3' },
+    strip: { t: 'Serve errors keep showing up.', b: 'You mentioned serve errors in 4 of your last 6 matches.' },
+    ends: ['6 matches ago', 'Latest'],
+    notes: {
+      trend: '<b>Trend Line</b> for performance over time: one skill measured match by match (here, share of net points won across 6 matches). Bright end = latest match.',
+      compare: '<b>Comparison Lines</b> for before vs. after or A vs. B: two totals side by side (here, defensive mistakes reported in the previous 3 vs. last 3 matches). Grey = earlier, blue = recent.',
+      strip: '<b>Match Strip</b> for frequency or consistency: one segment per match, lit when the thing happened (here, serve errors mentioned in 4 of 6). Oldest left, latest right.'
+    }
+  },
+  zh: {
+    title: '成长洞察图形预览', demo: '演示数据，仅为示例数值，并非真实球员分析。',
+    eyebrow: '关键洞察', tabs: { trend: '趋势线', compare: '对比线', strip: '比赛条' },
+    all: '同时显示三个', labels: '小标签', lang: 'English',
+    names: { trend: 'A · 趋势线', compare: 'B · 对比线', strip: 'C · 比赛条' },
+    trend: { t: '你的网前越来越强了。', b: '最近几场比赛里，你的网前表现持续进步。' },
+    compare: { t: '你的防守在进步。', b: '和之前 3 场相比，你在最近 3 场比赛中记录的防守失误更少。', k1: '之前 3 场', k2: '最近 3 场' },
+    strip: { t: '发球失误反复出现。', b: '你在最近 6 场比赛中有 4 场提到了发球失误。' },
+    ends: ['6 场前', '最近'],
+    notes: {
+      trend: '<b>趋势线</b>：表现随时间的变化。同一项技术逐场衡量（示例：6 场比赛中网前得分占比）。亮的一端是最近一场。',
+      compare: '<b>对比线</b>：前后对比或 A/B 对比。两组总数并排（示例：之前 3 场和最近 3 场记录的防守失误）。灰色是之前，蓝色是最近。',
+      strip: '<b>比赛条</b>：频率或稳定性。每场比赛一段，发生过就点亮（示例：6 场中 4 场提到发球失误）。左边最早，右边最近。'
+    }
+  }
+};
+
+const qs = new URLSearchParams(location.search);
+const S = {
+  pattern: ['trend', 'compare', 'strip'].includes(qs.get('p')) ? qs.get('p') : 'trend',
+  all: qs.get('all') === '1',
+  labels: qs.get('labels') !== '0',
+  lang: qs.get('lang') === 'zh' || (!qs.get('lang') && /^zh/i.test(navigator.language)) ? 'zh' : 'en'
+};
+
+const el = (tag, cls, html) => { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; };
+
+function sparkline(values) {
+  // 212 x 28 viewBox, 3px inset so the 2px line and the 6px end dot are never clipped. No axes.
+  const W = 212, H = 28, P = 3, min = Math.min(...values), max = Math.max(...values);
+  const pts = values.map((v, i) => [P + i * (W - 2 * P) / (values.length - 1), H - P - (v - min) / ((max - min) || 1) * (H - 2 * P)]);
+  const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  const [lx, ly] = pts[pts.length - 1];
+  const id = 'gi-grad-' + Math.random().toString(36).slice(2, 7);
+  return `<svg class="gi-spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+    <defs><!-- Blue Gradient 01 stops (--rw-blue-gradient-01-stops), reversed so the latest match is bright --><linearGradient id="${id}" x1="0" x2="1" y1="0" y2="0" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#2c3f5c"/><stop offset="1" stop-color="#5b9dff"/></linearGradient></defs>
+    <path d="${d}" fill="none" stroke="url(#${id})" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+    <circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="3" fill="var(--gi-fill-solid)"/>
+  </svg>`;
+}
+
+function graphic(kind, tx) {
+  const g = el('div', 'gi-graphic');
+  const ends = S.labels ? `<div class="gi-ends"><span>${tx.ends[0]}</span><span>${tx.ends[1]}</span></div>` : '';
+  if (kind === 'trend') g.innerHTML = sparkline(DEMO.trend) + ends;
+  if (kind === 'compare') {
+    const { earlier, recent } = DEMO.compare, scale = Math.max(earlier, recent) * 1.25;
+    const row = (k, v, cls) => `<span class="gi-cmp-k">${k}</span><div class="gi-line"><div class="${cls}" style="width:${(v / scale * 100).toFixed(1)}%"></div></div>` + (S.labels ? `<span class="gi-cmp-v">${v}</span>` : '<span></span>');
+    g.innerHTML = `<div class="gi-cmp">${row(tx.compare.k1, earlier, 'is-earlier')}${row(tx.compare.k2, recent, 'is-recent')}</div>`;
+  }
+  if (kind === 'strip') g.innerHTML = `<div class="gi-strip">${DEMO.strip.map(on => `<div class="${on ? 'is-on' : ''}"></div>`).join('')}</div>` + ends;
+  return g;
+}
+
+function tile(kind, tx) {
+  const t = el('div', 'rw-surface rw-tile gi');
+  t.setAttribute('data-pattern', kind);
+  t.appendChild(el('div', 'gi-eyebrow', `<i></i><span class="rw-eyebrow">${tx.eyebrow}</span>`));
+  t.appendChild(el('p', 'gi-title', tx[kind].t));
+  t.appendChild(el('p', 'gi-body', tx[kind].b));
+  t.appendChild(graphic(kind, tx));
+  return t;
+}
+
+function render() {
+  const tx = T[S.lang];
+  document.documentElement.lang = S.lang === 'zh' ? 'zh-CN' : 'en';
+  document.getElementById('h-title').textContent = tx.title;
+  document.getElementById('h-demo').textContent = tx.demo;
+
+  const tabs = document.getElementById('tabs'); tabs.innerHTML = '';
+  ['trend', 'compare', 'strip'].forEach(k => {
+    const on = !S.all && S.pattern === k, b = el('button', 'rw-tab' + (on ? ' is-active' : ''), tx.tabs[k]);
+    b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', on);
+    b.onclick = () => { S.pattern = k; S.all = false; sync(); };
+    tabs.appendChild(b);
+  });
+
+  const opts = document.getElementById('opts'); opts.innerHTML = '';
+  [[tx.all, S.all, () => S.all = !S.all], [tx.labels, S.labels, () => S.labels = !S.labels], [tx.lang, false, () => S.lang = S.lang === 'zh' ? 'en' : 'zh']].forEach(([label, on, fn]) => {
+    const b = el('button', 'rw-pill rw-pill-sm' + (on ? ' is-active' : ''), label);
+    b.setAttribute('aria-pressed', on); b.onclick = () => { fn(); sync(); };
+    opts.appendChild(b);
+  });
+
+  const stack = document.getElementById('stack'); stack.innerHTML = '';
+  (S.all ? ['trend', 'compare', 'strip'] : [S.pattern]).forEach(k => {
+    if (S.all) stack.appendChild(el('div', 'label', tx.names[k]));
+    stack.appendChild(tile(k, tx));
+  });
+
+  document.getElementById('note').innerHTML = (S.all ? ['trend', 'compare', 'strip'] : [S.pattern]).map(k => `<div>${tx.notes[k]}</div>`).join('');
+}
+
+function sync() {
+  const q = new URLSearchParams();
+  q.set('p', S.pattern); if (S.all) q.set('all', '1'); if (!S.labels) q.set('labels', '0'); q.set('lang', S.lang);
+  history.replaceState(null, '', '?' + q.toString());
+  render();
+}
+render();
+</script>
+</body>
+</html>
