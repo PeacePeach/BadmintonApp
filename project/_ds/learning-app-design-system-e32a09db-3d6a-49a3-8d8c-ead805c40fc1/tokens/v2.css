@@ -265,7 +265,7 @@
   --rw-form-bar-fill-down: var(--rw-color-data-fill-vertical-down);
   /* Score gap bar (Performance breakdown, Avg. Score Gap): fill grows out from the zero line, brightest at zero like
      every other bar in the tile. Same stops as Blue Gradient 01 (gap > 0) and OrangeGrad (gap < 0), only the angle
-     follows the direction of growth. Zero line: 1px, 12px tall, 2px dashes in N300. */
+     follows the direction of growth. Zero line: 1px, 12px tall, three 2px N300 dashes (top, middle, bottom). */
   --rw-gap-fill-up: linear-gradient(90deg, var(--rw-blue-gradient-01-stops));
   --rw-gap-fill-down: linear-gradient(270deg, var(--rw-orange-gradient-stops));
   --rw-gap-zero: var(--rw-color-text-tertiary);

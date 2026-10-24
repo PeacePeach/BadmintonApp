@@ -196,7 +196,7 @@
 .rw-breakdown .rw-bar{height:8px;}
 .rw-breakdown .rw-bar>div{position:relative;overflow:visible;}
 .rw-breakdown .rw-bar>div>div{position:absolute;top:0;bottom:0;}
-.rw-breakdown .rw-bar>div>.rw-breakdown-mid{position:absolute;left:50%;top:-2px;bottom:-2px;height:auto;width:1px;margin-left:-.5px;border-radius:0;background:repeating-linear-gradient(180deg,var(--rw-gap-zero) 0 2px,transparent 2px 4px);}  /* zero line, 12px on the 8px track */
+.rw-breakdown .rw-bar>div>.rw-breakdown-mid{position:absolute;left:50%;top:-2px;bottom:-2px;height:auto;width:1px;margin-left:-.5px;border-radius:0;background:repeating-linear-gradient(180deg,var(--rw-gap-zero) 0 2px,transparent 2px 5px);}  /* zero line, 12px on the 8px track: dashes at 0-2, 5-7, 10-12px, so it sticks out 2px above and 2px below and the middle dash is centred */
 .rw-breakdown .rw-bar>div>div.is-up{background:var(--rw-gap-fill-up);border-radius:0 99px 99px 0;}  /* square at the zero line */
 .rw-breakdown .rw-bar>div>div.is-down{background:var(--rw-gap-fill-down);border-radius:99px 0 0 99px;}
 .rw-breakdown-value{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
