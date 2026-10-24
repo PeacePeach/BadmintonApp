@@ -33,8 +33,7 @@
     --gi-attention: var(--rw-loss);                         /* O100: the W/L loss colour, for recurring problems */
     --gi-earlier: var(--rw-gap-zero);                       /* N300: the score-gap zero line colour, for "before" */
     --gi-zero: var(--rw-n200);                              /* N200: a match where it didn't happen (split Match Strip) */
-    --gi-chart-w: 136px;                                    /* split layout: chart width ... */
-    --gi-chart-h: 88px;                                     /* ... and height, the same for all three */
+    --gi-chart-h: 88px;                                     /* split layout: minimum chart height */
     --gi-type-tick: 500 9px/1 var(--font-sans);             /* tick labels; no 9px V2 type token yet */
   }
   *{box-sizing:border-box;}
@@ -81,10 +80,11 @@
   /* Split layout (Han, 2026-10-24, from a reference he shared): label across the top, text left, a small
      framed chart right. Chart frame for all three: 136 x 88, dashed horizontal grid at the y ticks, solid
      vertical grid at each match, tick labels in the chart-label colour. */
-  .gi-split{display:grid;grid-template-columns:minmax(0,1fr) var(--gi-chart-w);column-gap:16px;align-items:stretch;}
+  .gi-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:16px;align-items:stretch;}  /* text and chart always half and half, 16px apart (Han) */
+  .gi-split .rw-key-title{text-wrap:wrap;}  /* balance made some titles break early and look narrower than others (Han) */
   .gi-chart-slot{position:relative;min-height:var(--gi-chart-h);}  /* chart fills the text column: top grid line on the title, x labels on the body's last line */
   .gi-split-text{display:flex;flex-direction:column;gap:12px;min-width:0;}
-  .gi-chart{position:absolute;inset:0;display:block;width:var(--gi-chart-w);height:100%;overflow:visible;}
+  .gi-chart{position:absolute;inset:0;display:block;width:100%;height:100%;overflow:visible;}
   .gi-chart text{font:var(--gi-type-tick);letter-spacing:0;fill:var(--rw-chart-label-fg);font-variant-numeric:tabular-nums;}
   .gi-chart .grid-h{stroke:var(--gi-track);stroke-width:1;stroke-dasharray:2 3;}
   .gi-chart .grid-v{stroke:var(--gi-track);stroke-width:1;}
@@ -209,9 +209,9 @@ function graphic(kind, tx) {
   return g;
 }
 
-function chart(kind, H = 88) {
-  // One frame for all three: 136 wide, as tall as the text column (title top to body bottom, min 88), y labels in the left 16px, x labels (match 1-6, oldest left) along the bottom.
-  const W = 136, L = S.labels ? 18 : 4, R = 4, T = 5, B = S.labels ? 16 : 4, n = 6;
+function chart(kind, H = 88, W = 151) {
+  // One frame for all three: half the tile wide, as tall as the text column (title top to body bottom, min 88), y labels in the left 16px, x labels (match 1-6, oldest left) along the bottom.
+  const L = S.labels ? 18 : 4, R = 4, T = 5, B = S.labels ? 16 : 4, n = 6;
   const P = 9, X = i => L + P + i * (W - L - R - 2 * P) / (n - 1), PH = H - T - B; // 9px inner padding so the widest mark (14px pill) stays inside the frame
   const cfg = {
     trend: { min: 30, max: 70, ticks: [30, 50, 70], vals: DEMO.trend },
@@ -308,8 +308,8 @@ function render() {
 // Split charts are drawn at the measured height of their text column, and redrawn when it changes.
 function drawCharts() {
   document.querySelectorAll('.gi-chart-slot').forEach(slot => {
-    const h = Math.round(slot.getBoundingClientRect().height);
-    if (slot.dataset.h !== String(h)) { slot.dataset.h = h; slot.innerHTML = chart(slot.dataset.kind, h); }
+    const r = slot.getBoundingClientRect(), h = Math.round(r.height), w = Math.round(r.width), key = w + 'x' + h;
+    if (slot.dataset.size !== key) { slot.dataset.size = key; slot.innerHTML = chart(slot.dataset.kind, h, w); }
   });
 }
 const chartObserver = new ResizeObserver(drawCharts);
