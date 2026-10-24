@@ -618,7 +618,7 @@ button:disabled{cursor:default !important;}
               <sc-for list="{{ grow.strengths }}" as="k" hint-placeholder-count="2">
                 <div class="rw-surface rw-tile rw-advice">
                   <div class="rw-advice-head">
-                    <div class="rw-icon-badge" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 20 }}" hint-size="20px,20px"></x-import></div>
+                    <div class="rw-icon-badge" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ k.icon }}" size="{{ 20 }}" hint-size="20px,20px"></x-import></div>
                     <div class="rw-advice-text">
                       <div class="rw-name">{{ k.name }}</div>
                       <p class="rw-meta">{{ k.signal }}</p>
@@ -1988,6 +1988,9 @@ const REAL_VOICE_ENGINE = '2026-10-23-v5';
 const LANGS = [['en', 'English'], ['zh', '简体中文']];
 // Skill Tags a match can carry under What Worked / What Cost You Points.
 const TAG_KEYS = ['Serve', 'Return', 'Net', 'Smash', 'Defence', 'Footwork', 'Placement', 'Other'];
+// Lucide icon per Skill Tag on Your Strengths (Han, 2026-10-24). Other, or no tag, gets Feather (a shuttlecock is
+// feathers; Lucide has no shuttlecock or racket).
+const SKILL_ICONS = { Serve: 'Send', Return: 'Reply', Net: 'Grid3x3', Smash: 'Zap', Defence: 'Shield', Footwork: 'Footprints', Placement: 'Crosshair' };
 const I18N = {
   en: {
     matches: 'Matches', insights: 'Insights', players: 'Players', settings: 'Settings', profile: 'Profile', logOut: 'Log Out',
@@ -3425,6 +3428,12 @@ class Component extends DCLogic {
   // picked. A recommendation's topic is its Skill Tag when it came from tags or its name is a tag in either language,
   // otherwise its name with case, spacing and punctuation ignored. Engine V2 should send a stable topic id per
   // recommendation (and Focus would need a column to keep it); until then this is the key both sides share.
+  // A strength's icon comes from its Skill Tag. AI strengths carry no tag yet, so only a name that is exactly a tag
+  // in either language counts (topicKey); anything else gets Feather. Engine V2 will send a stable Skill ID instead.
+  skillIcon(name, tag) {
+    const k = this.topicKey(name, tag);
+    return (k.startsWith('tag:') && SKILL_ICONS[k.slice(4)]) || 'Feather';
+  }
   topicKey(name, tag) {
     if (tag) return 'tag:' + tag;
     const norm = x => String(x || '').normalize('NFKC').toLowerCase().replace(/[\s\p{P}\p{S}]+/gu, '');
@@ -3724,8 +3733,8 @@ class Component extends DCLogic {
             { name: 'Rear-court Clears', evidence: 'Short clears let opponents attack in 4 of your last 6 matches.', action: 'Hit through the shuttle and aim past the back service line.' }
           ],
           strengths: [
-            { name: 'Net Play', signal: 'Tagged as working in each of your last 6 wins.', action: 'Take the shuttle early and keep your replies tight.' },
-            { name: 'Smash Placement', signal: 'Most effective to the backhand side.', action: "Keep targeting your opponent's backhand corner." }
+            { name: 'Net Play', tag: 'Net', signal: 'Tagged as working in each of your last 6 wins.', action: 'Take the shuttle early and keep your replies tight.' },
+            { name: 'Smash Placement', tag: 'Smash', signal: 'Most effective to the backhand side.', action: "Keep targeting your opponent's backhand corner." }
           ],
           opps: [
             op('alex', "Push him deep first and avoid short lifts. He's strong in fast flat exchanges."),
@@ -3765,7 +3774,7 @@ class Component extends DCLogic {
             .filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]).slice(0, max);
           // Every qualifying tag is a candidate; Build Next shows the first two not already in Focus.
           const build = top(tagged, 'lt', Infinity).map(([t, n]) => ({ name: this.tagLabel(t), tag: t, evidence: this.t('costPoints', { n, total: tagged.length }), action: '' }));
-          const strengths = top(wins, 'wt').map(([t, n]) => ({ name: this.tagLabel(t), signal: this.t('workingIn', { n, total: wins.length }), action: '' }));
+          const strengths = top(wins, 'wt').map(([t, n]) => ({ name: this.tagLabel(t), tag: t, signal: this.t('workingIn', { n, total: wins.length }), action: '' }));
           const opps = [...new Set(all.flatMap(m => m.opps).filter(id => !this.unknown(id)))].map(id => ({ id, r: this.vs(id), note: all.find(m => m.on && m.opps.includes(id)) }))
             .filter(o => o.note && this.nm(o.id)).sort((a, b) => a.r.pct - b.r.pct || b.r.n - a.r.n).slice(0, 2).map(o => op(o.id, o.note.on));
           v.grow = { keyTitle: '', keyBody: '', keyCurrent: '0%', keyPrevious: '0%', showKeyChart: false, build, strengths, opps, doubles: [], showKey: false, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: false,
@@ -4060,6 +4069,7 @@ class Component extends DCLogic {
         focus: () => this.openFocusSheet({ mode: 'grow', title: b.name, goal: b.action || '' }) }));
       v.grow.showBuild = !!v.grow.build.length;
     }
+    if (v.grow && v.grow.strengths) v.grow.strengths = v.grow.strengths.map(k => ({ ...k, icon: this.skillIcon(k.name, k.tag) }));
     v.isFocus = s.screen === 'focus'; v.isFocusDetail = s.screen === 'focusDetail';
     v.newFocus = () => { if (this.dataReady()) this.openFocusSheet({ mode: 'new' }); };
     if (v.isFocus) {
