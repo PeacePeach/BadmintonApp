@@ -359,7 +359,7 @@
 
 /* Chinese glyphs need a full line box; keep icon and text centred within the
    existing flex component, without per-label positional offsets. */
-:root[lang="zh-Hans"] :is(.rw-btn,.rw-pill,.rw-flag,.rw-sheet-title,.rw-check){
+:root[lang="zh-Hans"] :is(.rw-btn,.rw-pill,.rw-flag,.rw-check){
   line-height:1.25;
 }
 :root[lang="zh-Hans"] :is(.rw-btn,.rw-pill,.rw-flag) :is(svg,x-import){
