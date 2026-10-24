@@ -2109,7 +2109,7 @@ const I18N = {
     shareUsageQ: 'Share Usage Data?', notNow: 'Not Now',
     consentBody: 'Help improve the Rallywise beta with anonymous usage data, like how many matches you log. Your name, email, players and notes are never shared. You can change this anytime in Settings > Privacy.',
     // Focus
-    focus: 'Focus', focusSub: "What you're working on right now.", focusActive: 'Active', focusCompletedN: 'Completed · {n}', focusCompleted: 'Completed',
+    focus: 'Focus', navFocus: 'Focus', focusSub: "What you're working on right now.", focusActive: 'Active', focusCompletedN: 'Completed · {n}', focusCompleted: 'Completed',
     fromGrow: 'From Grow', sessionsThisWeek: '{n} of {t} sessions this week', matchesSub: 'Next {t} matches · {n} complete', noSchedule: 'No schedule',
     noFocus: 'Nothing in Focus Yet', noFocusBody: 'Pick one thing to improve and track it here. You can also add one from Grow.', newFocus: 'New Focus', createFocus: 'Create New Focus',
     createdByYou: 'Created by you', addedFromGrow: 'Added from Grow', planPractice: 'Practice', perWeek: '{n}× / week', weeksN: '{n} weeks', oneWeek: '1 week',
@@ -2257,20 +2257,20 @@ const I18N = {
     deleteAccountQ: '删除账号？', deleteAccountBody: '这会永久删除你的账号，以及所有比赛、球友和洞察。删除后无法恢复。',
     shareUsageQ: '分享使用数据？', notNow: '以后再说',
     consentBody: '分享匿名使用数据（比如你记录了多少场比赛），帮我们改进 Rallywise 测试版。你的名字、邮箱、球友和赛后记录都不会被分享。你可以随时在“设置 > 隐私”里更改。',
-    focus: '重点', focusSub: '你正在努力提升的地方。', focusActive: '进行中', focusCompletedN: '已完成 · {n}', focusCompleted: '已完成',
+    focus: '训练目标', navFocus: '目标', focusSub: '你正在努力提升的地方。', focusActive: '进行中', focusCompletedN: '已完成 · {n}', focusCompleted: '已完成',
     fromGrow: '来自提升页', sessionsThisWeek: '本周 {n}/{t} 次', matchesSub: '接下来 {t} 场 · 已完成 {n} 场', noSchedule: '不设计划',
-    noFocus: '还没有重点', noFocusBody: '选一件想提升的事，在这里跟进。也可以从提升页添加。', newFocus: '新建重点', createFocus: '创建新重点',
+    noFocus: '还没有训练目标', noFocusBody: '选一件想提升的事，在这里跟进。也可以从提升页添加。', newFocus: '新建训练目标', createFocus: '创建训练目标',
     createdByYou: '由你创建', addedFromGrow: '来自提升页', planPractice: '练习', perWeek: '每周 {n} 次', weeksN: '{n} 周', oneWeek: '1 周',
     ongoing: '长期', planMatches: '比赛', nextN: '接下来 {n} 场', thisWeek: '本周', weekOf: '第 {n} 周，共 {t} 周', weekN: '第 {n} 周',
     thisPlan: '本次计划', nMatches: '{n} 场', hintStart: '练完一次，就点一下。', hintUndo: '再点一次可撤销。',
     hintWeekDone: '本周已完成。点一下可撤销。', hintMatch: '记录比赛后会自动更新。',
     sessionDone: '第 {n} 次，已完成', sessionOpen: '第 {n} 次，未完成', matchDone: '第 {n} 场，已记录', matchOpen: '第 {n} 场，尚未记录',
     overallProgress: '整体进度', tagNow: '当前', tagDone: '完成', tagSkipped: '已跳过', weekRow: '第 {n} 周：{d}/{t} 次',
-    whatToWorkOn: '练习要点', focusActions: '重点操作', editFocus: '编辑重点', deleteFocus: '删除重点', markComplete: '标记为完成',
-    markActive: '移回进行中', deleteFocusQ: '删除这个重点？', deleteFocusBody: '会删除“{title}”和它的进度，你的比赛和洞察不受影响。',
-    tFocusAdded: '已加入重点', tFocusUpdated: '重点已更新', tFocusDeleted: '重点已删除', tFocusDeleteFailed: '重点未能删除',
+    whatToWorkOn: '练习要点', focusActions: '训练目标操作', editFocus: '编辑训练目标', deleteFocus: '删除训练目标', markComplete: '标记为完成',
+    markActive: '移回进行中', deleteFocusQ: '删除这个训练目标？', deleteFocusBody: '会删除“{title}”和它的进度，你的比赛和洞察不受影响。',
+    tFocusAdded: '已添加训练目标', tFocusUpdated: '训练目标已更新', tFocusDeleted: '训练目标已删除', tFocusDeleteFailed: '训练目标未能删除',
     tFocusCompleted: '已标记为完成', tFocusReopened: '已移回进行中',
-    addToFocus: '加入重点', close: '关闭', improveQ: '你想提升什么？', focusName: '名称', focusNamePh: '反手高远球',
+    addToFocus: '添加训练目标', close: '关闭', improveQ: '你想提升什么？', focusName: '名称', focusNamePh: '反手高远球',
     howQ: '打算怎么练？',
     optPractice: '专项练习', optMatches: '接下来的比赛', optNone: '不设计划', howOften: '多久练一次？', howLong: '练多久？',
     howManyMatches: '跟进几场比赛？', noneHint: '什么时候完成由你决定，随时可以标记完成。',
@@ -3452,7 +3452,8 @@ class Component extends DCLogic {
     return recs.filter(r => {
       const k = this.topicKey(r.name, r.tag);
       if (!k) return true;
-      const same = FS.filter(f => this.topicKey(f.title) === k);
+      const keys = [k, ...(r.aliases || []).map(a => this.topicKey(a))];
+      const same = FS.filter(f => keys.includes(this.topicKey(f.title)));
       if (same.some(f => f.status === 'active')) return false;
       return same.every(f => {
         const after = loggedAfter(f.completedAt || f.createdAt || '');
@@ -3547,7 +3548,7 @@ class Component extends DCLogic {
       onSearch: e => this.setState({ search: e.target.value }),
       // Log Match opens only once the account's data has loaded; the loading state shows the button disabled.
       startLog: () => this.openVoice('matches'),
-      tabs: [[this.t('matches'), 'matches', 'List'], [this.t('insights'), 'insights', 'ChartColumn'], [this.t('focus'), 'focus', 'Target']].map(([label, k, icon]) => ({
+      tabs: [[this.t('matches'), 'matches', 'List'], [this.t('insights'), 'insights', 'ChartColumn'], [this.t('navFocus'), 'focus', 'Target']].map(([label, k, icon]) => ({
         label, icon, fg: s.screen === k ? 'var(--text-primary)' : 'var(--text-secondary)', cls: s.screen === k ? 'is-active' : '', current: s.screen === k ? 'page' : null, select: () => {
           // Back to Insights on Grow with no AI insight on screen (say the language changed since): make one.
           if (k === 'insights' && this.state.insTab === 'coach' && !this.state.aiGrow) setTimeout(() => this.refreshGrow(), 0);
@@ -3723,14 +3724,21 @@ class Component extends DCLogic {
         const n6 = chron.filter(m => m.wt.length || m.lt.length).slice(-6), dh = n6.filter(m => m.lt.includes('Defence')).length;
         const recOf = id => { const r = this.vs(id); return this.t('oppRecord', { w: r.w, l: r.l, name: this.first(id) }); };
         const op = (id, plan) => ({ name: this.nm(id), initials: this.ini(id), avCls: this.avDir(id), record: recOf(id), plan, open: () => this.go('player', { playerId: id }) });
+        // Sample recommendations show in the app's language. aliases holds both names so the topic stays the same
+        // whichever language a Focus was added in.
+        const zhS = this.lang() === 'zh', sb = (en, zh, evEn, evZh, acEn, acZh) => ({ name: zhS ? zh : en, aliases: [en, zh], evidence: zhS ? evZh : evEn, action: zhS ? acZh : acEn });
         const sample = {
           build: [
-            { name: 'Backhand Defence', evidence: `Lost points in ${dh} of your last ${n6.length} matches.`, action: 'Keep your racket higher during flat exchanges.' },
-            { name: 'Serve Return', evidence: 'Won 38% of return points, lower than usual.', action: 'Return deeper and higher to slow their attack.' },
+            sb('Backhand Defence', '反手防守', `Lost points in ${dh} of your last ${n6.length} matches.`, `最近 ${n6.length} 场比赛中，${dh} 场在这里丢分。`,
+              'Keep your racket higher during flat exchanges.', '平抽快打时拍头举高一点。'),
+            sb('Serve Return', '接发球', 'Won 38% of return points, lower than usual.', '接发球得分率只有 38%，低于平时。',
+              'Return deeper and higher to slow their attack.', '接发球回得更深更高，放慢对方的进攻。'),
             // Next in line: Footwork Recovery matches a completed Focus with no new evidence, so it stays hidden;
             // Rear-court Clears fills in when one of the first two goes to Focus.
-            { name: 'Footwork recovery', evidence: 'Late to the rear corners in 3 of your last 6 matches.', action: 'Push off the back foot after every lift.' },
-            { name: 'Rear-court Clears', evidence: 'Short clears let opponents attack in 4 of your last 6 matches.', action: 'Hit through the shuttle and aim past the back service line.' }
+            sb('Footwork recovery', '步法回位', 'Late to the rear corners in 3 of your last 6 matches.', '最近 6 场中有 3 场到后场底角慢了半步。',
+              'Push off the back foot after every lift.', '每次挑球后用后脚蹬地回位。'),
+            sb('Rear-court Clears', '后场高远球', 'Short clears let opponents attack in 4 of your last 6 matches.', '最近 6 场中有 4 场高远球不到底，被对方压着打。',
+              'Hit through the shuttle and aim past the back service line.', '击球要打透，落点压过双打后发球线。')
           ],
           strengths: [
             { name: 'Net Play', tag: 'Net', signal: 'Tagged as working in each of your last 6 wins.', action: 'Take the shuttle early and keep your replies tight.' },
