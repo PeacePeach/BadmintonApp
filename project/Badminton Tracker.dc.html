@@ -1860,75 +1860,85 @@ button:disabled{cursor:default !important;}
     </div>
   </sc-if>
 
-  <!-- Focus sheet: New Focus (+), Add to Focus (Grow's Build Next) and Edit Focus. -->
+  <!-- Focus sheet (Figma 199:3641, Create Focus 173:13428): New Focus (+ on Focus), Add to Focus (Grow's Build Next) and Edit Focus. -->
   <sc-if value="{{ hasSheet }}" hint-placeholder-val="{{ false }}">
-    <div onClick="{{ sh.close }}" style="position:absolute;inset:0;background:rgba(0,0,0,.55);"></div>
-    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="focus-sheet-title" data-screen-label="{{ sh.heading }}" style="position:absolute;left:0;right:0;bottom:0;max-height:90%;overflow-y:auto;background:var(--bg-primary);border-radius:34px 34px 0 0;padding:12px 20px 34px;display:flex;flex-direction:column;gap:32px;">
-      <div aria-hidden="true" style="width:40px;height:5px;border-radius:99px;background:var(--border-default);align-self:center;"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:-8px;">
-        <h2 id="focus-sheet-title" style="margin:0;font:600 28px/1.2 var(--font-sans);">{{ sh.heading }}</h2>
-        <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="X" size="{{ 48 }}" label="{{ tx.close }}" onClick="{{ sh.close }}" hint-size="48px,48px"></x-import>
-      </div>
-      <sc-if value="{{ sh.isGrow }}" hint-placeholder-val="{{ true }}">
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <div style="font:500 15px/1.3 var(--font-sans);overflow-wrap:anywhere;">{{ sh.title }}</div>
-          <div style="font:400 13px/1.4 var(--font-sans);color:var(--text-secondary);">{{ sh.goal }}</div>
+    <div class="rw-sheet-scrim" onClick="{{ sh.close }}"></div>
+    <div class="rw-sheet" role="dialog" aria-modal="true" aria-labelledby="focus-sheet-title" data-screen-label="{{ sh.heading }}">
+      <div class="rw-sheet-head">
+        <span class="rw-sheet-grabber" aria-hidden="true"></span>
+        <div class="rw-sheet-bar">
+          <span></span>
+          <h2 id="focus-sheet-title" class="rw-sheet-title">{{ sh.heading }}</h2>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="X" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.close }}" onClick="{{ sh.close }}" hint-size="44px,44px"></x-import>
         </div>
-      </sc-if>
-      <sc-if value="{{ sh.isNew }}" hint-placeholder-val="{{ false }}">
-        <label style="display:flex;flex-direction:column;gap:12px;">
-          <span style="font:500 15px/1.3 var(--font-sans);">{{ sh.nameQ }}</span>
-          <textarea value="{{ sh.title }}" onChange="{{ sh.onTitle }}" rows="3" maxlength="120" placeholder="{{ tx.focusNamePh }}" style="background:var(--input-field-bg);border:1px solid var(--input-field-outline);outline:none;border-radius:22px;padding:14px 18px;color:var(--text-primary);font:400 16px/1.5 var(--font-sans);resize:none;"></textarea>
-        </label>
-      </sc-if>
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <div id="focus-how" style="font:500 15px/1.3 var(--font-sans);">{{ tx.howQ }}</div>
-        <div role="radiogroup" aria-labelledby="focus-how" style="display:flex;flex-direction:column;gap:8px;">
-          <sc-for list="{{ sh.types }}" as="o" hint-placeholder-count="3">
-            <button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.select }}" style="height:60px;border-radius:99px;background:var(--surface-primary);border:1.5px solid {{ o.border }};color:var(--text-primary);display:flex;align-items:center;gap:12px;padding:0 18px 0 10px;cursor:pointer;" style-active="transform:scale(.98);">
-              <span style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--icon-badge-fg);"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ o.icon }}" size="{{ 18 }}" hint-size="18px,18px"></x-import></span>
-              <span style="flex:1;text-align:left;font:500 15px/1 var(--font-sans);">{{ o.label }}</span>
-              <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:var(--control-outline-width) solid {{ o.dotBorder }};color:var(--control-selected-fg);">
-                <sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 14 }}" hint-size="14px,14px"></x-import></sc-if>
-              </span>
-            </button>
-          </sc-for>
-        </div>
+        <span class="rw-sheet-divider"></span>
       </div>
-      <sc-if value="{{ sh.isPractice }}" hint-placeholder-val="{{ true }}">
+      <div class="rw-sheet-body">
         <div style="display:flex;flex-direction:column;gap:32px;">
-          <div style="display:flex;flex-direction:column;gap:12px;">
-            <div style="font:500 15px/1.3 var(--font-sans);">{{ tx.howOften }}</div>
-            <div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface-primary);border-radius:99px;padding:6px;">
-              <button onClick="{{ sh.dec }}" aria-label="{{ tx.decrease }}" disabled="{{ sh.notDec }}" style="width:48px;height:48px;border-radius:50%;background:transparent;border:var(--control-outline-width) solid var(--control-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;opacity: {{ sh.decOp }};"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Minus" size="{{ 24 }}" hint-size="24px,24px"></x-import></button>
-              <div aria-live="polite" style="font:500 20px/1 var(--font-sans);">{{ sh.freqLabel }}</div>
-              <button onClick="{{ sh.inc }}" aria-label="{{ tx.increase }}" disabled="{{ sh.notInc }}" style="width:48px;height:48px;border-radius:50%;background:transparent;border:var(--control-outline-width) solid var(--control-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;opacity: {{ sh.incOp }};"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import></button>
+          <sc-if value="{{ sh.isGrow }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <h3 class="rw-section-title">{{ sh.nameQ }}</h3>
+              <div class="rw-surface rw-tile" style="display:flex;flex-direction:column;gap:4px;">
+                <span class="rw-name">{{ sh.title }}</span>
+                <sc-if value="{{ sh.goal }}" hint-placeholder-val="{{ true }}"><span class="rw-meta">{{ sh.goal }}</span></sc-if>
+              </div>
             </div>
-          </div>
+          </sc-if>
+          <sc-if value="{{ sh.isNew }}" hint-placeholder-val="{{ true }}">
+            <label style="display:flex;flex-direction:column;gap:12px;">
+              <span class="rw-section-title">{{ sh.nameQ }}</span>
+              <textarea class="rw-textarea" value="{{ sh.title }}" onChange="{{ sh.onTitle }}" maxlength="120" placeholder="{{ tx.focusNamePh }}"></textarea>
+            </label>
+          </sc-if>
           <div style="display:flex;flex-direction:column;gap:12px;">
-            <div id="focus-long" style="font:500 15px/1.3 var(--font-sans);">{{ tx.howLong }}</div>
-            <div role="radiogroup" aria-labelledby="focus-long" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;">
-              <sc-for list="{{ sh.weekOpts }}" as="c" hint-placeholder-count="4">
-                <button role="radio" aria-checked="{{ c.on }}" aria-disabled="{{ c.off }}" onClick="{{ c.select }}" style="height:var(--size-chip);padding:0 6px;border-radius:var(--radius-pill);font:400 15px/1 var(--font-sans);white-space:nowrap;cursor:pointer;transition:all var(--dur-base) var(--ease-out);background:var(--filter-pill-bg);color: {{ c.fg }};border:1px solid {{ c.border }};">{{ c.label }}</button>
+            <h3 id="focus-how" class="rw-section-title">{{ tx.howQ }}</h3>
+            <div role="radiogroup" aria-labelledby="focus-how" style="display:flex;flex-wrap:wrap;gap:8px;">
+              <sc-for list="{{ sh.types }}" as="o" hint-placeholder-count="2">
+                <button type="button" role="radio" aria-checked="{{ o.on }}" class="rw-surface rw-pill rw-pill-sm {{ o.cls }}" onClick="{{ o.select }}">{{ o.label }}</button>
               </sc-for>
             </div>
           </div>
+          <sc-if value="{{ sh.isPractice }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:32px;">
+              <div style="display:flex;flex-direction:column;gap:12px;">
+                <h3 id="focus-often" class="rw-section-title">{{ tx.howOften }}</h3>
+                <div class="rw-surface rw-stepper" role="group" aria-labelledby="focus-often">
+                  <button type="button" class="rw-stepper-btn" onClick="{{ sh.dec }}" aria-label="{{ tx.decrease }}" disabled="{{ sh.notDec }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Minus" size="{{ 18 }}" hint-size="18px,18px"></x-import></button>
+                  <span class="rw-stepper-value" aria-live="polite">{{ sh.freqLabel }}</span>
+                  <button type="button" class="rw-stepper-btn" onClick="{{ sh.inc }}" aria-label="{{ tx.increase }}" disabled="{{ sh.notInc }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 18 }}" hint-size="18px,18px"></x-import></button>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:12px;">
+                <h3 id="focus-long" class="rw-section-title">{{ tx.howLong }}</h3>
+                <div role="radiogroup" aria-labelledby="focus-long" style="display:flex;flex-wrap:wrap;gap:8px;">
+                  <sc-for list="{{ sh.weekOpts }}" as="c" hint-placeholder-count="5">
+                    <button type="button" role="radio" aria-checked="{{ c.on }}" aria-disabled="{{ c.off }}" class="rw-surface rw-pill rw-pill-sm {{ c.cls }}" onClick="{{ c.select }}">{{ c.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ sh.isMatch }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <h3 id="focus-matches" class="rw-section-title">{{ tx.howManyMatches }}</h3>
+              <div role="radiogroup" aria-labelledby="focus-matches" style="display:flex;flex-wrap:wrap;gap:8px;">
+                <sc-for list="{{ sh.matchOpts }}" as="c" hint-placeholder-count="4">
+                  <button type="button" role="radio" aria-checked="{{ c.on }}" class="rw-surface rw-pill rw-pill-sm {{ c.cls }}" onClick="{{ c.select }}">{{ c.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ sh.isNone }}" hint-placeholder-val="{{ false }}">
+            <p class="rw-meta">{{ tx.noneHint }}</p>
+          </sc-if>
         </div>
-      </sc-if>
-      <sc-if value="{{ sh.isMatch }}" hint-placeholder-val="{{ false }}">
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          <div id="focus-matches" style="font:500 15px/1.3 var(--font-sans);">{{ tx.howManyMatches }}</div>
-          <div role="radiogroup" aria-labelledby="focus-matches" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;">
-            <sc-for list="{{ sh.matchOpts }}" as="c" hint-placeholder-count="4">
-              <button role="radio" aria-checked="{{ c.on }}" onClick="{{ c.select }}" style="height:var(--size-chip);padding:0 6px;border-radius:var(--radius-pill);font:400 15px/1 var(--font-sans);cursor:pointer;transition:all var(--dur-base) var(--ease-out);background:var(--filter-pill-bg);color: {{ c.fg }};border:1px solid {{ c.border }};">{{ c.label }}</button>
-            </sc-for>
-          </div>
-        </div>
-      </sc-if>
-      <sc-if value="{{ sh.isNone }}" hint-placeholder-val="{{ false }}">
-        <div style="font:400 13px/1.4 var(--font-sans);color:var(--text-secondary);">{{ tx.noneHint }}</div>
-      </sc-if>
-      <button onClick="{{ sh.save }}" aria-disabled="{{ sh.notOk }}" style="height:60px;flex-shrink:0;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;background: {{ sh.ctaBg }};color: {{ sh.ctaFg }};" style-active="transform:scale(.97);">{{ sh.ctaLabel }}</button>
+      </div>
+      <div class="rw-sheet-foot">
+        <button type="button" class="rw-btn rw-btn-primary" onClick="{{ sh.save }}" disabled="{{ sh.notOk }}">
+          <sc-if value="{{ sh.ctaIcon }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 22 }}" hint-size="22px,22px"></x-import></sc-if>
+          {{ sh.ctaLabel }}
+        </button>
+      </div>
     </div>
   </sc-if>
 
@@ -4146,25 +4156,23 @@ class Component extends DCLogic {
     v.hasSheet = !!s.sheet;
     if (s.sheet) {
       const sh = s.sheet, isEdit = sh.mode === 'edit', isGrow = sh.mode === 'grow', ok = sh.title.trim().length > 1;
-      const types = [['practice', 'optPractice', 'Repeat'], ['match', 'optMatches', 'Trophy']].concat(isGrow ? [] : [['manual', 'optNone', 'Circle']]);
+      const types = [['practice', 'optPractice'], ['match', 'optMatches']].concat(isGrow ? [] : [['manual', 'optNone']]);
       // Edit can't shorten a running plan to end before this week; those lengths are disabled.
       const minW = isEdit && sh.type === 'practice' && sh.type === (FS.find(x => x.id === sh.editId) || {}).type ? sh.minWeeks || 0 : 0;
-      v.sh = { heading: this.t(isEdit ? 'editFocus' : isGrow ? 'addToFocus' : 'createFocus'), isGrow, isNew: !isGrow, nameQ: this.t(isEdit ? 'focusName' : 'improveQ'),
+      const pill = (on, select) => ({ on, cls: on ? 'is-active' : '', select });
+      v.sh = { heading: this.t(isEdit ? 'editFocus' : 'addToFocus'), isGrow, isNew: !isGrow, nameQ: this.t(isEdit ? 'focusName' : 'improveQ'),
         title: sh.title, goal: sh.goal, onTitle: e => this.setSheet({ title: e.target.value.replace(/\s*\n\s*/g, ' ') }),
         close: () => this.setState({ sheet: null }),
-        types: types.map(([k, label, icon]) => { const on = sh.type === k; return { label: this.t(label), icon, on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent',
-          dotBg: on ? 'var(--control-selected-bg)' : 'transparent', dotBorder: on ? 'var(--control-selected-bg)' : 'var(--control-outline)', select: () => this.setSheet({ type: k }) }; }),
+        types: types.map(([k, label]) => ({ label: this.t(label), ...pill(sh.type === k, () => this.setSheet({ type: k })) })),
         isPractice: sh.type === 'practice', isMatch: sh.type === 'match', isNone: sh.type === 'manual',
-        freqLabel: this.t('perWeek', { n: sh.perWeek }), notDec: sh.perWeek <= 1, notInc: sh.perWeek >= 7, decOp: sh.perWeek <= 1 ? .4 : 1, incOp: sh.perWeek >= 7 ? .4 : 1,
+        freqLabel: this.t('perWeek', { n: sh.perWeek }), notDec: sh.perWeek <= 1, notInc: sh.perWeek >= 7,
         dec: () => this.setSheet({ perWeek: Math.max(1, sh.perWeek - 1) }), inc: () => this.setSheet({ perWeek: Math.min(7, sh.perWeek + 1) }),
-        weekOpts: [[1, this.t('oneWeek')], [2, this.t('weeksN', { n: 2 })], [4, this.t('weeksN', { n: 4 })], [0, this.t('ongoing')]].map(([w, label]) => {
-          const on = sh.weeks === w, off = w > 0 && w < minW;
-          return { label, on, off, fg: off ? 'var(--text-tertiary)' : on ? 'var(--filter-pill-text-selected)' : 'var(--filter-pill-text-default)',
-            border: on ? 'var(--filter-pill-border-selected)' : 'transparent', select: () => { if (!off) this.setSheet({ weeks: w }); } }; }),
-        matchOpts: [3, 4, 5, 6].map(m => { const on = sh.matches === m;
-          return { label: String(m), on, off: false, fg: on ? 'var(--filter-pill-text-selected)' : 'var(--filter-pill-text-default)', border: on ? 'var(--filter-pill-border-selected)' : 'transparent', select: () => this.setSheet({ matches: m }) }; }),
-        ctaLabel: this.t(isEdit ? 'saveChanges' : 'addToFocus'), ok, notOk: !ok,
-        ctaBg: ok ? A : 'var(--surface-muted)', ctaFg: ok ? 'var(--action-on-primary)' : 'var(--text-tertiary)', save: () => this.saveFocusSheet() };
+        // Figma 173:13428 offers 1 to 4 weeks and Ongoing.
+        weekOpts: [1, 2, 3, 4, 0].map(w => {
+          const off = w > 0 && w < minW, label = w === 1 ? this.t('oneWeek') : w ? this.t('weeksN', { n: w }) : this.t('ongoing');
+          return { label, off, ...pill(sh.weeks === w, () => { if (!off) this.setSheet({ weeks: w }); }) }; }),
+        matchOpts: [3, 4, 5, 6].map(m => ({ label: String(m), ...pill(sh.matches === m, () => this.setSheet({ matches: m })) })),
+        ctaLabel: this.t(isEdit ? 'saveChanges' : 'addToFocus'), ctaIcon: !isEdit, notOk: !ok, save: () => this.saveFocusSheet() };
     }
     if (s.toast) {
       const t = s.toast, kind = ['success', 'error', 'info', 'warning'].includes(t.kind) ? t.kind : 'success';

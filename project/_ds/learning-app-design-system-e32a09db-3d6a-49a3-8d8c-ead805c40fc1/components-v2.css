@@ -53,6 +53,8 @@
      IconButton XSmall (20px) ..... .rw-icon-btn-xs (score stepper)
      Pills XSmall (Selectable) .... .rw-surface.rw-pill.rw-pill-xs[.is-active]
      TextArea ..................... .rw-textarea (Unfilled, Filled Inactive, Typing = :focus)
+   Create Focus (Figma 173:13428, Add to Focus sheet 199:3641):
+     Stepper ...................... .rw-surface.rw-stepper > .rw-stepper-btn (Minus 18) + .rw-stepper-value + .rw-stepper-btn (Plus 18)
      Helper / meta text 13px ...... .rw-meta
      Result cue (plain dot) ....... .rw-pill.rw-pill-sm.rw-cue.is-done > .rw-cue-mark.is-dot[.is-win|.is-loss]
      Match Result, tied ........... .rw-result.is-draw
@@ -340,6 +342,14 @@
 .rw-textarea{display:block;width:100%;height:var(--rw-textarea-h);margin:0;padding:14px 18px;border-radius:var(--rw-textarea-radius);border:1px solid transparent;background:var(--rw-textarea-bg);color:var(--rw-textarea-fg);font:var(--rw-type-textarea);letter-spacing:var(--rw-tracking);resize:none;outline:none;caret-color:var(--rw-textarea-fg-active);transition:background var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out);}
 .rw-textarea::placeholder{color:var(--rw-placeholder-text);opacity:1;}
 .rw-textarea:focus{background:var(--rw-textarea-bg-active);border-color:var(--rw-textarea-border-active);color:var(--rw-textarea-fg-active);}
+/* Stepper (Figma Create Focus 173:13319): − value +, e.g. sessions per week. Buttons go to 40% at the ends. */
+.rw-stepper{display:flex;align-items:center;justify-content:space-between;padding:var(--rw-stepper-pad);border-radius:999px;}
+.rw-stepper-btn{width:var(--rw-stepper-btn-size);height:var(--rw-stepper-btn-size);flex-shrink:0;padding:0;border:none;border-radius:50%;background:var(--rw-stepper-btn-bg);color:var(--rw-stepper-fg);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform var(--dur-fast) var(--ease-out),opacity var(--dur-fast);}
+.rw-stepper-btn:active{transform:scale(.94);}
+.rw-stepper-btn:disabled{opacity:.4;transform:none;cursor:default;}
+.rw-stepper-value{font:var(--rw-type-pill);letter-spacing:var(--rw-tracking);color:var(--rw-stepper-fg);}
+/* A pill that can't be picked right now (e.g. a plan length shorter than the weeks already done). */
+.rw-pill[aria-disabled="true"]{opacity:.4;cursor:default;}
 /* Helper and score lines: 13px Medium, secondary. */
 .rw-meta{margin:0;font:var(--rw-type-meta);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
 /* Result cue: the Indicator pill with a plain dot instead of the check. More wins B75, more losses O100, tied or unresolved neutral. */

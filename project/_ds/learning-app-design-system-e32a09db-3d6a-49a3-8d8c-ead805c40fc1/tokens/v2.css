@@ -360,6 +360,11 @@
   --rw-textarea-fg-active: var(--rw-color-text-primary);
   --rw-placeholder-text: #59595b;
   --rw-textarea-placeholder: var(--rw-placeholder-text);
+  /* Stepper (Figma Create Focus 173:13319, "How often?"): Glass Fill track, 44px purplegrey-500 buttons with 18px icons, 14px value */
+  --rw-stepper-pad: 6px;
+  --rw-stepper-btn-size: 44px;
+  --rw-stepper-btn-bg: var(--rw-color-surface-input-filled);
+  --rw-stepper-fg: var(--rw-color-text-primary);
   /* Result indicator on a cue pill (Figma 349:4144): plain dot. More wins B75, more losses O100, tied or unresolved neutral (Han N7) */
   --rw-cue-dot-win: var(--rw-color-select-win);
   --rw-cue-dot-loss: var(--rw-color-status-loss);
