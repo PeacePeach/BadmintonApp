@@ -81,9 +81,10 @@
   /* Split layout (Han, 2026-10-24, from a reference he shared): label across the top, text left, a small
      framed chart right. Chart frame for all three: 136 x 88, dashed horizontal grid at the y ticks, solid
      vertical grid at each match, tick labels in the chart-label colour. */
-  .gi-split{display:grid;grid-template-columns:minmax(0,1fr) var(--gi-chart-w);column-gap:16px;align-items:end;}
+  .gi-split{display:grid;grid-template-columns:minmax(0,1fr) var(--gi-chart-w);column-gap:16px;align-items:stretch;}
+  .gi-chart-slot{position:relative;min-height:var(--gi-chart-h);}  /* chart fills the text column: top grid line on the title, x labels on the body's last line */
   .gi-split-text{display:flex;flex-direction:column;gap:12px;min-width:0;}
-  .gi-chart{display:block;width:var(--gi-chart-w);height:var(--gi-chart-h);overflow:visible;}
+  .gi-chart{position:absolute;inset:0;display:block;width:var(--gi-chart-w);height:100%;overflow:visible;}
   .gi-chart text{font:var(--gi-type-tick);letter-spacing:0;fill:var(--rw-chart-label-fg);font-variant-numeric:tabular-nums;}
   .gi-chart .grid-h{stroke:var(--gi-track);stroke-width:1;stroke-dasharray:2 3;}
   .gi-chart .grid-v{stroke:var(--gi-track);stroke-width:1;}
@@ -208,9 +209,9 @@ function graphic(kind, tx) {
   return g;
 }
 
-function chart(kind) {
-  // One frame for all three: 136 x 88, y labels in the left 16px, x labels (match 1-6, oldest left) along the bottom.
-  const W = 136, H = 88, L = S.labels ? 18 : 4, R = 4, T = 6, B = S.labels ? 16 : 4, n = 6;
+function chart(kind, H = 88) {
+  // One frame for all three: 136 wide, as tall as the text column (title top to body bottom, min 88), y labels in the left 16px, x labels (match 1-6, oldest left) along the bottom.
+  const W = 136, L = S.labels ? 18 : 4, R = 4, T = 5, B = S.labels ? 16 : 4, n = 6;
   const P = 9, X = i => L + P + i * (W - L - R - 2 * P) / (n - 1), PH = H - T - B; // 9px inner padding so the widest mark (14px pill) stays inside the frame
   const cfg = {
     trend: { min: 30, max: 70, ticks: [30, 50, 70], vals: DEMO.trend },
@@ -252,7 +253,7 @@ function tile(kind, tx) {
     t.setAttribute('data-pattern', kind);
     t.appendChild(el('div', 'rw-key-head', `<span class="rw-label">${tx.eyebrow}</span>`));
     const row = el('div', 'gi-split');
-    row.innerHTML = `<div class="gi-split-text"><p class="rw-key-title">${tx[kind].t}</p><p class="rw-key-body">${tx[kind].b}</p></div>${chart(kind)}`;
+    row.innerHTML = `<div class="gi-split-text"><p class="rw-key-title">${tx[kind].t}</p><p class="rw-key-body">${tx[kind].b}</p></div><div class="gi-chart-slot" data-kind="${kind}"></div>`;
     t.appendChild(row);
     return t;
   }
@@ -296,13 +297,24 @@ function render() {
   document.getElementById('note').innerHTML = (S.all ? ['trend', 'compare', 'strip'] : [S.pattern]).map(k => `<div>${(S.split ? tx.notesSplit : tx.notes)[k]}</div>`).join('');
 }
 
+// Split charts are drawn at the measured height of their text column, and redrawn when it changes.
+function drawCharts() {
+  document.querySelectorAll('.gi-chart-slot').forEach(slot => {
+    const h = Math.round(slot.getBoundingClientRect().height);
+    if (slot.dataset.h !== String(h)) { slot.dataset.h = h; slot.innerHTML = chart(slot.dataset.kind, h); }
+  });
+}
+const chartObserver = new ResizeObserver(drawCharts);
+function observeCharts() { chartObserver.disconnect(); document.querySelectorAll('.gi-chart-slot').forEach(n => chartObserver.observe(n)); drawCharts(); }
+if (document.fonts) document.fonts.ready.then(drawCharts);
+
 function sync() {
   const q = new URLSearchParams();
   q.set('p', S.pattern); if (!S.split) q.set('layout', 'stack'); if (S.all) q.set('all', '1'); if (!S.labels) q.set('labels', '0'); q.set('lang', S.lang);
   history.replaceState(null, '', '?' + q.toString());
-  render();
+  render(); observeCharts();
 }
-render();
+render(); observeCharts();
 </script>
 </body>
 </html>
