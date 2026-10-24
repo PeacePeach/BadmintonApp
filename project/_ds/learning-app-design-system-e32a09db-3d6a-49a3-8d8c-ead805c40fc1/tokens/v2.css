@@ -278,6 +278,16 @@
   /* Insights / Grow: KeyInsight, section header, Tile full wide / half width (Figma 203:5215) */
   --rw-key-dot: var(--rw-color-status-win);
   --rw-key-bar-w: 212px;
+  /* Split KeyInsight: text left, chart right, half and half (Han, 2026-10-24; key-chart.js draws the chart) */
+  --rw-key-split-gap: 16px;
+  --rw-key-chart-min-h: 88px;
+  --rw-key-chart-grid: var(--rw-color-data-track);     /* dashed ticks + per-match lines, PurpleGrey 500 */
+  --rw-key-chart-tick: var(--rw-chart-label-fg);       /* N300 */
+  --rw-key-chart-dot: var(--rw-color-status-win);      /* B100, flat (Han: no shaded dots) */
+  --rw-key-chart-latest: var(--rw-color-status-win);   /* the latest value's number */
+  --rw-key-chart-earlier: var(--rw-color-text-tertiary); /* N300 bars before the split (pending Han) */
+  --rw-key-chart-on: var(--rw-color-status-loss);      /* O100: it happened in this match */
+  --rw-key-chart-none: var(--rw-n200);                 /* N200: it didn't (pending Han) */
   --rw-advice-divider: var(--rw-color-divider);
   --rw-advice-label-accent: var(--rw-color-text-accent);
   --rw-icon-badge-size: 40px;
@@ -408,6 +418,7 @@
   --rw-type-meta: 500 13px/16.9px var(--font-sans);   /* 13px helper and score lines; Figma Regular -> Medium (Han N5) */
   --rw-type-key-title: 500 17px/22.1px var(--font-sans);  /* KeyInsight headline (Figma 203:5441) */
   --rw-type-body: 500 14px/21px var(--font-sans);         /* KeyInsight body; Figma Regular -> Medium (V2 minimum) */
+  --rw-type-key-chart-tick: 500 9px/1 var(--font-sans);  /* KeyInsight chart tick labels (pending Han) */
   --rw-type-tile-desc: 500 12px/16.8px var(--font-sans);  /* Tile half width evidence line (Figma 12px, 1.4) */
   --rw-type-tile-text: 500 12px/18.2px var(--font-sans);  /* advice under a tile label: TRY NEXT, KEEP GOING, GAME PLAN */
 }

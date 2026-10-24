@@ -29,6 +29,7 @@
      Insight / ListRow ............ .rw-list-row (.rw-avatar, .rw-eyebrow, .rw-name, .rw-list-value, .rw-caption)
    Insights / Grow (Figma 203:5215):
      KeyInsight ................... .rw-surface.rw-tile.rw-key > .rw-key-head (dot + .rw-label) + .rw-key-title + .rw-key-body + .rw-bar.rw-key-bar
+     KeyInsight, split ............ .rw-key.is-split > .rw-key-head + .rw-key-split > .rw-key-split-text (.rw-key-title + .rw-key-body) + .rw-key-chart[data-kind=trend|compare|strip] (drawn by key-chart.js)
      Section header ............... .rw-section-head > .rw-section-title + .rw-hint
      Tile full wide ............... .rw-surface.rw-tile.rw-advice > .rw-advice-head (.rw-icon-badge | .rw-avatar + .rw-advice-text: .rw-name + .rw-meta) + .rw-advice-divider + .rw-advice-tip (.rw-label[.is-accent] + .rw-advice-tip-text)
      Tile half width .............. .rw-surface.rw-tile.rw-advice.is-half > .rw-advice-body (.rw-advice-text: .rw-name + .rw-advice-desc, divider, tip) + .rw-btn-secondary | .rw-btn-tertiary
@@ -371,6 +372,20 @@
 .rw-key-title{margin:0;font:var(--rw-type-key-title);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);text-wrap:balance;}
 .rw-key-body{margin:0;font:var(--rw-type-body);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);text-wrap:pretty;}
 .rw-bar.rw-key-bar{height:8px;width:100%;max-width:var(--rw-key-bar-w);}
+/* Split KeyInsight: text and chart half and half, a fixed gap; the chart spans the text column (title top to body bottom). */
+.rw-key-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:var(--rw-key-split-gap);align-items:stretch;}
+.rw-key-split-text{display:flex;flex-direction:column;gap:12px;min-width:0;}
+.rw-key-split .rw-key-title{text-wrap:wrap;}  /* balanced wrapping made some titles break early and look narrower (Han) */
+.rw-key-chart{position:relative;min-height:var(--rw-key-chart-min-h);}
+.rw-key-chart svg{position:absolute;inset:0;display:block;width:100%;height:100%;overflow:visible;}
+.rw-key-chart text{font:var(--rw-type-key-chart-tick);fill:var(--rw-key-chart-tick);font-variant-numeric:tabular-nums;}
+.rw-key-chart text.is-latest{fill:var(--rw-key-chart-latest);}
+.rw-key-chart-grid-h{stroke:var(--rw-key-chart-grid);stroke-width:1;stroke-dasharray:2 3;}
+.rw-key-chart-grid-v{stroke:var(--rw-key-chart-grid);stroke-width:1;}
+.rw-key-chart-dot{fill:var(--rw-key-chart-dot);}
+.rw-key-chart-earlier{fill:var(--rw-key-chart-earlier);}
+.rw-key-chart-on{fill:var(--rw-key-chart-on);}
+.rw-key-chart-none{fill:var(--rw-key-chart-none);}
 .rw-section-head{display:flex;flex-direction:column;gap:4px;}
 .rw-advice{display:flex;flex-direction:column;gap:12px;}
 .rw-advice.is-half{gap:16px;}

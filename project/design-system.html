@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/components-v2.css" />
   <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
   <script src="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/illustrations.js"></script>
+  <script src="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/key-chart.js" defer></script>
 
   <title>Badminton Design System</title>
 
@@ -737,6 +738,34 @@
         </div>
         <div class="v2-cell"><div class="v2-label">Insight / ListRow</div>
           <div class="rw-surface rw-tile rw-list-row"><div class="rw-list-row-who"><div class="rw-avatar is-dir-1">PN</div><div class="rw-list-row-text"><div class="rw-eyebrow">Best partner</div><div class="rw-name">Priya Nair</div></div></div><div class="rw-list-row-end"><div class="rw-list-value">100%</div><div class="rw-caption">Win rate together</div></div></div>
+        </div>
+        <!-- Split KeyInsight + charts (Han, 2026-10-24). Sample data only; the chart draws whatever data-* it is given (key-chart.js). -->
+        <div id="v2-key-split" style="grid-column:1/-1;font:500 12px/1.4 var(--font-sans);color:var(--rw-text-secondary)">KeyInsight, split · charts drawn from data: <code>data-kind</code> trend | compare | strip, <code>data-values</code> (one per match, oldest first), optional <code>data-min</code> <code>data-max</code> <code>data-ticks</code> (else picked from the data) <code>data-unit</code> <code>data-quote</code> <code>data-split</code> (compare) <code>data-xlabels</code> <code>data-labels="false"</code>; or <code>RWKeyChart.render(el, chart)</code>. Sample data.</div>
+        <div class="v2-cell"><div class="v2-label">KeyInsight, split · Trend Line</div>
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div class="rw-surface rw-tile rw-key is-split" lang="en"><div class="rw-key-head"><span class="rw-label">Key insight</span></div><div class="rw-key-split"><div class="rw-key-split-text"><p class="rw-key-title">Your net game is getting stronger.</p><p class="rw-key-body">Net points won rose from 42% in match 1 to 64% in match 6.</p></div><div class="rw-key-chart" data-kind="trend" data-values="42,47,45,53,58,64" data-min="30" data-max="70" data-ticks="30,50,70" data-unit="%"></div></div></div>
+            <div class="rw-surface rw-tile rw-key is-split" lang="zh-CN"><div class="rw-key-head"><span class="rw-label">关键洞察</span></div><div class="rw-key-split"><div class="rw-key-split-text"><p class="rw-key-title">你的网前越来越强了。</p><p class="rw-key-body">网前得分率从第 1 场的 42% 升到第 6 场的 64%。</p></div><div class="rw-key-chart" data-kind="trend" data-values="42,47,45,53,58,64" data-min="30" data-max="70" data-ticks="30,50,70" data-unit="%"></div></div></div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">KeyInsight, split · Comparison Chart</div>
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div class="rw-surface rw-tile rw-key is-split" lang="en"><div class="rw-key-head"><span class="rw-label">Key insight</span></div><div class="rw-key-split"><div class="rw-key-split-text"><p class="rw-key-title">Your defence is improving.</p><p class="rw-key-body">Defensive mistakes dropped from 7 in matches 1–3 to 3 in matches 4–6.</p></div><div class="rw-key-chart" data-kind="compare" data-values="3,2,2,1,1,1" data-split="3" data-min="0" data-max="4" data-ticks="0,2,4"></div></div></div>
+            <div class="rw-surface rw-tile rw-key is-split" lang="zh-CN"><div class="rw-key-head"><span class="rw-label">关键洞察</span></div><div class="rw-key-split"><div class="rw-key-split-text"><p class="rw-key-title">你的防守在进步。</p><p class="rw-key-body">防守失误从第 1–3 场的 7 次降到第 4–6 场的 3 次。</p></div><div class="rw-key-chart" data-kind="compare" data-values="3,2,2,1,1,1" data-split="3" data-min="0" data-max="4" data-ticks="0,2,4"></div></div></div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">KeyInsight, split · Match Strip</div>
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div class="rw-surface rw-tile rw-key is-split" lang="en"><div class="rw-key-head"><span class="rw-label">Key insight</span></div><div class="rw-key-split"><div class="rw-key-split-text"><p class="rw-key-title">Serve errors keep showing up.</p><p class="rw-key-body">Serve errors showed up in 4 of your last 6 matches: 1, 3, 4 and 6.</p></div><div class="rw-key-chart" data-kind="strip" data-values="2,0,1,3,0,2" data-min="0" data-max="4" data-ticks="0,2,4"></div></div></div>
+            <div class="rw-surface rw-tile rw-key is-split" lang="zh-CN"><div class="rw-key-head"><span class="rw-label">关键洞察</span></div><div class="rw-key-split"><div class="rw-key-split-text"><p class="rw-key-title">发球失误反复出现。</p><p class="rw-key-body">最近 6 场里有 4 场出现发球失误：第 1、3、4、6 场。</p></div><div class="rw-key-chart" data-kind="strip" data-values="2,0,1,3,0,2" data-min="0" data-max="4" data-ticks="0,2,4"></div></div></div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">KeyInsight, split · real data shapes (negative + decimal trend, 5 matches, auto scale; 0/1 tags; labels off)</div>
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div class="rw-surface rw-tile rw-key is-split" lang="en"><div class="rw-key-head"><span class="rw-label">Key insight</span></div><div class="rw-key-split"><div class="rw-key-split-text"><p class="rw-key-title">Your games are getting closer.</p><p class="rw-key-body">Your average point margin per game went from −4.5 in match 1 to +2 in match 5.</p></div><div class="rw-key-chart" data-kind="trend" data-values="-4.5,-3,-2.5,-1,2"></div></div></div>
+            <div class="rw-surface rw-tile rw-key is-split" lang="en"><div class="rw-key-head"><span class="rw-label">Key insight</span></div><div class="rw-key-split"><div class="rw-key-split-text"><p class="rw-key-title">Fewer net errors lately.</p><p class="rw-key-body">You tagged net errors in 3 of matches 1–3 and 1 of matches 4–6.</p></div><div class="rw-key-chart" data-kind="compare" data-values="1,1,1,0,1,0" data-split="3"></div></div></div>
+            <div class="rw-surface rw-tile rw-key is-split" lang="zh-CN"><div class="rw-key-head"><span class="rw-label">关键洞察</span></div><div class="rw-key-split"><div class="rw-key-split-text"><p class="rw-key-title">发球失误反复出现。</p><p class="rw-key-body">最近 6 场里有 4 场标记了发球失误：第 1、3、4、6 场。</p></div><div class="rw-key-chart" data-kind="strip" data-values="1,0,1,1,0,1"></div></div></div>
+            <div class="rw-surface rw-tile rw-key is-split" lang="zh-CN"><div class="rw-key-head"><span class="rw-label">关键洞察</span></div><div class="rw-key-split"><div class="rw-key-split-text"><p class="rw-key-title">反手过渡还不稳定。</p><p class="rw-key-body">最近 4 场里有 3 场提到反手过渡失误。</p></div><div class="rw-key-chart" data-kind="strip" data-values="1,1,0,1" data-labels="false"></div></div></div>
+          </div>
         </div>
         <div class="v2-cell"><div class="v2-label">Insights / Grow: KeyInsight · Section header (Figma 203:5215)</div>
           <div style="display:flex;flex-direction:column;gap:24px">
