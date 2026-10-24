@@ -426,7 +426,7 @@
   --rw-type-timer: 500 14px/14px var(--font-sans);
   --rw-type-flag: 500 12px/15px var(--font-sans);   /* Pills State=Warning (Figma 329:7164) */
   --rw-type-row-text: 500 14px/20px var(--font-sans);   /* InputTile value (Figma 329:7089) */
-  --rw-type-sheet-title: 500 16px/15px var(--font-sans);
+  --rw-type-sheet-title: 600 16px/15px var(--font-sans);  /* Bottom Sheet title SemiBold (Figma DS component 172:13098) */
   --rw-type-check: 600 14px/15px var(--font-sans);    /* W / L letter, 胜 / 负 too (Figma CheckBoxes; 14px per Han 2026-10-23) */
   --rw-type-textarea: 500 14px/21px var(--font-sans); /* TextArea (Figma 349:4321) */
   --rw-type-meta: 500 13px/16.9px var(--font-sans);   /* 13px helper and score lines; Figma Regular -> Medium (Han N5) */
