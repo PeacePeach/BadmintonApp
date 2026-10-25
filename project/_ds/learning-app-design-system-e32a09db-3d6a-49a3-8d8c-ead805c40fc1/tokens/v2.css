@@ -292,7 +292,7 @@
   --rw-key-split-gap: 16px;
   --rw-key-split-text: 6fr;
   --rw-key-split-chart: 4fr;
-  --rw-key-chart-min-h: 88px;
+  --rw-key-chart-min-h: 55px;  /* the shortest text column (1 title line + gap + 1 body line), so the chart never runs below the text (Han, 2026-10-25; was 88px) */
   --rw-key-chart-grid: var(--rw-color-data-track);     /* dashed ticks + per-match lines, PurpleGrey 500 */
   --rw-key-chart-tick: var(--rw-chart-label-fg);       /* N300 */
   --rw-key-chart-dot: var(--rw-color-status-win);      /* B100, flat (Han: no shaded dots) */
