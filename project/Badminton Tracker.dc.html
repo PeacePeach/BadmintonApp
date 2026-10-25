@@ -3498,7 +3498,7 @@ class Component extends DCLogic {
           dotBg: on ? 'var(--control-selected-bg)' : 'transparent', dotBorder: on ? 'var(--control-selected-bg)' : 'var(--control-outline)', select: () => this.setLang(code) }; }),
       isLanguage: s.screen === 'language',
       isOnboarding: s.screen === 'onboarding',
-      showTabs: s.screen === 'matches' || s.screen === 'insights' || s.screen === 'focus' || s.screen === 'detail', menuOpen: s.menu,
+      showTabs: s.screen === 'matches' || s.screen === 'insights' || s.screen === 'focus', menuOpen: s.menu,
       floatMenu: s.screen === 'matches' || s.screen === 'insights' || s.screen === 'focus',
       hasToast: !!s.toast, search: s.search, canAddNew: q.length > 1 && !exists,
       toggleMenu: () => this.setState(x => ({ menu: !x.menu })),
@@ -3506,9 +3506,8 @@ class Component extends DCLogic {
       onSearch: e => this.setState({ search: e.target.value }),
       // Log Match opens only once the account's data has loaded; the loading state shows the button disabled.
       startLog: () => this.openVoice('matches'),
-      // Match Detail sits under the Matches tab (Figma 365:8096 shows the Bottom Nav with Matches active).
-      tabs: [[this.t('matches'), 'matches', 'List'], [this.t('insights'), 'insights', 'ChartColumn'], [this.t('navFocus'), 'focus', 'Target']].map(([label, k, icon]) => ({ label, icon, on: (s.screen === 'detail' ? 'matches' : s.screen) === k, k })).map(({ label, icon, on, k }) => ({
-        label, icon, fg: on ? 'var(--text-primary)' : 'var(--text-secondary)', cls: on ? 'is-active' : '', current: on ? 'page' : null, select: () => {
+      tabs: [[this.t('matches'), 'matches', 'List'], [this.t('insights'), 'insights', 'ChartColumn'], [this.t('navFocus'), 'focus', 'Target']].map(([label, k, icon]) => ({
+        label, icon, fg: s.screen === k ? 'var(--text-primary)' : 'var(--text-secondary)', cls: s.screen === k ? 'is-active' : '', current: s.screen === k ? 'page' : null, select: () => {
           // Back to Insights on Grow with no AI insight on screen (say the language changed since): make one.
           if (k === 'insights' && this.state.insTab === 'coach' && !this.state.aiGrow) setTimeout(() => this.refreshGrow(), 0);
           this.setState({ screen: k, back: [], menu: false });
