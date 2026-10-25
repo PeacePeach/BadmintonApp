@@ -196,7 +196,7 @@
   --status-win: var(--blue-100);
   --status-loss: var(--orange-200);
   /* Feedback */
-  --status-error: var(--red-400);
+  --status-error: var(--rw-color-status-error);   /* V1 alias of the V2 error red (#F28C85, Han 2026-10-25) */
 
   /* Illustration — empty, error, success and connection states */
   --illustration-backdrop: var(--blue-100);

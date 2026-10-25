@@ -61,6 +61,7 @@
   --rw-r50:               #ffefef;
   --rw-r75:               #ffbcbc;
   --rw-r100:              #ffa0a0;
+  --rw-r150:              #f28c85;   /* Error red, between R100 and R200 in brightness (Han 2026-10-25) */
   --rw-r200:              #ff7878;
   --rw-r300:              #ff5c5c;
   --rw-r400:              #b34040;
@@ -179,7 +180,7 @@
   /* Result and Notes sheets (Figma 349:3528, 349:3793; Han approved 2026-10-23) */
   /* Insights / Grow (Figma 203:5215; pending Han's review, 2026-10-24) */
   --rw-color-divider: var(--rw-n150);                 /* line inside a tile (Figma Tile full wide / half width) */
-  --rw-color-text-error: var(--rw-red-800);           /* field error label + note (Han 2026-10-25: one step darker than V1 red-400) */
+  --rw-color-status-error: var(--rw-r150);            /* the ONE error red: error text, borders and icons everywhere, 100% opacity (Han 2026-10-25) */
   --rw-color-text-accent: var(--rw-b100);             /* TRY NEXT label in Build Next (Figma #6BA6FF) */
   --rw-color-icon-accent: var(--rw-b100);             /* icon in the Avatar "Fancy" badge */
   --rw-color-border-icon-badge: linear-gradient(120deg, color-mix(in srgb, var(--rw-b100) 60%, transparent) 0%, color-mix(in srgb, var(--rw-b100) 5%, transparent) 100%); /* Figma shows B 5% at the faded end */
@@ -221,7 +222,7 @@
   --rw-toast-body-fg: var(--rw-n100);
   --rw-toast-close-fg: var(--rw-n75);
   --rw-toast-success-bg: var(--rw-g50);   --rw-toast-success-badge: var(--rw-g500);   --rw-toast-success-icon: var(--rw-g100);
-  --rw-toast-error-bg: var(--rw-red-50);  --rw-toast-error-badge: var(--rw-red-800);  --rw-toast-error-icon: var(--rw-red-100);
+  --rw-toast-error-bg: var(--rw-red-50);  --rw-toast-error-badge: var(--rw-color-status-error);  --rw-toast-error-icon: var(--rw-color-text-on-action);
   --rw-toast-info-bg: var(--rw-b50);      --rw-toast-info-badge: var(--rw-b400);      --rw-toast-info-icon: var(--rw-b75);
   --rw-toast-warning-bg: var(--rw-y50);   --rw-toast-warning-badge: var(--rw-o500);   --rw-toast-warning-icon: var(--rw-y75);
   --rw-type-banner-title: 600 16px/14px var(--font-sans);

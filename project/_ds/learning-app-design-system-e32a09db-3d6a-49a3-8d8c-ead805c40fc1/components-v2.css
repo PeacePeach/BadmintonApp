@@ -363,7 +363,7 @@ button.rw-input-row{cursor:pointer;}
 .rw-input-row:focus-within,.rw-input-row[aria-expanded="true"],button.rw-input-row:active{background:var(--rw-color-surface-highlight);outline:none;}
 .rw-input-row-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
 .rw-input-row-label{font:var(--rw-type-caption);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
-.rw-input-row.is-error{box-shadow:inset 0 0 0 1px var(--rw-color-text-error);}   /* error = 1px border in the error red; label stays N400 (Han 2026-10-25) */
+.rw-input-row.is-error{box-shadow:inset 0 0 0 1px var(--rw-color-status-error);}   /* error = 1px border in the error red; label stays N400 (Han 2026-10-25) */
 .rw-input-row-input,.rw-input-row-value{display:block;width:100%;height:20px;margin:0;padding:0;border:none;outline:none;background:transparent;font:var(--rw-type-list-value);line-height:20px;letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);caret-color:var(--rw-search-caret);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .rw-input-row-input::placeholder{color:var(--rw-placeholder-text);opacity:1;}
 .rw-input-row-value.is-muted{color:var(--rw-placeholder-text);}
@@ -375,7 +375,7 @@ button.rw-input-row{cursor:pointer;}
 .rw-select-option{justify-content:space-between;}
 .rw-select-option>:last-child{color:var(--rw-color-border-selected);}   /* Check N600 on the chosen option */
 .rw-field-note{margin:0;padding:0 var(--rw-field-inset);font:var(--rw-type-meta);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
-.rw-field-note.is-error{color:var(--rw-color-text-error);}
+.rw-field-note.is-error{color:var(--rw-color-status-error);}
 .rw-search>:first-child{flex-shrink:0;}
 .rw-search-input{flex:1;min-width:0;height:100%;padding:0 var(--rw-search-input-pad-x);border:none;outline:none;background:transparent;font:var(--rw-type-name);letter-spacing:var(--rw-tracking);color:var(--rw-search-fg);caret-color:var(--rw-search-caret);}
 .rw-search-input::placeholder{color:var(--rw-placeholder-text);opacity:1;}
