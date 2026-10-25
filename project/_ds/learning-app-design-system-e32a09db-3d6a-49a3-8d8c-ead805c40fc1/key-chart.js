@@ -13,7 +13,7 @@
      compare  one bar per match; matches before data-split are "earlier" (grey), the rest recent (blue);
               each group's total is written over it
      strip    one pill per match at its count; a match with 0 sits on the zero line in the "none" colour;
-              levels 16px apart, centred in the frame, with a thin connector where the state changes
+              levels 16px apart, centred in the frame, with a thin connector where the state changes, fading from one pill's colour to the next's
    Frame for all three: dashed horizontal grid at the ticks, a vertical grid line per match, tick labels.
    Colours and type come from the --rw-key-chart-* tokens in tokens/v2.css. */
 (function () {
@@ -75,7 +75,14 @@
       });
     }
     // Strip: a thin connector from one pill's end to the next pill's start wherever the state changes, drawn under the pills.
-    if (o.kind === 'strip') vals.forEach((v, i) => { if (i < n - 1 && vals[i + 1] !== v) m += `<line class="rw-key-chart-connector" x1="${X(i) + 7}" y1="${Y(v)}" x2="${X(i + 1) - 7}" y2="${Y(vals[i + 1])}"/>`; });
+    // It fades from one pill's colour to the other's (Han, 2026-10-25: orange above to grey below).
+    const pc = v => `var(--rw-key-chart-${v ? 'on' : 'none'})`;
+    if (o.kind === 'strip') vals.forEach((v, i) => {
+      if (i === n - 1 || vals[i + 1] === v) return;
+      const x1 = X(i) + 7, y1 = Y(v), x2 = X(i + 1) - 7, y2 = Y(vals[i + 1]), gid = `${id}c${i}`;
+      m += `<linearGradient id="${gid}" gradientUnits="userSpaceOnUse" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"><stop offset="0" style="stop-color:${pc(v)}"/><stop offset="1" style="stop-color:${pc(vals[i + 1])}"/></linearGradient>`
+        + `<line class="rw-key-chart-connector" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="url(#${gid})"/>`;
+    });
     if (o.kind === 'strip') vals.forEach((v, i) => { m += `<rect class="${v ? 'rw-key-chart-on' : 'rw-key-chart-none'}" x="${X(i) - 7}" y="${Y(v) - 3}" width="14" height="6" rx="3"/>`; });
     return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true"><defs>${defs}</defs>${g}${m}</svg>`;
   }

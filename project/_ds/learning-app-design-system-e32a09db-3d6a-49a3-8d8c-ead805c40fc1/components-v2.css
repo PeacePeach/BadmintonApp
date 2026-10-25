@@ -469,7 +469,7 @@ button.rw-input-row{cursor:pointer;}
 .rw-key-chart-earlier{fill:var(--rw-key-chart-earlier);}
 .rw-key-chart-on{fill:var(--rw-key-chart-on);}
 .rw-key-chart-none{fill:var(--rw-key-chart-none);}
-.rw-key-chart-connector{stroke:var(--rw-key-chart-connector);stroke-width:1;stroke-linecap:round;}
+.rw-key-chart-connector{stroke-width:1;stroke-linecap:round;}
 .rw-section-head{display:flex;flex-direction:column;gap:4px;}
 .rw-advice{display:flex;flex-direction:column;gap:12px;}
 .rw-advice.is-half{gap:16px;}
