@@ -288,8 +288,10 @@
   /* Insights / Grow: KeyInsight, section header, Tile full wide / half width (Figma 203:5215) */
   --rw-key-dot: var(--rw-color-status-win);
   --rw-key-bar-w: 212px;
-  /* Split KeyInsight: text left, chart right, half and half (Han, 2026-10-24; key-chart.js draws the chart) */
+  /* Split KeyInsight: text left, chart right, 6:4 (Han, 2026-10-25; was half and half). key-chart.js draws the chart. */
   --rw-key-split-gap: 16px;
+  --rw-key-split-text: 6fr;
+  --rw-key-split-chart: 4fr;
   --rw-key-chart-min-h: 88px;
   --rw-key-chart-grid: var(--rw-color-data-track);     /* dashed ticks + per-match lines, PurpleGrey 500 */
   --rw-key-chart-tick: var(--rw-chart-label-fg);       /* N300 */

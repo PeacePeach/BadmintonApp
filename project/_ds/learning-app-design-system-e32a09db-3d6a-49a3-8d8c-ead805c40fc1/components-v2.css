@@ -425,8 +425,8 @@
 .rw-key-title{margin:0;font:var(--rw-type-key-title);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);text-wrap:balance;}
 .rw-key-body{margin:0;font:var(--rw-type-body);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);text-wrap:pretty;}
 .rw-bar.rw-key-bar{height:8px;width:100%;max-width:var(--rw-key-bar-w);}
-/* Split KeyInsight: text and chart half and half, a fixed gap; the chart spans the text column (title top to body bottom). */
-.rw-key-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:var(--rw-key-split-gap);align-items:stretch;}
+/* Split KeyInsight: text and chart 6:4 (--rw-key-split-text / -chart), a fixed gap; the chart spans the text column (title top to body bottom). */
+.rw-key-split{display:grid;grid-template-columns:minmax(0,var(--rw-key-split-text)) minmax(0,var(--rw-key-split-chart));column-gap:var(--rw-key-split-gap);align-items:stretch;}
 .rw-key-split-text{display:flex;flex-direction:column;gap:12px;min-width:0;}
 .rw-key-split .rw-key-title{text-wrap:wrap;}  /* balanced wrapping made some titles break early and look narrower (Han) */
 .rw-key-chart{position:relative;min-height:var(--rw-key-chart-min-h);}

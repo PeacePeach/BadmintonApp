@@ -26,7 +26,7 @@ const CLOSE = 3;       // a close game is decided by 3 points or fewer (as on In
 
 // Tag labels. Titles use the app's tag names (tag_* in the app); sentences use a lower-case noun phrase.
 const TAG = {
-  en: { Serve: ['Serve', 'your serve'], Return: ['Return', 'your return'], Net: ['Net play', 'net play'], Smash: ['Smash', 'your smash'],
+  en: { Serve: ['Serve', 'serve'], Return: ['Return', 'return'], Net: ['Net play', 'net play'], Smash: ['Smash', 'smash'],
     Defence: ['Defence', 'defence'], Footwork: ['Footwork', 'footwork'], Placement: ['Placement', 'placement'] },
   zh: { Serve: ['发球', '发球'], Return: ['接发', '接发'], Net: ['网前', '网前'], Smash: ['杀球', '杀球'],
     Defence: ['防守', '防守'], Footwork: ['步法', '步法'], Placement: ['落点', '落点'] }
@@ -108,6 +108,8 @@ function phr(lang, c) {
   const skip = c.evidence.window.skipped > 0, notes = c.source === 'notes_tags';
   const q = skip ? (lang === 'zh' ? (notes ? '有记录的' : '有比分的') : (notes ? 'noted ' : 'scored ')) : '';
   if (lang === 'zh') return { lastN: n => `最近${q}${n}场`, last3: `最近${q}3场`, prev3: '之前3场' };
+  // English, skipped matches: "the last 3 with notes" (shorter than "your last 3 noted matches", for the 3-line body).
+  if (skip && notes) return { lastN: n => `the last ${n} with notes`, last3: 'the last 3 with notes', prev3: 'the 3 before' };
   return { lastN: n => `your last ${n} ${q}matches`, last3: `your last 3 ${q}matches`, prev3: 'the 3 before' };
 }
 // Matches inside the window's span that it skipped.
@@ -238,8 +240,8 @@ export function keyTemplate(c, lang) {
       body: `${P.lastN(N.n)}，你每局的平均分差从${signed(N.a)}分变成了${signed(N.b)}分。`
     };
     return {
-      title: up ? (strong ? 'Your scores are heading the right way' : 'Your scores are trending up') : (strong ? 'Your scores have been slipping' : 'Your scores have dipped lately'),
-      body: `Across ${P.lastN(N.n)}, your average margin per game went from ${signed(N.a)} to ${signed(N.b)} ${pts(N.b)}.`
+      title: up ? (strong ? 'Your scores are heading up' : 'Your scores are trending up') : (strong ? 'Your scores have been slipping' : 'Your scores have dipped lately'),
+      body: `From ${signed(N.a)} to ${signed(N.b)} ${pts(N.b)} per game over ${P.lastN(N.n)}.`
     };
   }
   if (c.family === 'compare') {
@@ -254,7 +256,7 @@ export function keyTemplate(c, lang) {
     const g = close ? 'close games' : 'games';
     return {
       title: close ? (up ? "You're winning more close games" : "You're losing more close games") : (up ? "You're winning more games lately" : "You've won fewer games lately"),
-      body: `You won ${N.r} of ${N.rn} ${g} in ${P.last3}, compared with ${N.p} of ${N.pn} in ${P.prev3}.`
+      body: `You won ${N.r} of ${N.rn} ${g} in ${P.last3}, ${up ? 'up' : 'down'} from ${N.p} of ${N.pn}.`
     };
   }
   const T = tagTitle(lang, c.tag), w = tagWord(lang, c.tag), cost = c.side === 'cost';
@@ -266,15 +268,47 @@ export function keyTemplate(c, lang) {
     return { title: cost ? `${T}问题最近冒出来了` : `最近常提到${T}打得好`,
       body: `${P.last3}有${N.r}场提到${what}，${P.prev3}${N.p === 0 ? '都没提到' : `只有${N.p}场`}。` };
   }
-  const what = cost ? `${w} costing you points` : `${w} winning you points`;
+  // The title names the skill; the body says what the strip counts (Han: title 2 lines, body 3).
+  const what = cost ? 'Noted as costing points' : 'Noted as winning points';
   if (c.shape === 'recurring') return { title: cost ? `${T} keeps coming up` : `${T} keeps standing out`,
-    body: `You noted ${what} in ${N.k} of ${P.lastN(N.n)}, including ${N.r === 3 ? 'all' : N.r} of the last 3.` };
+    body: `${what} in ${N.k} of ${P.lastN(N.n)}.` };
   if (c.shape === 'fading') return { title: `${T} is coming up less`,
-    body: N.r === 0 ? `You haven't noted ${what} in ${P.last3}, after noting it in ${N.p === 3 ? 'all 3 before that' : `${N.p} of ${P.prev3}`}.`
-      : `You noted ${what} in ${N.r} of ${P.last3}, compared with ${N.p === 3 ? 'all 3 before that' : `${N.p} of ${P.prev3}`}.` };
+    body: `${what} in ${N.r === 0 ? 'none' : N.r} of ${P.last3}, down from ${N.p}.` };
   return { title: cost ? `${T} has started coming up` : `${T} is starting to click`,
-    body: `You noted ${what} in ${N.r} of ${P.last3}, ${N.p === 0 ? 'and none of the 3 before' : `up from ${N.p} of ${P.prev3}`}.` };
+    body: `${what} in ${N.r} of ${P.last3}, up from ${N.p === 0 ? 'none' : N.p}.` };
 }
+
+// ---- Fit: lines on the Key Insight tile ----
+// Han (2026-10-25): title at most 2 lines, body at most 3, in the 6:4 split tile's text column. Lines are counted by
+// wrapping with Poppins 500 glyph widths (title 17px, body 14px, letter-spacing -0.16px, measured in the app) at a
+// 172px column: the text column on a 375px-wide phone (181px on 390px), so copy that fits there fits wider phones.
+export const KEY_FIT = { width: 172, title: { size: 17, lines: 2 }, body: { size: 14, lines: 3 } };
+const W17 = [4.42,5.46,5.49,14.82,11.05,13.5,12.94,2.92,8.36,8.36,8.57,12.14,3.82,9.94,4.1,8.74,10.9,5.95,9.81,10.1,11,10.86,10.91,9.52,10.85,10.79,4.16,5.17,10.4,13.16,10.03,9.15,17.42,11.85,10.71,13.14,12.05,8.91,8.75,13.14,11.98,4.49,9.59,10.76,7.55,14.99,12.26,13.33,10.11,13.38,10.74,10.27,9.59,11.73,11.8,16.98,11.22,10.28,9.49,8.24,12.19,8.23,11.12,13.57,4.32,11.53,11.53,10.2,11.53,10.49,5.64,11.53,11.03,4.49,4.49,9.42,4.49,17.66,11.03,10.85,11.53,11.53,6.53,9.08,6.32,11.03,9.79,14.02,8.48,9.89,8.01,8.77,5.51,8.77,9.4];
+const WIDE = /[⺀-鿿豈-﫿＀-￯　-〿]/;
+const NO_START = /^[，。、：；！？）”’,.!?:;)]/;
+const OTHER_W = { '−': 9.94, '–': 12.04, '—': 15.71, '’': 4.11, '“': 7.17, '”': 7.17 };
+const charW = (ch, size) => { const c = ch.codePointAt(0); return (c >= 32 && c < 127 ? W17[c - 32] * size / 17 : WIDE.test(ch) ? size : (OTHER_W[ch] || 10) * size / 17) - 0.16; };
+export function lineCount(text, size, width = KEY_FIT.width) {
+  // Tokens: a Latin word with its trailing space, or one wide (CJK) character. Closing punctuation never starts a
+  // line: it takes the character before it along to the next one.
+  const toks = []; let cur = '';
+  for (const ch of String(text || '').trim()) {
+    if (WIDE.test(ch)) { if (cur) toks.push(cur); cur = ''; toks.push(ch); }
+    else if (/\s/.test(ch)) { toks.push(cur + ch); cur = ''; }
+    else cur += ch;
+  }
+  if (cur) toks.push(cur);
+  const w = t => [...t].reduce((s, ch) => s + charW(ch, size), 0);
+  let n = 1, x = 0, prev = 0;
+  for (const t of toks) {
+    const full = w(t), ink = w(t.trimEnd());
+    if (x > 0 && x + ink > width + 0.5) { n++; x = NO_START.test(t) ? prev + full : full; }
+    else x += full;
+    prev = full;
+  }
+  return n;
+}
+export const fits = ({ title, body }) => lineCount(title, KEY_FIT.title.size) <= KEY_FIT.title.lines && lineCount(body, KEY_FIT.body.size) <= KEY_FIT.body.lines;
 
 // ---- Validation ----
 const ZH_NUM = { 零: 0, 一: 1, 两: 2, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9, 十: 10 };
@@ -303,8 +337,8 @@ export function checkCopy({ title, body }, c, lang) {
   const issues = [], text = `${title || ''} ${body || ''}`;
   if (!title || !body) issues.push('empty');
   if (lang === 'zh' ? !CJK.test(body) || !CJK.test(title) : CJK.test(text)) issues.push('language');
-  if (lang === 'zh') { if (zhLen(title) > 14) issues.push('title_length'); if (zhLen(body) > 42) issues.push('body_length'); }
-  else { if (words(title) > 7 || String(title).length > 40) issues.push('title_length'); if (words(body) > 25) issues.push('body_length'); }
+  if (lineCount(title, KEY_FIT.title.size) > KEY_FIT.title.lines) issues.push('title_length');
+  if (lineCount(body, KEY_FIT.body.size) > KEY_FIT.body.lines) issues.push('body_length');
   if (BAN[lang].some(r => r.test(text))) issues.push('banned_phrase');
   const nums = numbersIn(text).map(Math.abs);
   if (nums.some(n => !c.allowed.includes(n))) issues.push('number_not_in_evidence');
@@ -318,7 +352,7 @@ export function checkCopy({ title, body }, c, lang) {
     if (MEASURED[lang].test(text)) issues.push('measured_claim_from_notes');
   } else if (c.strength !== 'strong' && (lang === 'zh' ? /进步|越来越好/.test(title) : /\b(improv|better|stronger)/i.test(title))) issues.push('overclaim');
   if (c.pattern === 'compare' || (c.pattern === 'strip' && c.shape !== 'recurring')) {
-    const okWindow = lang === 'zh' ? /最近(有记录的)?3场/.test(body) && /之前/.test(body) : /last 3/i.test(body) && /\b(before|previous|earlier)\b/i.test(body);
+    const okWindow = lang === 'zh' ? /最近(有记录的)?3场/.test(body) && /之前/.test(body) : /last 3/i.test(body) && /\b(before|previous|earlier)\b|\b(up|down) from\b/i.test(body);
     if (!okWindow) issues.push('window');
   }
   return issues;
@@ -468,13 +502,14 @@ export function candidateFacts(c, lang) {
 
 export const KEY_RULES = `KEY INSIGHT (Engine V2):
 - The engine already found and ranked the candidates in key_candidates and computed every number. Pick ONE candidate_id (the first is the strongest; choose another only if the notes make it more specific and useful) and write its title and body. If key_candidates is empty, return null.
-- Title: the takeaway, like a coach would say it. English max 7 words; Chinese max 14 characters. Body: what the chart counts, over which matches, and the numbers. English max 25 words; Chinese max 40 characters.
+- Title: the takeaway, like a coach would say it. Body: what the chart counts, over which matches, and the numbers.
+- The card is narrow (text column about 172px): the title must fit in 2 lines and the body in 3 lines. That is about 30 characters for an English title and 60 for an English body, 12 Chinese characters for a title and 34 for a body (punctuation counts). Copy that is longer is thrown away. Leave the skill name to the title and keep the body to the numbers.
 - Use ONLY the candidate's numbers. Never compute, round differently, add percentages or add other numbers. Every number you write must be one of them.
 - source "notes_tags" is self-reported: say the player noted / mentioned it (「你提到」「记录里」). Never say mistakes were counted, points were won or lost with that skill, or that a skill improved, got better or worse. A match without notes is not evidence that something didn't happen.
 - source "scores" is measured: you may say games were won or the margin changed, but don't claim why.
 - Only strength "strong" may use outcome words in the title ("heading the right way"); otherwise stay measured.
 - Time words: "your last 3 matches", "the 3 before", "lately"; Chinese 「最近3场」「之前3场」「这几场」. If skipped_matches_without_notes > 0, say "noted matches" / 「有记录的」. Never "matches 1–3" or 「第1至第3场」「第N场」.
-- For compare and for a strip that changed (fading / emerging), the body must name both groups: the last 3 and the 3 before.
+- For compare and for a strip that changed (fading / emerging), the body must name both groups: the last 3 and the 3 before ("up from 1" / 「之前3场有1场」 is enough).
 - reference is a correct wording: improve it with a concrete detail from the notes of those matches if there is one, otherwise use it.
 BUILD NEXT / STRENGTHS (Engine V2):
 - Write one item for each of build_candidates / strength_candidates, in the same order, with its topic_id. Do not add others.

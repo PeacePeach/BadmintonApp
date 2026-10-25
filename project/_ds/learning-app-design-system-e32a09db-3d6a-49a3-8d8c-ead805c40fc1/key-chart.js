@@ -8,7 +8,7 @@
    quote: indices of the values the body copy quotes, written at their points (trend; default first and latest).
    unit: a suffix for quoted values (e.g. "%"). xLabels: the text under each match (default 1..n), per language.
    yLabels: true shows the tick numbers on the left (off by default since 2026-10-25).
-   The chart fills its box (half the tile, as tall as the text column) and redraws when the box changes size.
+   The chart fills its box (4 of 10 parts of the tile, as tall as the text column) and redraws when the box changes size.
      trend    one value per match, oldest left; line + flat dots, the first and latest values written at their points
      compare  one bar per match; matches before data-split are "earlier" (grey), the rest recent (blue);
               each group's total is written over it

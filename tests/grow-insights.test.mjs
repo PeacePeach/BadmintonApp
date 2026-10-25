@@ -35,9 +35,8 @@ test('regression: "fewer net errors lately" [1,1,1,0,1,0] is a Match Strip, neve
     assert.equal(k.chart.pattern, 'strip');
   }
   const en = G.finalizeKey([c], null, 'en');
-  assert.match(en.body, /noted/);
-  assert.match(en.body, /1 of your last 3 matches/);
-  assert.match(en.body, /all 3 before that/);
+  assert.equal(en.title, 'Net play is coming up less');
+  assert.equal(en.body, 'Noted as costing points in 1 of your last 3 matches, down from 3.');
   assert.doesNotMatch(en.title + en.body, /improv|better|mistakes? (dropped|fell)/i);
   const zh = G.finalizeKey([c], null, 'zh');
   assert.match(zh.body, /最近3场只有1场提到网前丢分/);
@@ -55,7 +54,7 @@ test('trend: average point margin per game, quoted first and latest values', () 
   assert.equal(c.strength, 'strong');
   const en = G.finalizeKey([c], null, 'en'), zh = G.finalizeKey([c], null, 'zh');
   copyOk(en, 'en'); copyOk(zh, 'zh');
-  assert.equal(en.body, 'Across your last 6 matches, your average margin per game went from -4.5 to +2.5 points.');
+  assert.equal(en.body, 'From -4.5 to +2.5 points per game over your last 6 matches.');
   assert.equal(zh.body, '最近6场，你每局的平均分差从-4.5分变成了+2.5分。');
 });
 
@@ -76,7 +75,7 @@ test('compare: games won, last 3 vs the 3 before; bars are games won per match a
   assert.deepEqual(c.numbers, { r: 6, rn: 7, p: 1, pn: 7 });
   const en = G.finalizeKey([c], null, 'en');
   copyOk(en, 'en');
-  assert.equal(en.body, 'You won 6 of 7 games in your last 3 matches, compared with 1 of 7 in the 3 before.');
+  assert.equal(en.body, 'You won 6 of 7 games in your last 3 matches, up from 1 of 7.');
   const zh = G.finalizeKey([c], null, 'zh');
   copyOk(zh, 'zh');
   assert.equal(zh.body, '最近3场打了7局赢了6局，之前3场7局赢了1局。');
@@ -89,7 +88,7 @@ test('strip: recurring cost tag (4 of 6, 2 of the last 3)', () => {
   const en = G.finalizeKey([c], null, 'en'), zh = G.finalizeKey([c], null, 'zh');
   copyOk(en, 'en'); copyOk(zh, 'zh');
   assert.equal(en.title, 'Serve keeps coming up');
-  assert.equal(en.body, 'You noted your serve costing you points in 4 of your last 6 matches, including 2 of the last 3.');
+  assert.equal(en.body, 'Noted as costing points in 4 of your last 6 matches.');
   assert.equal(zh.title, '发球问题这几场反复出现');
   assert.equal(zh.body, '最近6场里有4场你提到发球丢分，最近3场就有2场。');
 });
@@ -106,7 +105,7 @@ test('strip: emerging cost tag', () => {
   const c = G.keyCandidates(tagRow('Footwork', [0, 0, 0, 1, 1, 1])).find(x => x.tag === 'Footwork');
   assert.equal(c.shape, 'emerging'); assert.equal(c.strength, 'strong');
   for (const lang of BOTH) copyOk(G.finalizeKey([c], null, lang), lang);
-  assert.equal(G.finalizeKey([c], null, 'en').body, 'You noted footwork costing you points in 3 of your last 3 matches, and none of the 3 before.');
+  assert.equal(G.finalizeKey([c], null, 'en').body, 'Noted as costing points in 3 of your last 3 matches, up from none.');
 });
 
 test('weak evidence: one match of difference is not an insight', () => {
@@ -133,7 +132,7 @@ test('missing notes are skipped, never counted as "not noted"; the copy says "no
   assert.equal(c.match_ids.length, 6);
   const en = G.finalizeKey([c], null, 'en'), zh = G.finalizeKey([c], null, 'zh');
   copyOk(en, 'en'); copyOk(zh, 'zh');
-  assert.match(en.body, /your last 3 noted matches/);
+  assert.match(en.body, /the last 3 with notes/);
   assert.match(zh.body, /最近有记录的3场/);
 });
 
@@ -194,7 +193,7 @@ test('validator: mechanical windows, wrong language, missing numbers, overlong c
 test('validator: direction must match the evidence', () => {
   fresh();
   const c = G.keyCandidates(tagRow('Net', [1, 1, 1, 0, 1, 0])).find(x => x.tag === 'Net');
-  assert.deepEqual(G.checkCopy({ title: 'Net play is coming up less', body: 'You noted net play costing points in 1 of your last 3 matches, compared with all 3 before that.' }, c, 'en'), []);
+  assert.deepEqual(G.checkCopy({ title: 'Net play is coming up less', body: 'You noted it in 1 of your last 3 matches, down from all 3.' }, c, 'en'), []);
   assert.ok(G.checkCopy({ title: 'Net play keeps coming up more', body: 'You noted net play costing points again in 1 of your last 3 matches and all 3 before that.' }, c, 'en').includes('direction'));
 });
 
@@ -206,11 +205,23 @@ test('validator: comparison copy must name both groups', () => {
 
 test('good AI copy is kept as written (with a detail from the notes)', () => {
   const c = serveCand();
-  const ai = { candidate_id: c.id, title: 'Your serve keeps coming up', body: 'You noted short serves costing you points in 4 of your last 6 matches, including 2 of the last 3.' };
+  const ai = { candidate_id: c.id, title: 'Short serves keep coming up', body: 'You noted short serves costing points in 4 of your last 6.' };
   const k = G.finalizeKey([c], ai, 'en');
   assert.equal(k.copy_source, 'ai'); assert.equal(k.body, ai.body);
-  const zc = serveCand(), zai = { candidate_id: zc.id, title: '发球问题这几场反复出现', body: '最近6场有4场你提到发小球丢分，最近3场就有两场。' };
+  const zc = serveCand(), zai = { candidate_id: zc.id, title: '发小球问题反复出现', body: '最近6场有4场你提到发小球丢分，最近3场就有两场。' };
   assert.equal(G.finalizeKey([zc], zai, 'zh').copy_source, 'ai');
+});
+
+test('fit (Han): title at most 2 lines, body at most 3 in the 6:4 tile; longer AI copy falls back to the template', () => {
+  const c = serveCand();
+  const long = { candidate_id: c.id, title: 'Your serve keeps costing you points in close matches', body: 'You noted your serve costing you points in 4 of your last 6 matches, including 2 of the last 3.' };
+  const iss = G.checkCopy(long, c, 'en');
+  assert.ok(iss.includes('title_length') && iss.includes('body_length'), String(iss));
+  const k = G.finalizeKey([c], long, 'en');
+  assert.equal(k.copy_source, 'template');
+  assert.ok(G.lineCount(k.title, 17) <= 2 && G.lineCount(k.body, 14) <= 3);
+  assert.ok(G.checkCopy({ title: '发球问题这几场一直反复出现，最近三场都没有什么改善', body: '最近6场里有4场你提到发球丢分。' }, c, 'zh').includes('title_length'));
+  assert.ok(G.checkCopy({ title: '发球问题反复出现', body: '最近6场里有4场你提到发球丢分，最近3场有2场，发小球和发高远球都有，接下来练球时可以多注意一下发球的节奏。' }, c, 'zh').includes('body_length'));
 });
 
 test('every template passes its own checks, in both languages, for every shape', () => {
