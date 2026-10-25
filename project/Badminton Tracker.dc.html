@@ -947,7 +947,7 @@ button:disabled{cursor:default !important;}
               <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding:4px 6px 0;">{{ tx.yourSide }}</div>
               <sc-for list="{{ sideA }}" as="s" hint-placeholder-count="1">
                 <div onClick="{{ s.select }}" style="height:56px;border-radius:99px;background:var(--surface-muted);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;border:1px solid {{ s.border }};">
-                  <div style="width:40px;height:40px;border-radius:50%;background: {{ s.avBg }};color: {{ s.avFg }};display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ s.initials }}<sc-if value="{{ s.empty }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import></sc-if></div>
+                  <div class="rw-avatar-fill {{ s.avCls }}" style="width:40px;height:40px;border-radius:50%;background: {{ s.avBg }};color: {{ s.avFg }};display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ s.initials }}<sc-if value="{{ s.empty }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import></sc-if></div>
                   <div style="flex:1;font:500 15px/1 var(--font-sans);color: {{ s.fg }};">{{ s.name }}</div>
                   <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding-right:12px;">{{ s.role }}</div>
                 </div>
@@ -956,7 +956,7 @@ button:disabled{cursor:default !important;}
               <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding:0 6px;">{{ tx.opponents }}</div>
               <sc-for list="{{ sideB }}" as="s" hint-placeholder-count="1">
                 <div onClick="{{ s.select }}" style="height:56px;border-radius:99px;background:var(--surface-muted);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;border:1px solid {{ s.border }};">
-                  <div style="width:40px;height:40px;border-radius:50%;background: {{ s.avBg }};color: {{ s.avFg }};display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ s.initials }}<sc-if value="{{ s.empty }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import></sc-if></div>
+                  <div class="rw-avatar-fill {{ s.avCls }}" style="width:40px;height:40px;border-radius:50%;background: {{ s.avBg }};color: {{ s.avFg }};display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ s.initials }}<sc-if value="{{ s.empty }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import></sc-if></div>
                   <div style="flex:1;font:500 15px/1 var(--font-sans);color: {{ s.fg }};">{{ s.name }}</div>
                   <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding-right:12px;">{{ s.role }}</div>
                 </div>
@@ -980,7 +980,7 @@ button:disabled{cursor:default !important;}
                 <div style="display:flex;flex-direction:column;gap:8px;">
                   <sc-for list="{{ pickList }}" as="p" hint-placeholder-count="5">
                     <div onClick="{{ p.pick }}" style="height:60px;border-radius:99px;background:var(--surface-primary);display:flex;align-items:center;gap:12px;padding:0 10px;cursor:pointer;" style-active="transform:scale(.98);">
-                      <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
+                      <div class="rw-avatar-fill {{ p.avCls }}" style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
                       <div style="flex:1;font:500 15px/1 var(--font-sans);">{{ p.name }}</div>
                       <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);padding-right:12px;">{{ p.sub }}</div>
                     </div>
@@ -1157,14 +1157,14 @@ button:disabled{cursor:default !important;}
         <div style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:12px;">
           <sc-for list="{{ detail.sideA }}" as="p" hint-placeholder-count="1">
             <div style="display:flex;align-items:center;gap:12px;">
-              <div style="width:40px;height:40px;border-radius:50%;background: {{ p.avBg }};color: {{ p.avFg }};display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
+              <div class="rw-avatar-fill {{ p.avCls }}" style="width:40px;height:40px;border-radius:50%;background: {{ p.avBg }};color: {{ p.avFg }};display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
               <div style="font:500 16px/1 var(--font-sans);overflow-wrap:anywhere;">{{ p.name }}</div>
             </div>
           </sc-for>
           <sc-if value="{{ detail.hasSideB }}" hint-placeholder-val="{{ true }}"><div style="height:1px;background:var(--divider);margin:4px 0;"></div></sc-if>
           <sc-for list="{{ detail.sideB }}" as="p" hint-placeholder-count="1">
             <div onClick="{{ p.open }}" style="display:flex;align-items:center;gap:12px;cursor:pointer;">
-              <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
+              <div class="rw-avatar-fill {{ p.avCls }}" style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
               <div style="font:500 16px/1 var(--font-sans);flex:1;overflow-wrap:anywhere;">{{ p.name }}</div>
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 24 }}" color="var(--grey-400)" hint-size="24px,24px"></x-import>
             </div>
@@ -1174,7 +1174,7 @@ button:disabled{cursor:default !important;}
             <div style="font:500 12px/1.3 var(--font-sans);color:var(--text-secondary);">{{ tx.sidesUnconfirmed }}</div>
             <sc-for list="{{ detail.others }}" as="p" hint-placeholder-count="1">
               <div style="display:flex;align-items:center;gap:12px;">
-                <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
+                <div class="rw-avatar-fill {{ p.avCls }}" style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
                 <div style="font:500 16px/1 var(--font-sans);flex:1;overflow-wrap:anywhere;">{{ p.name }}</div>
               </div>
             </sc-for>
@@ -1259,7 +1259,7 @@ button:disabled{cursor:default !important;}
         <div style="display:flex;flex-direction:column;gap:8px;">
           <sc-for list="{{ playerList }}" as="p" hint-placeholder-count="6">
             <div onClick="{{ p.open }}" style="min-height:64px;border-radius:99px;background:var(--surface-primary);display:flex;align-items:center;gap:12px;padding:10px;cursor:pointer;">
-              <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 14px/1 var(--font-sans);flex-shrink:0;">{{ p.initials }}</div>
+              <div class="rw-avatar-fill {{ p.avCls }}" style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 14px/1 var(--font-sans);flex-shrink:0;">{{ p.initials }}</div>
               <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;">
                 <div style="font:500 15px/1.2 var(--font-sans);">{{ p.name }}</div>
                 <div style="font:400 12px/1.2 var(--font-sans);color:var(--text-secondary);">{{ p.sub }}</div>
@@ -1284,7 +1284,7 @@ button:disabled{cursor:default !important;}
           <div style="width:48px;"></div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
-          <div style="width:88px;height:88px;border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 28px/1 var(--font-sans);">{{ profile.initials }}</div>
+          <div class="rw-avatar-fill {{ profile.avCls }}" style="width:88px;height:88px;border-radius:50%;color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 28px/1 var(--font-sans);">{{ profile.initials }}</div>
           <div style="font:600 26px/1.2 var(--font-sans);">{{ profile.name }}</div>
           <div style="font:400 14px/1 var(--font-sans);color:var(--text-secondary);">{{ profile.sub }}</div>
         </div>
@@ -3843,8 +3843,8 @@ class Component extends DCLogic {
       const roles = { partner: this.t('partner'), opp1: this.t(log.type === 'Doubles' ? 'opponent1' : 'opponent'), opp2: this.t('opponent2') };
       const slot = k => {
         const id = log[k], act = log.active === k;
-        return { role: roles[k], name: id ? this.nm(id) : this.t('selectRole', { role: roles[k] }), initials: id ? this.ini(id) : '', empty: !id, fg: id ? 'var(--text-primary)' : 'var(--text-secondary)',
-          avBg: id ? 'var(--icon-badge-bg)' : 'transparent', avFg: id ? 'var(--icon-badge-fg)' : 'var(--text-secondary)', border: act ? 'var(--ghost-button-outline-highlight)' : 'transparent',
+        return { role: roles[k], name: id ? this.nm(id) : this.t('selectRole', { role: roles[k] }), initials: id ? this.ini(id) : '', avCls: id ? this.avDir(id) : '', empty: !id, fg: id ? 'var(--text-primary)' : 'var(--text-secondary)',
+          avBg: id ? '' : 'transparent', avFg: id ? 'var(--icon-badge-fg)' : 'var(--text-secondary)', border: act ? 'var(--ghost-button-outline-highlight)' : 'transparent',
           select: () => this.setLog({ active: k }) };
       };
       const me = { role: this.t('me'), name: this.nm('me'), initials: this.ini('me'), fg: 'var(--text-primary)', avBg: A, avFg: 'var(--action-on-primary)', border: 'transparent', select: () => {} };
@@ -3855,7 +3855,7 @@ class Component extends DCLogic {
       const chosen = ['partner', 'opp1', 'opp2'].map(k => log[k]).filter(Boolean);
       v.pickList = s.players.filter(p => p.id !== 'me' && !chosen.includes(p.id) && p.name.toLowerCase().includes(q)).map(p => {
         const r = log.active === 'partner' ? this.with(p.id) : this.vs(p.id);
-        return { name: p.name, initials: this.ini(p.id), sub: r.n ? this.t(log.active === 'partner' ? 'together' : 'h2h', { r: this.recWords(r) }) : this.t('newPlayer'), pick: () => this.pick(p.id) };
+        return { name: p.name, initials: this.ini(p.id), avCls: this.avDir(p.id), sub: r.n ? this.t(log.active === 'partner' ? 'together' : 'h2h', { r: this.recWords(r) }) : this.t('newPlayer'), pick: () => this.pick(p.id) };
       });
       v.pickEmpty = !v.pickList.length && !v.canAddNew && (q
         ? empty('no-results', this.t('noPlayersFound'), this.t('noPlayersFoundLogBody'))
@@ -4021,9 +4021,9 @@ class Component extends DCLogic {
       v.detail = {
         dateLong: this.date(m.date, true), type: this.typeLabel(m.type), resultWord: r.even ? this.t('wlShort', { w: r.us, l: r.them }) : this.t(r.win ? 'resultWin' : 'resultLoss'), gamesWon: `${r.us}–${r.them}`,
         sideA: [{ name: this.t('you') + ' · ' + this.nm('me'), initials: this.ini('me'), avBg: A, avFg: 'var(--action-on-primary)' }]
-          .concat(m.partner ? [{ name: this.nm(m.partner), initials: this.ini(m.partner), avBg: 'var(--icon-badge-bg)', avFg: 'var(--icon-badge-fg)' }] : []),
-        sideB: this.sides(m).opps.map(id => ({ name: this.nm(id), initials: this.ini(id), open: openP(id) })),
-        others: this.sides(m).others.map(id => ({ name: this.nm(id), initials: this.ini(id) })), hasOthers: this.sides(m).others.length > 0, hasSideB: this.sides(m).opps.length > 0,
+          .concat(m.partner ? [{ name: this.nm(m.partner), initials: this.ini(m.partner), avCls: this.avDir(m.partner), avBg: '', avFg: 'var(--icon-badge-fg)' }] : []),
+        sideB: this.sides(m).opps.map(id => ({ name: this.nm(id), initials: this.ini(id), avCls: this.avDir(id), open: openP(id) })),
+        others: this.sides(m).others.map(id => ({ name: this.nm(id), initials: this.ini(id), avCls: this.avDir(id) })), hasOthers: this.sides(m).others.length > 0, hasSideB: this.sides(m).opps.length > 0,
         aShort: m.partner ? this.t('you') + ' & ' + this.first(m.partner).slice(0, 1) : this.t('you'),
         // A game without a score shows its result; games whose order isn't known are one line of games won by each side.
         rows: m.games.map((g, i) => ({ g, i })).filter(x => !(x.g && x.g.u)).map(({ g, i }) => {
@@ -4051,7 +4051,7 @@ class Component extends DCLogic {
       v.playerList = s.players.filter(p => p.id !== 'me' && p.name.toLowerCase().includes(q)).map(p => {
         const o = this.vs(p.id), w = this.with(p.id);
         const parts = [o.n ? this.t('h2h', { r: this.recWords(o) }) : null, w.n ? this.t('partnerRec', { r: this.recWords(w) }) : null].filter(Boolean);
-        return { name: p.name, initials: this.ini(p.id), sub: parts.join(' · ') || this.t('noMatchesYet'), open: () => this.go('player', { playerId: p.id }) };
+        return { name: p.name, initials: this.ini(p.id), avCls: this.avDir(p.id), sub: parts.join(' · ') || this.t('noMatchesYet'), open: () => this.go('player', { playerId: p.id }) };
       });
       v.playersEmpty = !v.playerList.length && (q
         ? empty('no-results', this.t('noPlayersFound'), this.t('noPlayersFoundBody'))
@@ -4064,7 +4064,7 @@ class Component extends DCLogic {
       const id = s.playerId, o = this.vs(id), si = this.vs(id, 'Singles'), du = this.vs(id, 'Doubles'), w = this.with(id);
       const inv = all.filter(m => m.opps.includes(id) || m.partner === id);
       const st = (label, r) => ({ label, value: r.n ? r.label : '—', sub: r.n ? this.t('pctWinRate', { p: r.pctStr }) : this.t('noMatchesShort'), fg: 'var(--text-primary)' });
-      v.profile = { name: this.nm(id), initials: this.ini(id), sub: this.t('playedTogether', { n: inv.length }),
+      v.profile = { name: this.nm(id), initials: this.ini(id), avCls: this.avDir(id), sub: this.t('playedTogether', { n: inv.length }),
         stats: [st(this.t('overallH2H'), o), st(this.t('singlesH2H'), si), st(this.t('doublesH2H'), du), st(this.t('asPartner'), w)],
         recent: inv.slice(0, 5).map(m => this.card(m)),
         recentEmpty: !inv.length && { ...empty('no-matches', this.t('noTogether'), this.t('noTogetherBody')), style: { padding: '8px 16px' } } };

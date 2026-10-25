@@ -17,7 +17,7 @@
      Match ........................ .rw-surface.rw-tile.rw-match (+ .rw-caption, .rw-name, .rw-score)
      Match Result (Win, Loss) ..... .rw-result.is-win | .is-loss
      Match Players (Singles, Doubles) .rw-players[.is-doubles] > .rw-avatar.rw-avatar-sm
-     Avatar / Letter .............. .rw-avatar[.rw-avatar-sm][.is-dir-1..6: gradient direction][.is-me: B75, your own avatar]
+     Avatar / Letter .............. .rw-avatar[.rw-avatar-sm][.is-dir-1..6: gradient direction][.is-me: B75, your own avatar]; fill only: .rw-avatar-fill[.is-dir-N]
      Bottom Nav ................... .rw-nav > .rw-glass.rw-nav-bar > .rw-nav-item[.is-active]
      App bar ...................... .rw-appbar-scrim (progressive blur + fade, shown once scrolled) + .rw-status + .rw-appbar-action; .rw-title-fade
      Greeting ..................... .rw-greeting > .rw-title.rw-text-gradient + .rw-lead
@@ -133,7 +133,10 @@
 .rw-result.is-draw{color:var(--rw-draw);}
 /* Avatar / Letter (40px); Match Players uses the 32px size. Gradient fill only, it fades into the tile (Figma 360:8020);
    .is-dir-N picks one of six directions (the app sets it from the player ID). */
-.rw-avatar{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;--rw-avatar-angle:139deg;background:linear-gradient(var(--rw-avatar-angle),var(--rw-avatar-grad-from) 15%,var(--rw-avatar-grad-to) 88%);color:var(--rw-avatar-fg);font:var(--rw-type-avatar);letter-spacing:var(--rw-tracking);}
+.rw-avatar{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--rw-avatar-fg);font:var(--rw-type-avatar);letter-spacing:var(--rw-tracking);}
+/* The letter avatar fill on its own, for older (V1) screens that keep their own size and type (Han, 2026-10-25:
+   every letter avatar uses this gradient). */
+.rw-avatar,.rw-avatar-fill{--rw-avatar-angle:139deg;background:linear-gradient(var(--rw-avatar-angle),var(--rw-avatar-grad-from) 15%,var(--rw-avatar-grad-to) 88%);}
 .rw-avatar-sm{width:32px;height:32px;font:var(--rw-type-avatar-sm);}
 /* Centre the capital letter itself, not the font's line box: Poppins carries a tall ascender, so Safari drew
    the letters about 2px above the middle of the circle (Han, 2026-10-23). Trim to cap height and baseline,
@@ -142,12 +145,12 @@
   .rw-avatar{display:block;box-sizing:border-box;text-align:center;white-space:nowrap;text-box:trim-both cap alphabetic;padding-block:calc((40px - 1cap) / 2);}
   .rw-avatar-sm{padding-block:calc((32px - 1cap) / 2);}
 }
-.rw-avatar.is-dir-1{--rw-avatar-angle:139deg;}
-.rw-avatar.is-dir-2{--rw-avatar-angle:224deg;}
-.rw-avatar.is-dir-3{--rw-avatar-angle:44deg;}
-.rw-avatar.is-dir-4{--rw-avatar-angle:314deg;}
-.rw-avatar.is-dir-5{--rw-avatar-angle:180deg;}
-.rw-avatar.is-dir-6{--rw-avatar-angle:90deg;}
+:is(.rw-avatar,.rw-avatar-fill).is-dir-1{--rw-avatar-angle:139deg;}
+:is(.rw-avatar,.rw-avatar-fill).is-dir-2{--rw-avatar-angle:224deg;}
+:is(.rw-avatar,.rw-avatar-fill).is-dir-3{--rw-avatar-angle:44deg;}
+:is(.rw-avatar,.rw-avatar-fill).is-dir-4{--rw-avatar-angle:314deg;}
+:is(.rw-avatar,.rw-avatar-fill).is-dir-5{--rw-avatar-angle:180deg;}
+:is(.rw-avatar,.rw-avatar-fill).is-dir-6{--rw-avatar-angle:90deg;}
 .rw-avatar.is-me{background:var(--rw-avatar-me-bg);color:var(--rw-avatar-me-fg);}
 /* Match Players: Singles = 2 in a row, Doubles = 2 x 2 grid. */
 .rw-players{display:grid;grid-auto-flow:column;gap:4px;flex-shrink:0;}

@@ -169,8 +169,9 @@
   --rw-color-scrim: color-mix(in srgb, var(--rw-n75) 50%, transparent);      /* behind a sheet: N75 at 50% (Figma 236:9207) */
   /* Avatars */
   --rw-color-avatar-bg: var(--rw-n150);              /* the gradient end colour (at 10%) */
-  --rw-color-avatar-grad-from: #3e3e3e;               /* gradient start: Figma 360:8020 unbound #3E3E3E kept as is (Han approved, 2026-10-23) */
-  --rw-color-avatar-grad-to: color-mix(in srgb, var(--rw-color-avatar-bg) 50%, transparent); /* gradient end: N150 at 50% (Figma has 10%; Han chose 50%, 2026-10-23) */
+  /* Han, 2026-10-25: the whole avatar background at 70% (it read too dark on the Players sheet), so both stops x0.7. */
+  --rw-color-avatar-grad-from: color-mix(in srgb, #3e3e3e 70%, transparent); /* gradient start: Figma 360:8020 unbound #3E3E3E (Han approved, 2026-10-23), at 70% */
+  --rw-color-avatar-grad-to: color-mix(in srgb, var(--rw-color-avatar-bg) 35%, transparent); /* gradient end: N150 at 35% (Figma 10%; Han chose 50%, 2026-10-23; x0.7 on 2026-10-25) */
   --rw-color-avatar-fg: var(--rw-n600);               /* letter N600 (Figma 360:8022) */
   --rw-color-avatar-me-bg: var(--rw-b75);             /* your own avatar (Han, 2026-10-23: Figma Player 228:8826) */
   --rw-color-avatar-me-fg: var(--rw-n75);             /* Figma #1B1A1D is unbound; nearest Foundation N75 */
