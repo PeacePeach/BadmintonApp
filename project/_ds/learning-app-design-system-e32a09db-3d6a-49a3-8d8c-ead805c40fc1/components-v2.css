@@ -430,12 +430,12 @@
 
 /* Focus ListRow: title, progress line, optional source tag; dots and a chevron on the right. The whole tile is the button. */
 .rw-focus-row{width:100%;border:none;text-align:left;color:inherit;display:flex;align-items:center;gap:var(--rw-focus-row-gap);}
-.rw-focus-row-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;}   /* tag to title 4px (Han 2026-10-25) */
+.rw-focus-row-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;}   /* tag to title 8px (Han 2026-10-25) */
 .rw-focus-row-head{display:flex;flex-direction:column;gap:4px;}
 .rw-focus-row-sub{font:var(--rw-type-focus-sub);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
 .rw-focus-row-end{display:flex;align-items:center;gap:var(--rw-focus-row-gap);flex-shrink:0;color:var(--rw-text-secondary);}
 /* Source tag above the title: B100 Insights icon (Lucide ChartColumn 14) + an uppercase label like .rw-label on Grow (Han 2026-10-25). */
-.rw-focus-tag{display:flex;align-items:center;gap:6px;font:var(--rw-type-eyebrow);letter-spacing:var(--rw-tracking);text-transform:uppercase;color:var(--rw-text-secondary);}
+.rw-focus-tag{display:flex;align-items:center;gap:4px;font:var(--rw-type-eyebrow);letter-spacing:var(--rw-tracking);text-transform:uppercase;color:var(--rw-text-secondary);}
 .rw-focus-tag>:first-child{flex-shrink:0;color:var(--rw-focus-tag-icon);}
 /* Focus list: the stack of Focus ListRows. */
 .rw-focus-list{display:flex;flex-direction:column;gap:var(--rw-focus-list-gap);}
