@@ -501,8 +501,9 @@
 /* Match Detail (Figma 365:8096). Game table: header in caption N400, one row per game with its result (Match Result
    dot + Win / Loss) and both scores; the side that won the game is N800, the other N400. Rows split by the tile divider.
    Notes tile: one entry per note (label N800, tags N400 after a 16px divider, text body N600), split by the divider.
-   Existing V2 tokens only; tile radius and padding are the DS tile values (Figma draws 10px radius, 20px padding). */
-.rw-game-table{border-radius:var(--rw-tile-radius);padding:8px var(--rw-tile-pad);display:flex;flex-direction:column;}
+   Existing V2 tokens only; tile radius is the DS tile value (Figma draws 10px). Padding 20px as in Figma: the DS 16px
+   tile pad looked too tight above the first note (Han 2026-10-25). */
+.rw-game-table{border-radius:var(--rw-tile-radius);padding:8px 20px;display:flex;flex-direction:column;}
 .rw-game-table-row{display:grid;grid-template-columns:1fr 64px 64px;align-items:center;min-height:42px;box-sizing:border-box;padding:12px 0;}
 .rw-game-table-row+.rw-game-table-row{border-top:1px solid var(--rw-color-divider);}
 .rw-game-table-row.is-head{min-height:0;padding:12px 0 8px;font:var(--rw-type-caption);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
@@ -512,7 +513,7 @@
 .rw-game-table-game>.rw-result{height:auto;}
 .rw-game-table-score{text-align:center;font:var(--rw-type-game-score);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);font-variant-numeric:tabular-nums;}
 .rw-game-table-score.is-high{color:var(--rw-text-primary);}
-.rw-notes{border-radius:var(--rw-tile-radius);padding:var(--rw-tile-pad);display:flex;flex-direction:column;gap:18px;}
+.rw-notes{border-radius:var(--rw-tile-radius);padding:20px;display:flex;flex-direction:column;gap:18px;}
 .rw-note{display:flex;flex-direction:column;gap:6px;}
 .rw-note+.rw-note{border-top:1px solid var(--rw-color-divider);padding-top:18px;}
 .rw-note-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
