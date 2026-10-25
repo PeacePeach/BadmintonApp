@@ -7,6 +7,7 @@
    min/max/ticks the scale is picked from the data (trend: the data's range; compare/strip: from 0).
    quote: indices of the values the body copy quotes, written at their points (trend; default first and latest).
    unit: a suffix for quoted values (e.g. "%"). xLabels: the text under each match (default 1..n), per language.
+   yLabels: true shows the tick numbers on the left (off by default since 2026-10-25).
    The chart fills its box (half the tile, as tall as the text column) and redraws when the box changes size.
      trend    one value per match, oldest left; line + flat dots, the first and latest values written at their points
      compare  one bar per match; matches before data-split are "earlier" (grey), the rest recent (blue);
@@ -32,14 +33,16 @@
   function svg(o, W, H) {
     const vals = o.values, n = vals.length, labels = o.labels !== false;
     const ticks = o.ticks;
-    const L = labels ? 18 : 4, R = 4, T = 5, B = labels ? 16 : 4, P = 9; // P: inner padding so the 14px pill stays inside
+    // No y-axis numbers by default (Han, 2026-10-25): the quoted values are written on the chart, so the frame starts
+    // at the first match. yLabels: true (data-ylabels="true") brings the tick numbers back.
+    const yl = labels && o.yLabels, L = yl ? 18 : 4, R = 4, T = 5, B = labels ? 16 : 4, P = 9; // P: inner padding so the 14px pill stays inside
     const X = i => L + P + (n > 1 ? i * (W - L - R - 2 * P) / (n - 1) : (W - L - R - 2 * P) / 2), PH = H - T - B;
     const Y = v => T + PH - (v - o.min) / ((o.max - o.min) || 1) * PH;
     const id = 'rw-kc-' + (++uid);
     let g = '', m = '';
     ticks.forEach(t => {
       g += `<line class="rw-key-chart-grid-h" x1="${L}" x2="${W - R}" y1="${Y(t)}" y2="${Y(t)}"/>`;
-      if (labels) g += `<text x="${L - 6}" y="${Y(t) + 3}" text-anchor="end">${fmt(t)}</text>`;
+      if (yl) g += `<text x="${L - 6}" y="${Y(t) + 3}" text-anchor="end">${fmt(t)}</text>`;
     });
     for (let i = 0; i < n; i++) {
       g += `<line class="rw-key-chart-grid-v" x1="${X(i)}" x2="${X(i)}" y1="${T}" y2="${H - B + (labels ? 3 : 0)}"/>`;
@@ -74,7 +77,7 @@
   function draw(el) {
     const r = el.getBoundingClientRect(), W = Math.round(r.width), H = Math.round(r.height);
     if (!W || !H) return;
-    const d = el.dataset, key = [W, H, d.kind, d.values, d.labels, d.min, d.max, d.ticks, d.quote, d.split, d.unit, d.xlabels].join('|');
+    const d = el.dataset, key = [W, H, d.kind, d.values, d.labels, d.min, d.max, d.ticks, d.quote, d.split, d.unit, d.xlabels, d.ylabels].join('|');
     if (el._rwKey === key) return;
     el._rwKey = key;
     const values = num(d.values), n = values.length, kind = d.kind;
@@ -84,7 +87,7 @@
     const min = d.min != null ? +d.min : Math.min(ticks[0], lo), max = d.max != null ? +d.max : Math.max(ticks[ticks.length - 1], hi);
     const quote = d.quote != null ? num(d.quote) : (kind === 'trend' && n ? [0, n - 1] : []);
     const xLabels = d.xlabels ? d.xlabels.split('|') : [];
-    el.innerHTML = svg({ kind, values, ticks, min, max, quote, xLabels, unit: d.unit || '', split: +(d.split || Math.floor(n / 2)), labels: d.labels !== 'false' }, W, H);
+    el.innerHTML = svg({ kind, values, ticks, min, max, quote, xLabels, unit: d.unit || '', split: +(d.split || Math.floor(n / 2)), labels: d.labels !== 'false', yLabels: d.ylabels === 'true' }, W, H);
   }
 
   const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(es => es.forEach(e => draw(e.target))) : null;
@@ -96,7 +99,7 @@
     const d = el.dataset, set = (k, v) => { if (v == null) delete d[k]; else d[k] = Array.isArray(v) ? v.join(k === 'xlabels' ? '|' : ',') : String(v); };
     set('kind', c.pattern || c.kind); set('values', c.values); set('quote', c.quote); set('split', c.split);
     set('min', c.min); set('max', c.max); set('ticks', c.ticks); set('unit', c.unit); set('xlabels', c.xLabels);
-    set('labels', c.labels === false ? 'false' : null);
+    set('labels', c.labels === false ? 'false' : null); set('ylabels', c.yLabels ? 'true' : null);
     if (!el.classList.contains('rw-key-chart')) el.classList.add('rw-key-chart');
     if (!el._rwSeen) { el._rwSeen = true; if (ro) ro.observe(el); }
     el._rwKey = null; draw(el);
