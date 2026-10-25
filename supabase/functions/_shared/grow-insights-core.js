@@ -17,7 +17,7 @@
 //   compare  a count compared between your last 3 matches and the 3 before (games won, close games won)
 //   strip    whether a self-reported observation was noted in each match (0/1), in order
 
-export const ENGINE_VERSION = '2026-10-26-v7';
+export const ENGINE_VERSION = '2026-10-26-v8';
 export const SKILL_TAGS = ['Serve', 'Return', 'Net', 'Smash', 'Defence', 'Footwork', 'Placement'];
 const WINDOW = 10;     // latest matches the engine reads
 const NOTE_N = 6;      // matches with notes in a Skill Tag window
@@ -481,10 +481,12 @@ export function finalizeKey(cands, ai, lang) {
 // noted as costing points in 2+ of them; its evidence is then counted over those matches only.
 // Strengths: Skill Tags noted as working in 2+ of the same window.
 // One side per skill (Han, 2026-10-26): a tag noted 2+ times on both sides (in different matches) would show up as a
-// strength and a weakness at once, and a Skill Tag can't tell two subskills apart, so it keeps only the side noted
-// in more of the last 3 matches (then in more of the 6, then cost points) in Build Next, Strengths and the Key Insight.
-// Each item carries the player's free-text notes from the matches behind it. advice_basis is "notes" when one of
-// them says something specific, else "general": the advice is then a plainly general drill, never a diagnosis.
+// strength and a weakness at once, and a Skill Tag can't tell two subskills apart, so it keeps only the side with the
+// stronger evidence over the whole window: noted in more of the 6 matches (Han, 2026-10-26: a 4/6 strength is not
+// wiped out by a more recent 2/6 cost), then in more of the last 3 on a tie, then cost points.
+// Each item carries the player's free-text notes from the matches behind it. advice_basis is "notes" when 2+ of
+// them say something specific (one note is not a pattern), else "general": the advice is then a plainly general
+// drill, and the name and evidence may not name a specific shot, side or situation either.
 // focus: [{ topic, status: 'active' | 'completed', completed_at }]
 const noteWindow = matches => { const chron = normalize(matches), noted = chron.filter(hasNotes); return { chron, noted, win: noted.slice(-NOTE_N) }; };
 const has = (m, f, tag) => (m[f] || []).includes(tag);
@@ -494,11 +496,11 @@ export function topicSides(matches) {
     const c = win.filter(m => has(m, 'lt', tag)).length, w = win.filter(m => has(m, 'wt', tag)).length;
     if (c < 2 || w < 2) continue;
     const l3 = win.slice(-3), rc = l3.filter(m => has(m, 'lt', tag)).length, rw = l3.filter(m => has(m, 'wt', tag)).length;
-    out[tag] = rc !== rw ? (rc > rw ? 'cost' : 'worked') : c !== w ? (c > w ? 'cost' : 'worked') : 'cost';
+    out[tag] = c !== w ? (c > w ? 'cost' : 'worked') : rc !== rw ? (rc > rw ? 'cost' : 'worked') : 'cost';
   }
   return out;
 }
-const basisOf = notes => (notes.some(specificNote) ? 'notes' : 'general');
+const basisOf = notes => (notes.filter(specificNote).length >= 2 ? 'notes' : 'general');
 export function buildCandidates(matches, focus = [], max = 4) {
   const { chron, noted, win } = noteWindow(matches);
   if (win.length < 3) return [];
@@ -568,15 +570,18 @@ const CAUSE = { en: /\b(because|due to|caused by|the reason|that's why)\b/i, zh:
 export function checkItem(ai, item, kind, lang) {
   const issues = [], textKey = kind === 'strength' ? 'signal' : 'evidence';
   const name = String(ai.name || '').trim(), ev = String(ai[textKey] || '').trim(), act = String(ai.action || '').trim();
-  const allowed = [item.k, item.n, 3];
+  const allowed = [item.k, item.n, 3], ground = item.basis === 'notes' ? item.notes : [];
   for (const [f, s] of [['name', name], [textKey, ev], ['action', act]]) {
     if (!s) { if (f !== 'action') issues.push(f + ':empty'); continue; }
     if (lang === 'zh' ? !CJK.test(s) : CJK.test(s)) issues.push(f + ':language');
     if (BAN[lang].some(r => r.test(s))) issues.push(f + ':banned_phrase');
     if (numbersIn(s).some(n => !allowed.includes(Math.abs(n)))) issues.push(f + ':number_not_in_evidence');
     if (MEASURED[lang].test(s) && f !== 'action') issues.push(f + ':measured_claim_from_notes');
-    if (ungrounded(s, item.notes, { advice: f === 'action' }).length) issues.push(f + ':detail_not_in_notes');
+    // Details count as grounded only when the notes are a pattern (basis "notes"); a Build Next / Strengths action
+    // must also use only shots and situations the notes name (no suggested shot of its own) and build on them.
+    if (ungrounded(s, ground).length) issues.push(f + ':detail_not_in_notes');
     if (item.basis !== 'notes' && f !== 'action' && CAUSE[lang].test(s)) issues.push(f + ':invented_cause');
+    if (f === 'action' && item.basis === 'notes' && !anchored(s, item.notes)) issues.push('action:not_from_notes');
   }
   if (lang === 'zh' ? zhLen(name) > 8 : words(name) > 4) issues.push('name:length');
   if (numbersIn(name).length) issues.push('name:number');
@@ -723,7 +728,7 @@ export const ITEM_RULES = `BUILD NEXT / STRENGTHS (Engine V2):
 - Write one item for each of build_candidates / strength_candidates, in the same order, with its topic_id. Do not add others. The engine already removed any skill that would be both a strength and a weakness.
 - name: the skill in 1–4 words (Chinese max 8 characters). Make it more specific ("Backhand defence") only when its notes say so. No numbers.
 - evidence / signal: why it is here, conversationally, using only k and n if you use numbers. These are the player's own notes: "you noted", 「你记下」.
-- advice_basis "notes": the action may use what the notes say, one concrete thing to try. advice_basis "general": the notes don't say what went wrong, so don't guess a cause, technique, weakness or match situation anywhere in the item; the engine shows a general drill as the action.
+- advice_basis "notes": the action may build on what the notes say, one concrete thing to try, using only shots and situations the notes name. Don't add a correction of your own (no "use fewer X, try Y" unless the notes say so). advice_basis "general": the notes don't show a pattern, so don't name a specific shot, side, cause or situation anywhere in the item (name the skill plainly); the engine shows a general drill as the action.
 - If returning is true, the player completed a Focus on this before and it came up again since; say so naturally.`;
 
 export const OPPONENT_RULES = `OPPONENT PLANS:

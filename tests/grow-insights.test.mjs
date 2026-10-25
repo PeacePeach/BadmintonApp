@@ -32,16 +32,16 @@ test('regression: "fewer net errors lately" [1,1,1,0,1,0] is never a Comparison,
   for (const lang of BOTH) assert.deepEqual(G.finalizeKey(G.keyCandidates(ms), null, lang), { status: 'insufficient', reason: 'no_candidate' });
   // When the same skill starts being noted as working, that is positive evidence: an emerging "what worked" strip.
   fresh();
-  // Net noted as costing points [1,1,1,0,1,0] and as working in the 4th and 6th match.
-  const turn = [1, 1, 1, 0, 1, 0].map((v, i) => M(W, v ? ['Net'] : ['Other'], i === 3 || i === 5 ? ['Net'] : []));
+  // Net noted as costing points in the first 2 matches, then as working in each of the last 3.
+  const turn = [1, 1, 0, 0, 0, 0].map((v, i) => M(W, v ? ['Net'] : ['Other'], i >= 3 ? ['Net'] : []));
   const c = G.keyCandidates(turn).find(x => x.tag === 'Net');
   assert.ok(c, 'a Net candidate');
   assert.equal(c.pattern, 'strip'); assert.equal(c.side, 'worked'); assert.equal(c.shape, 'emerging'); assert.ok(c.turnaround);
-  assert.deepEqual(c.chart.values, [0, 0, 0, 1, 0, 1]);
+  assert.deepEqual(c.chart.values, [0, 0, 0, 1, 1, 1]);
   for (const lang of BOTH) { const k = G.finalizeKey([c], null, lang); copyOk(k, lang); assert.equal(k.chart.pattern, 'strip'); }
   assert.equal(G.finalizeKey([c], null, 'en').title, 'Net play is starting to pay off');
   assert.equal(G.finalizeKey([c], null, 'zh').title, '网前开始帮你得分了');
-  // One side per skill: Net is now a strength (more of the last 3), so it is not in Build Next as well.
+  // One side per skill: Net is now a strength (3 of 6 against 2 of 6), so it is not in Build Next as well.
   assert.equal(G.buildCandidates(turn).find(x => x.tag === 'Net'), undefined);
 });
 
@@ -438,9 +438,9 @@ test('generic notes: general advice, clearly labelled, and no invented cause or 
   for (const lang of BOTH) for (const t of G.SKILL_TAGS) assert.ok(G.generalAction(t, 'build', lang) && !G.conceptsIn(G.generalAction(t, 'build', lang)).length, t);
 });
 
-test('one side per skill: Build Next and Strengths never share a topic; the stronger finding wins', () => {
+test('one side per skill: Build Next and Strengths never share a topic; the stronger finding over all 6 wins', () => {
   fresh();
-  // Net cost in 4 of 6 (2 of the last 3) and worked in 2 other matches (1 of the last 3): Net stays in Build Next.
+  // Net cost in 4 of 6 and worked in 2 other matches: Net stays in Build Next.
   const ms = [['Net'], ['Net'], [], ['Net'], ['Net'], []].map((lt, i) => M(W, lt.length ? lt : ['Other'], i === 2 || i === 5 ? ['Net'] : []));
   assert.equal(G.topicSides(ms).Net, 'cost');
   const build = G.buildCandidates(ms), str = G.strengthCandidates(ms);
@@ -450,12 +450,58 @@ test('one side per skill: Build Next and Strengths never share a topic; the stro
   assert.ok(str.every(x => !ids.has(x.topic_id)));
   // The Key Insight follows the same side.
   assert.ok(G.keyCandidates(ms, null, { all: true }).filter(c => c.tag === 'Net').every(c => c.side === 'cost'));
-  // Flip the recent matches: Net worked in 2 of the last 3, cost in 1 -> Strengths only.
+  // A tie (3 and 3) goes to the side noted more in the last 3.
   fresh();
-  const ms2 = [['Net'], ['Net'], ['Net'], [], ['Net'], []].map((lt, i) => M(W, lt.length ? lt : ['Other'], i === 3 || i === 5 ? ['Net'] : []));
-  assert.equal(G.topicSides(ms2).Net, 'worked');
-  assert.ok(!G.buildCandidates(ms2).some(x => x.tag === 'Net'));
-  assert.ok(G.strengthCandidates(ms2).some(x => x.tag === 'Net'));
+  const tie = [[], [], [], ['Net'], ['Net'], ['Net']].map((lt, i) => M(W, lt.length ? lt : ['Other'], i < 3 ? ['Net'] : []));
+  assert.equal(G.topicSides(tie).Net, 'cost');
+});
+
+test('regression (Han, v7 screenshot): a 4/6 strength is not wiped out by a more recent 2/6 cost, in both languages', () => {
+  fresh();
+  // Smash noted as working in 4 of 6, as costing points in 2 of 6 (both in the last 3).
+  const ms = [M(W, ['Other'], ['Smash']), M(W, ['Other'], ['Smash']), M(L, ['Other'], ['Smash']), M(L, ['Smash'], [], { lost: 'backcourt smashes got blocked' }), M(W, ['Other'], ['Smash']), M(L, ['Smash'], [])];
+  assert.equal(G.topicSides(ms).Smash, 'worked');
+  assert.deepEqual(G.strengthCandidates(ms).map(x => `${x.tag} ${x.k}/${x.n}`), ['Smash 4/6']);
+  assert.equal(G.buildCandidates(ms).find(x => x.tag === 'Smash'), undefined, 'no contradictory Build Next');
+  assert.ok(G.keyCandidates(ms, null, { all: true }).every(c => c.tag !== 'Smash' || c.side === 'worked'));
+  const s = G.strengthCandidates(ms);
+  assert.equal(G.finalizeItems(s, null, 'strength', 'en')[0].signal, 'You noted it winning you points in 4 of your last 6 matches.');
+  assert.equal(G.finalizeItems(s, null, 'strength', 'zh')[0].signal, '最近6场有4场你记下这里帮你得分。');
+});
+
+test('Build Next actions (Han): no tactical correction from tags or a single note; only from a pattern in the notes', () => {
+  const ms = () => { fresh(); return [M(L, ['Smash']), M(W, ['Other']), M(L, ['Other']), M(W, ['Other']), M(L, ['Smash']), M(W, ['Other'])]; };
+  const ai = { en: { name: 'Backcourt smashes', evidence: 'You noted smashes in 2 of 6 matches.', action: 'Use fewer backcourt smashes; try high clears to corners.' },
+    zh: { name: '后场杀球', evidence: '最近6场有2场你记下杀球丢分。', action: '少打后场杀球，多打对角高远球。' } };
+  // 1. Tags only, no notes: plain name, general drill.
+  // 2. One specific note: still not a pattern.
+  // 3. Two notes about backcourt smashes: the topic is grounded, but "try high clears" adds a shot the notes don't name.
+  for (const [label, notes] of [['tags only', ['', '']], ['one note', ['后场杀球被对手挡回来', '']], ['two notes', ['backcourt smashes got blocked', '后场杀球又被挡回来']]]) {
+    const xs = ms(); xs[0].lost = notes[0]; xs[4].lost = notes[1];
+    const [d] = G.buildCandidates(xs);
+    assert.equal(d.tag, 'Smash'); assert.equal(d.basis, label === 'two notes' ? 'notes' : 'general', label);
+    for (const lang of BOTH) {
+      const [x] = G.finalizeItems([d], [{ topic_id: d.topic_id, ...ai[lang] }], 'build', lang);
+      assert.equal(x.advice_basis, 'general', `${label} ${lang}`);
+      assert.match(x.action, lang === 'en' ? /^General drill: / : /^通用练法：/);
+      if (label !== 'two notes') assert.equal(x.name, lang === 'en' ? 'Smash' : '杀球', `${label} ${lang}: ${x.name}`);
+      else assert.equal(x.name, ai[lang].name);
+    }
+  }
+  // An action that builds on what the two notes say is kept.
+  const xs = ms(); xs[0].lost = 'backcourt smashes got blocked, I was off balance'; xs[4].lost = '后场杀球又被挡回来，重心不稳';
+  const [d] = G.buildCandidates(xs);
+  const [en] = G.finalizeItems([d], [{ topic_id: d.topic_id, name: 'Backcourt smashes', evidence: 'You noted smash costing you points in 2 of your last 6 matches.', action: 'Only smash from the back court when you are balanced.' }], 'build', 'en');
+  assert.equal(en.advice_basis, 'notes', String(en.issues)); assert.equal(en.action, 'Only smash from the back court when you are balanced.');
+  const [zh] = G.finalizeItems([d], [{ topic_id: d.topic_id, name: '后场杀球', evidence: '最近6场有2场你记下杀球丢分。', action: '后场杀球前先站稳重心。' }], 'build', 'zh');
+  assert.equal(zh.advice_basis, 'notes', String(zh.issues));
+  // ...but not one that isn't about the notes at all.
+  const [off] = G.finalizeItems([d], [{ topic_id: d.topic_id, name: 'Smash', evidence: 'You noted smash costing you points in 2 of your last 6 matches.', action: 'Work on your wrist strength in the gym.' }], 'build', 'en');
+  assert.equal(off.advice_basis, 'general'); assert.ok(off.issues.some(i => /^action:/.test(i)), String(off.issues));
+});
+
+test('engine version is bumped so cached v7 insights regenerate', () => {
+  assert.equal(G.ENGINE_VERSION, '2026-10-26-v8');
 });
 
 test('opponent plans: only from notes about that opponent; record-only, unsupported or generic plans are left out', () => {
