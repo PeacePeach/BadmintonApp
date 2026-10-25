@@ -1233,39 +1233,31 @@ button:disabled{cursor:default !important;}
       </div>
     </sc-if>
 
-    <!-- PLAYERS -->
+    <!-- PLAYERS (V2): App bar title with the glass Back button, Search bar, then Player rows (same as the Players sheet). -->
     <sc-if value="{{ isPlayers }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Players" style="display:flex;flex-direction:column;gap:20px;">
-        <div style="display:flex;align-items:center;gap:14px;">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
-          <div style="font:600 28px/1.2 var(--font-sans);">{{ tx.players }}</div>
+      <div data-screen-label="Players" style="display:flex;flex-direction:column;gap:24px;">
+        <div class="rw-appbar-title">
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ArrowLeft" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="44px,44px"></x-import>
+          <h1 class="rw-appbar-name">{{ tx.players }}</h1>
         </div>
         <sc-if value="{{ blocked }}" hint-placeholder-val="{{ false }}">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ blockedState.illustration }}" title="{{ blockedState.title }}" body="{{ blockedState.body }}" actionLabel="{{ blockedState.actionLabel }}" onAction="{{ blockedState.onAction }}" hint-size="350px,330px"></x-import>
         </sc-if>
         <sc-if value="{{ notBlocked }}" hint-placeholder-val="{{ true }}">
-        <div class="search-field-outline" style="height:52px;border-radius:99px;background:transparent;display:flex;align-items:center;gap:10px;padding:0 18px;color:var(--input-field-text-default);">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Search" size="{{ 24 }}" hint-size="24px,24px"></x-import>
-          <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="{{ tx.searchName }}" style="flex:1;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);">
-        </div>
-        <sc-if value="{{ canAddNew }}" hint-placeholder-val="{{ false }}">
-          <div onClick="{{ addPlayerOnly }}" style="height:56px;border-radius:99px;border:1px dashed var(--ghost-button-outline);display:flex;align-items:center;gap:12px;padding:0 8px;cursor:pointer;">
-            <div style="width:40px;height:40px;border-radius:50%;background:transparent;border:var(--control-outline-width) solid var(--control-outline);color:var(--text-primary);display:flex;align-items:center;justify-content:center;">
-              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 24 }}" hint-size="24px,24px"></x-import>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <label class="rw-search {{ plSearchCls }}">
+            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Search" size="{{ 20 }}" hint-size="20px,20px"></x-import>
+            <input class="rw-search-input" value="{{ search }}" onChange="{{ onSearch }}" placeholder="{{ tx.searchName }}" autocomplete="off">
+            <sc-if value="{{ plHasQ }}" hint-placeholder-val="{{ false }}"><button type="button" class="rw-search-clear" aria-label="{{ tx.clearSearch }}" onClick="{{ plClearQ }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleX" size="{{ 20 }}" hint-size="20px,20px"></x-import></button></sc-if>
+          </label>
+          <sc-if value="{{ canAddNew }}" hint-placeholder-val="{{ false }}">
+            <div class="rw-surface rw-player is-empty" onClick="{{ addPlayerOnly }}">
+              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Plus" variant="add" size="{{ 40 }}" iconSize="{{ 18 }}" label="{{ addNameLabel }}" onClick="{{ addPlayerOnly }}" hint-size="40px,40px"></x-import>
+              <span class="rw-name" aria-hidden="true">{{ addNameLabel }}</span>
             </div>
-            <div style="font:500 15px/1 var(--font-sans);">{{ addNameLabel }}</div>
-          </div>
-        </sc-if>
-        <div style="display:flex;flex-direction:column;gap:8px;">
+          </sc-if>
           <sc-for list="{{ playerList }}" as="p" hint-placeholder-count="6">
-            <div onClick="{{ p.open }}" style="min-height:64px;border-radius:99px;background:var(--surface-primary);display:flex;align-items:center;gap:12px;padding:10px;cursor:pointer;">
-              <div class="rw-avatar-fill {{ p.avCls }}" style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 14px/1 var(--font-sans);flex-shrink:0;">{{ p.initials }}</div>
-              <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;">
-                <div style="font:500 15px/1.2 var(--font-sans);">{{ p.name }}</div>
-                <div style="font:400 12px/1.2 var(--font-sans);color:var(--text-secondary);">{{ p.sub }}</div>
-              </div>
-              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 24 }}" color="var(--grey-400)" style="margin-right:10px" hint-size="24px,24px"></x-import>
-            </div>
+            <button type="button" class="rw-surface rw-player" onClick="{{ p.open }}"><span class="rw-avatar {{ p.avCls }}" aria-hidden="true">{{ p.initials }}</span><span class="rw-name">{{ p.name }}</span><span class="rw-caption">{{ p.sub }}</span></button>
           </sc-for>
           <sc-if value="{{ playersEmpty }}" hint-placeholder-val="{{ false }}">
             <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ playersEmpty.illustration }}" title="{{ playersEmpty.title }}" body="{{ playersEmpty.body }}" actionLabel="{{ playersEmpty.actionLabel }}" onAction="{{ playersEmpty.onAction }}" hint-size="350px,300px"></x-import>
@@ -3507,7 +3499,7 @@ class Component extends DCLogic {
     const exists = s.players.some(p => p.name.toLowerCase() === q);
     const v = {
       scrollRef: this.scrollRef, onScroll: this.onScroll, overall, greeting: this.greeting(all),
-      scrollCls: ['matches', 'insights', 'focus', 'voice', 'review'].includes(s.screen) ? 'rw-scroll is-v2' : 'rw-scroll',
+      scrollCls: ['matches', 'insights', 'focus', 'voice', 'review', 'players'].includes(s.screen) ? 'rw-scroll is-v2' : 'rw-scroll',
       isMatches: s.screen === 'matches', isInsights: s.screen === 'insights', isLog: s.screen === 'log', isVoice: s.screen === 'voice' && !!s.voice, isReview: s.screen === 'review' && !!s.log, voiceRef: this.voiceRef,
       isDetail: s.screen === 'detail', isPlayers: s.screen === 'players', isPlayer: s.screen === 'player',
       isLogin: s.screen === 'login', isSignup: s.screen === 'signup', isSplash: s.screen === 'splash', skipSplash: () => this.leaveSplash(),
@@ -4065,6 +4057,7 @@ class Component extends DCLogic {
         ? empty('no-results', this.t('noPlayersFound'), this.t('noPlayersFoundBody'))
         : empty('no-players', this.t('noPlayers'), this.t('noPlayersBody')));
       v.addNameLabel = this.t('addName', { name: s.search.trim() });
+      v.plHasQ = !!s.search; v.plSearchCls = s.search ? 'is-filled' : ''; v.plClearQ = () => this.setState({ search: '' });
       v.addPlayerOnly = () => { this.addPlayer(s.search.trim(), 'players'); this.setState({ search: '' }); this.flash(this.t('tPlayerAdded')); };
     }
 
