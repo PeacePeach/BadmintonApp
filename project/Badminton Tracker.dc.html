@@ -882,12 +882,12 @@ button:disabled{cursor:default !important;}
       <div data-screen-label="Log Match · Review" style="display:flex;flex-direction:column;gap:40px;">
         <div class="rw-appbar-title">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ArrowLeft" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.back }}" onClick="{{ rv.back }}" hint-size="44px,44px"></x-import>
-          <h1 class="rw-appbar-name">{{ tx.logMatch }}</h1>
+          <h1 class="rw-appbar-name">{{ rv.title }}</h1>
         </div>
         <div style="display:flex;flex-direction:column;gap:24px;">
           <div class="rw-page-head">
             <h2 class="rw-heading">{{ tx.reviewTitle }}</h2>
-            <p class="rw-hint">{{ tx.reviewHint }}</p>
+            <p class="rw-hint">{{ rv.hint }}</p>
           </div>
           <div style="display:flex;flex-direction:column;gap:16px;">
             <sc-for list="{{ rv.rows }}" as="r" hint-placeholder-count="3">
@@ -2080,7 +2080,7 @@ const I18N = {
     voiceTitle: 'Describe Your Session', voiceHint: 'Who you played, how many games, how it went.', voicePh: 'Tap the mic and talk, or type here.',
     cuesLabel: 'What we heard', cuePlayers: 'Players', cueGames: 'Number of games', cueResult: 'Win vs Loss', cueNotes: 'Reflection', cueHeard: 'heard', cueNotHeard: 'not heard yet',
     startRec: 'Start recording', stopRec: 'Stop recording', recFor: 'Recording, {t}', recLength: 'Recorded {t}',
-    reviewTitle: 'Review the Match Details', reviewHint: 'Tap a section to fix anything we got wrong.', rvPlayers: 'Players', rvResult: 'Result', rvNotes: 'Notes',
+    reviewTitle: 'Review the Match Details', reviewHint: 'Tap a section to fix anything we got wrong.', editHint: 'Tap a section to change it.', rvPlayers: 'Players', rvResult: 'Result', rvNotes: 'Notes',
     yourPartner: 'Your partner', searchPlayers: 'Search or add a new player', clearSearch: 'Clear search',
     fillManually: 'Fill manually', reading: 'Reading…', selectType: 'Select match type', flagUnknown: 'Unknown players', unknownPlayer: 'Unknown player', sidesUnconfirmed: 'Also played · sides not confirmed',
     whoIs: 'Who is “{name}”?', whoPartner: 'Who is your partner?', addName: 'Add “{name}”', searchAnother: 'Search or add another',
@@ -2227,7 +2227,7 @@ const I18N = {
     voiceTitle: '说说这次打球', voiceHint: '和谁打、打了几局、打得怎么样。', voicePh: '点麦克风说话，或直接输入。',
     cuesLabel: '已听到', cuePlayers: '球员', cueGames: '局数', cueResult: '输赢', cueNotes: '复盘', cueHeard: '已听到', cueNotHeard: '还没听到',
     startRec: '开始录音', stopRec: '停止录音', recFor: '录音中，{t}', recLength: '已录音 {t}',
-    reviewTitle: '核对比赛信息', reviewHint: '点任意一项即可修改。', rvPlayers: '球员', rvResult: '结果', rvNotes: '笔记',
+    reviewTitle: '核对比赛信息', reviewHint: '点任意一项即可修改。', editHint: '点任意一项即可修改。', rvPlayers: '球员', rvResult: '结果', rvNotes: '笔记',
     yourPartner: '你的搭档', searchPlayers: '搜索或添加新球友', clearSearch: '清除搜索',
     fillManually: '手动填写', reading: '正在读取…', selectType: '选择比赛类型', flagUnknown: '未知球员', unknownPlayer: '未知球员', sidesUnconfirmed: '同场球员 · 位置未确认',
     whoIs: '“{name}”是谁？', whoPartner: '谁是你的搭档？', addName: '添加“{name}”', searchAnother: '搜索或添加其他人',
@@ -2896,6 +2896,24 @@ class Component extends DCLogic {
       games: m.games.map(g => ({ w: this.gameRes(g) === 'W' ? 'us' : 'them', l: Array.isArray(g) ? Math.min(g[0], g[1]) : null, ...(g && g.u ? { u: 1 } : {}) })), wt: m.wt.slice(), lt: m.lt.slice(), worked: m.worked, lost: m.lost, on: m.on };
   }
 
+  // Edit opens the V2 Review page (Han 2026-10-25): the match turned back into a Review draft. Saved players fill their
+  // slots; an Unknown Player keeps the name that was heard, and participants whose side was never confirmed go back to
+  // the pool, so the Players sheet asks about them as it does after a voice log. Games come back with their aggregate.
+  editReview(m) {
+    const V = window.RallywiseVoice, sd = this.sides(m), fs = V.fromSaved(m.games), sc = this.scored(m.games);
+    const t = (sc.length && [21, 15, 11].find(f => sc.every(g => { const w = g[0] > g[1] ? 'us' : 'them', l = Math.min(g[0], g[1]); return this.scoreOf({ w, l }, f).join() === g.join(); }))) || this.fmt();
+    const log = { type: m.type, partner: null, opp1: null, opp2: null }, slots = {};
+    const put = (k, id) => {
+      if (!id) slots[k] = { heard: '', id: null, cands: [], state: 'missing' };
+      else if (V.isUnknown(id)) slots[k] = { heard: V.heardOf(id), id: null, cands: [], state: 'new' };
+      else { log[k] = id; slots[k] = { heard: '', id, cands: [], state: 'confirmed' }; }
+    };
+    if (m.type === 'Doubles') { put('partner', sd.partner); put('opp1', sd.opps[0]); put('opp2', sd.opps[1]); } else put('opp1', sd.opps[0]);
+    const pool = sd.others.map(id => ({ heard: V.heardOf(id), id: null, cands: [], state: 'new' }));
+    return { ...log, step: 'review', editId: m.id, date: m.date, format: t, active: null, games: fs.games, wt: m.wt.slice(), lt: m.lt.slice(), worked: m.worked, lost: m.lost, on: m.on,
+      voice: { flags: { players: V.unresolved(m.type, slots, pool) ? 'unknown' : null, result: null, notes: null }, slots, pool, people: [], totals: fs.totals, dirty: {}, from: '' } };
+  }
+
   newOb() { return { step: 1, name: '', level: null }; }
 
   componentDidMount() {
@@ -3514,7 +3532,7 @@ class Component extends DCLogic {
         }
       })),
       menuItems: s.screen === 'detail' ? [
-        { label: this.t('editMatch'), icon: 'Pencil', select: () => { const m = all.find(x => x.id === s.detailId) || all[0]; this.setState({ menu: false }); if (m) this.go('log', { log: this.editLog(m) }); } },
+        { label: this.t('editMatch'), icon: 'Pencil', select: () => { const m = all.find(x => x.id === s.detailId) || all[0]; this.setState({ menu: false }); if (m) this.go('review', { log: this.editReview(m) }); } },
         { label: this.t('deleteMatch'), icon: 'Trash2', cls: 'has-sep', select: () => { const m = all.find(x => x.id === s.detailId) || all[0]; if (m) this.requestDeleteMatch(m.id); } }
       ] : [
         { label: this.t('players'), icon: 'Users', select: () => this.go('players') },
@@ -3882,12 +3900,13 @@ class Component extends DCLogic {
       const row = (part, label, value, muted, flag, warn, open) => ({ label: this.t(label), value, valueCls: muted ? 'is-muted' : '', flag: flag ? this.t(flag) : '',
         cls: flag || warn ? 'is-warning' : '', open: open || (() => this.reviewOpen(part)) });
       const ready = this.reviewReady(log);
-      v.rv = { back: () => this.voiceBack(),
+      const ed = !!log.editId;
+      v.rv = { back: () => ed ? this.goBack() : this.voiceBack(), title: this.t(ed ? 'editMatch' : 'logMatch'), hint: this.t(ed ? 'editHint' : 'reviewHint'),
         rows: [row('players', 'rvPlayers', log.type ? names.join(sep) : this.t('selectType'), !log.type, f.players === 'unknown' && 'flagUnknown', !log.type, () => this.psOpen()),
           row('result', 'rvResult', wl.state === 'missing' ? this.t('notMentioned') : this.t(wl.open ? 'rvWLOpen' : 'rvWL', { w: wl.w, l: wl.l, n: wl.open }), wl.state === 'missing',
             f.result === 'conflict' ? 'flagConflict' : !wl.ok ? 'flagResult' : f.result === 'scores' && 'flagScores'),
           row('notes', 'rvNotes', notes || log.wt.concat(log.lt).map(t => this.tagLabel(t)).join(sep) || this.t('noNotes'), !notes && !log.wt.length && !log.lt.length, f.notes && 'flagNotes')],
-        saving: !!log.saving, idle: !log.saving, saveErr: !!log.saveErr, ctaLabel: this.t(log.saveErr ? 'saveAgain' : 'logMatch'), cantSave: !ready || !!log.saving,
+        saving: !!log.saving, idle: !log.saving, saveErr: !!log.saveErr, ctaLabel: this.t(log.saveErr ? 'saveAgain' : ed ? 'saveChanges' : 'logMatch'), cantSave: !ready || !!log.saving,
         next: () => { if (this.reviewReady(this.state.log)) this.save(); } };
       v.hasRs = !!s.rs;
       if (s.rs) {
