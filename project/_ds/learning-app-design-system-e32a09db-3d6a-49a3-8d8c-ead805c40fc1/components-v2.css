@@ -43,10 +43,11 @@
      Waveform ..................... .rw-wave[.is-live] > i (one per bar; height, opacity and delay set per bar)
      Record controls .............. .rw-rec > .rw-rec-side + .rw-rec-btn + .rw-rec-side.is-end; .rw-rec-timer (.is-live: green dot)
      InputTile (Figma 329:7089) ... .rw-surface.rw-tile.rw-input-tile[.is-warning] > .rw-input-tile-text (.rw-eyebrow + .rw-input-tile-value) + .rw-input-tile-end (.rw-flag, chevron 16px)
-   Grouped list (Settings) ...... .rw-surface.rw-group > .rw-group-row (Lucide 18 + .rw-group-row-text (.rw-group-row-label + .rw-caption) + .rw-group-row-end chevron 20); no Figma component, built from V2 tokens
+   Grouped list (Settings) ...... .rw-surface.rw-group > .rw-group-row[.is-static: read-only] (Lucide 18 + .rw-group-row-text (.rw-group-row-label + .rw-caption) + .rw-group-row-end chevron 20); no Figma component, built from V2 tokens
+   Switch ....................... .rw-switch[.is-on] (44x24, inside a .rw-group-row role=switch)
    Overflow menu (⋯) ............ .rw-menu-scrim + .rw-menu > .rw-menu-item[.has-sep] (Lucide icon 24 + label); no Figma component, built from V2 tokens
    Player row (Figma 228:8835) ... .rw-surface.rw-player[.is-empty][.is-warning] > .rw-avatar | IconButton variant "add" + .rw-name + .rw-caption
-   Search bar (Figma 329:7330) ... .rw-search[.is-filled] > Search icon + .rw-search-input + .rw-search-clear (states: Unfilled, Filled Inactive, Active Typing = :focus-within)
+   Search bar (Figma 329:7330) ... .rw-search[.is-filled][.is-field: form field, filled = tile fill] > Search icon + .rw-search-input + .rw-search-clear (states: Unfilled, Filled Inactive, Active Typing = :focus-within)
    Bottom Sheet (Figma 319:6349) ... .rw-sheet-scrim + .rw-sheet > .rw-sheet-head (.rw-sheet-grabber, .rw-sheet-bar > spacer + .rw-sheet-title + IconButton glass, .rw-sheet-divider) + .rw-sheet-body (body copy .rw-sheet-text) + .rw-sheet-foot
    Result and Notes sheets (Figma 349:3528, 349:3793; Han approved 2026-10-23):
      W / L check (CheckBoxes) ..... .rw-check[.is-win|.is-loss]  (no class = unselected, dashed ring)
@@ -341,6 +342,7 @@
 .rw-search{height:var(--rw-search-h);padding:0 18px;border-radius:999px;border:1px solid transparent;background:var(--rw-search-bg);display:flex;align-items:center;gap:8px;color:var(--rw-search-fg);}
 .rw-search.is-filled,.rw-search:focus-within{background:var(--rw-search-bg-filled);}
 .rw-search:focus-within{border-color:var(--rw-search-border-active);}
+.rw-search.is-field.is-filled:not(:focus-within){background:var(--rw-search-bg);}   /* form field (Profile name, passwords): stays the tile fill when it holds a value, Han 2026-10-25 */
 .rw-search>:first-child{flex-shrink:0;}
 .rw-search-input{flex:1;min-width:0;height:100%;padding:0 2px;border:none;outline:none;background:transparent;font:var(--rw-type-name);letter-spacing:var(--rw-tracking);color:var(--rw-search-fg);caret-color:var(--rw-search-caret);}
 .rw-search-input::placeholder{color:var(--rw-placeholder-text);opacity:1;}
@@ -476,10 +478,19 @@
 .rw-group{border-radius:var(--rw-tile-radius);overflow:hidden;display:flex;flex-direction:column;}
 .rw-group-row{position:relative;width:100%;min-height:56px;box-sizing:border-box;padding:var(--rw-tile-pad);display:flex;align-items:center;gap:12px;border:none;background:transparent;color:var(--rw-text-primary);text-align:left;font:inherit;cursor:pointer;transition:background var(--dur-fast) var(--ease-out);}
 .rw-group-row>:first-child{flex-shrink:0;color:var(--rw-text-primary);}
-.rw-group-row:active,.rw-group-row:focus-visible{background:var(--rw-color-surface-highlight);outline:none;}
+.rw-group-row:not(.is-static):active,.rw-group-row:focus-visible{background:var(--rw-color-surface-highlight);outline:none;}
 .rw-group-row+.rw-group-row::before{content:"";position:absolute;left:var(--rw-tile-pad);right:var(--rw-tile-pad);top:0;height:1px;background:var(--rw-color-divider);}
 .rw-group-row-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
 .rw-group-row-label{font:var(--rw-type-list-value);letter-spacing:var(--rw-tracking);}
 .rw-group-row-text>.rw-caption{color:var(--rw-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.rw-group-row.is-static{cursor:default;}   /* read-only row, e.g. Email on Account */
 .rw-group-row-end{display:flex;flex-shrink:0;color:var(--rw-text-secondary);}
 :root[lang="zh-Hans"] .rw-group-row-label{line-height:1.25;}
+.rw-group-row-text>.rw-caption.is-wrap{white-space:normal;line-height:16px;}   /* a sentence-long description */
+.rw-group-row-end.is-selected{color:var(--rw-color-border-selected);}            /* Check on the chosen option, N600 like every selected state */
+/* Switch (on/off setting). Existing tokens only. Off: Highlight Fill track, N400 knob. On (Han 2026-10-25): track one
+   step brighter (N200), knob N800; no outline. */
+.rw-switch{position:relative;flex-shrink:0;width:44px;height:24px;border-radius:999px;background:var(--rw-color-surface-highlight);transition:background var(--dur-fast) var(--ease-out);}
+.rw-switch::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--rw-color-text-secondary);transition:transform var(--dur-fast) var(--ease-out),background var(--dur-fast) var(--ease-out);}
+.rw-switch.is-on{background:var(--rw-n200);}
+.rw-switch.is-on::after{transform:translateX(20px);background:var(--rw-color-text-primary);}
