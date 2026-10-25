@@ -115,7 +115,7 @@ button:disabled{cursor:default !important;}
           <p class="rw-hint">{{ tx.loginBody }}</p>
         </div>
         <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
-          <div role="alert" class="rw-surface rw-alert"><span><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 18 }}" hint-size="18px,18px"></x-import></span><span>{{ banner }}</span></div>
+          <div role="alert" class="rw-toast is-error"><span class="rw-toast-badge" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Ban" size="{{ 12 }}" hint-size="12px,12px"></x-import></span><div class="rw-toast-text"><p class="rw-toast-title">{{ banner }}</p></div></div>
         </sc-if>
         <div class="rw-input-list">
           <div class="rw-input-field">
@@ -163,7 +163,7 @@ button:disabled{cursor:default !important;}
           <p class="rw-hint">{{ tx.signupBody }}</p>
         </div>
         <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
-          <div role="alert" class="rw-surface rw-alert"><span><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 18 }}" hint-size="18px,18px"></x-import></span><span>{{ banner }}</span></div>
+          <div role="alert" class="rw-toast is-error"><span class="rw-toast-badge" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Ban" size="{{ 12 }}" hint-size="12px,12px"></x-import></span><div class="rw-toast-text"><p class="rw-toast-title">{{ banner }}</p></div></div>
         </sc-if>
         <div class="rw-input-list">
           <div class="rw-input-field">
@@ -224,7 +224,7 @@ button:disabled{cursor:default !important;}
           <p class="rw-hint">{{ tx.forgotBody }}</p>
         </div>
         <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
-          <div role="alert" class="rw-surface rw-alert"><span><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 18 }}" hint-size="18px,18px"></x-import></span><span>{{ banner }}</span></div>
+          <div role="alert" class="rw-toast is-error"><span class="rw-toast-badge" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Ban" size="{{ 12 }}" hint-size="12px,12px"></x-import></span><div class="rw-toast-text"><p class="rw-toast-title">{{ banner }}</p></div></div>
         </sc-if>
         <div class="rw-input-list">
           <div class="rw-input-field">
@@ -1324,7 +1324,7 @@ button:disabled{cursor:default !important;}
           <sc-if value="{{ noInitials }}" hint-placeholder-val="{{ false }}"><div class="rw-avatar-fill rw-avatar-lg {{ meAvCls }}" aria-hidden="true" style="border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--rw-avatar-fg);"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="UserRound" size="{{ 24 }}" hint-size="24px,24px"></x-import></div></sc-if>
         </div>
         <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
-          <div role="alert" class="rw-surface rw-alert"><span><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 18 }}" hint-size="18px,18px"></x-import></span><span>{{ banner }}</span></div>
+          <div role="alert" class="rw-toast is-error"><span class="rw-toast-badge" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Ban" size="{{ 12 }}" hint-size="12px,12px"></x-import></span><div class="rw-toast-text"><p class="rw-toast-title">{{ banner }}</p></div></div>
         </sc-if>
         <div class="rw-input-list">
           <div class="rw-input-field">
@@ -1393,7 +1393,7 @@ button:disabled{cursor:default !important;}
           <h1 class="rw-appbar-name">{{ tx.changePassword }}</h1>
         </div>
         <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
-          <div role="alert" class="rw-surface rw-alert"><span><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 18 }}" hint-size="18px,18px"></x-import></span><span>{{ banner }}</span></div>
+          <div role="alert" class="rw-toast is-error"><span class="rw-toast-badge" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Ban" size="{{ 12 }}" hint-size="12px,12px"></x-import></span><div class="rw-toast-text"><p class="rw-toast-title">{{ banner }}</p></div></div>
         </sc-if>
         <div class="rw-input-list">
           <sc-if value="{{ needCurrent }}" hint-placeholder-val="{{ true }}">
@@ -1499,10 +1499,7 @@ button:disabled{cursor:default !important;}
   <sc-if value="{{ isReview }}" hint-placeholder-val="{{ false }}">
     <div style="position:absolute;left:0;right:0;bottom:0;padding:14px 20px 34px;display:flex;flex-direction:column;gap:10px;">
       <sc-if value="{{ rv.saveErr }}" hint-placeholder-val="{{ false }}">
-        <div role="alert" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:22px;background:var(--surface-muted);">
-          <div style="color:var(--rw-color-status-error);display:flex;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
-          <div style="font:400 14px/1.45 var(--font-sans);color:var(--text-primary);">{{ tx.saveErr }}</div>
-        </div>
+        <div role="alert" class="rw-toast is-error"><span class="rw-toast-badge" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Ban" size="{{ 12 }}" hint-size="12px,12px"></x-import></span><div class="rw-toast-text"><p class="rw-toast-title">{{ tx.saveErr }}</p></div></div>
       </sc-if>
       <button type="button" class="rw-btn rw-btn-primary" onClick="{{ rv.next }}" aria-busy="{{ rv.saving }}" disabled="{{ rv.cantSave }}">
         <sc-if value="{{ rv.saving }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 22 }}" hint-size="22px,22px"></x-import></span><span class="sr-only">{{ tx.savingMatch }}</span></sc-if>
@@ -1700,10 +1697,7 @@ button:disabled{cursor:default !important;}
           <div style="text-align:center;font:500 14px/1 var(--font-sans);color: {{ liveResultColor }};">{{ liveResult }}</div>
         </sc-if>
         <sc-if value="{{ saveErr }}" hint-placeholder-val="{{ false }}">
-          <div role="alert" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:22px;background:var(--surface-muted);">
-            <div style="color:var(--rw-color-status-error);display:flex;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
-            <div style="font:400 14px/1.45 var(--font-sans);color:var(--text-primary);">{{ tx.saveErr }}</div>
-          </div>
+          <div role="alert" class="rw-toast is-error"><span class="rw-toast-badge" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Ban" size="{{ 12 }}" hint-size="12px,12px"></x-import></span><div class="rw-toast-text"><p class="rw-toast-title">{{ tx.saveErr }}</p></div></div>
         </sc-if>
         <button onClick="{{ logNext }}" aria-busy="{{ saving }}" disabled="{{ saving }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;background: {{ ctaBg }};color: {{ ctaFg }};">
           <sc-if value="{{ saving }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">{{ tx.savingMatch }}</span></sc-if>
@@ -1798,10 +1792,7 @@ button:disabled{cursor:default !important;}
         <div id="del-acct-body" style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">{{ tx.deleteAccountBody }}</div>
       </div>
       <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
-        <div role="alert" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:22px;background:var(--surface-muted);">
-          <div style="color:var(--rw-color-status-error);display:flex;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
-          <div style="font:400 14px/1.45 var(--font-sans);color:var(--text-primary);">{{ banner }}</div>
-        </div>
+        <div role="alert" class="rw-toast is-error"><span class="rw-toast-badge" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Ban" size="{{ 12 }}" hint-size="12px,12px"></x-import></span><div class="rw-toast-text"><p class="rw-toast-title">{{ banner }}</p></div></div>
       </sc-if>
       <div style="display:flex;flex-direction:column;gap:12px;">
         <button onClick="{{ deleteAccount }}" aria-busy="{{ busyDelete }}" disabled="{{ busyAny }}" style="height:56px;border:none;border-radius:99px;background:var(--rw-color-status-error);color:var(--rw-color-text-on-action);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-active="transform:scale(.98);">

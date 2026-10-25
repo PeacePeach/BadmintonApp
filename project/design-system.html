@@ -855,9 +855,9 @@
             <label class="rw-search is-filled v2-typing"><i data-lucide="search" style="width:20px;height:20px;stroke-width:1.6"></i><input class="rw-search-input" value="Chris Won" id="v2-search-typing"><button class="rw-search-clear" aria-label="Clear"><i data-lucide="circle-x" style="width:20px;height:20px;stroke-width:1.44"></i></button></label>
           </div>
         </div>
-        <div class="v2-cell"><div class="v2-label">Auth pages (Log In, Sign Up, Forgot Password, Check Email): .rw-alert, .rw-text-link, .rw-or, .rw-btn-social, .rw-checkbox[.is-on] (Han 2026-10-25)</div>
+        <div class="v2-cell"><div class="v2-label">Auth pages (Log In, Sign Up, Forgot Password, Check Email): inline Error toast, .rw-text-link, .rw-or, .rw-btn-social, .rw-checkbox[.is-on] (Han 2026-10-25)</div>
           <div class="rw-auth" style="padding-top:0;">
-            <div class="rw-surface rw-alert"><span><i data-lucide="circle-alert" style="width:18px;height:18px"></i></span><span>Incorrect email or password.</span></div>
+            <div role="alert" class="rw-toast is-error"><span class="rw-toast-badge"><i data-lucide="ban" style="width:12px;height:12px;stroke-width:3"></i></span><div class="rw-toast-text"><p class="rw-toast-title">Incorrect email or password. Try again or reset your password.</p></div></div>
             <div class="rw-auth-end" style="margin-top:0;"><button type="button" class="rw-text-link">Forgot Password?</button></div>
             <div class="rw-or">Or</div>
             <div class="rw-btn-stack"><button type="button" class="rw-btn rw-btn-social">Continue with Apple</button></div>
