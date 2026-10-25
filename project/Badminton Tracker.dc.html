@@ -721,8 +721,8 @@ button:disabled{cursor:default !important;}
                 <sc-for list="{{ fl.active }}" as="it" hint-placeholder-count="2">
                   <button type="button" class="rw-surface rw-tile rw-press rw-focus-row" onClick="{{ it.open }}">
                     <span class="rw-focus-row-text">
-                      <span class="rw-focus-row-head"><span class="rw-name">{{ it.title }}</span><span class="rw-focus-row-sub">{{ it.sub }}</span></span>
                       <sc-if value="{{ it.fromGrow }}" hint-placeholder-val="{{ false }}"><span class="rw-focus-tag"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChartColumn" size="{{ 14 }}" hint-size="14px,14px"></x-import>{{ tx.fromGrow }}</span></sc-if>
+                      <span class="rw-focus-row-head"><span class="rw-name">{{ it.title }}</span><span class="rw-focus-row-sub">{{ it.sub }}</span></span>
                     </span>
                     <span class="rw-focus-row-end">
                       <sc-if value="{{ it.hasDots }}" hint-placeholder-val="{{ true }}">

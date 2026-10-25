@@ -59,7 +59,7 @@
      Result cue (plain dot) ....... .rw-pill.rw-pill-sm.rw-cue.is-done > .rw-cue-mark.is-dot[.is-win|.is-loss]
      Match Result, tied ........... .rw-result.is-draw
    Focus (Figma 203:6012):
-     Focus ListRow ................ .rw-surface.rw-tile.rw-focus-row > .rw-focus-row-text (.rw-name + .rw-focus-row-sub + optional .rw-focus-tag: ChartColumn 14 + label) + .rw-focus-row-end (.rw-dots + chevron 20)
+     Focus ListRow ................ .rw-surface.rw-tile.rw-focus-row > .rw-focus-row-text (optional .rw-focus-tag: B100 ChartColumn 14 + uppercase label, then .rw-name + .rw-focus-row-sub) + .rw-focus-row-end (.rw-dots + chevron 20)
      Focus list ................... .rw-focus-list > .rw-focus-row (8px apart)
      Dots indicator ............... .rw-dots > i[.is-on]  (one dot per session or match; Figma shows 3 to 5, the plan allows up to 7)
      Disclosure (Completed · n) ... .rw-disclosure (label + chevron 20)
@@ -434,8 +434,9 @@
 .rw-focus-row-head{display:flex;flex-direction:column;gap:4px;}
 .rw-focus-row-sub{font:var(--rw-type-focus-sub);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
 .rw-focus-row-end{display:flex;align-items:center;gap:var(--rw-focus-row-gap);flex-shrink:0;color:var(--rw-text-secondary);}
-.rw-focus-tag{display:flex;align-items:center;gap:6px;font:var(--rw-type-caption);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
-.rw-focus-tag>:first-child{flex-shrink:0;}   /* source icon: Lucide ChartColumn 14 (the Insights nav icon; Han 2026-10-25) */
+/* Source tag above the title: B100 Insights icon (Lucide ChartColumn 14) + an uppercase label like .rw-label on Grow (Han 2026-10-25). */
+.rw-focus-tag{display:flex;align-items:center;gap:6px;font:var(--rw-type-eyebrow);letter-spacing:var(--rw-tracking);text-transform:uppercase;color:var(--rw-text-secondary);}
+.rw-focus-tag>:first-child{flex-shrink:0;color:var(--rw-focus-tag-icon);}
 /* Focus list: the stack of Focus ListRows. */
 .rw-focus-list{display:flex;flex-direction:column;gap:var(--rw-focus-list-gap);}
 /* Dots indicator */

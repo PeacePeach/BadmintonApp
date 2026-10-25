@@ -304,6 +304,7 @@
   --rw-dots-gap: 4px;
   --rw-dots-on: var(--rw-color-status-win);           /* B100; Figma #5B9DFF is unbound (Blue Gradient 01 start), nearest Foundation B100 */
   --rw-dots-off: var(--rw-purplegrey-400);            /* Figma purplegrey-400 */
+  --rw-focus-tag-icon: var(--rw-color-icon-accent);  /* B100 Insights icon on the From Grow tag */
   --rw-focus-list-gap: 8px;                           /* between Focus tiles (Han 2026-10-25; Figma 16px) */
   --rw-focus-row-gap: 14px;                           /* text to dots, dots to chevron */
   --rw-advice-label-accent: var(--rw-color-text-accent);
