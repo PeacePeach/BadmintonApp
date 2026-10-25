@@ -14,7 +14,7 @@
      Metric ....................... .rw-eyebrow + .rw-metric-value + .rw-subtitle | .rw-bar
      Record value ................. .rw-metric-value.rw-record > n + .rw-record-unit + .rw-record-sep + n + .rw-record-unit
      Graphs / Simple bar .......... .rw-bar
-     Match ........................ .rw-surface.rw-tile.rw-match[.is-won|.is-lost] (+ .rw-caption, .rw-match-chevron, .rw-name, .rw-score)
+     Match ........................ .rw-surface.rw-tile.rw-match[.is-won|.is-lost] (+ .rw-caption > .rw-match-dot, .rw-match-chevron, .rw-name, .rw-score)
      Match Result (Win, Loss) ..... .rw-result.is-win | .is-loss
      Match Players (Singles, Doubles) .rw-players[.is-doubles] > .rw-avatar.rw-avatar-sm
      Avatar / Letter .............. .rw-avatar[.rw-avatar-sm][.is-dir-1..6: gradient direction][.is-me: B75, your own avatar]; fill only: .rw-avatar-fill[.is-dir-N]
@@ -157,8 +157,10 @@
 .rw-players.is-doubles{grid-auto-flow:row;grid-template-columns:repeat(2,32px);}
 /* Match */
 .rw-match{display:flex;flex-direction:column;gap:24px;}
-.rw-match.is-won{background:var(--rw-color-surface-match-won);}
-.rw-match.is-lost{background:var(--rw-color-surface-match-lost);}
+/* Result dot before the date (Han, 2026-10-25): an entry is several games, so the card has no Win/Loss tag.
+   Blue (--rw-win) when you won at least as many games as you lost, ties included; orange (--rw-loss) when you lost more. */
+.rw-match-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px;background:var(--rw-win);}
+.rw-match.is-lost .rw-match-dot{background:var(--rw-loss);}
 /* Chevron where the Win/Loss tag was (Figma Icons 386:12106): Lucide ChevronRight 18px. */
 .rw-match-chevron{display:flex;flex-shrink:0;color:var(--rw-color-text-secondary);}
 .rw-caption{font:var(--rw-type-caption);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}

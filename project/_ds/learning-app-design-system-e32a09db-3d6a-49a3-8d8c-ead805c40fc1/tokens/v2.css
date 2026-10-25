@@ -117,7 +117,6 @@
   --rw-blue-gradient-02: linear-gradient(180deg, var(--rw-blue-gradient-01-from) 0%, var(--rw-blue-gradient-02-to) 100%); /* Blue Gradient 02 (vertical) */
   --rw-orange-gradient-stops: #efb16a 0%, #212328 100%;                  /* OrangeGrad stops, reused at another angle */
   --rw-orange-gradient: linear-gradient(180deg, var(--rw-orange-gradient-stops)); /* OrangeGrad (vertical): O100 -> #212328, Figma paint style */
-  --rw-orange-gradient-8: linear-gradient(90deg, rgba(239, 177, 106, .08) 0%, rgba(33, 35, 40, .08) 100%); /* OrangeGrad at 8%, horizontal (match tile, paired with Blue Gradient 01 at 8%) */
   /* Input Border Gradient (voice transcript card stroke, 213:7972): B100 at 50% -> clear at 51% -> B100 at 50%.
      Figma's middle stop is #C4DCFF at 0% alpha; it is fully transparent, so it is written as B100 at 0%.
      Stops are Figma's 0 / 51% / 100% re-projected onto the CSS gradient line of the 350 x 302 card at 130deg. */
@@ -156,11 +155,6 @@
   --rw-color-surface-done: var(--rw-highlightfill);     /* a recognised item */
   --rw-color-border-banner: var(--rw-n100);
   --rw-color-surface-banner: var(--rw-blue-gradient-01-8);   /* in-content prompt, e.g. InlineBanner */
-  /* Match tile background (Han, 2026-10-25): an entry is several games, so the card shows no Win/Loss tag; the tile
-     tints blue when you won at least as many games as you lost (ties too), orange when you lost more.
-     Blue is the InlineBanner fill on purpose. Figma TileBG_Grad_Blue / TileBG_Grad_Orange use 10%. */
-  --rw-color-surface-match-won: var(--rw-color-surface-banner);
-  --rw-color-surface-match-lost: var(--rw-orange-gradient-8);
   --rw-color-surface-highlight: var(--rw-highlightfill); /* raised control inside a surface, e.g. the Plus button on an empty player slot */
   --rw-color-surface-pending: var(--rw-inactivefill);   /* an item not heard yet */
   --rw-color-border-input-active: var(--rw-input-border-gradient);

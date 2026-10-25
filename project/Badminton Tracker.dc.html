@@ -408,7 +408,7 @@ button:disabled{cursor:default !important;}
             <sc-for list="{{ matchCards }}" as="m" hint-placeholder-count="4">
               <div onClick="{{ m.open }}" class="rw-surface rw-tile rw-match rw-press {{ m.tileCls }}">
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
-                  <div class="rw-caption">{{ m.dateLabel }} · {{ m.type }}</div>
+                  <div class="rw-caption"><span class="rw-match-dot" aria-hidden="true"></span>{{ m.dateLabel }} · {{ m.type }}</div>
                   <span class="rw-match-chevron" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 18 }}" hint-size="18px,18px"></x-import></span>
                 </div>
                 <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;">
@@ -3143,7 +3143,7 @@ class Component extends DCLogic {
       id: m.id, type: this.typeLabel(m.type), dateLabel: this.date(m.date), teamA: this.teamA(m), teamB: this.teamB(m), gamesWon: `${r.us}–${r.them}`,
       ...this.badge(r.win), ...(r.even ? { resultLabel: this.t('wlShort', { w: r.us, l: r.them }) } : {}),
       games: this.scored(m.games).map(g => ({ s: `${g[0]}–${g[1]}`, fg: 'var(--text-secondary)' })),
-      // V2 Match card: chevron, tile tint (blue when games won >= games lost, else orange), Letter avatars (you,
+      // V2 Match card: result dot (blue when games won >= games lost, else orange), chevron, Letter avatars (you,
       // partner, then opponents) and the "2 : 1" score. An entry is several games, so no Win/Loss tag (Han, 2026-10-25).
       tileCls: r.us >= r.them ? 'is-won' : 'is-lost', score: `${r.us} : ${r.them}`,
       playersCls: m.type === 'Doubles' ? 'is-doubles' : '',
