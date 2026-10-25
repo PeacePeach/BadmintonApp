@@ -1250,7 +1250,7 @@ button:disabled{cursor:default !important;}
             <input class="rw-search-input" value="{{ search }}" onChange="{{ onSearch }}" placeholder="{{ tx.searchName }}" autocomplete="off">
             <sc-if value="{{ plHasQ }}" hint-placeholder-val="{{ false }}"><button type="button" class="rw-search-clear" aria-label="{{ tx.clearSearch }}" onClick="{{ plClearQ }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleX" size="{{ 20 }}" hint-size="20px,20px"></x-import></button></sc-if>
           </label>
-          <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;flex-direction:column;gap:4px;">
           <sc-if value="{{ canAddNew }}" hint-placeholder-val="{{ false }}">
             <div class="rw-surface rw-player is-empty" onClick="{{ addPlayerOnly }}">
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Plus" variant="add" size="{{ 40 }}" iconSize="{{ 18 }}" label="{{ addNameLabel }}" onClick="{{ addPlayerOnly }}" hint-size="40px,40px"></x-import>
