@@ -704,18 +704,25 @@ button:disabled{cursor:default !important;}
           </div>
         </sc-if>
         <sc-if value="{{ fl.empty }}" hint-placeholder-val="{{ false }}">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ fl.empty.illustration }}" title="{{ fl.empty.title }}" body="{{ fl.empty.body }}" actionLabel="{{ fl.empty.actionLabel }}" onAction="{{ fl.empty.onAction }}" hint-size="350px,330px"></x-import>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ fl.empty.illustration }}" title="{{ fl.empty.title }}" body="{{ fl.empty.body }}" hint-size="350px,280px"></x-import>
+            <button type="button" class="rw-btn rw-btn-primary" onClick="{{ newFocus }}">
+              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 22 }}" hint-size="22px,22px"></x-import>
+              {{ tx.addFocus }}
+            </button>
+          </div>
         </sc-if>
         <sc-if value="{{ fl.hasAny }}" hint-placeholder-val="{{ true }}">
           <div style="display:flex;flex-direction:column;gap:24px;">
             <div style="display:flex;flex-direction:column;gap:16px;">
               <sc-if value="{{ fl.hasActive }}" hint-placeholder-val="{{ true }}">
                 <div class="rw-section-head"><h2 class="rw-section-title">{{ tx.focusActive }}</h2><p class="rw-hint">{{ tx.focusSub }}</p></div>
+                <div class="rw-focus-list">
                 <sc-for list="{{ fl.active }}" as="it" hint-placeholder-count="2">
                   <button type="button" class="rw-surface rw-tile rw-press rw-focus-row" onClick="{{ it.open }}">
                     <span class="rw-focus-row-text">
                       <span class="rw-focus-row-head"><span class="rw-name">{{ it.title }}</span><span class="rw-focus-row-sub">{{ it.sub }}</span></span>
-                      <sc-if value="{{ it.fromGrow }}" hint-placeholder-val="{{ false }}"><span class="rw-focus-tag">{{ tx.fromGrow }}</span></sc-if>
+                      <sc-if value="{{ it.fromGrow }}" hint-placeholder-val="{{ false }}"><span class="rw-focus-tag"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChartColumn" size="{{ 14 }}" hint-size="14px,14px"></x-import>{{ tx.fromGrow }}</span></sc-if>
                     </span>
                     <span class="rw-focus-row-end">
                       <sc-if value="{{ it.hasDots }}" hint-placeholder-val="{{ true }}">
@@ -725,6 +732,7 @@ button:disabled{cursor:default !important;}
                     </span>
                   </button>
                 </sc-for>
+                </div>
               </sc-if>
               <button type="button" class="rw-btn rw-btn-primary" onClick="{{ newFocus }}">
                 <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 22 }}" hint-size="22px,22px"></x-import>
@@ -738,12 +746,14 @@ button:disabled{cursor:default !important;}
                   <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ fl.doneIcon }}" size="{{ 20 }}" hint-size="20px,20px"></x-import>
                 </button>
                 <sc-if value="{{ fl.showDone }}" hint-placeholder-val="{{ false }}">
+                  <div class="rw-focus-list">
                   <sc-for list="{{ fl.done }}" as="it" hint-placeholder-count="1">
                     <button type="button" class="rw-surface rw-tile rw-press rw-focus-row" onClick="{{ it.open }}">
                       <span class="rw-focus-row-text"><span class="rw-focus-row-head"><span class="rw-name">{{ it.title }}</span><span class="rw-focus-row-sub">{{ tx.focusCompleted }}</span></span></span>
                       <span class="rw-focus-row-end"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 20 }}" hint-size="20px,20px"></x-import></span>
                     </button>
                   </sc-for>
+                  </div>
                 </sc-if>
               </div>
             </sc-if>
@@ -1977,6 +1987,9 @@ button:disabled{cursor:default !important;}
 // scores and anything the user typed are shown as entered, and stored values (match types, tags, skill levels)
 // stay in English; only their labels are translated.
 const LANG_KEY = 'rallywise.lang';
+// Focus plans ask for at most 5 sessions a week or 5 matches: healthy training, not every day (Han, 2026-10-25).
+// Editing an older plan above 5 brings it down to 5.
+const FOCUS_MAX = 5;
 // The parser version a Real Voice test (?voiceMode=real) expects from the deployed parse-voice-log.
 const REAL_VOICE_ENGINE = '2026-10-23-v5';
 const LANGS = [['en', 'English'], ['zh', '简体中文']];
@@ -4150,8 +4163,8 @@ class Component extends DCLogic {
       v.menuItems = fdF ? [
         { label: this.t('editFocus'), icon: 'Pencil', select: () => {
           const f = fdF, P = f.type === 'practice';
-          this.openFocusSheet({ mode: 'edit', editId: f.id, title: f.title, goal: f.goal, type: f.type, perWeek: P ? f.plan.target : 3,
-            weeks: P ? f.plan.periods : 2, matches: f.type === 'match' ? f.plan.target : 4, minWeeks: P && f.status !== 'completed' ? this.weekIndex(f, day) + 1 : 0 }); } },
+          this.openFocusSheet({ mode: 'edit', editId: f.id, title: f.title, goal: f.goal, type: f.type, perWeek: P ? Math.min(FOCUS_MAX, f.plan.target) : 3,
+            weeks: P ? f.plan.periods : 2, matches: f.type === 'match' ? Math.min(FOCUS_MAX, f.plan.target) : 4, minWeeks: P && f.status !== 'completed' ? this.weekIndex(f, day) + 1 : 0 }); } },
         fdF.status === 'completed'
           ? (fdF.completedBy === 'user' ? { label: this.t('markActive'), icon: 'RotateCcw', select: () => this.setFocusDone(fdF.id, false) } : null)
           : { label: this.t('markComplete'), icon: 'CircleCheck', select: () => this.setFocusDone(fdF.id, true) },
@@ -4177,13 +4190,13 @@ class Component extends DCLogic {
         close: () => this.setState({ sheet: null }),
         types: types.map(([k, label]) => ({ label: this.t(label), ...pill(sh.type === k, () => this.setSheet({ type: k })) })),
         isPractice: sh.type === 'practice', isMatch: sh.type === 'match', isNone: sh.type === 'manual',
-        freqLabel: this.t('perWeek', { n: sh.perWeek }), notDec: sh.perWeek <= 1, notInc: sh.perWeek >= 7,
-        dec: () => this.setSheet({ perWeek: Math.max(1, sh.perWeek - 1) }), inc: () => this.setSheet({ perWeek: Math.min(7, sh.perWeek + 1) }),
+        freqLabel: this.t('perWeek', { n: sh.perWeek }), notDec: sh.perWeek <= 1, notInc: sh.perWeek >= FOCUS_MAX,
+        dec: () => this.setSheet({ perWeek: Math.max(1, sh.perWeek - 1) }), inc: () => this.setSheet({ perWeek: Math.min(FOCUS_MAX, sh.perWeek + 1) }),
         // Figma 173:13428 offers 1 to 4 weeks and Ongoing.
         weekOpts: [1, 2, 3, 4, 0].map(w => {
           const off = w > 0 && w < minW, label = w === 1 ? this.t('oneWeek') : w ? this.t('weeksN', { n: w }) : this.t('ongoing');
           return { label, off, ...pill(sh.weeks === w, () => { if (!off) this.setSheet({ weeks: w }); }) }; }),
-        matchOpts: [3, 4, 5, 6].map(m => ({ label: String(m), ...pill(sh.matches === m, () => this.setSheet({ matches: m })) })),
+        matchOpts: [3, 4, 5].map(m => ({ label: String(m), ...pill(sh.matches === m, () => this.setSheet({ matches: m })) })),
         ctaLabel: this.t(isEdit ? 'saveChanges' : 'addToFocus'), ctaIcon: !isEdit, notOk: !ok, save: () => this.saveFocusSheet() };
     }
     if (s.toast) {
