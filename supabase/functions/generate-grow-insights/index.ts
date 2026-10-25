@@ -1,4 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+// Engine V2: candidates, chart data, ranking, validation and template copy (shared with tests/grow-insights.test.mjs).
+import * as G from "../_shared/grow-insights-core.js";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -6,46 +8,8 @@ const CORS = {
   "Access-Control-Allow-Methods": "POST, OPTIONS"
 };
 
-const schema = {
-  type: "object",
-  additionalProperties: false,
-  required: ["keyInsight","buildNext","strengths","opponentPlans","doublesPlay"],
-  properties: {
-    keyInsight: { anyOf: [
-      { type: "null" },
-      { type: "object", additionalProperties: false, required: ["title","body","metric_id"], properties: {
-        title: { type: "string" }, body: { type: "string" }, metric_id: { type: "string" }
-      }}
-    ]},
-    buildNext: { type: "array", maxItems: 2, items: {
-      type: "object", additionalProperties: false, required: ["name","evidence","action"], properties: {
-        name:{type:"string"}, evidence:{type:"string"}, action:{type:"string"}
-      }
-    }},
-    strengths: { type: "array", maxItems: 2, items: {
-      type: "object", additionalProperties: false, required: ["name","signal","action"], properties: {
-        name:{type:"string"}, signal:{type:"string"}, action:{type:"string"}
-      }
-    }},
-    opponentPlans: { type: "array", maxItems: 2, items: {
-      type: "object", additionalProperties: false, required: ["player_id","plan"], properties: {
-        player_id:{type:"string"}, plan:{type:"string"}
-      }
-    }},
-    doublesPlay: { type: "array", maxItems: 2, items: {
-      type: "object", additionalProperties: false, required: ["name","pattern","label","action"], properties: {
-        name:{type:"string"}, pattern:{type:"string"},
-        label:{type:"string",enum:["Try Next","Keep Doing"]}, action:{type:"string"}
-      }
-    }}
-  }
-};
-
-function resultOf(games:any[]) {
-  let us=0, them=0;
-  for (const g of games || []) g[0] > g[1] ? us++ : them++;
-  return us > them ? "win" : "loss";
-}
+// "win" | "loss" | "even" | null. Games saved without a score ({ r: "W" }) count by their result (they used to read as losses).
+const resultOf = (games:any[]) => G.matchResult({ games });
 function counts(matches:any[], field:string) {
   const c:any = {};
   for (const m of matches) for (const t of (m[field] || [])) c[t] = (c[t] || 0) + 1;
@@ -77,22 +41,26 @@ Deno.serve(async req => {
     const reqBody = await req.json().catch(() => ({}));
     const lang = reqBody && reqBody.lang === "zh" ? "zh" : "en";
 
-    const [{data:players,error:pe},{data:matches,error:me}] = await Promise.all([
+    // Focus rows (select * so topic_id is read once its column exists); a missing Focus table just means no Focus.
+    const [{data:players,error:pe},{data:matches,error:me},{data:focusRows},{data:cached}] = await Promise.all([
       sb.from("players").select("id,name,level").order("created_at"),
       sb.from("matches").select("id,date,type,partner,opps,games,wt,lt,worked,lost,opp_notes,created_at")
-        .order("date",{ascending:false}).order("created_at",{ascending:false}).limit(20)
+        .order("date",{ascending:false}).order("created_at",{ascending:false}).limit(20),
+      sb.from("focus_items").select("*"),
+      sb.from("ai_insights").select("input_fingerprint,insight_json,generated_at").eq("user_id",uid).maybeSingle()
     ]);
     if (pe || me) throw pe || me;
 
     const recent = (matches || []).slice(0,10);
-    const INSIGHT_VERSION = "2026-10-15-v5";
+    const previous:any = cached?.insight_json || null;
+    // Every Focus as a topic, so Build Next can leave out active topics and bring back completed ones on new evidence.
+    const focus = (focusRows || []).map((f:any) => ({ topic: G.focusTopic(f, previous), status: f.status, completed_at: f.completed_at }));
+    const INSIGHT_VERSION = G.ENGINE_VERSION;
     const fp = await hash(INSIGHT_VERSION + (lang === "zh" ? ":zh" : "") + JSON.stringify(recent.map((m:any)=>({
       id:m.id,date:m.date,type:m.type,partner:m.partner,opps:m.opps,games:m.games,wt:m.wt,lt:m.lt,
       worked:safe(m.worked),lost:safe(m.lost),opp_notes:safe(m.opp_notes)
-    }))));
+    }))) + JSON.stringify(focus.map((f:any) => [f.topic, f.status, f.completed_at]).sort()));
 
-    const {data:cached} = await sb.from("ai_insights")
-      .select("input_fingerprint,insight_json,generated_at").eq("user_id",uid).maybeSingle();
     if (cached?.input_fingerprint === fp)
       return Response.json({insight:cached.insight_json,generated_at:cached.generated_at,cached:true},{headers:CORS});
     if (!recent.length) return Response.json({insight:null,cached:false},{headers:CORS});
@@ -103,45 +71,29 @@ Deno.serve(async req => {
     // but it never becomes an opponent profile with notes or weaknesses.
     for (const m of recent) for (const pid of (m.opps || []).filter((p:string) => !String(p).startsWith("unknown:"))) {
       const o = opponents[pid] ||= {player_id:pid,name:names[pid] || "Opponent",wins:0,losses:0,notes:[],cost:{}};
-      resultOf(m.games)==="win" ? o.wins++ : o.losses++;
+      const r = resultOf(m.games); if (r === "win") o.wins++; else if (r === "loss") o.losses++;
       if (m.opp_notes) o.notes.push(safe(m.opp_notes));
       for (const t of (m.lt || [])) o.cost[t]=(o.cost[t]||0)+1;
     }
     const six = recent.slice(0,6);
     const doubles = recent.filter((m:any)=>m.type==="Doubles").slice(0,6);
 
-    const newest = six.slice(0, Math.min(3, six.length));
-    const older = six.slice(newest.length);
-    const tagRate = (list:any[], field:string, tag:string) =>
-      list.length ? Math.round(list.filter(m => (m[field] || []).includes(tag)).length / list.length * 100) : 0;
-    const tags = [...new Set(six.flatMap((m:any) => [...(m.wt || []), ...(m.lt || [])]).filter((t:any) => t && t !== "Other"))];
-    const key_metrics:any[] = [];
-    if (older.length >= 2 && newest.length >= 2) {
-      for (const tag of tags) {
-        const goodNow = tagRate(newest,"wt",tag), goodBefore = tagRate(older,"wt",tag);
-        const costNow = tagRate(newest,"lt",tag), costBefore = tagRate(older,"lt",tag);
-        if (Math.abs(goodNow-goodBefore) >= 20) key_metrics.push({
-          metric_id:"worked:" + tag, direction:"worked", tag,
-          current_percent:goodNow, previous_percent:goodBefore,
-          current_matches:newest.length, previous_matches:older.length
-        });
-        if (Math.abs(costNow-costBefore) >= 20) key_metrics.push({
-          metric_id:"cost:" + tag, direction:"cost", tag,
-          current_percent:costNow, previous_percent:costBefore,
-          current_matches:newest.length, previous_matches:older.length
-        });
-      }
-    }
+    // Engine V2 evidence: everything numeric is decided here; the model only picks and words it.
+    const keyCands = G.keyCandidates(recent, previous?.keyInsight?.candidate_id).slice(0,3);
+    const buildCands = G.buildCandidates(recent, focus, 4);
+    const strengthCands = G.strengthCandidates(recent, 2);
     const facts = {
       summary:{
         recent_matches:recent.length,
         wins:recent.filter((m:any)=>resultOf(m.games)==="win").length,
-        losses:recent.filter((m:any)=>resultOf(m.games)!=="win").length,
+        losses:recent.filter((m:any)=>resultOf(m.games)==="loss").length,
         singles:recent.filter((m:any)=>m.type==="Singles").length,
         doubles:recent.filter((m:any)=>m.type==="Doubles").length
       },
       patterns:{ cost_points:counts(six,"lt"), worked:counts(six,"wt") },
-      key_metrics,
+      key_candidates:keyCands.map((c:any)=>G.candidateFacts(c, lang)),
+      build_candidates:buildCands.map((b:any)=>({topic_id:b.topic_id,tag:b.tag,k:b.k,n:b.n,returning:b.returning})),
+      strength_candidates:strengthCands.map((b:any)=>({topic_id:b.topic_id,tag:b.tag,k:b.k,n:b.n})),
       notes:recent.flatMap((m:any)=>[
         m.worked?{match_id:m.id,kind:"worked",text:safe(m.worked)}:null,
         m.lost?{match_id:m.id,kind:"cost_points",text:safe(m.lost)}:null
@@ -166,6 +118,7 @@ Deno.serve(async req => {
     const prompt = `You are Rallywise's badminton insight writer.
 Use only supplied verified facts and player notes. Never invent scores, counts, trends, opponents, or events.
 Numbers are already computed; do not recalculate or contradict them. Treat notes as observations, not objective facts.
+Skill Tags are the player's own notes, once per match: they say a skill was mentioned, never how many mistakes or points.
 Find recurring themes across tags and free text, including Other. Prefer fewer strong insights over filler.
 
 VOICE AND TONE:
@@ -184,24 +137,13 @@ VOICE AND TONE:
 - Do not add encouragement to every sentence; keep it subtle and credible.
 
 COPY LENGTH — hard limits:
-- Key Insight title: max 5 words and max 34 characters. Aim for one line; never exceed two lines on a 390px mobile screen.
-- Key Insight body: max 16 words and max 90 characters. Aim for two short lines on a 390px mobile screen.
+- Key Insight: see KEY INSIGHT below (title max 7 words / 14 Chinese characters; body max 25 words / 40 Chinese characters).
 - Build Next evidence: max 12 words. Action: max 14 words.
 - Strength evidence: max 12 words. Action: max 14 words.
 - Opponent game plan: max 20 words.
 - Doubles pattern/action: max 14 words each.
 
-KEY INSIGHT:
-- Make it a synthesized coaching insight, not a restatement of raw tags.
-- Think of the card as: title = interpretation; body = quantitative evidence; chart = visualization of exactly that same evidence.
-- For improving trends, the title should frame the progress positively (for example, "Returns are getting steadier") rather than leading with the remaining problem (for example, "Return errors remain costly"). The body can then acknowledge what still needs attention.
-- If using the chart, choose exactly one metric_id from key_metrics.
-- When metric_id is non-empty, the body MUST explicitly name what is being measured, include BOTH current_percent and previous_percent, and make the comparison window understandable when possible.
-- The numbers in the body MUST exactly match the selected key_metrics entry. Never round them differently, substitute different values, or describe a different metric.
-- Example: title "Your net game is getting stronger"; body "62% in your last 3 matches, up from 47% in the previous 3."
-- Chinese example: title "网前正在变得更稳定"; body "最近3场网前发挥率62%，此前3场为47%。"
-- If no key_metrics candidate genuinely supports a clear quantitative insight, set metric_id to "" and do not imply a numeric trend. In that case no chart will be shown.
-- metric_id is internal metadata only. NEVER expose metric_id, field names, tag syntax, parentheses such as "(cost:Footwork)", or implementation language in visible copy.
+${G.KEY_RULES}
 
 BUILD NEXT / STRENGTHS:
 - Evidence must explain WHY the card exists, but phrase it conversationally rather than like a report.
@@ -221,7 +163,7 @@ DOUBLES PLAY:
 
 Do not mention AI. Keep every card scannable on a phone.
 
-OUTPUT LANGUAGE: write every visible string in ${lang === "zh" ? "natural Simplified Chinese" : "English"}. Keep JSON keys, metric_id, player_id and the doublesPlay label values ("Try Next" / "Keep Doing") exactly as specified.`
+OUTPUT LANGUAGE: write every visible string in ${lang === "zh" ? "natural Simplified Chinese" : "English"}. Keep JSON keys, candidate_id, topic_id, player_id and the doublesPlay label values ("Try Next" / "Keep Doing") exactly as specified.`
 
     const ai = await fetch("https://api.openai.com/v1/responses",{
       method:"POST",
@@ -229,7 +171,8 @@ OUTPUT LANGUAGE: write every visible string in ${lang === "zh" ? "natural Simpli
       body:JSON.stringify({
         model:"gpt-5-mini",
         input:[{role:"system",content:prompt},{role:"user",content:JSON.stringify(facts)}],
-        text:{format:{type:"json_schema",name:"rallywise_grow",strict:true,schema}}
+        text:{format:{type:"json_schema",name:"rallywise_grow",strict:true,
+          schema:G.modelSchema(keyCands.map((c:any)=>c.id), buildCands.map((b:any)=>b.topic_id), strengthCands.map((b:any)=>b.topic_id))}}
       })
     });
     if (!ai.ok) {
@@ -240,17 +183,13 @@ OUTPUT LANGUAGE: write every visible string in ${lang === "zh" ? "natural Simpli
     const parsed = JSON.parse(readOutput(await ai.json()));
     parsed.lang = lang;
 
-    if (parsed.keyInsight) {
-      const chosen = key_metrics.find((m:any) => m.metric_id === parsed.keyInsight.metric_id);
-      if (chosen) {
-        parsed.keyInsight.chart = {
-          current_percent: chosen.current_percent,
-          previous_percent: chosen.previous_percent
-        };
-      } else {
-        parsed.keyInsight.metric_id = "";
-      }
-    }
+    parsed.engine_version = G.ENGINE_VERSION;
+    // The engine's evidence decides the chart; the AI copy is kept only if it passes the checks, else the template.
+    parsed.keyInsight = G.finalizeKey(keyCands, parsed.keyInsight, lang);
+    parsed.buildNext = G.finalizeItems(buildCands, parsed.buildNext, "build", lang);
+    parsed.strengths = G.finalizeItems(strengthCands, parsed.strengths, "strength", lang);
+    const failed = [parsed.keyInsight, ...parsed.buildNext, ...parsed.strengths].filter((x:any) => x.copy_source && x.copy_source !== "ai");
+    if (failed.length) console.warn("grow copy replaced", JSON.stringify(failed.map((x:any) => [x.candidate_id || x.topic_id, x.validation?.ai_issues || x.issues])));
 
     parsed.opponentPlans = (parsed.opponentPlans || []).map((p:any) => {
       const o:any = Object.values(opponents).find((x:any) => x.player_id === p.player_id);

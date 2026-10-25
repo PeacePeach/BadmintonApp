@@ -27,6 +27,7 @@
 <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
 <script src="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/_ds_bundle.js"></script>
 <script src="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/illustrations.js"></script>
+<script src="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/key-chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.3/dist/umd/supabase.js"></script>
 <script src="rallywise-config.js"></script>
 <script src="rallywise-backend.js"></script>
@@ -576,6 +577,21 @@ button:disabled{cursor:default !important;}
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ grow.empty.illustration }}" title="{{ grow.empty.title }}" body="{{ grow.empty.body }}" hint-size="350px,300px"></x-import>
             </sc-if>
             <sc-if value="{{ grow.showKey }}" hint-placeholder-val="{{ true }}">
+            <!-- Engine V2: split KeyInsight with one of the three RWKeyChart patterns, from the engine's chart object. -->
+            <sc-if value="{{ grow.keySplit }}" hint-placeholder-val="{{ true }}">
+            <div class="rw-surface rw-tile rw-key is-split">
+              <div class="rw-key-head"><span class="rw-label">{{ tx.keyInsight }}</span></div>
+              <div class="rw-key-split">
+                <div class="rw-key-split-text">
+                  <p class="rw-key-title">{{ grow.keyTitle }}</p>
+                  <p class="rw-key-body">{{ grow.keyBody }}</p>
+                </div>
+                <div class="rw-key-chart" role="img" aria-label="{{ grow.keyBody }}" data-kind="{{ grow.keyChart.kind }}" data-values="{{ grow.keyChart.values }}" data-quote="{{ grow.keyChart.quote }}" data-split="{{ grow.keyChart.split }}"></div>
+              </div>
+            </div>
+            </sc-if>
+            <!-- Legacy fallback (Han, 2026-10-24): insights cached before Engine V2, until they are made again. -->
+            <sc-if value="{{ grow.keyLegacy }}" hint-placeholder-val="{{ false }}">
             <div class="rw-surface rw-tile rw-key">
               <div class="rw-key-head"><span class="rw-label">{{ tx.keyInsight }}</span></div>
               <p class="rw-key-title">{{ grow.keyTitle }}</p>
@@ -584,6 +600,7 @@ button:disabled{cursor:default !important;}
               <div class="rw-bar rw-key-bar" role="img" aria-label="{{ grow.keyCurrent }}"><div><div style="width: {{ grow.keyCurrent }};"></div></div></div>
               </sc-if>
             </div>
+            </sc-if>
             </sc-if>
 
             <sc-if value="{{ grow.showBuild }}" hint-placeholder-val="{{ true }}">
@@ -3025,6 +3042,8 @@ class Component extends DCLogic {
     this.persist();
     this.syncFocus();
     this.applyLang();
+    // Key Insight charts (RWKeyChart): draw new ones, redraw when their data changed.
+    if (window.RWKeyChart) document.querySelectorAll('.rw-key-chart').forEach(el => el._rwSeen ? window.RWKeyChart.draw(el) : window.RWKeyChart.scan(el.parentNode));
     // insights_viewed: once per visit to Insights, once its data (or No Insights Yet) is on screen.
     const cs = this.state;
     if (cs.screen !== 'insights') this._insSeen = false;
@@ -3395,7 +3414,8 @@ class Component extends DCLogic {
       this.setState(s => ({ focuses: s.focuses.map(x => x.id === f.id ? next : x), focusPeriods: rows, sheet: null }));
       return this.flash(this.t('tFocusUpdated'));
     }
-    const f = { id: 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8), title, source: sh.mode === 'grow' ? 'grow' : 'manual', type: sh.type, status: 'active', completedBy: null, completedAt: null,
+    // A Focus added from Grow keeps the recommendation's topic (saved once focus_items.topic_id exists).
+    const f = { id: 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8), title, source: sh.mode === 'grow' ? 'grow' : 'manual', topicId: sh.mode === 'grow' ? sh.topicId || null : null, type: sh.type, status: 'active', completedBy: null, completedAt: null,
       goal: sh.goal.trim(), cues: sh.cues || [], createdAt: now, plan: this.planFor(sh, now) };
     this.setState(s => ({ focuses: [f, ...s.focuses], sheet: null, ...(sh.mode === 'new' ? { screen: 'focusDetail', focusId: f.id, back: [{ screen: 'focus' }] } : {}) }));
     this.flash(this.t('tFocusAdded'));
@@ -3422,15 +3442,19 @@ class Component extends DCLogic {
   // Focus on the same topic hides it. A completed one does too, until there is new evidence: 3 or more matches logged
   // since it was completed, and the recommendation is newer than that (an AI insight made after it, or, for a tag,
   // the tag picked again in 2 of those matches). Nothing is deleted; Focus history stays as it is.
+  // Engine V2 (2026-10-25): a recommendation with a topicId was already checked by the engine against Focus, and
+  // a completed topic comes back only as returning (new evidence since completion). This stays as a second check
+  // for insights made before a Focus changed: a Focus is matched by its stored topicId, else by its title.
   openRecs(recs, { generatedAt, max = 2 } = {}) {
     const FS = this.state.focuses || [], ms = this.state.matches || [];
     const loggedAfter = iso => ms.filter(m => (m.createdAt || m.date + 'T23:59:59') > iso);
     return recs.filter(r => {
-      const k = this.topicKey(r.name, r.tag);
+      const k = r.topicId || this.topicKey(r.name, r.tag);
       if (!k) return true;
-      const keys = [k, ...(r.aliases || []).map(a => this.topicKey(a))];
-      const same = FS.filter(f => keys.includes(this.topicKey(f.title)));
+      const keys = [k, this.topicKey(r.name, r.tag), ...(r.aliases || []).map(a => this.topicKey(a))];
+      const same = FS.filter(f => keys.includes(f.topicId || this.topicKey(f.title)) || keys.includes(this.topicKey(f.title)));
       if (same.some(f => f.status === 'active')) return false;
+      if (r.topicId && same.length) return !!r.returning && !!generatedAt && same.every(f => generatedAt > (f.completedAt || ''));
       return same.every(f => {
         const after = loggedAfter(f.completedAt || f.createdAt || '');
         if (after.length < 3) return false;
@@ -3734,7 +3758,12 @@ class Component extends DCLogic {
         // Design previews keep the sample coaching above. Real accounts only see what their own matches back up:
         // tags they picked (2 or more times), and their own notes on opponents. The key insight and Doubles Play are
         // sample-only until they can be worked out from real data.
-        if (!this.live()) v.grow = { ...sample, keyTitle: 'Your net game is getting stronger.', keyBody: "Net worked in 3 of your last 3 matches, up from 2 of the previous 3.", keyCurrent: '100%', keyPrevious: '67%', showKeyChart: true, showKey: true, showBuild: true, showStrengths: true, showOpps: true, showDoubles: true, empty: null };
+        // The preview's Key Insight is an Engine V2 Match Strip, worded as the engine's template would word it.
+        const zhKey = this.lang() === 'zh';
+        if (!this.live()) v.grow = { ...sample, keyTitle: zhKey ? '网前这几场一直是亮点' : 'Net play keeps standing out',
+          keyBody: zhKey ? '最近6场里有5场你提到网前打得好，最近3场每场都有。' : 'You noted net play winning you points in 5 of your last 6 matches, including all of the last 3.',
+          keyChart: { kind: 'strip', values: '1,1,0,1,1,1', quote: '', split: '' }, keySplit: true, keyLegacy: false,
+          keyCurrent: '0%', keyPrevious: '0%', showKeyChart: false, showKey: true, showBuild: true, showStrengths: true, showOpps: true, showDoubles: true, empty: null };
         else if (s.aiGrow) {
           const ai = s.aiGrow;
           const opps = (ai.opponentPlans || []).map(x => {
@@ -3743,12 +3772,22 @@ class Component extends DCLogic {
           }).filter(Boolean);
           // label is the schema's "Try Next" / "Keep Doing" enum; only what is shown is translated.
           const doubles = (ai.doublesPlay || []).map(x => ({ ...x, label: this.t(x.label === 'Try Next' ? 'tryNext' : 'keepDoing'), labelFg: x.label === 'Try Next' ? 'var(--status-win)' : 'var(--text-secondary)' }));
-          const build = ai.buildNext || [], strengths = ai.strengths || [], key = ai.keyInsight || null;
+          // Engine V2 items carry a topic_id ("tag:Defence"); its Skill Tag drives the Strengths icon and Focus matching.
+          const tagOf = x => x.tag || (String(x.topic_id || '').startsWith('tag:') ? x.topic_id.slice(4) : undefined);
+          const build = (ai.buildNext || []).map(x => ({ ...x, tag: tagOf(x), topicId: x.topic_id || null })),
+            strengths = (ai.strengths || []).map(x => ({ ...x, tag: tagOf(x), topicId: x.topic_id || null }));
+          // An Engine V2 Key Insight has status ok | insufficient and a chart from the engine's evidence; one cached
+          // before V2 has no status and may carry the old { current_percent } (shown as the legacy bar).
+          const key = ai.keyInsight && ai.keyInsight.status !== 'insufficient' && ai.keyInsight.title ? ai.keyInsight : null;
+          const kc = key && key.chart && ['trend', 'compare', 'strip'].includes(key.chart.pattern) && Array.isArray(key.chart.values) && key.chart.values.length ? key.chart : null;
+          const legacyPct = key && !kc && key.chart && typeof key.chart.current_percent === 'number';
           v.grow = {
             keyTitle: key ? key.title : '', keyBody: key ? key.body : '',
-            keyCurrent: key && key.chart ? Math.max(0, Math.min(100, key.chart.current_percent)) + '%' : '0%',
-            keyPrevious: key && key.chart ? Math.max(0, Math.min(100, key.chart.previous_percent)) + '%' : '0%',
-            showKeyChart: !!(key && key.chart),
+            keyChart: kc ? { kind: kc.pattern, values: kc.values.join(','), quote: (kc.quote || []).join(','), split: kc.split != null ? String(kc.split) : '' } : { kind: '', values: '', quote: '', split: '' },
+            keySplit: !!kc, keyLegacy: !!key && !kc,
+            keyCurrent: legacyPct ? Math.max(0, Math.min(100, key.chart.current_percent)) + '%' : '0%',
+            keyPrevious: legacyPct ? Math.max(0, Math.min(100, key.chart.previous_percent)) + '%' : '0%',
+            showKeyChart: !!legacyPct,
             build, strengths, opps, doubles,
             showKey: !!key, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: !!doubles.length,
             empty: !key && !build.length && !strengths.length && !opps.length && !doubles.length &&
@@ -3763,7 +3802,7 @@ class Component extends DCLogic {
           const strengths = top(wins, 'wt').map(([t, n]) => ({ name: this.tagLabel(t), tag: t, signal: this.t('workingIn', { n, total: wins.length }), action: '' }));
           const opps = [...new Set(all.flatMap(m => m.opps).filter(id => !this.unknown(id)))].map(id => ({ id, r: this.vs(id), note: all.find(m => m.on && m.opps.includes(id)) }))
             .filter(o => o.note && this.nm(o.id)).sort((a, b) => a.r.pct - b.r.pct || b.r.n - a.r.n).slice(0, 2).map(o => op(o.id, o.note.on));
-          v.grow = { keyTitle: '', keyBody: '', keyCurrent: '0%', keyPrevious: '0%', showKeyChart: false, build, strengths, opps, doubles: [], showKey: false, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: false,
+          v.grow = { keyTitle: '', keyBody: '', keyChart: { kind: '', values: '', quote: '', split: '' }, keySplit: false, keyLegacy: false, keyCurrent: '0%', keyPrevious: '0%', showKeyChart: false, build, strengths, opps, doubles: [], showKey: false, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: false,
             empty: !build.length && !strengths.length && !opps.length && empty('no-insights', this.t('notEnough'), this.t('notEnoughBody')) };
         }
       }
@@ -4054,7 +4093,7 @@ class Component extends DCLogic {
     if (v.grow && v.grow.build) {
       v.grow.build = this.openRecs(v.grow.build, { generatedAt: s.aiGrow && this.live() ? s.aiGrow._generatedAt : null }).map(b => ({ ...b,
         fLabel: this.t('addToFocus'), fIcon: 'Plus', fCls: 'rw-btn-secondary',
-        focus: () => this.openFocusSheet({ mode: 'grow', title: b.name, goal: b.action || '' }) }));
+        focus: () => this.openFocusSheet({ mode: 'grow', title: b.name, goal: b.action || '', topicId: b.topicId || this.topicKey(b.name, b.tag) || null }) }));
       v.grow.showBuild = !!v.grow.build.length;
     }
     if (v.grow && v.grow.strengths) v.grow.strengths = v.grow.strengths.map(k => ({ ...k, icon: this.skillIcon(k.name, k.tag) }));

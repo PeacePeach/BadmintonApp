@@ -161,12 +161,16 @@
   const fromPlayerRow = r => r.id === 'me' ? { id: r.id, name: r.name, level: r.level } : (r.level ? { id: r.id, name: r.name, level: r.level } : { id: r.id, name: r.name });
   const fromMatchRow = r => ({ id: r.id, date: r.date, type: r.type, partner: r.partner, opps: r.opps || [], games: r.games || [],
     wt: r.wt || [], lt: r.lt || [], worked: r.worked || '', lost: r.lost || '', on: r.opp_notes || '', createdAt: r.created_at });
+  // topic_id (Grow topic, 20261025000000_focus_topic_id.sql) is sent only once load() has seen the column, so the
+  // app keeps saving Focus the same way before that migration runs.
+  let focusTopicCol = false;
   const toFocusRow = (uid, f) => ({ user_id: uid, id: String(f.id), title: String(f.title || '').slice(0, 120), source: f.source === 'grow' ? 'grow' : 'manual',
+    ...(focusTopicCol ? { topic_id: f.topicId || null } : {}),
     type: f.type, status: f.status === 'completed' ? 'completed' : 'active', completed_by: f.status === 'completed' ? (f.completedBy === 'plan' ? 'plan' : 'user') : null,
     completed_at: f.status === 'completed' ? f.completedAt || null : null, goal: f.goal || '', cues: f.cues || [],
     period_type: f.plan.periodType, target_per_period: f.plan.target || 0, total_periods: f.plan.periods || 0, plan_start: f.plan.start,
     plan_started_at: f.plan.startedAt, ...(f.createdAt ? { created_at: f.createdAt } : {}) });
-  const fromFocusRow = r => ({ id: r.id, title: r.title, source: r.source, type: r.type, status: r.status, completedBy: r.completed_by || null,
+  const fromFocusRow = r => ({ id: r.id, title: r.title, source: r.source, topicId: r.topic_id || null, type: r.type, status: r.status, completedBy: r.completed_by || null,
     completedAt: r.completed_at || null, goal: r.goal || '', cues: r.cues || [], createdAt: r.created_at,
     plan: { periodType: r.period_type, target: r.target_per_period, periods: r.total_periods, start: r.plan_start, startedAt: r.plan_started_at } });
   const toPeriodRow = (uid, p) => ({ user_id: uid, id: String(p.id), focus_id: String(p.focusId), period_start: p.start, period_end: p.end, target: p.target,
@@ -265,13 +269,15 @@
       const db = sb(), uid = user.id;
       // Focus rows load alongside; if their tables aren't there yet, Focus starts empty and isn't synced.
       const focus = async q => { const r = await q; if (r.error && missingTable(r.error)) return null; if (r.error) throw dataFail(r.error); return r.data; };
-      const [profile, players, matches, focusItems, focusPeriods] = await Promise.all([
+      const [profile, players, matches, focusItems, focusPeriods, topicCol] = await Promise.all([
         run(db.from('profiles').select('onboarded, prefs, anon_id').eq('user_id', uid).maybeSingle()),
         run(db.from('players').select('id, name, level').eq('user_id', uid).order('created_at')),
         run(db.from('matches').select('*').eq('user_id', uid).order('date', { ascending: false }).order('created_at', { ascending: false })),
         focus(db.from('focus_items').select('*').eq('user_id', uid).order('created_at', { ascending: false })),
-        focus(db.from('focus_periods').select('*').eq('user_id', uid).order('period_start'))
+        focus(db.from('focus_periods').select('*').eq('user_id', uid).order('period_start')),
+        db.from('focus_items').select('topic_id').limit(1).then(r => !r.error, () => false)
       ]);
+      focusTopicCol = !!topicCol;
       const focusReady = !!(focusItems && focusPeriods);
       if (!focusReady) console.warn('[rallywise] Focus tables not found; apply supabase/migrations/20261016000000_focus.sql. Focus changes are not saved.');
       const focuses = focusReady ? focusItems.map(fromFocusRow) : [], periods = focusReady ? focusPeriods.map(fromPeriodRow) : [];
