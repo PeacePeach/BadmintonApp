@@ -178,9 +178,13 @@ function compareCandidate(chron, kind) {
 // Fewer mentions is never a candidate on either side (Han, 2026-10-26): a cost tag the player stopped picking
 // (e.g. [1,1,1,0,1,0]) is an absence of notes, not proof the problem went away, and fewer "what worked" mentions
 // don't show anything got worse.
-// A recurring cost tag is "linked" to results when it was noted in 2+ of the losses in that window, in at least
+// A recurring cost tag is "linked" to results when it was noted in 3+ of the recorded losses in that window, in at least
 // two thirds of them, and losses were at least half again as common with it as without it. The strip then shows
 // each match's result under its pill (xLabels), so the chart carries what the copy says.
+// Han (2026-10-26): results are only the recorded ones (matchResult: more games won or lost, scored or { r }).
+// A match with no result, or level games, is "unknown": it is left out of the rates, never guessed, and its
+// label is "·". At least 4 of the 6 must have a result. The copy states an association (it showed up in the
+// losses), never that the skill caused them; checkCopy rejects causal wording.
 // An emerging "what worked" tag that cost points in 2+ of the 3 matches before is a turnaround (ranked higher).
 // A tag noted on both sides of the same match in half or more of its matches is mixed, and not used.
 function tagCandidates(chron) {
@@ -188,6 +192,7 @@ function tagCandidates(chron) {
   if (win.length < NOTE_N) return [];
   const skipped = skippedIn(chron, win, hasNotes);
   const res = win.map(m => matchResult(m)), losses = res.filter(r => r === 'loss').length;
+  const known = res.map(r => r === 'win' || r === 'loss');
   const out = [];
   for (const side of ['cost', 'worked']) for (const tag of SKILL_TAGS) {
     const f = side === 'cost' ? 'lt' : 'wt', o = side === 'cost' ? 'wt' : 'lt';
@@ -200,9 +205,10 @@ function tagCandidates(chron) {
     if (k >= 4 && r >= 2) shape = 'recurring';
     else if (r >= 2 && r - p >= 2) shape = 'emerging';
     if (!shape) continue;
-    const lt = values.filter((v, i) => v && res[i] === 'loss').length, untagged = NOTE_N - k;
-    const linked = side === 'cost' && shape === 'recurring' && lt >= 2 && lt * 3 >= losses * 2 && untagged > 0 &&
-      lt / k - values.filter((v, i) => !v && res[i] === 'loss').length / untagged >= 0.5;
+    const lt = values.filter((v, i) => v && res[i] === 'loss').length;
+    const taggedKnown = values.filter((v, i) => v && known[i]).length, untaggedKnown = values.filter((v, i) => !v && known[i]).length;
+    const linked = side === 'cost' && shape === 'recurring' && known.filter(Boolean).length >= 4 && lt >= 3 && lt * 3 >= losses * 2 &&
+      taggedKnown > 0 && untaggedKnown > 0 && lt / taggedKnown - values.filter((v, i) => !v && res[i] === 'loss').length / untaggedKnown >= 0.5;
     const turnaround = side === 'worked' && shape === 'emerging' && sum(win.slice(0, 3).map(m => ((m.lt || []).includes(tag) ? 1 : 0))) >= 2;
     const strength = shape === 'recurring' ? (k >= 5 || linked ? 'strong' : 'moderate') : Math.abs(p - r) === 3 ? 'strong' : 'moderate';
     const latest = values[values.length - 1];
@@ -416,6 +422,9 @@ const BAN = {
 // Self-reported evidence must sound self-reported, and may not claim measured outcomes.
 const NOTE_WORDS = { en: /\b(not(e|ed|es|ing)|mention(ed|s)?|said|wr(ote|itten))\b/i, zh: /提到|记录|记下|笔记|写到|你说/ };
 const MEASURED = { en: /%|\bpercent|\brate\b|\bpoints? won\b|\bwon \d+ points|\bimprov|\bbetter\b|\bstronger\b|\bfixed\b|\bsolved\b|\bmistakes? (dropped|fell)/i, zh: /%|得分率|胜率|成功率|进步|变强|提升|改善|解决了|失误.{0,4}(次|个)/ };
+// A linked strip says the skill showed up in the losses; these say it made them happen.
+const CAUSAL = { en: /\b(caus|because|due to|led to|leads? to|cost(s|ing)? you (the|those|these|that|your)? ?(match|matches|game|games|loss)|lost (you )?(the )?(match|matches)|why you lo|reason)/i,
+  zh: /导致|因为|由于|害你|输在|原因|让你输|才输|输掉了?.{0,4}(比赛|这几场)/ };
 const UP_WORDS = { en: /\b(more|keeps?|again|started|starting|rising|rose|up|climb)/i, zh: /多了|多起来|越来越多|反复|又|开始/ };
 const DOWN_WORDS = { en: /\b(fewer|less|dropped|down|haven't|slipp|dipped|fell|lower)/i, zh: /少了|减少|没提到|下滑|往下|降/ };
 
@@ -438,6 +447,7 @@ export function checkCopy({ title, body }, c, lang) {
     if (MEASURED[lang].test(text)) issues.push('measured_claim_from_notes');
   } else if (c.strength !== 'strong' && (lang === 'zh' ? /进步|越来越好/.test(title) : /\b(improv|better|stronger)/i.test(title))) issues.push('overclaim');
   if (ungrounded(text, c.notes).length) issues.push('detail_not_in_notes');
+  if (c.linked && CAUSAL[lang].test(text)) issues.push('causal_claim');
   if (c.pattern === 'compare' || (c.pattern === 'strip' && c.shape !== 'recurring')) {
     const okWindow = lang === 'zh' ? /最近(有记录的)?3场/.test(body) && /之前/.test(body) : /last 3/i.test(body) && /\b(before|previous|earlier)\b|\b(up|down) from\b/i.test(body);
     if (!okWindow) issues.push('window');
@@ -702,7 +712,7 @@ export const KEY_RULES = `KEY INSIGHT (Engine V2):
 - The card is narrow (text column about 172px): the title must fit in 2 lines and the body in 3 lines. That is about 30 characters for an English title and 60 for an English body, 12 Chinese characters for a title and 34 for a body (punctuation counts). Copy that is longer is thrown away. Say it simply rather than squeeze it.
 - Use ONLY the candidate's numbers. Never compute, round differently, add percentages, fractions like "2/6" or other numbers. Every number you write must be one of them.
 - source "notes_tags" is self-reported: say the player noted / mentioned it (「你记下」「你提到」). Never say mistakes were counted, points were won or lost with that skill, or that a skill improved, got better or worse. Notes that stop mentioning a problem are not evidence it went away.
-- linked_to_losses: it showed up in the losses; never say it caused them.
+- linked_to_losses: the chart marks each match's recorded result (W/L; "·" = no recorded result). Describe an association only ("shows up in your losses", 「输球时常有」); never say or imply it caused, cost you or lost you the matches (no "because", "led to", 「导致」「因为」「输在」).
 - source "scores" is measured: you may say games were won or the margin changed, but don't claim why.
 - Only strength "strong" may use outcome words in the title ("heading the right way"); otherwise stay measured.
 - Time words: "your last 3 matches", "the 3 before", "lately"; Chinese 「最近3场」「之前3场」「这几场」. If skipped_matches_without_notes > 0, say "noted matches" / 「有记录的」. Never "matches 1–3", 「第1至第3场」「第N场」, "tagged" or 「标签」.

@@ -127,6 +127,49 @@ test('strip: a cost tag that lines up with the losses is "linked"; the chart sho
   // Tagged in every match: nothing to compare against, so not linked.
   fresh();
   assert.equal(G.keyCandidates([L, L, W, L, W, L].map(g => M(g, ['Serve']))).find(x => x.tag === 'Serve').linked, false);
+  // Still the existing Match Strip: same pattern, same 0/1 values, only the labels under the matches change.
+  assert.equal(en.pattern, 'strip'); assert.deepEqual(en.chart.values, row);
+});
+
+test('linked strip (Han conditions): only recorded results, unknown never guessed, association not cause', () => {
+  // A match with no recorded result (no games, level games, or unscored ties) is unknown: "·", out of the rates.
+  fresh();
+  const games = [L, L, W, L, [], L], row = [1, 1, 0, 1, 1, 1];
+  const c = G.keyCandidates(games.map((g, i) => M(g, row[i] ? ['Serve'] : ['Other']))).find(x => x.tag === 'Serve');
+  assert.ok(c.linked);
+  assert.deepEqual(c.chart.results, ['L', 'L', 'W', 'L', '', 'L']);
+  assert.deepEqual(G.finalizeKey([c], null, 'en').chart.xLabels, ['L', 'L', 'W', 'L', '·', 'L']);
+  assert.deepEqual(G.finalizeKey([c], null, 'zh').chart.xLabels, ['负', '负', '胜', '负', '·', '负']);
+  assert.equal(c.numbers.l, 4); assert.equal(c.numbers.lt, 4);
+  // Level games (1-1) and voice results { r } are read as recorded, never guessed.
+  assert.equal(G.matchResult({ games: [[21, 17], [17, 21]] }), 'even');
+  assert.equal(G.matchResult({ games: [{ r: 'L' }] }), 'loss');
+  assert.equal(G.matchResult({ games: [[21, 21]] }), null);
+  fresh();
+  const voice = [[{ r: 'L' }], [{ r: 'L' }], [{ r: 'W' }], [{ r: 'L' }], [{ r: 'W' }], [{ r: 'L' }]].map((g, i) => M(g, row[i] ? ['Serve'] : ['Other']));
+  assert.deepEqual(G.keyCandidates(voice).find(x => x.tag === 'Serve').chart.results, ['L', 'L', 'W', 'L', 'W', 'L']);
+  // Fewer than 4 recorded results in the 6: not linked (no W/L labels).
+  fresh();
+  const few = [L, [], W, [[21, 17], [17, 21]], [], L].map((g, i) => M(g, row[i] ? ['Serve'] : ['Other']));
+  const cf = G.keyCandidates(few, null, { all: true }).find(x => x.tag === 'Serve');
+  assert.equal(cf.linked, false); assert.equal(cf.chart.results, undefined);
+  assert.equal(G.finalizeKey([cf], null, 'en').chart.xLabels, undefined);
+  // Only recorded losses count: two unknown matches with the tag leave 2 recorded losses, too few to link.
+  fresh();
+  const mixed = [[], [], W, L, W, L].map((g, i) => M(g, [1, 1, 0, 1, 1, 1][i] ? ['Serve'] : ['Other']));
+  assert.equal(G.keyCandidates(mixed, null, { all: true }).find(x => x.tag === 'Serve').linked, false);
+  // Copy: association yes, cause no, in both languages; templates pass.
+  for (const lang of BOTH) assert.deepEqual(G.checkCopy(G.keyTemplate(c, lang), c, lang), []);
+  for (const [t, b, lang] of [
+    ['Serve is costing you matches', 'You noted it in all 4 losses in your last 6 matches.', 'en'],
+    ['Serve shows up in your losses', 'You noted it in all 4 losses, so it caused them.', 'en'],
+    ['Serve shows up in your losses', 'You lost because of it: noted in all 4 losses in your last 6 matches.', 'en'],
+    ['发球导致你输球', '最近6场输了4场，其中每场你都记下了发球丢分。', 'zh'],
+    ['输球时常有发球问题', '最近6场输了4场，都是因为你记下的发球丢分。', 'zh'],
+    ['你输在发球上', '最近6场输了4场，其中每场你都记下了发球丢分。', 'zh']
+  ]) assert.ok(G.checkCopy({ title: t, body: b }, c, lang).includes('causal_claim'), `${t} / ${b}`);
+  const ok = { title: 'Serve shows up when you lose', body: 'You noted it in all 4 losses in your last 6 matches.' };
+  assert.deepEqual(G.checkCopy(ok, c, 'en'), []);
 });
 
 test('strip: emerging cost tag', () => {
