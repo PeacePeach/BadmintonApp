@@ -353,8 +353,8 @@
   --rw-menu-radius: var(--rw-tile-radius);
   --rw-menu-scrim: var(--rw-color-scrim);
   --rw-menu-item-radius: 10px;
-  --rw-menu-item-fg: var(--rw-color-text-primary);
-  --rw-menu-item-icon: var(--rw-color-text-secondary);
+  --rw-menu-item-fg: var(--rw-color-text-body);       /* N600 label and icon (Han, 2026-10-25) */
+  --rw-menu-item-icon: var(--rw-color-text-body);
   --rw-menu-item-pressed: var(--rw-color-surface-highlight);
   --rw-menu-divider: var(--rw-color-divider);
   /* W / L check (Figma CheckBoxes 348:13628). Selected = fill (no outline); unselected = dashed N400 ring. Letter N75 (Figma N150, Han R4) */
