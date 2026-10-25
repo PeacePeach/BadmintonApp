@@ -1988,7 +1988,7 @@ button:disabled{cursor:default !important;}
 // stay in English; only their labels are translated.
 const LANG_KEY = 'rallywise.lang';
 // Focus plans ask for at most 5 sessions a week or 5 matches: healthy training, not every day (Han, 2026-10-25).
-// Editing an older plan above 5 brings it down to 5.
+// Plans saved earlier with more are brought down to 5 when Focus syncs (reconcileFocus).
 const FOCUS_MAX = 5;
 // The parser version a Real Voice test (?voiceMode=real) expects from the deployed parse-voice-log.
 const REAL_VOICE_ENGINE = '2026-10-23-v5';
@@ -3354,6 +3354,13 @@ class Component extends DCLogic {
     const put = r => { const i = byId.get(r.id); if (i == null) { byId.set(r.id, rows.length); rows.push(r); } else rows[i] = r; changed = true; };
     const next = focuses.map(f0 => {
       let f = f0;
+      // Plans saved before the cap of 5 (FOCUS_MAX) come down to 5. Like an edit, this week's row takes the new target
+      // (keeping up to 5 marks); finished weeks keep their history.
+      if ((f.type === 'practice' || f.type === 'match') && f.plan && f.plan.target > FOCUS_MAX) {
+        f = { ...f, plan: { ...f.plan, target: FOCUS_MAX } };
+        const cw = this.currentWeek(f, day), row = cw && rows[byId.get(cw.id)];
+        if (row && row.target > FOCUS_MAX) put({ ...row, target: FOCUS_MAX, marks: this.resizeMarks(row.marks, FOCUS_MAX) });
+      }
       const ended = this.planEnded(f, day, matches);
       if (f.status === 'active' && ended) f = { ...f, status: 'completed', completedBy: 'plan', completedAt: new Date().toISOString() };
       else if (f.status === 'completed' && f.completedBy === 'plan' && !ended) f = { ...f, status: 'active', completedBy: null, completedAt: null };
