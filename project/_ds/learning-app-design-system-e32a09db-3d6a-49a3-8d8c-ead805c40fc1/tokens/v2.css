@@ -263,6 +263,7 @@
   --rw-avatar-grad-from: var(--rw-color-avatar-grad-from);
   --rw-avatar-grad-to: var(--rw-color-avatar-grad-to);
   --rw-avatar-fg: var(--rw-color-avatar-fg);
+  --rw-avatar-lg-size: 64px;                         /* Profile header (pending Han) */
   --rw-avatar-me-bg: var(--rw-color-avatar-me-bg);
   --rw-avatar-me-fg: var(--rw-color-avatar-me-fg);
   /* Search bar (Figma 329:7330; Han approved a reusable search component, 2026-10-23) */
@@ -431,6 +432,7 @@
   --rw-type-pill: 500 14px/15px var(--font-sans);
   --rw-type-pill-sm: 500 12px/15px var(--font-sans);
   --rw-type-avatar: 700 14px/14px var(--font-sans);    /* 40px avatar: Bold 14px (Han, 2026-10-23; Figma 360:8022 shows 16px) */
+  --rw-type-avatar-lg: 700 20px/20px var(--font-sans);  /* 64px Me avatar on Profile (pending Han) */
   --rw-type-avatar-sm: 700 12px/12px var(--font-sans); /* 32px Match Players avatar: Bold 12px (Han, 2026-10-23) */
   --rw-type-nav: 500 11px/12px var(--font-sans);
   --rw-type-tab: 500 15px/15px var(--font-sans);

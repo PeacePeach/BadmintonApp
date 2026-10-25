@@ -1341,15 +1341,17 @@ button:disabled{cursor:default !important;}
       </div>
     </sc-if>
 
-    <!-- MY PROFILE -->
+    <!-- MY PROFILE (V2): detail-page App bar (glass Back, centred title), the Me letter avatar, Name field (Search bar
+         styling without the icon), Skill level as Small pills (like the Add Focus sheet), Primary button. -->
     <sc-if value="{{ isMyProfile }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Profile" style="display:flex;flex-direction:column;gap:28px;">
-        <div style="display:flex;align-items:center;gap:14px;">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
-          <div style="font:600 28px/1.2 var(--font-sans);">{{ tx.profile }}</div>
+      <div data-screen-label="Profile" style="display:flex;flex-direction:column;gap:24px;">
+        <div class="rw-appbar-title is-centered">
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ArrowLeft" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="44px,44px"></x-import>
+          <h1 class="rw-appbar-name">{{ tx.profile }}</h1>
         </div>
         <div style="display:flex;justify-content:center;">
-          <div aria-hidden="true" style="width:88px;height:88px;border-radius:50%;background:var(--icon-badge-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 28px/1 var(--font-sans);color:var(--text-secondary);"><sc-if value="{{ meInitials }}" hint-placeholder-val="{{ true }}"><span style="color:var(--text-primary);">{{ meInitials }}</span></sc-if><sc-if value="{{ noInitials }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="UserRound" size="{{ 24 }}" hint-size="24px,24px"></x-import></sc-if></div>
+          <sc-if value="{{ meInitials }}" hint-placeholder-val="{{ true }}"><div class="rw-avatar rw-avatar-lg {{ meAvCls }}" aria-hidden="true">{{ meInitials }}</div></sc-if>
+          <sc-if value="{{ noInitials }}" hint-placeholder-val="{{ false }}"><div class="rw-avatar-fill rw-avatar-lg {{ meAvCls }}" aria-hidden="true" style="border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--rw-avatar-fg);"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="UserRound" size="{{ 24 }}" hint-size="24px,24px"></x-import></div></sc-if>
         </div>
         <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
           <div role="alert" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:22px;background:var(--surface-muted);">
@@ -1357,25 +1359,22 @@ button:disabled{cursor:default !important;}
             <div style="font:400 14px/1.45 var(--font-sans);color:var(--text-primary);">{{ banner }}</div>
           </div>
         </sc-if>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          <div style="font:500 15px/1 var(--font-sans);">{{ tx.name }}</div>
-          <div class="search-field-outline {{ nameCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="text" value="{{ meName }}" onChange="{{ onMeName }}" placeholder="{{ tx.yourName }}" autocomplete="name" aria-invalid="{{ nameInvalid }}" aria-label="{{ tx.name }}" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
-          <sc-if value="{{ nameErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--status-error);">{{ nameErr }}</div></sc-if>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          <div style="font:500 15px/1 var(--font-sans);">{{ tx.skillLevel }}</div>
-          <div role="radiogroup" aria-label="{{ tx.skillLevel }}" style="display:flex;flex-direction:column;gap:10px;">
-            <sc-for list="{{ meLevels }}" as="o" hint-placeholder-count="4">
-              <button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.select }}" style="height:56px;border-radius:99px;background:var(--surface-primary);border:1.5px solid {{ o.border }};color:var(--text-primary);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 22px;cursor:pointer;" style-active="transform:scale(.98);">
-                <span>{{ o.label }}</span>
-                <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:var(--control-outline-width) solid {{ o.dotBorder }};color:var(--control-selected-fg);">
-                  <sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 14 }}" hint-size="14px,14px"></x-import></sc-if>
-                </span>
-              </button>
-            </sc-for>
+        <div style="display:flex;flex-direction:column;gap:32px;">
+          <label style="display:flex;flex-direction:column;gap:12px;">
+            <span class="rw-section-title">{{ tx.name }}</span>
+            <span class="rw-search {{ meNameCls }}"><input class="rw-search-input" type="text" value="{{ meName }}" onChange="{{ onMeName }}" placeholder="{{ tx.yourName }}" autocomplete="name" aria-invalid="{{ nameInvalid }}"></span>
+            <sc-if value="{{ nameErr }}" hint-placeholder-val="{{ false }}"><span role="alert" class="field-msg" style="color:var(--status-error);">{{ nameErr }}</span></sc-if>
+          </label>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <h2 id="profile-level" class="rw-section-title">{{ tx.skillLevel }}</h2>
+            <div role="radiogroup" aria-labelledby="profile-level" style="display:flex;flex-wrap:wrap;gap:8px;">
+              <sc-for list="{{ meLevels }}" as="o" hint-placeholder-count="4">
+                <button type="button" role="radio" aria-checked="{{ o.on }}" class="rw-surface rw-pill rw-pill-sm {{ o.cls }}" onClick="{{ o.select }}">{{ o.label }}</button>
+              </sc-for>
+            </div>
           </div>
         </div>
-        <button onClick="{{ saveProfile }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--action-primary);color:var(--action-on-primary);" style-active="transform:scale(.97);">
+        <button type="button" class="rw-btn rw-btn-primary" onClick="{{ saveProfile }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="width:100%;margin-top:8px;">
           <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">{{ tx.save }}</span></sc-if>
           <sc-if value="{{ idleSubmit }}" hint-placeholder-val="{{ true }}">{{ tx.save }}</sc-if>
         </button>
@@ -3503,7 +3502,7 @@ class Component extends DCLogic {
     const exists = s.players.some(p => p.name.toLowerCase() === q);
     const v = {
       scrollRef: this.scrollRef, onScroll: this.onScroll, overall, greeting: this.greeting(all),
-      scrollCls: ['matches', 'insights', 'focus', 'voice', 'review', 'players'].includes(s.screen) ? 'rw-scroll is-v2' : 'rw-scroll',
+      scrollCls: ['matches', 'insights', 'focus', 'voice', 'review', 'players', 'profile'].includes(s.screen) ? 'rw-scroll is-v2' : 'rw-scroll',
       isMatches: s.screen === 'matches', isInsights: s.screen === 'insights', isLog: s.screen === 'log', isVoice: s.screen === 'voice' && !!s.voice, isReview: s.screen === 'review' && !!s.log, voiceRef: this.voiceRef,
       isDetail: s.screen === 'detail', isPlayers: s.screen === 'players', isPlayer: s.screen === 'player',
       isLogin: s.screen === 'login', isSignup: s.screen === 'signup', isSplash: s.screen === 'splash', skipSplash: () => this.leaveSplash(),
@@ -3622,10 +3621,11 @@ class Component extends DCLogic {
     if (v.isMyProfile) {
       const a = s.acct, name = a.name.trim();
       v.meName = a.name; v.meInitials = name.split(/\s+/).filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase(); v.noInitials = !v.meInitials;
+      v.meAvCls = this.avDir('me'); v.meNameCls = name ? 'is-filled' : '';
       v.onMeName = e => this.setAcct({ name: e.target.value }, 'name');
       v.meLevels = ['Beginner', 'Intermediate', 'Advanced', 'Competitive'].map(label => {
         const on = a.level === label;
-        return { label: this.t('level_' + label), on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent', dotBg: on ? 'var(--control-selected-bg)' : 'transparent', dotBorder: on ? 'var(--control-selected-bg)' : 'var(--control-outline)', select: () => this.setAcct({ level: label }, 'level') };
+        return { label: this.t('level_' + label), on, cls: on ? 'is-active' : '', select: () => this.setAcct({ level: label }, 'level') };
       });
       v.saveProfile = () => this.submit({ name: name ? null : this.msg.nameEmpty }, async () => {
         const players = this.state.players.map(p => p.id === 'me' ? { ...p, name, level: this.state.acct.level } : p);
