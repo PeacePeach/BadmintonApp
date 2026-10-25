@@ -12,7 +12,8 @@
      trend    one value per match, oldest left; line + flat dots, the first and latest values written at their points
      compare  one bar per match; matches before data-split are "earlier" (grey), the rest recent (blue);
               each group's total is written over it
-     strip    one pill per match at its count; a match with 0 sits on the zero line in the "none" colour
+     strip    one pill per match at its count; a match with 0 sits on the zero line in the "none" colour;
+              levels 16px apart, centred in the frame, with a thin connector where the state changes
    Frame for all three: dashed horizontal grid at the ticks, a vertical grid line per match, tick labels.
    Colours and type come from the --rw-key-chart-* tokens in tokens/v2.css. */
 (function () {
@@ -37,7 +38,10 @@
     // at the first match. yLabels: true (data-ylabels="true") brings the tick numbers back.
     const yl = labels && o.yLabels, L = yl ? 18 : 4, R = 4, T = 5, B = labels ? 16 : 4, P = 9; // P: inner padding so the 14px pill stays inside
     const X = i => L + P + (n > 1 ? i * (W - L - R - 2 * P) / (n - 1) : (W - L - R - 2 * P) / 2), PH = H - T - B;
-    const Y = v => T + PH - (v - o.min) / ((o.max - o.min) || 1) * PH;
+    // Strip levels sit STEP px apart in a band centred in the frame, instead of at its top and bottom edges
+    // (Han, 2026-10-25: the two levels were too far apart). Trend and compare use the full height.
+    const STEP = 16, span = o.kind === 'strip' ? Math.min(PH, (o.max - o.min) * STEP) : PH, T0 = T + (PH - span) / 2;
+    const Y = v => T0 + span - (v - o.min) / ((o.max - o.min) || 1) * span;
     const id = 'rw-kc-' + (++uid);
     let g = '', m = '';
     ticks.forEach(t => {
@@ -70,6 +74,8 @@
         m += `<text class="${c}" x="${(X(a) + X(b - 1)) / 2}" y="${Y(Math.max(...grp)) - 6}" text-anchor="middle">${fmt(grp.reduce((x, y) => x + y, 0))}</text>`;
       });
     }
+    // Strip: a thin connector from one pill's end to the next pill's start wherever the state changes, drawn under the pills.
+    if (o.kind === 'strip') vals.forEach((v, i) => { if (i < n - 1 && vals[i + 1] !== v) m += `<line class="rw-key-chart-connector" x1="${X(i) + 7}" y1="${Y(v)}" x2="${X(i + 1) - 7}" y2="${Y(vals[i + 1])}"/>`; });
     if (o.kind === 'strip') vals.forEach((v, i) => { m += `<rect class="${v ? 'rw-key-chart-on' : 'rw-key-chart-none'}" x="${X(i) - 7}" y="${Y(v) - 3}" width="14" height="6" rx="3"/>`; });
     return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true"><defs>${defs}</defs>${g}${m}</svg>`;
   }

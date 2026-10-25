@@ -313,6 +313,7 @@
   --rw-key-chart-earlier: var(--rw-color-data-earlier); /* N300: bars before the split */
   --rw-key-chart-on: var(--rw-color-status-loss);      /* O100: it happened in this match */
   --rw-key-chart-none: var(--rw-color-data-neutral);   /* N200: it didn't happen in this match */
+  --rw-key-chart-connector: var(--rw-key-chart-tick);   /* strip: thin line where the state changes, N300 like the tick labels */
   --rw-key-chart-line-from: var(--rw-blue-gradient-01-to);   /* trend line: Blue Gradient 01 reversed, latest match bright */
   --rw-key-chart-line-to: var(--rw-blue-gradient-01-from);
   --rw-key-chart-bar-from: var(--rw-blue-gradient-01-from);  /* recent bars: Blue Gradient 02 */
