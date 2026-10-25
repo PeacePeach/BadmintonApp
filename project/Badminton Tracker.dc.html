@@ -1244,13 +1244,13 @@ button:disabled{cursor:default !important;}
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ blockedState.illustration }}" title="{{ blockedState.title }}" body="{{ blockedState.body }}" actionLabel="{{ blockedState.actionLabel }}" onAction="{{ blockedState.onAction }}" hint-size="350px,330px"></x-import>
         </sc-if>
         <sc-if value="{{ notBlocked }}" hint-placeholder-val="{{ true }}">
-        <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="rw-search-results">
           <label class="rw-search {{ plSearchCls }}">
             <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Search" size="{{ 20 }}" hint-size="20px,20px"></x-import>
             <input class="rw-search-input" value="{{ search }}" onChange="{{ onSearch }}" placeholder="{{ tx.searchName }}" autocomplete="off">
             <sc-if value="{{ plHasQ }}" hint-placeholder-val="{{ false }}"><button type="button" class="rw-search-clear" aria-label="{{ tx.clearSearch }}" onClick="{{ plClearQ }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleX" size="{{ 20 }}" hint-size="20px,20px"></x-import></button></sc-if>
           </label>
-          <div style="display:flex;flex-direction:column;gap:4px;">
+          <div class="rw-player-list">
           <sc-if value="{{ canAddNew }}" hint-placeholder-val="{{ false }}">
             <div class="rw-surface rw-player is-empty" onClick="{{ addPlayerOnly }}">
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Plus" variant="add" size="{{ 40 }}" iconSize="{{ 18 }}" label="{{ addNameLabel }}" onClick="{{ addPlayerOnly }}" hint-size="40px,40px"></x-import>
@@ -1599,13 +1599,14 @@ button:disabled{cursor:default !important;}
           </div>
         </sc-if>
         <sc-if value="{{ ps.picking }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="rw-search-results">
             <div class="rw-hint" id="ps-slot" style="padding:0 6px;">{{ ps.slotLabel }}</div>
             <label class="rw-search {{ ps.searchCls }}">
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Search" size="{{ 20 }}" hint-size="20px,20px"></x-import>
               <input class="rw-search-input" value="{{ ps.q }}" onChange="{{ ps.onQ }}" placeholder="{{ tx.searchPlayers }}" aria-describedby="ps-slot" autocomplete="off">
               <sc-if value="{{ ps.hasQ }}" hint-placeholder-val="{{ false }}"><button type="button" class="rw-search-clear" aria-label="{{ tx.clearSearch }}" onClick="{{ ps.clearQ }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleX" size="{{ 20 }}" hint-size="20px,20px"></x-import></button></sc-if>
             </label>
+            <div class="rw-player-list">
             <sc-if value="{{ ps.canAdd }}" hint-placeholder-val="{{ false }}">
               <div class="rw-surface rw-player is-empty" onClick="{{ ps.add }}">
                 <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Plus" variant="add" size="{{ 40 }}" iconSize="{{ 18 }}" label="{{ ps.addLabel }}" onClick="{{ ps.add }}" hint-size="40px,40px"></x-import>
@@ -1616,6 +1617,7 @@ button:disabled{cursor:default !important;}
               <button type="button" class="rw-surface rw-player" onClick="{{ p.pick }}"><span class="rw-avatar {{ p.avCls }}" aria-hidden="true">{{ p.initials }}</span><span class="rw-name">{{ p.name }}</span><span class="rw-caption">{{ p.sub }}</span></button>
             </sc-for>
             <sc-if value="{{ ps.none }}" hint-placeholder-val="{{ false }}"><p class="rw-hint" style="padding:0 6px;">{{ tx.noPlayersFound }}</p></sc-if>
+            </div>
           </div>
         </sc-if>
       </div>

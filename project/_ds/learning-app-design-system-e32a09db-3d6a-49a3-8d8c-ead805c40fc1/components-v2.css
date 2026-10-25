@@ -326,6 +326,9 @@
 .rw-player.is-warning{border-color:var(--rw-player-warning-border);}
 .rw-player.is-empty>.rw-name{color:var(--rw-text-secondary);}
 .rw-player>.rw-caption{flex-shrink:0;padding-right:12px;}
+/* Search + results: Search bar, then the Player list. Used on the Players page and the Players sheet. */
+.rw-search-results{display:flex;flex-direction:column;gap:var(--rw-search-results-gap);}
+.rw-player-list{display:flex;flex-direction:column;gap:var(--rw-player-list-gap);}
 /* Search bar. Unfilled: 5% fill. Filled Inactive (.is-filled): purplegrey-500. Active Typing (:focus-within): purplegrey-500 + N600 ring, N800 text. */
 .rw-search{height:var(--rw-search-h);padding:0 18px;border-radius:999px;border:1px solid transparent;background:var(--rw-search-bg);display:flex;align-items:center;gap:8px;color:var(--rw-search-fg);}
 .rw-search.is-filled,.rw-search:focus-within{background:var(--rw-search-bg-filled);}

@@ -240,6 +240,9 @@
   /* Player row (Figma Player 228:8835; Han approved 2026-10-23, reuses Avatar and IconButton) */
   --rw-player-h: 48px;
   --rw-player-warning-border: var(--rw-color-status-warning);  /* Y400, Figma Player Warning=Yes (Han 2026-10-23) */
+  /* Search + results (Han 2026-10-25): 12px from the Search bar to the list, 4px between Player rows */
+  --rw-search-results-gap: 12px;
+  --rw-player-list-gap: 4px;
   /* Pills */
   --rw-pill-h: 32px;
   --rw-pill-fg: var(--rw-color-text-secondary);
