@@ -66,6 +66,9 @@
      Focus list ................... .rw-focus-list > .rw-focus-row (8px apart)
      Dots indicator ............... .rw-dots > i[.is-on]  (one dot per session or match; Figma shows 3 to 5, the plan allows up to 7)
      Disclosure (Completed · n) ... .rw-disclosure (label + chevron 20)
+   Match Detail (Figma 365:8096):
+     Game table ................... .rw-surface.rw-game-table > .rw-game-table-row[.is-head] (.rw-game-table-game: label + .rw-result, .rw-game-table-score[.is-high] x2)
+     Notes tile ................... .rw-surface.rw-notes > .rw-note (.rw-note-head: .rw-note-label + .rw-note-tags, .rw-note-text)
    ========================================================= */
 /* Screen background: app background + glow. The glow stays fixed while the content scrolls over it. */
 .rw-scroll.is-v2{background:var(--rw-bg-app-glow) no-repeat scroll,var(--rw-bg-app);--empty-body-weight:var(--rw-weight-min);}
@@ -494,3 +497,27 @@
 .rw-switch::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--rw-color-text-secondary);transition:transform var(--dur-fast) var(--ease-out),background var(--dur-fast) var(--ease-out);}
 .rw-switch.is-on{background:var(--rw-n200);}
 .rw-switch.is-on::after{transform:translateX(20px);background:var(--rw-color-text-primary);}
+
+/* Match Detail (Figma 365:8096). Game table: header in caption N400, one row per game with its result (Match Result
+   dot + Win / Loss) and both scores; the side that won the game is N800, the other N400. Rows split by the tile divider.
+   Notes tile: one entry per note (label N800, tags N400 after a 16px divider, text body N600), split by the divider.
+   Existing V2 tokens only; tile radius and padding are the DS tile values (Figma draws 10px radius, 20px padding). */
+.rw-game-table{border-radius:var(--rw-tile-radius);padding:8px var(--rw-tile-pad);display:flex;flex-direction:column;}
+.rw-game-table-row{display:grid;grid-template-columns:1fr 64px 64px;align-items:center;min-height:42px;box-sizing:border-box;padding:12px 0;}
+.rw-game-table-row+.rw-game-table-row{border-top:1px solid var(--rw-color-divider);}
+.rw-game-table-row.is-head{min-height:0;padding:12px 0 8px;font:var(--rw-type-caption);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
+.rw-game-table-row.is-head>:not(:first-child){text-align:center;}
+.rw-game-table-game{display:flex;align-items:center;gap:12px;min-width:0;font:var(--rw-type-row-value);letter-spacing:var(--rw-tracking);color:var(--rw-color-text-body);}
+.rw-game-table-game>span:first-child{min-width:56px;}
+.rw-game-table-game>.rw-result{height:auto;}
+.rw-game-table-score{text-align:center;font:var(--rw-type-game-score);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);font-variant-numeric:tabular-nums;}
+.rw-game-table-score.is-high{color:var(--rw-text-primary);}
+.rw-notes{border-radius:var(--rw-tile-radius);padding:var(--rw-tile-pad);display:flex;flex-direction:column;gap:18px;}
+.rw-note{display:flex;flex-direction:column;gap:6px;}
+.rw-note+.rw-note{border-top:1px solid var(--rw-color-divider);padding-top:18px;}
+.rw-note-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
+.rw-note-label{margin:0;font:var(--rw-type-row-value);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);}
+.rw-note-tags{display:flex;align-items:center;gap:6px;font:var(--rw-type-caption);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
+.rw-note-tags::before{content:"";width:1px;height:16px;background:var(--rw-color-divider);}
+.rw-note-text{margin:0;font:var(--rw-type-body);letter-spacing:var(--rw-tracking);color:var(--rw-color-text-body);overflow-wrap:anywhere;}
+:root[lang="zh-Hans"] .rw-note-label,:root[lang="zh-Hans"] .rw-game-table-game{line-height:1.25;}

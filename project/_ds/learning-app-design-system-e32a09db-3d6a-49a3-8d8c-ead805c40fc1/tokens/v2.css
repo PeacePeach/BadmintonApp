@@ -428,6 +428,7 @@
   --rw-type-result: 600 12px/12px var(--font-sans);
   --rw-type-name: 500 14px/18.2px var(--font-sans);
   --rw-type-score: 500 24px/1 var(--font-sans);
+  --rw-type-game-score: 500 18px/18px var(--font-sans);   /* per-game score in the Match Detail game table (Figma 367:8270) */
   --rw-type-button: 600 15px/15px var(--font-sans);
   --rw-type-pill: 500 14px/15px var(--font-sans);
   --rw-type-pill-sm: 500 12px/15px var(--font-sans);

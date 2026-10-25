@@ -1108,127 +1108,79 @@ button:disabled{cursor:default !important;}
       </div>
     </sc-if>
 
-    <!-- MATCH DETAIL -->
+    <!-- MATCH DETAIL (V2, Figma 365:8096): detail-page App bar (glass Back, centred title, glass ⋯), date + "You vs ...",
+         Game table (per-game result dot, winner's score N800), Notes tile, then the other players as Player rows. -->
     <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Match Detail" style="display:flex;flex-direction:column;gap:22px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
-          <div style="font:500 17px/1 var(--font-sans);">{{ tx.matchDetail }}</div>
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" size="{{ 48 }}" label="{{ tx.matchActions }}" onClick="{{ toggleMenu }}" hint-size="48px,48px"></x-import>
+      <div data-screen-label="Match Detail" style="display:flex;flex-direction:column;gap:40px;">
+        <div class="rw-appbar-title is-centered">
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ArrowLeft" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="44px,44px"></x-import>
+          <h1 class="rw-appbar-name">{{ tx.matchDetail }}</h1>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.matchActions }}" onClick="{{ toggleMenu }}" hint-size="44px,44px"></x-import>
         </div>
         <sc-if value="{{ detailLoading }}" hint-placeholder-val="{{ false }}">
-          <div aria-busy="true" style="display:flex;flex-direction:column;gap:22px;">
+          <div aria-busy="true" style="display:flex;flex-direction:column;gap:32px;">
             <span class="sr-only" role="status">{{ tx.loadingMatch }}</span>
-            <div aria-hidden="true" style="display:flex;flex-direction:column;gap:14px;padding:6px 2px;">
-              <div class="skel skel-bg" style="height:14px;width:55%;"></div>
-              <div style="display:flex;justify-content:space-between;">
-                <div class="skel skel-bg" style="height:48px;width:40%;"></div>
-                <div class="skel skel-bg" style="height:48px;width:24%;"></div>
-              </div>
+            <div aria-hidden="true" style="display:flex;flex-direction:column;gap:10px;">
+              <div class="skel skel-bg" style="height:12px;width:30%;"></div>
+              <div class="skel skel-bg" style="height:28px;width:65%;"></div>
             </div>
-            <div aria-hidden="true" style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:12px;">
-              <sc-for list="{{ skel2 }}" as="k" hint-placeholder-count="2">
-                <div style="display:flex;align-items:center;gap:12px;">
-                  <div class="skel" style="width:40px;height:40px;border-radius:50%;flex-shrink:0;"></div>
-                  <div class="skel" style="height:16px;width:50%;"></div>
-                </div>
-              </sc-for>
-            </div>
-            <div aria-hidden="true" style="background:var(--surface-primary);border-radius:26px;padding:8px 20px;display:flex;flex-direction:column;">
-              <div style="padding:12px 0 8px;"><div class="skel" style="height:12px;width:30%;"></div></div>
+            <div aria-hidden="true" class="rw-surface rw-game-table">
+              <div class="rw-game-table-row is-head"><div class="skel" style="height:12px;width:30%;"></div></div>
               <sc-for list="{{ skel3 }}" as="k" hint-placeholder-count="3">
-                <div style="display:grid;grid-template-columns:1fr 64px 64px;align-items:center;padding:12px 0;border-top:1px solid var(--divider);">
-                  <div class="skel" style="height:15px;width:40%;"></div>
-                  <div class="skel" style="height:24px;width:32px;justify-self:center;"></div>
-                  <div class="skel" style="height:24px;width:32px;justify-self:center;"></div>
+                <div class="rw-game-table-row">
+                  <div class="skel" style="height:14px;width:50%;"></div>
+                  <div class="skel" style="height:18px;width:24px;justify-self:center;"></div>
+                  <div class="skel" style="height:18px;width:24px;justify-self:center;"></div>
                 </div>
               </sc-for>
             </div>
           </div>
         </sc-if>
         <sc-if value="{{ detailReady }}" hint-placeholder-val="{{ true }}">
-        <div style="display:flex;flex-direction:column;gap:10px;padding:6px 2px;">
-          <div style="font:400 14px/1 var(--font-sans);color:var(--text-secondary);">{{ detail.dateLong }} · {{ detail.type }}</div>
-          <div style="display:flex;align-items:baseline;justify-content:space-between;">
-            <div style="font:600 48px/1 var(--font-sans);color:var(--text-primary);">{{ detail.resultWord }}</div>
-            <div style="font:500 48px/1 var(--font-sans);">{{ detail.gamesWon }}</div>
-          </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="rw-caption">{{ detail.dateLong }}</div>
+          <h2 class="rw-title" style="text-wrap:balance;overflow-wrap:anywhere;">{{ detail.title }}</h2>
         </div>
-        <div style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:12px;">
-          <sc-for list="{{ detail.sideA }}" as="p" hint-placeholder-count="1">
-            <div style="display:flex;align-items:center;gap:12px;">
-              <div class="rw-avatar-fill {{ p.avCls }}" style="width:40px;height:40px;border-radius:50%;background: {{ p.avBg }};color: {{ p.avFg }};display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
-              <div style="font:500 16px/1 var(--font-sans);overflow-wrap:anywhere;">{{ p.name }}</div>
+        <div style="display:flex;flex-direction:column;gap:32px;">
+          <div class="rw-surface rw-game-table" role="table" aria-label="{{ tx.gameCol }}">
+            <div class="rw-game-table-row is-head" role="row">
+              <div role="columnheader">{{ tx.gameCol }}</div><div role="columnheader">{{ detail.aShort }}</div><div role="columnheader">{{ tx.oppCol }}</div>
             </div>
-          </sc-for>
-          <sc-if value="{{ detail.hasSideB }}" hint-placeholder-val="{{ true }}"><div style="height:1px;background:var(--divider);margin:4px 0;"></div></sc-if>
-          <sc-for list="{{ detail.sideB }}" as="p" hint-placeholder-count="1">
-            <div onClick="{{ p.open }}" style="display:flex;align-items:center;gap:12px;cursor:pointer;">
-              <div class="rw-avatar-fill {{ p.avCls }}" style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
-              <div style="font:500 16px/1 var(--font-sans);flex:1;overflow-wrap:anywhere;">{{ p.name }}</div>
-              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 24 }}" color="var(--grey-400)" hint-size="24px,24px"></x-import>
-            </div>
-          </sc-for>
-          <sc-if value="{{ detail.hasOthers }}" hint-placeholder-val="{{ false }}">
-            <div style="height:1px;background:var(--divider);margin:4px 0;"></div>
-            <div style="font:500 12px/1.3 var(--font-sans);color:var(--text-secondary);">{{ tx.sidesUnconfirmed }}</div>
-            <sc-for list="{{ detail.others }}" as="p" hint-placeholder-count="1">
-              <div style="display:flex;align-items:center;gap:12px;">
-                <div class="rw-avatar-fill {{ p.avCls }}" style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--font-sans);">{{ p.initials }}</div>
-                <div style="font:500 16px/1 var(--font-sans);flex:1;overflow-wrap:anywhere;">{{ p.name }}</div>
+            <sc-for list="{{ detail.rows }}" as="r" hint-placeholder-count="3">
+              <div class="rw-game-table-row" role="row">
+                <div class="rw-game-table-game" role="cell"><span>{{ r.label }}</span><sc-if value="{{ r.res }}" hint-placeholder-val="{{ true }}"><span class="rw-result {{ r.resCls }}">{{ r.res }}</span></sc-if></div>
+                <div class="rw-game-table-score {{ r.aCls }}" role="cell">{{ r.a }}</div>
+                <div class="rw-game-table-score {{ r.bCls }}" role="cell">{{ r.b }}</div>
               </div>
             </sc-for>
-          </sc-if>
-        </div>
-        <div style="background:var(--surface-primary);border-radius:26px;padding:8px 20px;display:flex;flex-direction:column;">
-          <div style="display:grid;grid-template-columns:1fr 64px 64px;padding:12px 0 8px;font:400 12px/1 var(--font-sans);color:var(--text-secondary);">
-            <div>{{ tx.gameCol }}</div><div style="text-align:center;">{{ detail.aShort }}</div><div style="text-align:center;">{{ tx.oppCol }}</div>
           </div>
-          <sc-for list="{{ detail.rows }}" as="r" hint-placeholder-count="2">
-            <div style="display:grid;grid-template-columns:1fr 64px 64px;align-items:center;padding:12px 0;border-top:1px solid var(--divider);">
-              <div style="font:400 15px/1 var(--font-sans);color:var(--neutral-600);">{{ r.label }}</div>
-              <div style="text-align:center;font:500 24px/1 var(--font-sans);color: {{ r.aFg }};">{{ r.a }}</div>
-              <div style="text-align:center;font:500 24px/1 var(--font-sans);color: {{ r.bFg }};">{{ r.b }}</div>
-            </div>
-          </sc-for>
-        </div>
-        <sc-if value="{{ detail.hasNotes }}" hint-placeholder-val="{{ true }}">
-          <div style="display:flex;flex-direction:column;gap:12px;">
-            <div style="font:500 19px/1.3 var(--font-sans);">{{ tx.notes }}</div>
-            <div style="background:var(--surface-primary);border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:18px;">
-              <sc-for list="{{ detail.noteRows }}" as="n" hint-placeholder-count="3">
-                <div style="display:flex;flex-direction:column;gap:6px;">
-                  <div style="font:400 13px/1 var(--font-sans);color: {{ n.labelFg }};">{{ n.label }}</div>
-                  <sc-if value="{{ n.tags }}" hint-placeholder-val="{{ true }}">
-                    <div style="font:500 15px/1.4 var(--font-sans);">{{ n.tags }}</div>
-                  </sc-if>
-                  <sc-if value="{{ n.text }}" hint-placeholder-val="{{ true }}">
-                    <div style="font:400 15px/1.5 var(--font-sans);color:var(--neutral-600);overflow-wrap:anywhere;">{{ n.text }}</div>
-                  </sc-if>
-                </div>
-              </sc-for>
-            </div>
-          </div>
-        </sc-if>
-        <sc-if value="{{ detail.hasH2h }}" hint-placeholder-val="{{ true }}">
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          <div style="font:500 19px/1.3 var(--font-sans);">{{ tx.headToHead }}</div>
-          <sc-for list="{{ detail.h2h }}" as="h" hint-placeholder-count="1">
-            <div onClick="{{ h.open }}" style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;">
-              <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;">
-                <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ h.vsLabel }}</div>
-                <div style="font:500 32px/1 var(--font-sans);">{{ h.label }}</div>
-                <div style="font:400 12px/1.3 var(--font-sans);color:var(--text-secondary);">{{ h.sub }}</div>
-              </div>
-              <div style="display:flex;gap:4px;">
-                <sc-for list="{{ h.form }}" as="d" hint-placeholder-count="5">
-                  <div class="zh12" style="width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:600 10px/1 var(--font-sans);background: {{ d.bg }};color: {{ d.fg }};">{{ d.l }}</div>
+          <sc-if value="{{ detail.hasNotes }}" hint-placeholder-val="{{ true }}">
+            <section aria-labelledby="detail-notes" style="display:flex;flex-direction:column;gap:12px;">
+              <h2 id="detail-notes" class="rw-section-title">{{ tx.notes }}</h2>
+              <div class="rw-surface rw-notes">
+                <sc-for list="{{ detail.noteRows }}" as="n" hint-placeholder-count="3">
+                  <div class="rw-note">
+                    <div class="rw-note-head">
+                      <h3 class="rw-note-label">{{ n.label }}</h3>
+                      <sc-if value="{{ n.tags }}" hint-placeholder-val="{{ true }}"><span class="rw-note-tags">{{ n.tags }}</span></sc-if>
+                    </div>
+                    <sc-if value="{{ n.text }}" hint-placeholder-val="{{ true }}"><p class="rw-note-text">{{ n.text }}</p></sc-if>
+                  </div>
                 </sc-for>
               </div>
-            </div>
-          </sc-for>
+            </section>
+          </sc-if>
+          <sc-if value="{{ detail.hasPlayers }}" hint-placeholder-val="{{ true }}">
+            <section aria-labelledby="detail-players" style="display:flex;flex-direction:column;gap:12px;">
+              <h2 id="detail-players" class="rw-section-title">{{ tx.players }}</h2>
+              <div class="rw-player-list">
+                <sc-for list="{{ detail.players }}" as="p" hint-placeholder-count="1">
+                  <button type="button" class="rw-surface rw-player" onClick="{{ p.open }}" disabled="{{ p.static }}"><span class="rw-avatar {{ p.avCls }}" aria-hidden="true">{{ p.initials }}</span><span class="rw-name">{{ p.name }}</span><sc-if value="{{ p.sub }}" hint-placeholder-val="{{ true }}"><span class="rw-caption">{{ p.sub }}</span></sc-if></button>
+                </sc-for>
+              </div>
+            </section>
+          </sc-if>
         </div>
-        </sc-if>
         </sc-if>
       </div>
     </sc-if>
@@ -2090,7 +2042,7 @@ const I18N = {
     // Match Detail
     matchDetail: 'Match Detail', matchActions: 'Match actions', loadingMatch: 'Loading match', resultWin: 'Win', resultLoss: 'Loss',
     gameCol: 'Game', oppCol: 'Opp', notes: 'Notes', noteWorked: 'What Worked', noteCost: 'What Cost Points', noteOn: 'On {name}',
-    headToHead: 'Head-to-Head', youVs: 'You vs {name}', h2hSub: 'Singles {s} · Doubles {d}', dotW: 'W', dotL: 'L',
+    headToHead: 'Head-to-Head', youVs: 'You vs {name}', youAndVs: 'You & {p} vs {o}', gameWin: 'Win', gameLoss: 'Loss', h2hSub: 'Singles {s} · Doubles {d}', dotW: 'W', dotL: 'L',
     deleteMatch: 'Delete Match', deleteMatchQ: 'Delete Match?', deleteMatchBody: 'This removes the score and notes for good.',
     delete: 'Delete', cancel: 'Cancel',
     // Players · Player
@@ -2241,7 +2193,7 @@ const I18N = {
     tag_Serve: '发球', tag_Return: '接发', tag_Net: '网前', tag_Smash: '杀球', tag_Defence: '防守', tag_Footwork: '步法', tag_Placement: '落点', tag_Other: '其他',
     matchDetail: '比赛详情', matchActions: '比赛操作', loadingMatch: '正在加载比赛', resultWin: '胜利', resultLoss: '失利',
     gameCol: '局', oppCol: '对手', notes: '赛后记录', noteWorked: '打得不错', noteCost: '丢分点', noteOn: '关于 {name}',
-    headToHead: '交手记录', youVs: '你 vs {name}', h2hSub: '单打 {s} · 双打 {d}', dotW: '胜', dotL: '负',
+    headToHead: '交手记录', youVs: '你 vs {name}', youAndVs: '你和{p} vs {o}', gameWin: '胜', gameLoss: '负', h2hSub: '单打 {s} · 双打 {d}', dotW: '胜', dotL: '负',
     deleteMatch: '删除比赛', deleteMatchQ: '删除这场比赛？', deleteMatchBody: '比分和赛后记录会被永久删除。',
     delete: '删除', cancel: '取消',
     addName: '添加“{name}”', partnerRec: '搭档 {r}', noMatchesYet: '还没有比赛',
@@ -3498,7 +3450,7 @@ class Component extends DCLogic {
     const exists = s.players.some(p => p.name.toLowerCase() === q);
     const v = {
       scrollRef: this.scrollRef, onScroll: this.onScroll, overall, greeting: this.greeting(all),
-      scrollCls: ['matches', 'insights', 'focus', 'voice', 'review', 'players', 'profile', 'settings', 'account', 'password', 'language', 'notifications', 'privacy'].includes(s.screen) ? 'rw-scroll is-v2' : 'rw-scroll',
+      scrollCls: ['matches', 'insights', 'focus', 'detail', 'voice', 'review', 'players', 'profile', 'settings', 'account', 'password', 'language', 'notifications', 'privacy'].includes(s.screen) ? 'rw-scroll is-v2' : 'rw-scroll',
       isMatches: s.screen === 'matches', isInsights: s.screen === 'insights', isLog: s.screen === 'log', isVoice: s.screen === 'voice' && !!s.voice, isReview: s.screen === 'review' && !!s.log, voiceRef: this.voiceRef,
       isDetail: s.screen === 'detail', isPlayers: s.screen === 'players', isPlayer: s.screen === 'player',
       isLogin: s.screen === 'login', isSignup: s.screen === 'signup', isSplash: s.screen === 'splash', skipSplash: () => this.leaveSplash(),
@@ -3546,7 +3498,7 @@ class Component extends DCLogic {
           dotBg: on ? 'var(--control-selected-bg)' : 'transparent', dotBorder: on ? 'var(--control-selected-bg)' : 'var(--control-outline)', select: () => this.setLang(code) }; }),
       isLanguage: s.screen === 'language',
       isOnboarding: s.screen === 'onboarding',
-      showTabs: s.screen === 'matches' || s.screen === 'insights' || s.screen === 'focus', menuOpen: s.menu,
+      showTabs: s.screen === 'matches' || s.screen === 'insights' || s.screen === 'focus' || s.screen === 'detail', menuOpen: s.menu,
       floatMenu: s.screen === 'matches' || s.screen === 'insights' || s.screen === 'focus',
       hasToast: !!s.toast, search: s.search, canAddNew: q.length > 1 && !exists,
       toggleMenu: () => this.setState(x => ({ menu: !x.menu })),
@@ -3554,8 +3506,9 @@ class Component extends DCLogic {
       onSearch: e => this.setState({ search: e.target.value }),
       // Log Match opens only once the account's data has loaded; the loading state shows the button disabled.
       startLog: () => this.openVoice('matches'),
-      tabs: [[this.t('matches'), 'matches', 'List'], [this.t('insights'), 'insights', 'ChartColumn'], [this.t('navFocus'), 'focus', 'Target']].map(([label, k, icon]) => ({
-        label, icon, fg: s.screen === k ? 'var(--text-primary)' : 'var(--text-secondary)', cls: s.screen === k ? 'is-active' : '', current: s.screen === k ? 'page' : null, select: () => {
+      // Match Detail sits under the Matches tab (Figma 365:8096 shows the Bottom Nav with Matches active).
+      tabs: [[this.t('matches'), 'matches', 'List'], [this.t('insights'), 'insights', 'ChartColumn'], [this.t('navFocus'), 'focus', 'Target']].map(([label, k, icon]) => ({ label, icon, on: (s.screen === 'detail' ? 'matches' : s.screen) === k, k })).map(({ label, icon, on, k }) => ({
+        label, icon, fg: on ? 'var(--text-primary)' : 'var(--text-secondary)', cls: on ? 'is-active' : '', current: on ? 'page' : null, select: () => {
           // Back to Insights on Grow with no AI insight on screen (say the language changed since): make one.
           if (k === 'insights' && this.state.insTab === 'coach' && !this.state.aiGrow) setTimeout(() => this.refreshGrow(), 0);
           this.setState({ screen: k, back: [], menu: false });
@@ -4019,33 +3972,33 @@ class Component extends DCLogic {
       const m = all.find(x => x.id === s.detailId) || all[0];
       const r = this.res(m.games);
       const openP = id => () => { if (!this.unknown(id)) this.go('player', { playerId: id }); };
+      const sd = this.sides(m);
+      const pRow = (id, sub) => ({ name: this.nm(id), initials: this.ini(id), avCls: this.avDir(id), sub, static: this.unknown(id), open: openP(id) });
+      const rec = r => r.n ? this.t('h2h', { r: this.recWords(r) }) : '';
       v.detail = {
-        dateLong: this.date(m.date, true), type: this.typeLabel(m.type), resultWord: r.even ? this.t('wlShort', { w: r.us, l: r.them }) : this.t(r.win ? 'resultWin' : 'resultLoss'), gamesWon: `${r.us}–${r.them}`,
-        sideA: [{ name: this.t('you') + ' · ' + this.nm('me'), initials: this.ini('me'), avBg: A, avFg: 'var(--action-on-primary)' }]
-          .concat(m.partner ? [{ name: this.nm(m.partner), initials: this.ini(m.partner), avCls: this.avDir(m.partner), avBg: '', avFg: 'var(--icon-badge-fg)' }] : []),
-        sideB: this.sides(m).opps.map(id => ({ name: this.nm(id), initials: this.ini(id), avCls: this.avDir(id), open: openP(id) })),
-        others: this.sides(m).others.map(id => ({ name: this.nm(id), initials: this.ini(id), avCls: this.avDir(id) })), hasOthers: this.sides(m).others.length > 0, hasSideB: this.sides(m).opps.length > 0,
+        // Figma date style: 20 Sep 2026 (zh 2026年9月20日).
+        dateLong: this.lang() === 'zh' ? this.date(m.date, true) : this.date(m.date) + ' ' + m.date.slice(0, 4),
+        title: m.type === 'Doubles' ? this.t('youAndVs', { p: m.partner ? this.first(m.partner) : '?', o: this.teamB(m) }) : this.t('youVs', { name: this.teamB(m) }),
         aShort: m.partner ? this.t('you') + ' & ' + this.first(m.partner).slice(0, 1) : this.t('you'),
-        // A game without a score shows its result; games whose order isn't known are one line of games won by each side.
+        // Each scored game shows its result (dot + Win / Loss) and the winner's score in N800; a game without a score shows
+        // its result and dashes; games whose order isn't known are one line of games won by each side.
         rows: m.games.map((g, i) => ({ g, i })).filter(x => !(x.g && x.g.u)).map(({ g, i }) => {
-          const k = this.gameRes(g), sc = Array.isArray(g), hi = 'var(--text-primary)', lo = 'var(--text-secondary)';
-          return { label: sc ? this.t('game', { n: i + 1 }) : this.t('gameNoScore', { game: this.t('game', { n: i + 1 }), r: this.t(k === 'W' ? 'resultWin' : 'resultLoss') }),
-            a: sc ? String(g[0]) : '–', b: sc ? String(g[1]) : '–', aFg: k === 'W' ? hi : lo, bFg: k === 'L' ? hi : lo };
-        }).concat(m.games.some(g => g && g.u) ? [{ label: this.t('gamesUnordered'), a: String(m.games.filter(g => g && g.u && g.r === 'W').length),
-          b: String(m.games.filter(g => g && g.u && g.r === 'L').length), aFg: 'var(--text-primary)', bFg: 'var(--text-primary)' }] : []),
+          const k = this.gameRes(g), sc = Array.isArray(g);
+          return { label: this.t('game', { n: i + 1 }), res: this.t(k === 'W' ? 'gameWin' : 'gameLoss'), resCls: k === 'W' ? 'is-win' : 'is-loss',
+            a: sc ? String(g[0]) : '–', b: sc ? String(g[1]) : '–', aCls: k === 'W' ? 'is-high' : '', bCls: k === 'L' ? 'is-high' : '' };
+        }).concat(m.games.some(g => g && g.u) ? [{ label: this.t('gamesUnordered'), res: '', a: String(m.games.filter(g => g && g.u && g.r === 'W').length),
+          b: String(m.games.filter(g => g && g.u && g.r === 'L').length), aCls: 'is-high', bCls: 'is-high' }] : []),
         hasNotes: !!(m.wt.length || m.lt.length || m.worked || m.lost || m.on),
         noteRows: [
-          (m.wt.length || m.worked) && { label: this.t('noteWorked'), labelFg: 'var(--text-secondary)', tags: m.wt.map(t => this.tagLabel(t)).join(' · '), text: m.worked },
-          (m.lt.length || m.lost) && { label: this.t('noteCost'), labelFg: 'var(--text-secondary)', tags: m.lt.map(t => this.tagLabel(t)).join(' · '), text: m.lost },
-          m.on && { label: this.t('noteOn', { name: this.teamB(m) }), labelFg: 'var(--text-secondary)', tags: '', text: m.on }
+          (m.wt.length || m.worked) && { label: this.t('noteWorked'), tags: m.wt.map(t => this.tagLabel(t)).join(' · '), text: m.worked },
+          (m.lt.length || m.lost) && { label: this.t('noteCost'), tags: m.lt.map(t => this.tagLabel(t)).join(' · '), text: m.lost },
+          m.on && { label: this.t('noteOn', { name: this.teamB(m) }), tags: '', text: m.on }
         ].filter(Boolean),
-        h2h: m.opps.filter(id => !this.unknown(id)).map(id => {
-          const tot = this.vs(id), si = this.vs(id, 'Singles'), du = this.vs(id, 'Doubles');
-          const recent = all.filter(x => x.opps.includes(id)).slice(0, 5).reverse();
-          return { name: this.nm(id), vsLabel: this.t('youVs', { name: this.nm(id) }), label: tot.label, sub: this.t('h2hSub', { s: this.recWords(si), d: this.recWords(du) }), form: recent.map(x => this.dot(this.res(x.games).win)), open: openP(id) };
-        })
+        // Everyone else in the match: partner (record together), opponents (head-to-head), then players whose side isn't known.
+        players: (sd.partner ? [pRow(sd.partner, this.with(sd.partner).n ? this.t('partnerRec', { r: this.recWords(this.with(sd.partner)) }) : '')] : [])
+          .concat(sd.opps.map(id => pRow(id, this.unknown(id) ? '' : rec(this.vs(id)))), sd.others.map(id => pRow(id, '')))
       };
-      v.detail.hasH2h = v.detail.h2h.length > 0;
+      v.detail.hasPlayers = v.detail.players.length > 0;
     }
 
     if (v.isPlayers) {
