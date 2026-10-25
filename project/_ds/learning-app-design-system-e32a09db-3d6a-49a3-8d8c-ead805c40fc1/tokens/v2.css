@@ -179,6 +179,7 @@
   /* Result and Notes sheets (Figma 349:3528, 349:3793; Han approved 2026-10-23) */
   /* Insights / Grow (Figma 203:5215; pending Han's review, 2026-10-24) */
   --rw-color-divider: var(--rw-n150);                 /* line inside a tile (Figma Tile full wide / half width) */
+  --rw-color-text-error: var(--rw-red-800);           /* field error label + note (Han 2026-10-25: one step darker than V1 red-400) */
   --rw-color-text-accent: var(--rw-b100);             /* TRY NEXT label in Build Next (Figma #6BA6FF) */
   --rw-color-icon-accent: var(--rw-b100);             /* icon in the Avatar "Fancy" badge */
   --rw-color-border-icon-badge: linear-gradient(120deg, color-mix(in srgb, var(--rw-b100) 60%, transparent) 0%, color-mix(in srgb, var(--rw-b100) 5%, transparent) 100%); /* Figma shows B 5% at the faded end */
@@ -267,7 +268,19 @@
   --rw-avatar-me-bg: var(--rw-color-avatar-me-bg);
   --rw-avatar-me-fg: var(--rw-color-avatar-me-fg);
   /* Search bar (Figma 329:7330; Han approved a reusable search component, 2026-10-23) */
+  /* Detail page (centred App bar): 40px from the App bar to the first component, 24px between components (Han 2026-10-25) */
+  --rw-page-head-gap: 40px;
+  --rw-page-gap: 24px;
   --rw-search-h: 48px;
+  --rw-search-pad-x: 18px;
+  --rw-search-input-pad-x: 2px;
+  /* Input row (label inside the tile, Han 2026-10-25): notes under the tile line up with the row text */
+  --rw-field-inset: var(--rw-tile-pad);
+  --rw-input-row-h: 64px;
+  --rw-input-list-gap: 8px;
+  --rw-input-row-radius: 10px;
+  --rw-input-row-pad-top: 15px;
+  --rw-input-row-pad-bottom: 11px;
   --rw-search-bg: var(--rw-color-surface);
   --rw-search-bg-filled: var(--rw-color-surface-input-filled);
   --rw-search-border-active: var(--rw-color-border-selected);
@@ -431,14 +444,14 @@
   --rw-type-name: 500 14px/18.2px var(--font-sans);
   --rw-type-score: 500 24px/1 var(--font-sans);
   --rw-type-game-score: 500 18px/18px var(--font-sans);   /* per-game score in the Match Detail game table (Figma 367:8270) */
-  --rw-type-button: 600 15px/15px var(--font-sans);
+  --rw-type-button: 600 14px/14px var(--font-sans);   /* was 15px; Han 2026-10-25: no 15px in the DS, 14px instead */
   --rw-type-pill: 500 14px/15px var(--font-sans);
   --rw-type-pill-sm: 500 12px/15px var(--font-sans);
   --rw-type-avatar: 700 14px/14px var(--font-sans);    /* 40px avatar: Bold 14px (Han, 2026-10-23; Figma 360:8022 shows 16px) */
   --rw-type-avatar-lg: 700 20px/20px var(--font-sans);  /* 64px Me avatar on Profile (pending Han) */
   --rw-type-avatar-sm: 700 12px/12px var(--font-sans); /* 32px Match Players avatar: Bold 12px (Han, 2026-10-23) */
   --rw-type-nav: 500 11px/12px var(--font-sans);
-  --rw-type-tab: 500 15px/15px var(--font-sans);
+  --rw-type-tab: 500 14px/14px var(--font-sans);      /* was 15px (Han 2026-10-25) */
   --rw-type-tab-sm: 500 12px/12px var(--font-sans);
   --rw-type-section: 500 16px/19.2px var(--font-sans);
   --rw-type-trend: 600 12px/13px var(--font-sans);
@@ -446,7 +459,7 @@
   --rw-type-row-label: 500 12px/16.9px var(--font-sans);
   --rw-type-row-value: 500 14px/14px var(--font-sans);
   --rw-type-row-sub: 500 11px/11px var(--font-sans);
-  --rw-type-list-value: 500 15px/15px var(--font-sans);
+  --rw-type-list-value: 500 14px/14px var(--font-sans);   /* was 15px (Han 2026-10-25) */
   --rw-type-appbar-title: 600 16px/20px var(--font-sans);
   --rw-type-heading: 600 24px/1 var(--font-sans);  /* Figma 20px; 24px for Han to review (2026-10-22) */
   --rw-type-hint: 500 14px/1.2 var(--font-sans);        /* Figma Regular -> Medium (V2 minimum) */

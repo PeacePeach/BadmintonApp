@@ -1286,7 +1286,7 @@ button:disabled{cursor:default !important;}
 
     <!-- SETTINGS (V2): detail-page App bar, all rows in one Grouped list tile, Log Out on its own tile. -->
     <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Settings" style="display:flex;flex-direction:column;gap:24px;">
+      <div data-screen-label="Settings" class="rw-page">
         <div class="rw-appbar-title is-centered">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ArrowLeft" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="44px,44px"></x-import>
           <h1 class="rw-appbar-name">{{ tx.settings }}</h1>
@@ -1311,10 +1311,10 @@ button:disabled{cursor:default !important;}
       </div>
     </sc-if>
 
-    <!-- MY PROFILE (V2): detail-page App bar (glass Back, centred title), the Me letter avatar, Name field (Search bar
-         styling without the icon), Skill level as Small pills (like the Add Focus sheet), Primary button. -->
+    <!-- MY PROFILE (V2): detail-page App bar (glass Back, centred title), the Me letter avatar, Name and Skill level
+         as Input rows, one tile each 8px apart (label inside, Skill level opens a Select menu), Primary button. -->
     <sc-if value="{{ isMyProfile }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Profile" style="display:flex;flex-direction:column;gap:24px;">
+      <div data-screen-label="Profile" class="rw-page">
         <div class="rw-appbar-title is-centered">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ArrowLeft" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="44px,44px"></x-import>
           <h1 class="rw-appbar-name">{{ tx.profile }}</h1>
@@ -1329,19 +1329,26 @@ button:disabled{cursor:default !important;}
             <div style="font:400 14px/1.45 var(--font-sans);color:var(--text-primary);">{{ banner }}</div>
           </div>
         </sc-if>
-        <div style="display:flex;flex-direction:column;gap:32px;">
-          <label style="display:flex;flex-direction:column;gap:12px;">
-            <span class="rw-section-title">{{ tx.name }}</span>
-            <span class="rw-search is-field {{ meNameCls }}"><input class="rw-search-input" type="text" value="{{ meName }}" onChange="{{ onMeName }}" placeholder="{{ tx.yourName }}" autocomplete="name" aria-invalid="{{ nameInvalid }}"></span>
-            <sc-if value="{{ nameErr }}" hint-placeholder-val="{{ false }}"><span role="alert" class="field-msg" style="color:var(--status-error);">{{ nameErr }}</span></sc-if>
-          </label>
-          <div style="display:flex;flex-direction:column;gap:12px;">
-            <h2 id="profile-level" class="rw-section-title">{{ tx.skillLevel }}</h2>
-            <div role="radiogroup" aria-labelledby="profile-level" style="display:flex;flex-wrap:wrap;gap:8px;">
-              <sc-for list="{{ meLevels }}" as="o" hint-placeholder-count="4">
-                <button type="button" role="radio" aria-checked="{{ o.on }}" class="rw-surface rw-pill rw-pill-sm {{ o.cls }}" onClick="{{ o.select }}">{{ o.label }}</button>
-              </sc-for>
-            </div>
+        <div class="rw-input-list">
+          <div class="rw-input-field">
+              <label class="rw-surface rw-input-row {{ meNameRowCls }}">
+                <span class="rw-input-row-text"><span class="rw-input-row-label">{{ tx.name }}</span><input class="rw-input-row-input" type="text" value="{{ meName }}" onChange="{{ onMeName }}" placeholder="{{ tx.yourName }}" autocomplete="name" aria-invalid="{{ nameInvalid }}"></span>
+              </label>
+            <sc-if value="{{ nameErr }}" hint-placeholder-val="{{ false }}"><span role="alert" class="rw-field-note is-error">{{ nameErr }}</span></sc-if>
+          </div>
+          <div class="rw-input-field">
+              <button type="button" class="rw-surface rw-input-row" aria-haspopup="listbox" aria-expanded="{{ levelOpen }}" onClick="{{ toggleLevel }}">
+                <span class="rw-input-row-text"><span class="rw-input-row-label">{{ tx.skillLevel }}</span><span class="rw-input-row-value {{ meLevelCls }}">{{ meLevelLabel }}</span></span>
+                <span class="rw-input-row-end"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronDown" size="{{ 18 }}" hint-size="18px,18px"></x-import></span>
+              </button>
+            <sc-if value="{{ levelOpen }}" hint-placeholder-val="{{ false }}">
+              <div class="rw-select-catch" onClick="{{ toggleLevel }}"></div>
+              <div class="rw-menu rw-select-menu" role="listbox" aria-label="{{ tx.skillLevel }}">
+                <sc-for list="{{ meLevels }}" as="o" hint-placeholder-count="4">
+                  <button type="button" role="option" aria-selected="{{ o.on }}" class="rw-menu-item rw-select-option" onClick="{{ o.select }}"><span>{{ o.label }}</span><sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 18 }}" hint-size="18px,18px"></x-import></sc-if></button>
+                </sc-for>
+              </div>
+            </sc-if>
           </div>
         </div>
         <button type="button" class="rw-btn rw-btn-primary" onClick="{{ saveProfile }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="width:100%;margin-top:8px;">
@@ -1353,7 +1360,7 @@ button:disabled{cursor:default !important;}
 
     <!-- ACCOUNT (V2): detail-page App bar, Email + Change Password in one Grouped list tile, Delete Account on its own tile. -->
     <sc-if value="{{ isAccount }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Account" style="display:flex;flex-direction:column;gap:24px;">
+      <div data-screen-label="Account" class="rw-page">
         <div class="rw-appbar-title is-centered">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ArrowLeft" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="44px,44px"></x-import>
           <h1 class="rw-appbar-name">{{ tx.account }}</h1>
@@ -1381,9 +1388,9 @@ button:disabled{cursor:default !important;}
     </sc-if>
 
     <!-- CHANGE PASSWORD (V2): like My Profile: detail-page App bar, section titles, fields with Search bar styling
-         (show/hide eye in the clear-button slot), helper as .rw-meta, Primary button. -->
+         (show/hide eye at the end of the Current row), Input rows (one tile each, 8px apart), each note under its own field, Primary button. -->
     <sc-if value="{{ isPassword }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Change Password" style="display:flex;flex-direction:column;gap:24px;">
+      <div data-screen-label="Change Password" class="rw-page">
         <div class="rw-appbar-title is-centered">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ArrowLeft" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="44px,44px"></x-import>
           <h1 class="rw-appbar-name">{{ tx.changePassword }}</h1>
@@ -1394,20 +1401,23 @@ button:disabled{cursor:default !important;}
             <div style="font:400 14px/1.45 var(--font-sans);color:var(--text-primary);">{{ banner }}</div>
           </div>
         </sc-if>
-        <div style="display:flex;flex-direction:column;gap:32px;">
+        <div class="rw-input-list">
           <sc-if value="{{ needCurrent }}" hint-placeholder-val="{{ true }}">
-          <label style="display:flex;flex-direction:column;gap:12px;">
-            <span class="rw-section-title">{{ tx.currentPw }}</span>
-            <span class="rw-search is-field {{ pwCurCls }}"><input class="rw-search-input" type="{{ pwType }}" value="{{ pwCur }}" onChange="{{ onPwCur }}" placeholder="{{ tx.currentPw }}" autocomplete="current-password" aria-invalid="{{ curInvalid }}"><button type="button" class="rw-search-clear" onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 20 }}" hint-size="20px,20px"></x-import></button></span>
-            <sc-if value="{{ curErr }}" hint-placeholder-val="{{ false }}"><span role="alert" class="field-msg" style="color:var(--status-error);">{{ curErr }}</span></sc-if>
-          </label>
+          <div class="rw-input-field">
+              <label class="rw-surface rw-input-row {{ pwCurRowCls }}">
+                <span class="rw-input-row-text"><span class="rw-input-row-label">{{ tx.currentPw }}</span><input class="rw-input-row-input" type="{{ pwType }}" value="{{ pwCur }}" onChange="{{ onPwCur }}" placeholder="{{ tx.currentPw }}" autocomplete="current-password" aria-invalid="{{ curInvalid }}"></span>
+                <span class="rw-input-row-end"><button type="button" class="rw-search-clear" onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 18 }}" hint-size="18px,18px"></x-import></button></span>
+              </label>
+            <sc-if value="{{ curErr }}" hint-placeholder-val="{{ false }}"><span role="alert" class="rw-field-note is-error">{{ curErr }}</span></sc-if>
+          </div>
           </sc-if>
-          <label style="display:flex;flex-direction:column;gap:12px;">
-            <span class="rw-section-title">{{ tx.newPw }}</span>
-            <span class="rw-search is-field {{ pwNextCls }}"><input class="rw-search-input" type="{{ pwType }}" value="{{ pwNext }}" onChange="{{ onPwNext }}" placeholder="{{ tx.newPw }}" autocomplete="new-password" aria-invalid="{{ passwordInvalid }}"></span>
-            <sc-if value="{{ passwordErr }}" hint-placeholder-val="{{ false }}"><span role="alert" class="field-msg" style="color:var(--status-error);">{{ passwordErr }}</span></sc-if>
-            <sc-if value="{{ passwordHelper }}" hint-placeholder-val="{{ true }}"><span class="rw-meta">{{ tx.pwHelper }}</span></sc-if>
-          </label>
+          <div class="rw-input-field">
+              <label class="rw-surface rw-input-row {{ pwNextRowCls }}">
+                <span class="rw-input-row-text"><span class="rw-input-row-label">{{ tx.newPw }}</span><input class="rw-input-row-input" type="{{ pwType }}" value="{{ pwNext }}" onChange="{{ onPwNext }}" placeholder="{{ tx.newPw }}" autocomplete="new-password" aria-invalid="{{ passwordInvalid }}"></span>
+              </label>
+            <sc-if value="{{ passwordErr }}" hint-placeholder-val="{{ false }}"><span role="alert" class="rw-field-note is-error">{{ passwordErr }}</span></sc-if>
+            <sc-if value="{{ passwordHelper }}" hint-placeholder-val="{{ true }}"><span class="rw-field-note">{{ tx.pwHelper }}</span></sc-if>
+          </div>
         </div>
         <button type="button" class="rw-btn rw-btn-primary" onClick="{{ savePassword }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="width:100%;margin-top:8px;">
           <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">{{ tx.updatePw }}</span></sc-if>
@@ -1418,7 +1428,7 @@ button:disabled{cursor:default !important;}
 
     <!-- NOTIFICATIONS / PRIVACY (V2): detail-page App bar, options in one Grouped list tile with a Switch each. -->
     <sc-if value="{{ isPrefs }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="{{ prefTitle }}" style="display:flex;flex-direction:column;gap:24px;">
+      <div data-screen-label="{{ prefTitle }}" class="rw-page">
         <div class="rw-appbar-title is-centered">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ArrowLeft" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="44px,44px"></x-import>
           <h1 class="rw-appbar-name">{{ prefTitle }}</h1>
@@ -1436,7 +1446,7 @@ button:disabled{cursor:default !important;}
 
     <!-- LANGUAGE (V2): detail-page App bar, languages in one Grouped list tile; the chosen one shows a Check (selected N600). -->
     <sc-if value="{{ isLanguage }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Language" style="display:flex;flex-direction:column;gap:24px;">
+      <div data-screen-label="Language" class="rw-page">
         <div class="rw-appbar-title is-centered">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ArrowLeft" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="44px,44px"></x-import>
           <h1 class="rw-appbar-name">{{ tx.language }}</h1>
@@ -1964,7 +1974,7 @@ const I18N = {
     performance: 'Performance', grow: 'Grow', back: 'Back', language: 'Language', menu: 'Menu',
     obWelcomeTitle: 'Welcome to Rallywise', obWelcomeBody: 'Track your matches, understand your game, and improve over time.',
     obProfileTitle: 'Set up your profile', obProfileBody: 'This helps Rallywise make sense of your matches.',
-    name: 'Name', yourName: 'Your name', skillLevel: 'Skill level',
+    name: 'Name', yourName: 'Your name', skillLevel: 'Skill level', chooseLevel: 'Choose your level',
     level_Beginner: 'Beginner', level_Intermediate: 'Intermediate', level_Advanced: 'Advanced', level_Competitive: 'Competitive',
     obReadyTitle: 'Ready to play, {name}', obReadyBody: 'Start logging your matches. Your insights will build over time as you play.',
     getStarted: 'Get started', continue: 'Continue', logFirstMatch: 'Log your first match', goToMatches: 'Go to Matches',
@@ -2123,7 +2133,7 @@ const I18N = {
     performance: '表现', grow: '提升', back: '返回', language: '语言', menu: '菜单',
     obWelcomeTitle: '欢迎来到 Rallywise', obWelcomeBody: '记录每场比赛，看懂自己的打法，慢慢变强。',
     obProfileTitle: '设置你的资料', obProfileBody: '这能帮 Rallywise 更好地理解你的比赛。',
-    name: '名字', yourName: '你的名字', skillLevel: '水平',
+    name: '名字', yourName: '你的名字', skillLevel: '水平', chooseLevel: '选择你的水平',
     level_Beginner: '入门', level_Intermediate: '中级', level_Advanced: '进阶', level_Competitive: '竞技',
     obReadyTitle: '准备开打，{name}', obReadyBody: '开始记录你的比赛吧。打得越多，洞察就越准。',
     getStarted: '开始', continue: '下一步', logFirstMatch: '记录第一场比赛', goToMatches: '去看比赛',
@@ -3272,7 +3282,7 @@ class Component extends DCLogic {
   }
   // Settings & account. Saves reuse the auth request, so the busy spinner and network banner match.
   openForm(screen, acct) { this.go(screen, { acct: { ...this.state.acct, cur: '', next: '', ...acct }, errors: {}, banner: null, pwVisible: false }); }
-  openProfile() { const me = this.state.players.find(p => p.id === 'me') || {}; this.openForm('profile', { name: me.name || '', level: me.level || null }); }
+  openProfile() { const me = this.state.players.find(p => p.id === 'me') || {}; this.openForm('profile', { name: me.name || '', level: me.level || null }); this.setState({ levelOpen: false }); }
   setAcct(patch, errKey) { this.setState(x => ({ acct: { ...x.acct, ...patch }, errors: { ...x.errors, [errKey]: null }, banner: null })); }
   addPlayer(name, source) {
     this.track('player_added', { source, player_count: this.state.players.filter(p => p.id !== 'me').length + 1 });
@@ -3492,7 +3502,8 @@ class Component extends DCLogic {
     const exists = s.players.some(p => p.name.toLowerCase() === q);
     const v = {
       scrollRef: this.scrollRef, onScroll: this.onScroll, overall, greeting: this.greeting(all),
-      scrollCls: ['matches', 'insights', 'focus', 'detail', 'voice', 'review', 'players', 'profile', 'settings', 'account', 'password', 'language', 'notifications', 'privacy'].includes(s.screen) ? 'rw-scroll is-v2' : 'rw-scroll',
+      scrollCls: ['matches', 'insights', 'focus', 'detail', 'voice', 'review', 'players', 'profile', 'settings', 'account', 'password', 'language', 'notifications', 'privacy'].includes(s.screen)
+        ? 'rw-scroll is-v2' + (['detail', 'focusDetail', 'profile', 'settings', 'account', 'password', 'language', 'notifications', 'privacy'].includes(s.screen) ? ' is-detail' : '') : 'rw-scroll',
       isMatches: s.screen === 'matches', isInsights: s.screen === 'insights', isLog: s.screen === 'log', isVoice: s.screen === 'voice' && !!s.voice, isReview: s.screen === 'review' && !!s.log, voiceRef: this.voiceRef,
       isDetail: s.screen === 'detail', isPlayers: s.screen === 'players', isPlayer: s.screen === 'player',
       isLogin: s.screen === 'login', isSignup: s.screen === 'signup', isSplash: s.screen === 'splash', skipSplash: () => this.leaveSplash(),
@@ -3611,11 +3622,13 @@ class Component extends DCLogic {
     if (v.isMyProfile) {
       const a = s.acct, name = a.name.trim();
       v.meName = a.name; v.meInitials = name.split(/\s+/).filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase(); v.noInitials = !v.meInitials;
-      v.meAvCls = this.avDir('me'); v.meNameCls = name ? 'is-filled' : '';
+      v.meAvCls = this.avDir('me'); v.meNameRowCls = s.errors.name ? 'is-error' : '';
+      v.levelOpen = !!s.levelOpen; v.toggleLevel = () => this.setState(x => ({ levelOpen: !x.levelOpen }));
+      v.meLevelLabel = a.level ? this.t('level_' + a.level) : this.t('chooseLevel'); v.meLevelCls = a.level ? '' : 'is-muted';
       v.onMeName = e => this.setAcct({ name: e.target.value }, 'name');
       v.meLevels = ['Beginner', 'Intermediate', 'Advanced', 'Competitive'].map(label => {
         const on = a.level === label;
-        return { label: this.t('level_' + label), on, cls: on ? 'is-active' : '', select: () => this.setAcct({ level: label }, 'level') };
+        return { label: this.t('level_' + label), on, cls: on ? 'is-active' : '', select: () => { this.setAcct({ level: label }, 'level'); this.setState({ levelOpen: false }); } };
       });
       v.saveProfile = () => this.submit({ name: name ? null : this.msg.nameEmpty }, async () => {
         const players = this.state.players.map(p => p.id === 'me' ? { ...p, name, level: this.state.acct.level } : p);
@@ -3634,7 +3647,7 @@ class Component extends DCLogic {
       v.onPwCur = e => this.setAcct({ cur: e.target.value }, 'current');
       v.onPwNext = e => this.setAcct({ next: e.target.value }, 'password');
       v.curErr = s.errors.current || null; v.curInvalid = !!v.curErr; v.curCls = v.curErr ? 'field-error' : '';
-      v.pwCurCls = [a.cur && 'is-filled', v.curCls].filter(Boolean).join(' '); v.pwNextCls = [a.next && 'is-filled', s.errors.password && 'field-error'].filter(Boolean).join(' ');
+      v.pwCurRowCls = v.curErr ? 'is-error' : ''; v.pwNextRowCls = s.errors.password ? 'is-error' : '';
       // After a reset link the current password isn't asked for (needCurrent hides that field).
       v.needCurrent = !a.recovery;
       v.savePassword = () => this.submit({ current: a.recovery || a.cur ? null : this.msg.curEmpty, password: a.next.length >= 8 ? null : a.next ? this.msg.pwShort : this.msg.nextEmpty }, async () => {

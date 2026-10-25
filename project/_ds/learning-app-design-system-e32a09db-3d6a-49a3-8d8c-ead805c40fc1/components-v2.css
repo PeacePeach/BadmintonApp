@@ -3,7 +3,7 @@
    One stylesheet for every V2 component, built from tokens/v2.css (component and semantic tokens only).
    Figma source: Design System page (159:5834), as used on the Matches screen (199:3497).
    Components (Figma name -> class):
-     Screen background ............ .rw-scroll.is-v2
+     Screen background ............ .rw-scroll.is-v2[.is-detail: no glow]
      Tile Container ............... .rw-surface.rw-tile
      Glass (floating controls) .... .rw-glass   (IconButton variant "glass" in _ds_bundle.js uses the same tokens)
      Button / Primary, Large ...... .rw-btn.rw-btn-primary
@@ -37,6 +37,7 @@
      Avatar / Fancy (icon badge) .. .rw-icon-badge (40px, gradient B100 ring, B100 icon 20px)
    Voice Log Match (Figma 207:7730 and Review 217:8404 / 248:2470):
      App bar title (Back/Close + name) .rw-appbar-title[.is-centered: detail page] > IconButton glass + .rw-appbar-name
+     Detail page .................. .rw-page > .rw-appbar-title.is-centered + content (40px under the App bar, 24px between)
      Page heading + hint .......... .rw-page-head > .rw-heading + .rw-hint
      Voice Input (transcript card)  .rw-voice-input[.is-live] > .rw-voice-text + .rw-cues
      Pills / Recognition cue ...... .rw-pill.rw-pill-sm.rw-cue[.is-done] > .rw-cue-mark  (Figma Pills, Type=Indicator 216:8356/8357)
@@ -47,7 +48,8 @@
    Switch ....................... .rw-switch[.is-on] (44x24, inside a .rw-group-row role=switch)
    Overflow menu (⋯) ............ .rw-menu-scrim + .rw-menu > .rw-menu-item[.has-sep] (Lucide icon 24 + label); no Figma component, built from V2 tokens
    Player row (Figma 228:8835) ... .rw-surface.rw-player[.is-empty][.is-warning] > .rw-avatar | IconButton variant "add" + .rw-name + .rw-caption
-   Search bar (Figma 329:7330) ... .rw-search[.is-filled][.is-field: form field, filled = tile fill] > Search icon + .rw-search-input + .rw-search-clear (states: Unfilled, Filled Inactive, Active Typing = :focus-within)
+   Input rows (form) ............ .rw-input-list > .rw-input-field > .rw-surface.rw-input-row[.is-error: red 1px border] + .rw-field-note[.is-error] (.rw-input-row-text: .rw-input-row-label + input | .rw-input-row-value, .rw-input-row-end); select row = button + .rw-select-menu > .rw-menu-item.rw-select-option
+   Search bar (Figma 329:7330) ... .rw-search[.is-filled] > Search icon + .rw-search-input + .rw-search-clear (states: Unfilled, Filled Inactive, Active Typing = :focus-within)
    Bottom Sheet (Figma 319:6349) ... .rw-sheet-scrim + .rw-sheet > .rw-sheet-head (.rw-sheet-grabber, .rw-sheet-bar > spacer + .rw-sheet-title + IconButton glass, .rw-sheet-divider) + .rw-sheet-body (body copy .rw-sheet-text) + .rw-sheet-foot
    Result and Notes sheets (Figma 349:3528, 349:3793; Han approved 2026-10-23):
      W / L check (CheckBoxes) ..... .rw-check[.is-win|.is-loss]  (no class = unselected, dashed ring)
@@ -72,6 +74,7 @@
    ========================================================= */
 /* Screen background: app background + glow. The glow stays fixed while the content scrolls over it. */
 .rw-scroll.is-v2{background:var(--rw-bg-app-glow) no-repeat scroll,var(--rw-bg-app);--empty-body-weight:var(--rw-weight-min);}
+.rw-scroll.is-v2.is-detail{background:var(--rw-bg-app);}   /* detail pages (centred App bar): plain background, no glow (Han 2026-10-25) */
 /* Surface (in-page content) and Glass (floating controls). */
 .rw-surface{background:var(--rw-surface-fill);}
 .rw-glass{background:var(--rw-glass-fill);-webkit-backdrop-filter:var(--rw-glass-effect);backdrop-filter:var(--rw-glass-effect);box-shadow:var(--rw-glass-rim);}
@@ -250,6 +253,9 @@
    optional action on the right. The empty third column keeps the name centred when there is no action. */
 .rw-appbar-title.is-centered{display:grid;grid-template-columns:44px 1fr 44px;}
 .rw-appbar-title.is-centered>.rw-appbar-name{grid-column:2;text-align:center;}
+/* Detail page body: App bar, then the first component 40px below it, then 24px between components. */
+.rw-page{display:flex;flex-direction:column;gap:var(--rw-page-gap);}
+.rw-page>.rw-appbar-title{margin-bottom:calc(var(--rw-page-head-gap) - var(--rw-page-gap));}
 /* Page heading: title + one-line hint */
 .rw-page-head{display:flex;flex-direction:column;gap:8px;}
 .rw-heading{font:var(--rw-type-heading);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);margin:0;}
@@ -342,12 +348,36 @@
 .rw-search-results{display:flex;flex-direction:column;gap:var(--rw-search-results-gap);}
 .rw-player-list{display:flex;flex-direction:column;gap:var(--rw-player-list-gap);}
 /* Search bar. Unfilled: 5% fill. Filled Inactive (.is-filled): purplegrey-500. Active Typing (:focus-within): purplegrey-500 + N600 ring, N800 text. */
-.rw-search{height:var(--rw-search-h);padding:0 18px;border-radius:999px;border:1px solid transparent;background:var(--rw-search-bg);display:flex;align-items:center;gap:8px;color:var(--rw-search-fg);}
+.rw-search{height:var(--rw-search-h);padding:0 var(--rw-search-pad-x);border-radius:999px;border:1px solid transparent;background:var(--rw-search-bg);display:flex;align-items:center;gap:8px;color:var(--rw-search-fg);}
 .rw-search.is-filled,.rw-search:focus-within{background:var(--rw-search-bg-filled);}
 .rw-search:focus-within{border-color:var(--rw-search-border-active);}
-.rw-search.is-field.is-filled:not(:focus-within){background:var(--rw-search-bg);}   /* form field (Profile name, passwords): stays the tile fill when it holds a value, Han 2026-10-25 */
+/* Input row: single-line field with its label inside the tile (12px label over the 15px value). Typing or an open
+   select gives the row Highlight Fill. A select row is a button with
+   ChevronDown 18 and opens .rw-select-menu (the ⋯ menu styling) under its tile. Each field (.rw-input-field) is its own
+   tile, radius 10, 8px apart, with its note right under it, inset 16 (Han 2026-10-25). Padding is 15 top / 11 bottom so
+   the ink sits optically centred: the 20px value line carries ~4px of empty descender space under the text. */
+.rw-input-field{position:relative;display:flex;flex-direction:column;gap:8px;}   /* one field: its tile, then its own note */
+.rw-input-row{position:relative;width:100%;min-height:var(--rw-input-row-h);box-sizing:border-box;padding:var(--rw-input-row-pad-top) var(--rw-tile-pad) var(--rw-input-row-pad-bottom);display:flex;align-items:center;gap:12px;border:none;border-radius:var(--rw-input-row-radius);color:inherit;text-align:left;font:inherit;cursor:text;transition:background var(--dur-fast) var(--ease-out);}
+button.rw-input-row{cursor:pointer;}
+.rw-input-list{display:flex;flex-direction:column;gap:var(--rw-input-list-gap);}
+.rw-input-row:focus-within,.rw-input-row[aria-expanded="true"],button.rw-input-row:active{background:var(--rw-color-surface-highlight);outline:none;}
+.rw-input-row-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
+.rw-input-row-label{font:var(--rw-type-caption);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
+.rw-input-row.is-error{box-shadow:inset 0 0 0 1px var(--rw-color-text-error);}   /* error = 1px border in the error red; label stays N400 (Han 2026-10-25) */
+.rw-input-row-input,.rw-input-row-value{display:block;width:100%;height:20px;margin:0;padding:0;border:none;outline:none;background:transparent;font:var(--rw-type-list-value);line-height:20px;letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);caret-color:var(--rw-search-caret);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.rw-input-row-input::placeholder{color:var(--rw-placeholder-text);opacity:1;}
+.rw-input-row-value.is-muted{color:var(--rw-placeholder-text);}
+.rw-input-row-end{display:flex;align-items:center;flex-shrink:0;color:var(--rw-text-secondary);}
+:root[lang="zh-Hans"] .rw-input-row{--rw-input-row-pad-top:14px;--rw-input-row-pad-bottom:11px;}   /* Chinese glyphs fill the label line; re-centred by eye-measure */
+:root[lang="zh-Hans"] .rw-input-row-label{line-height:15px;}
+.rw-select-catch{position:fixed;inset:0;z-index:20;}
+.rw-select-menu{top:calc(100% - 24px);right:0;z-index:21;}
+.rw-select-option{justify-content:space-between;}
+.rw-select-option>:last-child{color:var(--rw-color-border-selected);}   /* Check N600 on the chosen option */
+.rw-field-note{margin:0;padding:0 var(--rw-field-inset);font:var(--rw-type-meta);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
+.rw-field-note.is-error{color:var(--rw-color-text-error);}
 .rw-search>:first-child{flex-shrink:0;}
-.rw-search-input{flex:1;min-width:0;height:100%;padding:0 2px;border:none;outline:none;background:transparent;font:var(--rw-type-name);letter-spacing:var(--rw-tracking);color:var(--rw-search-fg);caret-color:var(--rw-search-caret);}
+.rw-search-input{flex:1;min-width:0;height:100%;padding:0 var(--rw-search-input-pad-x);border:none;outline:none;background:transparent;font:var(--rw-type-name);letter-spacing:var(--rw-tracking);color:var(--rw-search-fg);caret-color:var(--rw-search-caret);}
 .rw-search-input::placeholder{color:var(--rw-placeholder-text);opacity:1;}
 .rw-search:focus-within .rw-search-input{color:var(--rw-search-fg-active);}
 .rw-search-clear{flex-shrink:0;width:20px;height:20px;padding:0;border:none;background:transparent;color:inherit;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;}

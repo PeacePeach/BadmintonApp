@@ -887,7 +887,7 @@
             </div>
           </div>
         </div>
-        <div class="v2-cell v2-wide"><div class="v2-label">Overflow menu (⋯): scrim, app background + Glass Fill, glass rim, tile radius 15, 24px Lucide icons and 15px Medium labels both N800, divider N150 before the last action</div>
+        <div class="v2-cell v2-wide"><div class="v2-label">Overflow menu (⋯): scrim, app background + Glass Fill, glass rim, tile radius 15, 24px Lucide icons and 14px Medium labels both N800, divider N150 before the last action</div>
           <div style="position:relative;height:330px;border-radius:24px;overflow:hidden;background:var(--rw-bg-app);">
             <div class="rw-menu-scrim"></div>
             <div class="rw-menu" role="menu" style="top:24px;">
@@ -898,7 +898,7 @@
             </div>
           </div>
         </div>
-        <div class="v2-cell v2-wide"><div class="v2-label">Grouped list (Settings): rows in one tile, 18px Lucide icon N800, 15px Medium label + caption, chevron 20, row padding 16 (tile pad), divider N150 inset 16, pressed Highlight Fill; a single action gets its own tile 16px below</div>
+        <div class="v2-cell v2-wide"><div class="v2-label">Grouped list (Settings): rows in one tile, 18px Lucide icon N800, 14px Medium label + caption, chevron 20, row padding 16 (tile pad), divider N150 inset 16, pressed Highlight Fill; a single action gets its own tile 16px below</div>
           <div style="display:flex;flex-direction:column;gap:16px;">
             <div class="rw-surface rw-group">
               <button class="rw-group-row"><i data-lucide="circle-user" style="width:18px;height:18px"></i><span class="rw-group-row-text"><span class="rw-group-row-label">Profile</span><span class="rw-caption">Xu Han · Intermediate</span></span><i data-lucide="chevron-right" class="rw-group-row-end" style="width:20px;height:20px"></i></button>
@@ -931,6 +931,20 @@
               <div class="rw-note"><div class="rw-note-head"><h3 class="rw-note-label">What Worked</h3><span class="rw-note-tags">Net · Placement</span></div><p class="rw-note-text">Tight net shots, then deep clears to his backhand.</p></div>
               <div class="rw-note"><div class="rw-note-head"><h3 class="rw-note-label">On Alex Chen</h3></div><p class="rw-note-text">Deep clears to Alex’s backhand gave me time.</p></div>
             </div>
+          </div>
+        </div>
+        <div class="v2-cell v2-wide"><div class="v2-label">Input rows: one tile per field (radius 10), 8px apart, note under its own field; label (12px N400) inside the tile over the value (14px N800); typing row = Highlight Fill; select row = ChevronDown 18 opening the menu-style list with Check N600; error = red 1px border + note under the field, inset 16</div>
+          <div class="rw-input-list" style="padding-bottom:150px;">
+            <div class="rw-input-field"><label class="rw-surface rw-input-row"><span class="rw-input-row-text"><span class="rw-input-row-label">Name</span><input class="rw-input-row-input" value="Xu Han"></span></label></div>
+            <div class="rw-input-field">
+              <button type="button" class="rw-surface rw-input-row" aria-expanded="true"><span class="rw-input-row-text"><span class="rw-input-row-label">Skill level</span><span class="rw-input-row-value">Intermediate</span></span><span class="rw-input-row-end"><i data-lucide="chevron-down" style="width:18px;height:18px"></i></span></button>
+              <div class="rw-menu rw-select-menu" role="listbox" style="animation:none;">
+                <button class="rw-menu-item rw-select-option"><span>Beginner</span></button>
+                <button class="rw-menu-item rw-select-option"><span>Intermediate</span><i data-lucide="check" style="width:18px;height:18px"></i></button>
+                <button class="rw-menu-item rw-select-option"><span>Advanced</span></button>
+              </div>
+            </div>
+            <div class="rw-input-field"><label class="rw-surface rw-input-row is-error"><span class="rw-input-row-text"><span class="rw-input-row-label">New password</span><input class="rw-input-row-input" type="password" value="abc"></span></label><span class="rw-field-note is-error">Password must be at least 8 characters.</span></div>
           </div>
         </div>
         <div class="v2-cell v2-wide"><div class="v2-label">Bottom Nav (Matches active)</div>
