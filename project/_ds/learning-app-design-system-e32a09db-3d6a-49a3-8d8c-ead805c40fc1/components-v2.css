@@ -43,6 +43,7 @@
      Waveform ..................... .rw-wave[.is-live] > i (one per bar; height, opacity and delay set per bar)
      Record controls .............. .rw-rec > .rw-rec-side + .rw-rec-btn + .rw-rec-side.is-end; .rw-rec-timer (.is-live: green dot)
      InputTile (Figma 329:7089) ... .rw-surface.rw-tile.rw-input-tile[.is-warning] > .rw-input-tile-text (.rw-eyebrow + .rw-input-tile-value) + .rw-input-tile-end (.rw-flag, chevron 16px)
+   Overflow menu (⋯) ............ .rw-menu-scrim + .rw-menu > .rw-menu-item[.has-sep] (Lucide icon 24 + label); no Figma component, built from V2 tokens
    Player row (Figma 228:8835) ... .rw-surface.rw-player[.is-empty][.is-warning] > .rw-avatar | IconButton variant "add" + .rw-name + .rw-caption
    Search bar (Figma 329:7330) ... .rw-search[.is-filled] > Search icon + .rw-search-input + .rw-search-clear (states: Unfilled, Filled Inactive, Active Typing = :focus-within)
    Bottom Sheet (Figma 319:6349) ... .rw-sheet-scrim + .rw-sheet > .rw-sheet-head (.rw-sheet-grabber, .rw-sheet-bar > spacer + .rw-sheet-title + IconButton glass, .rw-sheet-divider) + .rw-sheet-body (body copy .rw-sheet-text) + .rw-sheet-foot
@@ -307,6 +308,18 @@
 @keyframes rw-sheet-in{from{transform:translateY(100%);}to{transform:none;}}
 @keyframes rw-fade{from{opacity:0;}to{opacity:1;}}
 @media (prefers-reduced-motion:reduce){.rw-sheet,.rw-sheet-scrim{animation:none;}}
+/* Overflow menu: drops from the floating ⋯ button (top 58 + 44px, 8px gap). Glass-rimmed tile over the sheet scrim.
+   .has-sep puts a divider above an item (Log Out, Delete) so the last action sits apart. */
+.rw-menu-scrim{position:absolute;inset:0;background:var(--rw-menu-scrim);animation:rw-fade var(--dur-base) var(--ease-out);}
+.rw-menu{position:absolute;top:110px;right:20px;min-width:200px;box-sizing:border-box;padding:6px;display:flex;flex-direction:column;border-radius:var(--rw-menu-radius);background:var(--rw-menu-bg);box-shadow:var(--rw-glass-rim);transform-origin:top right;animation:rw-menu-in var(--dur-base) var(--ease-out);}
+.rw-menu-item{height:48px;padding:0 12px;display:flex;align-items:center;gap:12px;border:none;border-radius:var(--rw-menu-item-radius);background:transparent;color:var(--rw-menu-item-fg);font:var(--rw-type-list-value);letter-spacing:var(--rw-tracking);text-align:left;white-space:nowrap;cursor:pointer;transition:background var(--dur-fast) var(--ease-out);}
+.rw-menu-item>:first-child{color:var(--rw-menu-item-icon);flex-shrink:0;}
+.rw-menu-item:active,.rw-menu-item:focus-visible{background:var(--rw-menu-item-pressed);outline:none;}
+@media (hover:hover){.rw-menu-item:hover{background:var(--rw-menu-item-pressed);}}
+.rw-menu-item.has-sep{position:relative;margin-top:13px;}
+.rw-menu-item.has-sep::before{content:"";position:absolute;left:6px;right:6px;top:-7px;height:1px;background:var(--rw-menu-divider);}
+@keyframes rw-menu-in{from{opacity:0;transform:scale(.96);}to{opacity:1;transform:none;}}
+@media (prefers-reduced-motion:reduce){.rw-menu,.rw-menu-scrim{animation:none;}.rw-menu-item{transition:none;}}
 /* Player row: a 48px pill. Filled slot = Avatar + name + role; empty slot = IconButton "add" + placeholder. The whole row is tappable. */
 .rw-player{width:100%;height:var(--rw-player-h);padding:0 4px;border-radius:999px;border:1px solid transparent;display:flex;align-items:center;gap:12px;text-align:left;cursor:pointer;}
 .rw-player>.rw-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}

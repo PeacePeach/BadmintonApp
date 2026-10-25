@@ -1797,15 +1797,15 @@ button:disabled{cursor:default !important;}
     </nav>
   </sc-if>
 
-  <!-- Menu -->
+  <!-- Menu (V2 overflow menu: .rw-menu in components-v2.css) -->
   <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
-    <div onClick="{{ toggleMenu }}" style="position:absolute;inset:0;background:rgba(0,0,0,.45);"></div>
-    <div style="position:absolute;top:112px;right:20px;width:210px;background:var(--surface-primary);border-radius:26px;padding:8px;display:flex;flex-direction:column;">
+    <div class="rw-menu-scrim" onClick="{{ toggleMenu }}"></div>
+    <div class="rw-menu" role="menu">
       <sc-for list="{{ menuItems }}" as="i" hint-placeholder-count="3">
-        <div onClick="{{ i.select }}" style="height:52px;border-radius:99px;display:flex;align-items:center;gap:12px;padding:0 14px;cursor:pointer;font:400 15px/1 var(--font-sans);" style-hover="background:var(--surface-muted);">
+        <button class="rw-menu-item {{ i.cls }}" role="menuitem" onClick="{{ i.select }}">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ i.icon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import>
-          {{ i.label }}
-        </div>
+          <span>{{ i.label }}</span>
+        </button>
       </sc-for>
     </div>
   </sc-if>
@@ -3572,12 +3572,12 @@ class Component extends DCLogic {
       })),
       menuItems: s.screen === 'detail' ? [
         { label: this.t('editMatch'), icon: 'Pencil', select: () => { const m = all.find(x => x.id === s.detailId) || all[0]; this.setState({ menu: false }); if (m) this.go('log', { log: this.editLog(m) }); } },
-        { label: this.t('deleteMatch'), icon: 'Trash2', select: () => { const m = all.find(x => x.id === s.detailId) || all[0]; if (m) this.requestDeleteMatch(m.id); } }
+        { label: this.t('deleteMatch'), icon: 'Trash2', cls: 'has-sep', select: () => { const m = all.find(x => x.id === s.detailId) || all[0]; if (m) this.requestDeleteMatch(m.id); } }
       ] : [
         { label: this.t('players'), icon: 'Users', select: () => this.go('players') },
         { label: this.t('profile'), icon: 'CircleUser', select: () => this.openProfile() },
         { label: this.t('settings'), icon: 'Settings', select: () => this.go('settings') },
-        { label: this.t('logOut'), icon: 'LogOut', select: () => this.signOut() }
+        { label: this.t('logOut'), icon: 'LogOut', cls: 'has-sep', select: () => this.signOut() }
       ],
       filters: ['All', 'Singles', 'Doubles'].map(f => ({ label: f === 'All' ? this.t('all') : this.typeLabel(f), active: s.filter === f, cls: s.filter === f ? 'is-active' : '', select: () => this.setState({ filter: f }) })),
       matchCards: all.filter(m => s.filter === 'All' || m.type === s.filter).map(m => this.card(m)),
@@ -4176,7 +4176,7 @@ class Component extends DCLogic {
         fdF.status === 'completed'
           ? (fdF.completedBy === 'user' ? { label: this.t('markActive'), icon: 'RotateCcw', select: () => this.setFocusDone(fdF.id, false) } : null)
           : { label: this.t('markComplete'), icon: 'CircleCheck', select: () => this.setFocusDone(fdF.id, true) },
-        { label: this.t('deleteFocus'), icon: 'Trash2', select: () => this.setState({ menu: false, confirmDeleteFocus: fdF.id }) }
+        { label: this.t('deleteFocus'), icon: 'Trash2', cls: 'has-sep', select: () => this.setState({ menu: false, confirmDeleteFocus: fdF.id }) }
       ].filter(Boolean) : [];
     }
     v.confirmDeleteFocus = !!s.confirmDeleteFocus;

@@ -343,6 +343,17 @@
   --rw-sheet-scrim: var(--rw-color-scrim);
   --rw-sheet-grabber: var(--rw-purplegrey-400);       /* Figma #4F4E53 is unbound; nearest Foundation primitive (Han, 2026-10-23) */
   --rw-sheet-divider: var(--rw-purplegrey-600);
+  /* Overflow menu (the ⋯ button: Players / Profile / Settings / Log Out). Figma has no menu component, so it is built
+     from existing tokens only: the sheet's app background with Glass Fill on top (reads like a tile), glass rim, tile
+     radius, sheet scrim, tile divider before the last action (2026-10-25, for Han to review). */
+  --rw-menu-bg: linear-gradient(var(--rw-color-surface-glass), var(--rw-color-surface-glass)), var(--rw-color-bg-app);
+  --rw-menu-radius: var(--rw-tile-radius);
+  --rw-menu-scrim: var(--rw-color-scrim);
+  --rw-menu-item-radius: 10px;
+  --rw-menu-item-fg: var(--rw-color-text-primary);
+  --rw-menu-item-icon: var(--rw-color-text-secondary);
+  --rw-menu-item-pressed: var(--rw-color-surface-highlight);
+  --rw-menu-divider: var(--rw-color-divider);
   /* W / L check (Figma CheckBoxes 348:13628). Selected = fill (no outline); unselected = dashed N400 ring. Letter N75 (Figma N150, Han R4) */
   --rw-check-size: 32px;
   --rw-check-win-bg: var(--rw-color-select-win);
