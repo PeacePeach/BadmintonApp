@@ -109,153 +109,153 @@ button:disabled{cursor:default !important;}
 
     <!-- LOG IN -->
     <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Log In" style="display:flex;flex-direction:column;gap:32px;padding-top:56px;">
-        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:0 12px;">
-          <div style="font:600 30px/1.2 var(--font-sans);">{{ tx.welcomeBack }}</div>
-          <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">{{ tx.loginBody }}</div>
+      <div data-screen-label="Log In" class="rw-auth">
+        <div class="rw-auth-head">
+          <h1 class="rw-title">{{ tx.welcomeBack }}</h1>
+          <p class="rw-hint">{{ tx.loginBody }}</p>
         </div>
         <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
-          <div role="alert" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:22px;background:var(--surface-muted);">
-            <div style="color:var(--rw-color-status-error);display:flex;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
-            <div style="font:400 14px/1.45 var(--font-sans);color:var(--text-primary);">{{ banner }}</div>
-          </div>
+          <div role="alert" class="rw-surface rw-alert"><span><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 18 }}" hint-size="18px,18px"></x-import></span><span>{{ banner }}</span></div>
         </sc-if>
-        <div style="display:flex;flex-direction:column;gap:20px;">
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <div style="font:500 15px/1 var(--font-sans);">{{ tx.email }}</div>
-            <div class="search-field-outline {{ emailCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="email" value="{{ f.email }}" onChange="{{ on_email }}" placeholder="you@example.com" autocomplete="email" aria-invalid="{{ emailInvalid }}" aria-label="{{ tx.email }}" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
-            <sc-if value="{{ emailErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--rw-color-status-error);">{{ emailErr }}</div></sc-if>
+        <div class="rw-input-list">
+          <div class="rw-input-field">
+            <label class="rw-surface rw-input-row {{ emailRowCls }}">
+              <span class="rw-input-row-text"><span class="rw-input-row-label">{{ tx.email }}</span><input class="rw-input-row-input" type="email" value="{{ f.email }}" onChange="{{ on_email }}" placeholder="you@example.com" autocomplete="email" aria-invalid="{{ emailInvalid }}"></span>
+              
+            </label>
+            <sc-if value="{{ emailErr }}" hint-placeholder-val="{{ false }}"><span role="alert" class="rw-field-note is-error">{{ emailErr }}</span></sc-if>
           </div>
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <div style="font:500 15px/1 var(--font-sans);">{{ tx.password }}</div>
-            <div class="search-field-outline {{ passwordCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="{{ pwType }}" value="{{ f.password }}" onChange="{{ on_password }}" placeholder="{{ tx.password }}" autocomplete="current-password" aria-invalid="{{ passwordInvalid }}" aria-label="{{ tx.password }}" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"><button onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}" style="width:32px;height:32px;border:none;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import></button></div>
-            <sc-if value="{{ passwordErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--rw-color-status-error);">{{ passwordErr }}</div></sc-if>
+          <div class="rw-input-field">
+            <label class="rw-surface rw-input-row {{ passwordRowCls }}">
+              <span class="rw-input-row-text"><span class="rw-input-row-label">{{ tx.password }}</span><input class="rw-input-row-input" type="{{ pwType }}" value="{{ f.password }}" onChange="{{ on_password }}" placeholder="{{ tx.password }}" autocomplete="current-password" aria-invalid="{{ passwordInvalid }}"></span>
+              <span class="rw-input-row-end"><button type="button" class="rw-search-clear" onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 18 }}" hint-size="18px,18px"></x-import></button></span>
+            </label>
+            <sc-if value="{{ passwordErr }}" hint-placeholder-val="{{ false }}"><span role="alert" class="rw-field-note is-error">{{ passwordErr }}</span></sc-if>
           </div>
-          <div style="display:flex;justify-content:flex-end;margin-top:-4px;"><span onClick="{{ forgotPw }}" style="font:500 14px/1 var(--font-sans);color:var(--status-win);cursor:pointer;">{{ tx.forgotPw }}</span></div>
         </div>
-        <button onClick="{{ logIn }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--action-primary);color:var(--action-on-primary);" style-active="transform:scale(.97);">
-          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">{{ tx.logIn }}</span></sc-if>
+        <div class="rw-auth-end"><button type="button" class="rw-text-link" onClick="{{ forgotPw }}">{{ tx.forgotPw }}</button></div>
+        <button type="button" class="rw-btn rw-btn-primary" onClick="{{ logIn }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="width:100%;">
+          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 20 }}" hint-size="20px,20px"></x-import></span><span class="sr-only">{{ tx.logIn }}</span></sc-if>
           <sc-if value="{{ idleSubmit }}" hint-placeholder-val="{{ true }}">{{ tx.logIn }}</sc-if>
         </button>
-        <div style="display:flex;align-items:center;gap:16px;">
-          <div style="flex:1;height:1px;background:var(--border-default);"></div>
-          <div style="font:500 13px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.or }}</div>
-          <div style="flex:1;height:1px;background:var(--border-default);"></div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          <button onClick="{{ apple.go }}" aria-busy="{{ apple.busy }}" disabled="{{ busyAny }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;opacity:{{ apple.dim }};" style-active="transform:scale(.98);">
-            <sc-if value="{{ apple.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" hint-size="24px,24px"></x-import></span></sc-if>
-            <sc-if value="{{ apple.idle }}" hint-placeholder-val="{{ true }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z"></path></svg></sc-if>
+        <div class="rw-or">{{ tx.or }}</div>
+        <div class="rw-btn-stack">
+          <button type="button" class="rw-btn rw-btn-social" onClick="{{ apple.go }}" aria-busy="{{ apple.busy }}" disabled="{{ busyAny }}" style="opacity:{{ apple.dim }};">
+            <sc-if value="{{ apple.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 20 }}" hint-size="20px,20px"></x-import></span></sc-if>
+            <sc-if value="{{ apple.idle }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z"></path></svg></sc-if>
             {{ tx.withApple }}
           </button>
-          <button onClick="{{ google.go }}" aria-busy="{{ google.busy }}" disabled="{{ busyAny }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;opacity:{{ google.dim }};" style-active="transform:scale(.98);">
-            <sc-if value="{{ google.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" hint-size="24px,24px"></x-import></span></sc-if>
-            <sc-if value="{{ google.idle }}" hint-placeholder-val="{{ true }}"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg></sc-if>
+          <button type="button" class="rw-btn rw-btn-social" onClick="{{ google.go }}" aria-busy="{{ google.busy }}" disabled="{{ busyAny }}" style="opacity:{{ google.dim }};">
+            <sc-if value="{{ google.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 20 }}" hint-size="20px,20px"></x-import></span></sc-if>
+            <sc-if value="{{ google.idle }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg></sc-if>
             {{ tx.withGoogle }}
           </button>
         </div>
-        <div style="text-align:center;font:400 15px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.noAccount }}<span onClick="{{ toSignup }}" style="color:var(--status-win);font-weight:600;cursor:pointer;">{{ tx.signUp }}</span></div>
+        <p class="rw-auth-foot">{{ tx.noAccount }}<button type="button" class="rw-text-link" onClick="{{ toSignup }}">{{ tx.signUp }}</button></p>
       </div>
     </sc-if>
 
     <!-- SIGN UP -->
     <sc-if value="{{ isSignup }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Sign Up" style="display:flex;flex-direction:column;gap:32px;padding-top:56px;">
-        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:0 12px;">
-          <div style="font:600 30px/1.2 var(--font-sans);">{{ tx.createAccount }}</div>
-          <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">{{ tx.signupBody }}</div>
+      <div data-screen-label="Sign Up" class="rw-auth">
+        <div class="rw-auth-head">
+          <h1 class="rw-title">{{ tx.createAccount }}</h1>
+          <p class="rw-hint">{{ tx.signupBody }}</p>
         </div>
         <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
-          <div role="alert" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:22px;background:var(--surface-muted);">
-            <div style="color:var(--rw-color-status-error);display:flex;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
-            <div style="font:400 14px/1.45 var(--font-sans);color:var(--text-primary);">{{ banner }}</div>
-          </div>
+          <div role="alert" class="rw-surface rw-alert"><span><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 18 }}" hint-size="18px,18px"></x-import></span><span>{{ banner }}</span></div>
         </sc-if>
-        <div style="display:flex;flex-direction:column;gap:16px;">
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <div class="search-field-outline {{ nameCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="text" value="{{ f.name }}" onChange="{{ on_name }}" placeholder="{{ tx.name }}" autocomplete="name" aria-invalid="{{ nameInvalid }}" aria-label="{{ tx.name }}" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
-            <sc-if value="{{ nameErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--rw-color-status-error);">{{ nameErr }}</div></sc-if>
+        <div class="rw-input-list">
+          <div class="rw-input-field">
+            <label class="rw-surface rw-input-row {{ nameRowCls }}">
+              <span class="rw-input-row-text"><span class="rw-input-row-label">{{ tx.name }}</span><input class="rw-input-row-input" type="text" value="{{ f.name }}" onChange="{{ on_name }}" placeholder="{{ tx.yourName }}" autocomplete="name" aria-invalid="{{ nameInvalid }}"></span>
+              
+            </label>
+            <sc-if value="{{ nameErr }}" hint-placeholder-val="{{ false }}"><span role="alert" class="rw-field-note is-error">{{ nameErr }}</span></sc-if>
           </div>
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <div class="search-field-outline {{ emailCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="email" value="{{ f.email }}" onChange="{{ on_email }}" placeholder="{{ tx.email }}" autocomplete="email" aria-invalid="{{ emailInvalid }}" aria-label="{{ tx.email }}" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
-            <sc-if value="{{ emailErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--rw-color-status-error);">{{ emailErr }}</div></sc-if>
+          <div class="rw-input-field">
+            <label class="rw-surface rw-input-row {{ emailRowCls }}">
+              <span class="rw-input-row-text"><span class="rw-input-row-label">{{ tx.email }}</span><input class="rw-input-row-input" type="email" value="{{ f.email }}" onChange="{{ on_email }}" placeholder="you@example.com" autocomplete="email" aria-invalid="{{ emailInvalid }}"></span>
+              
+            </label>
+            <sc-if value="{{ emailErr }}" hint-placeholder-val="{{ false }}"><span role="alert" class="rw-field-note is-error">{{ emailErr }}</span></sc-if>
           </div>
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <div class="search-field-outline {{ passwordCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="{{ pwType }}" value="{{ f.password }}" onChange="{{ on_password }}" placeholder="{{ tx.password }}" autocomplete="new-password" aria-invalid="{{ passwordInvalid }}" aria-label="{{ tx.password }}" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"><button onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}" style="width:32px;height:32px;border:none;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 24 }}" hint-size="24px,24px"></x-import></button></div>
-            <sc-if value="{{ passwordErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--rw-color-status-error);">{{ passwordErr }}</div></sc-if>
-            <sc-if value="{{ passwordHelper }}" hint-placeholder-val="{{ true }}"><div class="field-msg" style="color:var(--text-tertiary);">{{ tx.pwHelper }}</div></sc-if>
+          <div class="rw-input-field">
+            <label class="rw-surface rw-input-row {{ passwordRowCls }}">
+              <span class="rw-input-row-text"><span class="rw-input-row-label">{{ tx.password }}</span><input class="rw-input-row-input" type="{{ pwType }}" value="{{ f.password }}" onChange="{{ on_password }}" placeholder="{{ tx.password }}" autocomplete="new-password" aria-invalid="{{ passwordInvalid }}"></span>
+              <span class="rw-input-row-end"><button type="button" class="rw-search-clear" onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pwIcon }}" size="{{ 18 }}" hint-size="18px,18px"></x-import></button></span>
+            </label>
+            <sc-if value="{{ passwordErr }}" hint-placeholder-val="{{ false }}"><span role="alert" class="rw-field-note is-error">{{ passwordErr }}</span></sc-if>
+            <sc-if value="{{ passwordHelper }}" hint-placeholder-val="{{ true }}"><span class="rw-field-note">{{ tx.pwHelper }}</span></sc-if>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:12px;">
-          <button onClick="{{ toggleAgree }}" aria-label="{{ tx.agreeLabel }}" style="width:24px;height:24px;border-radius:7px;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;background: {{ agreeBg }};border:var(--control-outline-width) solid {{ agreeBorder }};color:var(--control-selected-fg);">
-            <sc-if value="{{ agree }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 16 }}" hint-size="16px,16px"></x-import></sc-if>
+        <div class="rw-agree">
+          <button type="button" class="rw-checkbox {{ agreeCls }}" onClick="{{ toggleAgree }}" role="checkbox" aria-checked="{{ agree }}" aria-label="{{ tx.agreeLabel }}">
+            <sc-if value="{{ agree }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 14 }}" hint-size="14px,14px"></x-import></sc-if>
           </button>
-          <div style="font:400 15px/1.4 var(--font-sans);">{{ tx.agreeA }}<span style="color:var(--status-win);font-weight:600;">{{ tx.terms }}</span>{{ tx.agreeAnd }}<span style="color:var(--status-win);font-weight:600;">{{ tx.privacyPolicy }}</span>{{ tx.agreeEnd }}</div>
+          <div>{{ tx.agreeA }}<span class="rw-text-link">{{ tx.terms }}</span>{{ tx.agreeAnd }}<span class="rw-text-link">{{ tx.privacyPolicy }}</span>{{ tx.agreeEnd }}</div>
         </div>
-        <button onClick="{{ signUp }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;background: {{ signupBg }};color: {{ signupFg }};" style-active="transform:scale(.97);">
-          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">{{ tx.signUp }}</span></sc-if>
+        <button type="button" class="rw-btn rw-btn-primary" onClick="{{ signUp }}" aria-busy="{{ busySubmit }}" disabled="{{ signupOff }}" style="width:100%;">
+          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 20 }}" hint-size="20px,20px"></x-import></span><span class="sr-only">{{ tx.signUp }}</span></sc-if>
           <sc-if value="{{ idleSubmit }}" hint-placeholder-val="{{ true }}">{{ tx.signUp }}</sc-if>
         </button>
-        <div style="display:flex;align-items:center;gap:16px;">
-          <div style="flex:1;height:1px;background:var(--border-default);"></div>
-          <div style="font:500 13px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.or }}</div>
-          <div style="flex:1;height:1px;background:var(--border-default);"></div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          <button onClick="{{ apple.go }}" aria-busy="{{ apple.busy }}" disabled="{{ busyAny }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;opacity:{{ apple.dim }};" style-active="transform:scale(.98);">
-            <sc-if value="{{ apple.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" hint-size="24px,24px"></x-import></span></sc-if>
-            <sc-if value="{{ apple.idle }}" hint-placeholder-val="{{ true }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z"></path></svg></sc-if>
+        <div class="rw-or">{{ tx.or }}</div>
+        <div class="rw-btn-stack">
+          <button type="button" class="rw-btn rw-btn-social" onClick="{{ apple.go }}" aria-busy="{{ apple.busy }}" disabled="{{ busyAny }}" style="opacity:{{ apple.dim }};">
+            <sc-if value="{{ apple.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 20 }}" hint-size="20px,20px"></x-import></span></sc-if>
+            <sc-if value="{{ apple.idle }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z"></path></svg></sc-if>
             {{ tx.withApple }}
           </button>
-          <button onClick="{{ google.go }}" aria-busy="{{ google.busy }}" disabled="{{ busyAny }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;opacity:{{ google.dim }};" style-active="transform:scale(.98);">
-            <sc-if value="{{ google.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" hint-size="24px,24px"></x-import></span></sc-if>
-            <sc-if value="{{ google.idle }}" hint-placeholder-val="{{ true }}"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg></sc-if>
+          <button type="button" class="rw-btn rw-btn-social" onClick="{{ google.go }}" aria-busy="{{ google.busy }}" disabled="{{ busyAny }}" style="opacity:{{ google.dim }};">
+            <sc-if value="{{ google.busy }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 20 }}" hint-size="20px,20px"></x-import></span></sc-if>
+            <sc-if value="{{ google.idle }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg></sc-if>
             {{ tx.withGoogle }}
           </button>
         </div>
-        <div style="text-align:center;font:400 15px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.haveAccount }}<span onClick="{{ toLogin }}" style="color:var(--status-win);font-weight:600;cursor:pointer;">{{ tx.logIn }}</span></div>
+        <p class="rw-auth-foot">{{ tx.haveAccount }}<button type="button" class="rw-text-link" onClick="{{ toLogin }}">{{ tx.logIn }}</button></p>
       </div>
     </sc-if>
 
     <!-- FORGOT PASSWORD -->
     <sc-if value="{{ isForgot }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Forgot Password" style="display:flex;flex-direction:column;gap:32px;padding-top:56px;">
-        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:0 12px;">
-          <div style="font:600 30px/1.2 var(--font-sans);">{{ tx.forgotPw }}</div>
-          <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">{{ tx.forgotBody }}</div>
+      <div data-screen-label="Forgot Password" class="rw-auth">
+        <div class="rw-auth-head">
+          <h1 class="rw-title">{{ tx.forgotPw }}</h1>
+          <p class="rw-hint">{{ tx.forgotBody }}</p>
         </div>
         <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
-          <div role="alert" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:22px;background:var(--surface-muted);">
-            <div style="color:var(--rw-color-status-error);display:flex;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
-            <div style="font:400 14px/1.45 var(--font-sans);color:var(--text-primary);">{{ banner }}</div>
-          </div>
+          <div role="alert" class="rw-surface rw-alert"><span><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 18 }}" hint-size="18px,18px"></x-import></span><span>{{ banner }}</span></div>
         </sc-if>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-            <div style="font:500 15px/1 var(--font-sans);">{{ tx.email }}</div>
-            <div class="search-field-outline {{ emailCls }}" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="email" value="{{ f.email }}" onChange="{{ on_email }}" placeholder="you@example.com" autocomplete="email" aria-invalid="{{ emailInvalid }}" aria-label="{{ tx.email }}" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
-            <sc-if value="{{ emailErr }}" hint-placeholder-val="{{ false }}"><div role="alert" class="field-msg" style="color:var(--rw-color-status-error);">{{ emailErr }}</div></sc-if>
+        <div class="rw-input-list">
+          <div class="rw-input-field">
+            <label class="rw-surface rw-input-row {{ emailRowCls }}">
+              <span class="rw-input-row-text"><span class="rw-input-row-label">{{ tx.email }}</span><input class="rw-input-row-input" type="email" value="{{ f.email }}" onChange="{{ on_email }}" placeholder="you@example.com" autocomplete="email" aria-invalid="{{ emailInvalid }}"></span>
+              
+            </label>
+            <sc-if value="{{ emailErr }}" hint-placeholder-val="{{ false }}"><span role="alert" class="rw-field-note is-error">{{ emailErr }}</span></sc-if>
           </div>
-        <button onClick="{{ sendReset }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--action-primary);color:var(--action-on-primary);" style-active="transform:scale(.97);">
-          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">{{ tx.sendReset }}</span></sc-if>
+        </div>
+        <button type="button" class="rw-btn rw-btn-primary" onClick="{{ sendReset }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="width:100%;">
+          <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 20 }}" hint-size="20px,20px"></x-import></span><span class="sr-only">{{ tx.sendReset }}</span></sc-if>
           <sc-if value="{{ idleSubmit }}" hint-placeholder-val="{{ true }}">{{ tx.sendReset }}</sc-if>
         </button>
-        <div style="text-align:center;font:400 15px/1 var(--font-sans);"><span onClick="{{ toLogin }}" style="color:var(--status-win);font-weight:600;cursor:pointer;">{{ tx.backToLogin }}</span></div>
+        <p class="rw-auth-foot"><button type="button" class="rw-text-link" onClick="{{ toLogin }}">{{ tx.backToLogin }}</button></p>
       </div>
     </sc-if>
 
     <!-- CHECK EMAIL -->
     <sc-if value="{{ isResetSent }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Check Email" style="display:flex;flex-direction:column;gap:32px;padding-top:56px;">
-        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:0 12px;">
-          <div style="width:64px;height:64px;border-radius:50%;background:var(--icon-button-bg);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;margin-bottom:14px;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="MailCheck" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
-          <div style="font:600 30px/1.2 var(--font-sans);">{{ tx.checkEmail }}</div>
-          <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">{{ tx.resetBodyA }}<span style="color:var(--text-primary);font-weight:500;overflow-wrap:anywhere;">{{ resetEmail }}</span>{{ tx.resetBodyB }}</div>
+      <div data-screen-label="Check Email" class="rw-auth">
+        <div class="rw-auth-head">
+          <div class="rw-icon-badge"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="MailCheck" size="{{ 20 }}" hint-size="20px,20px"></x-import></div>
+          <h1 class="rw-title">{{ tx.checkEmail }}</h1>
+          <p class="rw-hint">{{ tx.resetBodyA }}<span class="rw-auth-strong">{{ resetEmail }}</span>{{ tx.resetBodyB }}</p>
         </div>
-        <button onClick="{{ toLogin }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;background:var(--action-primary);color:var(--action-on-primary);" style-active="transform:scale(.97);">{{ tx.backToLogin }}</button>
-        <div style="text-align:center;font:400 15px/1 var(--font-sans);color:var(--text-secondary);">{{ tx.noEmail }}
-          <sc-if value="{{ canResend }}" hint-placeholder-val="{{ true }}"><span onClick="{{ resend }}" role="button" style="color:var(--status-win);font-weight:600;cursor:pointer;">{{ tx.resend }}</span></sc-if>
-          <sc-if value="{{ resendWait }}" hint-placeholder-val="{{ false }}"><span style="color:var(--text-tertiary);font-variant-numeric:tabular-nums;">{{ resendInLabel }}</span></sc-if>
-        </div>
+        <button type="button" class="rw-btn rw-btn-primary" onClick="{{ toLogin }}" style="width:100%;">{{ tx.backToLogin }}</button>
+        <p class="rw-auth-foot">{{ tx.noEmail }}
+          <sc-if value="{{ canResend }}" hint-placeholder-val="{{ true }}"><button type="button" class="rw-text-link" onClick="{{ resend }}">{{ tx.resend }}</button></sc-if>
+          <sc-if value="{{ resendWait }}" hint-placeholder-val="{{ false }}"><span style="font-variant-numeric:tabular-nums;">{{ resendInLabel }}</span></sc-if>
+        </p>
       </div>
     </sc-if>
 
@@ -1324,10 +1324,7 @@ button:disabled{cursor:default !important;}
           <sc-if value="{{ noInitials }}" hint-placeholder-val="{{ false }}"><div class="rw-avatar-fill rw-avatar-lg {{ meAvCls }}" aria-hidden="true" style="border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--rw-avatar-fg);"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="UserRound" size="{{ 24 }}" hint-size="24px,24px"></x-import></div></sc-if>
         </div>
         <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
-          <div role="alert" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:22px;background:var(--surface-muted);">
-            <div style="color:var(--rw-color-status-error);display:flex;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
-            <div style="font:400 14px/1.45 var(--font-sans);color:var(--text-primary);">{{ banner }}</div>
-          </div>
+          <div role="alert" class="rw-surface rw-alert"><span><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 18 }}" hint-size="18px,18px"></x-import></span><span>{{ banner }}</span></div>
         </sc-if>
         <div class="rw-input-list">
           <div class="rw-input-field">
@@ -1396,10 +1393,7 @@ button:disabled{cursor:default !important;}
           <h1 class="rw-appbar-name">{{ tx.changePassword }}</h1>
         </div>
         <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
-          <div role="alert" style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:22px;background:var(--surface-muted);">
-            <div style="color:var(--rw-color-status-error);display:flex;flex-shrink:0;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
-            <div style="font:400 14px/1.45 var(--font-sans);color:var(--text-primary);">{{ banner }}</div>
-          </div>
+          <div role="alert" class="rw-surface rw-alert"><span><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="CircleAlert" size="{{ 18 }}" hint-size="18px,18px"></x-import></span><span>{{ banner }}</span></div>
         </sc-if>
         <div class="rw-input-list">
           <sc-if value="{{ needCurrent }}" hint-placeholder-val="{{ true }}">
@@ -3502,7 +3496,7 @@ class Component extends DCLogic {
     const exists = s.players.some(p => p.name.toLowerCase() === q);
     const v = {
       scrollRef: this.scrollRef, onScroll: this.onScroll, overall, greeting: this.greeting(all),
-      scrollCls: ['matches', 'insights', 'focus', 'detail', 'voice', 'review', 'players', 'profile', 'settings', 'account', 'password', 'language', 'notifications', 'privacy'].includes(s.screen)
+      scrollCls: ['matches', 'insights', 'focus', 'detail', 'voice', 'review', 'players', 'profile', 'settings', 'account', 'password', 'language', 'notifications', 'privacy', 'login', 'signup', 'forgot', 'resetSent'].includes(s.screen)
         ? 'rw-scroll is-v2' + (['detail', 'focusDetail', 'profile', 'settings', 'account', 'password', 'language', 'notifications', 'privacy'].includes(s.screen) ? ' is-detail' : '') : 'rw-scroll',
       isMatches: s.screen === 'matches', isInsights: s.screen === 'insights', isLog: s.screen === 'log', isVoice: s.screen === 'voice' && !!s.voice, isReview: s.screen === 'review' && !!s.log, voiceRef: this.voiceRef,
       isDetail: s.screen === 'detail', isPlayers: s.screen === 'players', isPlayer: s.screen === 'player',
@@ -3528,8 +3522,8 @@ class Component extends DCLogic {
       toSignup: () => this.toAuth('signup'),
       toLogin: () => this.toAuth('login', s.screen === 'forgot' || s.screen === 'resetSent'),
       agree: s.agree, toggleAgree: () => this.setState(x => ({ agree: !x.agree })),
-      agreeBg: s.agree ? 'var(--control-selected-bg)' : 'transparent', agreeBorder: s.agree ? 'var(--control-selected-bg)' : 'var(--control-outline)',
-      signupBg: s.agree ? 'var(--action-primary)' : 'var(--surface-muted)', signupFg: s.agree ? 'var(--action-on-primary)' : 'var(--text-tertiary)',
+      agreeCls: s.agree ? 'is-on' : '', signupOff: !!s.busy || !s.agree,
+      emailRowCls: s.errors.email ? 'is-error' : '', passwordRowCls: s.errors.password ? 'is-error' : '', nameRowCls: s.errors.name ? 'is-error' : '',
       signUp: () => { if (!this.state.agree) return; const f = this.state.f;
         this.submit({ name: f.name.trim() ? null : this.msg.nameEmpty, email: this.emailErr(f.email), password: f.password.length >= 8 ? null : f.password ? this.msg.pwShort : this.msg.pwEmpty },
           async () => {

@@ -49,6 +49,9 @@
    Overflow menu (⋯) ............ .rw-menu-scrim + .rw-menu > .rw-menu-item[.has-sep] (Lucide icon 24 + label); no Figma component, built from V2 tokens
    Player row (Figma 228:8835) ... .rw-surface.rw-player[.is-empty][.is-warning] > .rw-avatar | IconButton variant "add" + .rw-name + .rw-caption
    Input rows (form) ............ .rw-input-list > .rw-input-field > .rw-surface.rw-input-row[.is-error: red 1px border] + .rw-field-note[.is-error] (.rw-input-row-text: .rw-input-row-label + input | .rw-input-row-value, .rw-input-row-end); select row = button + .rw-select-menu > .rw-menu-item.rw-select-option
+   Auth pages (Log In, Sign Up, Forgot, Check Email) .rw-auth > .rw-auth-head (.rw-icon-badge, .rw-title, .rw-hint) + .rw-alert + .rw-input-list + .rw-btn-primary + .rw-or + .rw-btn-stack > .rw-btn.rw-btn-social + .rw-auth-foot > .rw-text-link
+   Checkbox (terms) ............. .rw-agree > .rw-checkbox[.is-on] + text with .rw-text-link
+   Alert (form error) ........... .rw-surface.rw-alert > CircleAlert 18 + text
    Search bar (Figma 329:7330) ... .rw-search[.is-filled] > Search icon + .rw-search-input + .rw-search-clear (states: Unfilled, Filled Inactive, Active Typing = :focus-within)
    Bottom Sheet (Figma 319:6349) ... .rw-sheet-scrim + .rw-sheet > .rw-sheet-head (.rw-sheet-grabber, .rw-sheet-bar > spacer + .rw-sheet-title + IconButton glass, .rw-sheet-divider) + .rw-sheet-body (body copy .rw-sheet-text) + .rw-sheet-foot
    Result and Notes sheets (Figma 349:3528, 349:3793; Han approved 2026-10-23):
@@ -376,6 +379,34 @@ button.rw-input-row{cursor:pointer;}
 .rw-select-option>:last-child{color:var(--rw-color-border-selected);}   /* Check N600 on the chosen option */
 .rw-field-note{margin:0;padding:0 var(--rw-field-inset);font:var(--rw-type-meta);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
 .rw-field-note.is-error{color:var(--rw-color-status-error);}
+/* Auth pages (Log In, Sign Up, Forgot Password, Check Email): no Figma component, built from V2 tokens (pending Han 2026-10-25).
+   Centred heading, then the first component 40px below, then 24px between components (same rhythm as .rw-page). */
+.rw-auth{display:flex;flex-direction:column;gap:var(--rw-page-gap);padding-top:56px;}
+.rw-auth-head{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:0 12px;margin-bottom:calc(var(--rw-page-head-gap) - var(--rw-page-gap));}
+.rw-auth-head>.rw-icon-badge{margin-bottom:8px;}
+.rw-auth-head>.rw-hint{line-height:1.45;}
+.rw-auth-strong{color:var(--rw-text-primary);overflow-wrap:anywhere;}
+.rw-auth-foot{margin:0;text-align:center;font:var(--rw-type-hint);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
+.rw-auth-end{display:flex;justify-content:flex-end;margin-top:-8px;}   /* Forgot password, 16px under the fields */
+/* Text link: SemiBold 14px N800 inside N400 text */
+.rw-text-link{position:relative;display:inline;margin:0;padding:0;border:none;background:none;font:var(--rw-type-button);line-height:inherit;letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);cursor:pointer;}
+.rw-text-link::after{content:"";position:absolute;inset:-12px -4px;}
+.rw-text-link:active{opacity:.6;}
+/* "or" divider: two N150 lines (the tile divider) around a 12px N400 caption */
+.rw-or{display:flex;align-items:center;gap:16px;font:var(--rw-type-caption);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
+.rw-or::before,.rw-or::after{content:"";flex:1;height:1px;background:var(--rw-color-divider);}
+/* Social sign-in: the primary button's size and shape on the tile fill; brand logo 18px + N800 label */
+.rw-btn-social{width:100%;height:var(--rw-btn-primary-h);border-radius:999px;padding:1px 24px;background:var(--rw-surface-fill);color:var(--rw-text-primary);font:var(--rw-type-button);letter-spacing:var(--rw-tracking);}
+.rw-btn-social:active{background:var(--rw-color-surface-highlight);}
+.rw-btn-stack{display:flex;flex-direction:column;gap:12px;}
+/* Checkbox: Highlight Fill square; checked adds the selected outline + Check, both N600 */
+.rw-agree{display:flex;align-items:flex-start;gap:12px;font:var(--rw-type-body);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
+.rw-checkbox{position:relative;width:20px;height:20px;margin-top:0.5px;flex-shrink:0;padding:0;border:none;border-radius:6px;background:var(--rw-color-surface-highlight);color:var(--rw-color-text-on-selected);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.rw-checkbox::after{content:"";position:absolute;inset:-12px;}
+.rw-checkbox.is-on{box-shadow:inset 0 0 0 1px var(--rw-color-border-selected);}
+/* Alert (form-level error): tile with CircleAlert 18 in the error red + 14px N800 text */
+.rw-alert{display:flex;align-items:center;gap:12px;padding:var(--rw-tile-pad);border-radius:var(--rw-input-row-radius);font:var(--rw-type-body);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);}
+.rw-alert>:first-child{flex-shrink:0;display:flex;color:var(--rw-color-status-error);}
 .rw-search>:first-child{flex-shrink:0;}
 .rw-search-input{flex:1;min-width:0;height:100%;padding:0 var(--rw-search-input-pad-x);border:none;outline:none;background:transparent;font:var(--rw-type-name);letter-spacing:var(--rw-tracking);color:var(--rw-search-fg);caret-color:var(--rw-search-caret);}
 .rw-search-input::placeholder{color:var(--rw-placeholder-text);opacity:1;}
