@@ -586,7 +586,7 @@ button:disabled{cursor:default !important;}
                   <p class="rw-key-title">{{ grow.keyTitle }}</p>
                   <p class="rw-key-body">{{ grow.keyBody }}</p>
                 </div>
-                <div class="rw-key-chart" role="img" aria-label="{{ grow.keyBody }}" data-kind="{{ grow.keyChart.kind }}" data-values="{{ grow.keyChart.values }}" data-quote="{{ grow.keyChart.quote }}" data-split="{{ grow.keyChart.split }}"></div>
+                <div class="rw-key-chart" role="img" aria-label="{{ grow.keyBody }}" data-kind="{{ grow.keyChart.kind }}" data-values="{{ grow.keyChart.values }}" data-quote="{{ grow.keyChart.quote }}" data-split="{{ grow.keyChart.split }}" data-xlabels="{{ grow.keyChart.xlabels }}"></div>
               </div>
             </div>
             </sc-if>
@@ -3775,7 +3775,7 @@ class Component extends DCLogic {
         const zhKey = this.lang() === 'zh';
         if (!this.live()) v.grow = { ...sample, keyTitle: zhKey ? '网前这几场一直是亮点' : 'Net play keeps standing out',
           keyBody: zhKey ? '最近6场里有5场你提到网前打得好，最近3场每场都有。' : 'You noted net play winning you points in 5 of your last 6 matches, including all of the last 3.',
-          keyChart: { kind: 'strip', values: '1,1,0,1,1,1', quote: '', split: '' }, keySplit: true, keyLegacy: false,
+          keyChart: { kind: 'strip', values: '1,1,0,1,1,1', quote: '', split: '', xlabels: '' }, keySplit: true, keyLegacy: false,
           keyCurrent: '0%', keyPrevious: '0%', showKeyChart: false, showKey: true, showBuild: true, showStrengths: true, showOpps: true, showDoubles: true, empty: null };
         else if (s.aiGrow) {
           const ai = s.aiGrow;
@@ -3796,7 +3796,8 @@ class Component extends DCLogic {
           const legacyPct = key && !kc && key.chart && typeof key.chart.current_percent === 'number';
           v.grow = {
             keyTitle: key ? key.title : '', keyBody: key ? key.body : '',
-            keyChart: kc ? { kind: kc.pattern, values: kc.values.join(','), quote: (kc.quote || []).join(','), split: kc.split != null ? String(kc.split) : '' } : { kind: '', values: '', quote: '', split: '' },
+            // xLabels: a strip linked to results writes W/L (胜/负) under each match instead of 1..6.
+            keyChart: kc ? { kind: kc.pattern, values: kc.values.join(','), quote: (kc.quote || []).join(','), split: kc.split != null ? String(kc.split) : '', xlabels: Array.isArray(kc.xLabels) ? kc.xLabels.join('|') : '' } : { kind: '', values: '', quote: '', split: '', xlabels: '' },
             keySplit: !!kc, keyLegacy: !!key && !kc,
             keyCurrent: legacyPct ? Math.max(0, Math.min(100, key.chart.current_percent)) + '%' : '0%',
             keyPrevious: legacyPct ? Math.max(0, Math.min(100, key.chart.previous_percent)) + '%' : '0%',
@@ -3815,7 +3816,7 @@ class Component extends DCLogic {
           const strengths = top(wins, 'wt').map(([t, n]) => ({ name: this.tagLabel(t), tag: t, signal: this.t('workingIn', { n, total: wins.length }), action: '' }));
           const opps = [...new Set(all.flatMap(m => m.opps).filter(id => !this.unknown(id)))].map(id => ({ id, r: this.vs(id), note: all.find(m => m.on && m.opps.includes(id)) }))
             .filter(o => o.note && this.nm(o.id)).sort((a, b) => a.r.pct - b.r.pct || b.r.n - a.r.n).slice(0, 2).map(o => op(o.id, o.note.on));
-          v.grow = { keyTitle: '', keyBody: '', keyChart: { kind: '', values: '', quote: '', split: '' }, keySplit: false, keyLegacy: false, keyCurrent: '0%', keyPrevious: '0%', showKeyChart: false, build, strengths, opps, doubles: [], showKey: false, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: false,
+          v.grow = { keyTitle: '', keyBody: '', keyChart: { kind: '', values: '', quote: '', split: '', xlabels: '' }, keySplit: false, keyLegacy: false, keyCurrent: '0%', keyPrevious: '0%', showKeyChart: false, build, strengths, opps, doubles: [], showKey: false, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: false,
             empty: !build.length && !strengths.length && !opps.length && empty('no-insights', this.t('notEnough'), this.t('notEnoughBody')) };
         }
       }

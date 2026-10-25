@@ -66,17 +66,10 @@ Deno.serve(async req => {
     if (!recent.length) return Response.json({insight:null,cached:false},{headers:CORS});
 
     const names:any = Object.fromEntries((players || []).map((p:any)=>[p.id,p.name]));
-    const opponents:any = {};
-    // "unknown:<heard name>" is a voice-logged opponent nobody identified: the match still counts everywhere else,
-    // but it never becomes an opponent profile with notes or weaknesses.
-    for (const m of recent) for (const pid of (m.opps || []).filter((p:string) => !String(p).startsWith("unknown:"))) {
-      const o = opponents[pid] ||= {player_id:pid,name:names[pid] || "Opponent",wins:0,losses:0,notes:[],cost:{}};
-      const r = resultOf(m.games); if (r === "win") o.wins++; else if (r === "loss") o.losses++;
-      if (m.opp_notes) o.notes.push(safe(m.opp_notes));
-      for (const t of (m.lt || [])) o.cost[t]=(o.cost[t]||0)+1;
-    }
+    // Opponents the player wrote notes about, with only those notes (no record: it says nothing about how they play).
+    const opponents = G.opponentFacts(recent, names);
     const six = recent.slice(0,6);
-    const doubles = recent.filter((m:any)=>m.type==="Doubles").slice(0,6);
+    const doubles = G.doublesFacts(recent);
 
     // Engine V2 evidence: everything numeric is decided here; the model only picks and words it.
     const keyCands = G.keyCandidates(recent, previous?.keyInsight?.candidate_id).slice(0,3);
@@ -92,24 +85,10 @@ Deno.serve(async req => {
       },
       patterns:{ cost_points:counts(six,"lt"), worked:counts(six,"wt") },
       key_candidates:keyCands.map((c:any)=>G.candidateFacts(c, lang)),
-      build_candidates:buildCands.map((b:any)=>({topic_id:b.topic_id,tag:b.tag,k:b.k,n:b.n,returning:b.returning})),
-      strength_candidates:strengthCands.map((b:any)=>({topic_id:b.topic_id,tag:b.tag,k:b.k,n:b.n})),
-      notes:recent.flatMap((m:any)=>[
-        m.worked?{match_id:m.id,kind:"worked",text:safe(m.worked)}:null,
-        m.lost?{match_id:m.id,kind:"cost_points",text:safe(m.lost)}:null
-      ]).filter(Boolean).slice(0,12),
-      opponents:Object.values(opponents).map((o:any)=>({
-        player_id:o.player_id,name:o.name,record:{wins:o.wins,losses:o.losses},
-        notes:o.notes.slice(0,4),
-        cost_points:Object.entries(o.cost).sort((a:any,b:any)=>b[1]-a[1]).slice(0,4).map(([tag,count])=>({tag,count}))
-      })).filter((o:any)=>o.notes.length || o.record.wins+o.record.losses>=2).slice(0,5),
-      doubles:{
-        matches:doubles.length,cost_points:counts(doubles,"lt"),strengths:counts(doubles,"wt"),
-        notes:doubles.flatMap((m:any)=>[
-          m.worked?{kind:"worked",text:safe(m.worked)}:null,
-          m.lost?{kind:"cost_points",text:safe(m.lost)}:null
-        ]).filter(Boolean).slice(0,8)
-      }
+      build_candidates:buildCands.map((b:any)=>({topic_id:b.topic_id,tag:b.tag,k:b.k,n:b.n,returning:b.returning,notes:b.notes,advice_basis:b.basis})),
+      strength_candidates:strengthCands.map((b:any)=>({topic_id:b.topic_id,tag:b.tag,k:b.k,n:b.n,notes:b.notes,advice_basis:b.basis})),
+      opponents,
+      doubles
     };
 
     const key = Deno.env.get("OPENAI_API_KEY");
@@ -119,7 +98,7 @@ Deno.serve(async req => {
 Use only supplied verified facts and player notes. Never invent scores, counts, trends, opponents, or events.
 Numbers are already computed; do not recalculate or contradict them. Treat notes as observations, not objective facts.
 Skill Tags are the player's own notes, once per match: they say a skill was mentioned, never how many mistakes or points.
-Find recurring themes across tags and free text, including Other. Prefer fewer strong insights over filler.
+Each candidate carries the notes from its own matches; use those, not notes from other matches. Prefer fewer strong insights over filler, and leave a section empty rather than pad it.
 
 VOICE AND TONE:
 - Write like a thoughtful badminton coach who noticed something useful, not like a dashboard, analyst, or performance report.
@@ -137,7 +116,7 @@ VOICE AND TONE:
 - Do not add encouragement to every sentence; keep it subtle and credible.
 
 COPY LENGTH — hard limits:
-- Key Insight: see KEY INSIGHT below (title max 7 words / 14 Chinese characters; body max 25 words / 40 Chinese characters).
+- Key Insight: see KEY INSIGHT below (title 2 lines, body 3 lines on the card).
 - Build Next evidence: max 12 words. Action: max 14 words.
 - Strength evidence: max 12 words. Action: max 14 words.
 - Opponent game plan: max 20 words.
@@ -147,19 +126,14 @@ ${G.KEY_RULES}
 
 BUILD NEXT / STRENGTHS:
 - Evidence must explain WHY the card exists, but phrase it conversationally rather than like a report.
-- Prefer human coaching language such as "Movement has still been costing you points lately" over "Cost points in 4 of your last 6 tagged matches."
 - Never quote a player note directly in evidence and never prefix with "Player note:".
-- Free-text notes may influence the recommendation, but the displayed evidence should be synthesized and concise.
 - Recommendations must be one concrete action, not a drill paragraph and not multiple clauses.
 - Strengths should acknowledge what is working without exaggerating it.
+${G.ITEM_RULES}
 
-OPPONENT PLANS:
-- Return only the plan text. Never start with the opponent's name, a colon, or "Against [name]".
-- Convert observations into one concise tactical instruction that sounds like advice from a coach.
+${G.OPPONENT_RULES}
 
-DOUBLES PLAY:
-- Describe the pattern naturally, then give one practical adjustment or habit to keep.
-- Avoid mechanical labels or report-style wording.
+${G.DOUBLES_RULES}
 
 Do not mention AI. Keep every card scannable on a phone.
 
@@ -172,7 +146,7 @@ OUTPUT LANGUAGE: write every visible string in ${lang === "zh" ? "natural Simpli
         model:"gpt-5-mini",
         input:[{role:"system",content:prompt},{role:"user",content:JSON.stringify(facts)}],
         text:{format:{type:"json_schema",name:"rallywise_grow",strict:true,
-          schema:G.modelSchema(keyCands.map((c:any)=>c.id), buildCands.map((b:any)=>b.topic_id), strengthCands.map((b:any)=>b.topic_id))}}
+          schema:G.modelSchema(keyCands.map((c:any)=>c.id), buildCands.map((b:any)=>b.topic_id), strengthCands.map((b:any)=>b.topic_id), opponents.map((o:any)=>o.player_id))}}
       })
     });
     if (!ai.ok) {
@@ -191,19 +165,12 @@ OUTPUT LANGUAGE: write every visible string in ${lang === "zh" ? "natural Simpli
     const failed = [parsed.keyInsight, ...parsed.buildNext, ...parsed.strengths].filter((x:any) => x.copy_source && x.copy_source !== "ai");
     if (failed.length) console.warn("grow copy replaced", JSON.stringify(failed.map((x:any) => [x.candidate_id || x.topic_id, x.validation?.ai_issues || x.issues])));
 
-    parsed.opponentPlans = (parsed.opponentPlans || []).map((p:any) => {
-      const o:any = Object.values(opponents).find((x:any) => x.player_id === p.player_id);
-      const name = String(o?.name || "").trim();
-      let plan = String(p.plan || "").trim();
-      if (name) {
-        const lower = plan.toLowerCase();
-        const prefix1 = (name + ":").toLowerCase();
-        const prefix2 = ("against " + name + ":").toLowerCase();
-        if (lower.startsWith(prefix1)) plan = plan.slice(prefix1.length).trim();
-        else if (lower.startsWith(prefix2)) plan = plan.slice(prefix2.length).trim();
-      }
-      return { ...p, plan };
-    });
+    // Opponent plans and Doubles Play are checked against the notes they came from; one that isn't is left out.
+    const plans = G.finalizeOpponents(parsed.opponentPlans, opponents, lang);
+    const droppedPlans = plans.filter((p:any) => p.dropped);
+    if (droppedPlans.length) console.warn("opponent plans dropped", JSON.stringify(droppedPlans));
+    parsed.opponentPlans = plans.filter((p:any) => !p.dropped);
+    parsed.doublesPlay = G.finalizeDoubles(parsed.doublesPlay, doubles, lang);
 
     const {error:ce} = await sb.from("ai_insights").upsert({
       user_id:uid,input_fingerprint:fp,insight_json:parsed,generated_at:new Date().toISOString()

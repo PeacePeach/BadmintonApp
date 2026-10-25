@@ -17,12 +17,15 @@
 //   compare  a count compared between your last 3 matches and the 3 before (games won, close games won)
 //   strip    whether a self-reported observation was noted in each match (0/1), in order
 
-export const ENGINE_VERSION = '2026-10-25-v6';
+export const ENGINE_VERSION = '2026-10-26-v7';
 export const SKILL_TAGS = ['Serve', 'Return', 'Net', 'Smash', 'Defence', 'Footwork', 'Placement'];
 const WINDOW = 10;     // latest matches the engine reads
 const NOTE_N = 6;      // matches with notes in a Skill Tag window
 const TREND_N = 6;     // scored matches in the margin trend
 const CLOSE = 3;       // a close game is decided by 3 points or fewer (as on Insights Performance)
+// Quality bar (Han, 2026-10-26): a candidate below it is not worth a Key Insight, and with none above it the tile
+// says there is not enough evidence. Quality is the ranking score without the "same as last time" discount.
+export const KEY_MIN_QUALITY = 0.4;
 
 // Tag labels. Titles use the app's tag names (tag_* in the app); sentences use a lower-case noun phrase.
 const TAG = {
@@ -50,6 +53,8 @@ export function matchResult(m) {
   return w > l ? 'win' : l > w ? 'loss' : w ? 'even' : null;
 }
 const hasNotes = m => (m.wt || []).length > 0 || (m.lt || []).length > 0;
+// The player's free-text notes in these matches (What Worked = worked, What Cost Points = lost), latest last, at most 4.
+const notesFor = (ms, fields = ['lost', 'worked']) => ms.flatMap(m => fields.map(f => String(m[f] || '').trim().slice(0, 300)).filter(Boolean)).slice(-4);
 
 // Oldest -> latest, at most WINDOW. Input rows are the matches table (date, created_at), newest first or any order.
 export function normalize(matches) {
@@ -78,6 +83,8 @@ export function focusTopic(f, previous) {
   const hit = items.find(x => x && x.topic_id && norm(x.name) === n);
   return hit ? hit.topic_id : topicKey(f.title);
 }
+
+const CJK = /[㐀-鿿]/;
 
 // ---- Small statistics ----
 const round1 = v => Math.round(v * 10) / 10;
@@ -133,7 +140,7 @@ function trendCandidate(chron) {
     allowed: [Math.abs(a), Math.abs(b), values.length],
     chart: { pattern: 'trend', values, quote: [0, values.length - 1], unit: '' },
     evidence: { metric: 'avg_point_margin_per_game', unit: 'points', window: { matches: values.length, skipped: skippedIn(chron, ms, m => scored(m).length > 0) }, rho: round1(rho), delta },
-    match_ids: ms.map(m => m.id),
+    match_ids: ms.map(m => m.id), notes: notesFor(ms),
     significance: Math.min(1, 0.6 + Math.abs(delta) / 20), actionability: 0.8
   };
 }
@@ -160,21 +167,27 @@ function compareCandidate(chron, kind) {
     numbers: { r, rn, p, pn }, required: [r, p], allowed: [r, rn, p, pn, 3],
     chart: { pattern: 'compare', values: rows.map(x => x.won), split: 3, unit: '' },
     evidence: { metric: close ? 'close_games_won' : 'games_won', unit: 'games', window: { matches: 6, recent: 3, previous: 3, skipped: skippedIn(chron, ms, keep) } },
-    match_ids: ms.map(m => m.id),
+    match_ids: ms.map(m => m.id), notes: notesFor(ms),
     significance: Math.min(1, 0.6 + Math.abs(diff) * 0.6), actionability: close ? 0.75 : 0.6, lowNovelty: !close
   };
 }
 
 // A Skill Tag noted (or not) in each of the latest 6 matches with notes. Shapes, by what the 0/1 row says:
 //   recurring  noted in 4+ of 6 and in 2+ of the last 3        (still happening)
-//   fading     noted in 2+ of the 3 before and at least 2 fewer of the last 3   e.g. [1,1,1,0,1,0]
 //   emerging   noted in 2+ of the last 3 and at least 2 fewer of the 3 before
-// "What worked" fading is never a candidate: fewer positive mentions doesn't show anything got worse.
+// Fewer mentions is never a candidate on either side (Han, 2026-10-26): a cost tag the player stopped picking
+// (e.g. [1,1,1,0,1,0]) is an absence of notes, not proof the problem went away, and fewer "what worked" mentions
+// don't show anything got worse.
+// A recurring cost tag is "linked" to results when it was noted in 2+ of the losses in that window, in at least
+// two thirds of them, and losses were at least half again as common with it as without it. The strip then shows
+// each match's result under its pill (xLabels), so the chart carries what the copy says.
+// An emerging "what worked" tag that cost points in 2+ of the 3 matches before is a turnaround (ranked higher).
 // A tag noted on both sides of the same match in half or more of its matches is mixed, and not used.
 function tagCandidates(chron) {
   const noted = chron.filter(hasNotes), win = noted.slice(-NOTE_N);
   if (win.length < NOTE_N) return [];
   const skipped = skippedIn(chron, win, hasNotes);
+  const res = win.map(m => matchResult(m)), losses = res.filter(r => r === 'loss').length;
   const out = [];
   for (const side of ['cost', 'worked']) for (const tag of SKILL_TAGS) {
     const f = side === 'cost' ? 'lt' : 'wt', o = side === 'cost' ? 'wt' : 'lt';
@@ -185,97 +198,116 @@ function tagCandidates(chron) {
     const p = sum(values.slice(0, 3)), r = sum(values.slice(3));
     let shape = null;
     if (k >= 4 && r >= 2) shape = 'recurring';
-    else if (p >= 2 && p - r >= 2) shape = 'fading';
     else if (r >= 2 && r - p >= 2) shape = 'emerging';
-    if (!shape || (side === 'worked' && shape === 'fading')) continue;
-    const strength = shape === 'recurring' ? (k >= 5 ? 'strong' : 'moderate') : Math.abs(p - r) === 3 ? 'strong' : 'moderate';
+    if (!shape) continue;
+    const lt = values.filter((v, i) => v && res[i] === 'loss').length, untagged = NOTE_N - k;
+    const linked = side === 'cost' && shape === 'recurring' && lt >= 2 && lt * 3 >= losses * 2 && untagged > 0 &&
+      lt / k - values.filter((v, i) => !v && res[i] === 'loss').length / untagged >= 0.5;
+    const turnaround = side === 'worked' && shape === 'emerging' && sum(win.slice(0, 3).map(m => ((m.lt || []).includes(tag) ? 1 : 0))) >= 2;
+    const strength = shape === 'recurring' ? (k >= 5 || linked ? 'strong' : 'moderate') : Math.abs(p - r) === 3 ? 'strong' : 'moderate';
     const latest = values[values.length - 1];
+    const numbers = linked ? { k, n: NOTE_N, r, p, l: losses, lt } : { k, n: NOTE_N, r, p };
     out.push({
       id: `strip:${side}:${tag}:${shape}`, family: 'tag', pattern: 'strip', source: 'notes_tags', tag, side, shape,
-      direction: shape === 'fading' ? 'down' : 'up', strength,
-      numbers: { k, n: NOTE_N, r, p }, required: shape === 'recurring' ? [k, NOTE_N] : [r, p], allowed: [k, NOTE_N, r, p, 3],
-      chart: { pattern: 'strip', values, unit: '' },
+      direction: 'up', strength, linked, turnaround,
+      numbers, required: linked ? [lt, losses] : shape === 'recurring' ? [k, NOTE_N] : [r, p],
+      allowed: linked ? [k, NOTE_N, r, p, 3, losses, lt] : [k, NOTE_N, r, p, 3],
+      chart: { pattern: 'strip', values, unit: '', ...(linked ? { results: res.map(x => (x === 'loss' ? 'L' : x === 'win' ? 'W' : '')) } : {}) },
       evidence: { metric: side === 'cost' ? 'tag_noted_cost_points' : 'tag_noted_worked', unit: 'matches', window: { matches: NOTE_N, recent: 3, previous: 3, skipped } },
       match_ids: win.map(m => m.id),
-      significance: shape === 'recurring' ? 0.55 + k * 0.07 : 0.6 + Math.abs(p - r) * 0.1,
-      actionability: side === 'cost' ? (shape === 'fading' ? 0.9 : 1.0) : 0.7,
-      // Recurring tags are also what Build Next / Strengths show, so they are less of a discovery than a change.
-      novelty: shape === 'recurring' ? 0.75 : 1,
-      recentSupport: shape === 'fading' ? latest === 0 : latest === 1
+      notes: notesFor(win.filter((m, i) => values[i]), side === 'cost' ? ['lost'] : ['worked']),
+      significance: Math.min(1, (shape === 'recurring' ? 0.55 + k * 0.07 : 0.6 + Math.abs(p - r) * 0.1) + (linked ? 0.15 : 0) + (turnaround ? 0.1 : 0)),
+      actionability: side === 'cost' ? 1.0 : 0.7,
+      // Recurring tags are also what Build Next / Strengths show, so they are less of a discovery than a change,
+      // unless they line up with the results.
+      novelty: shape === 'recurring' && !linked ? 0.75 : 1,
+      recentSupport: latest === 1
     });
   }
   return out;
 }
 
 // Ranking: significance x confidence x actionability x novelty x recency. Ties: objective evidence, then id.
-//   significance   size of the change or how often it was noted
+//   significance   size of the change or how often it was noted (+ when a cost tag lines up with the losses)
 //   confidence     strong 1, moderate 0.75
-//   actionability  cost-points tag 1 (fading 0.9), score trend 0.8, close games 0.75, worked tag 0.7, games won 0.6
+//   actionability  cost-points tag 1, score trend 0.8, close games 0.75, worked tag 0.7, games won 0.6
 //   novelty        0.6 when it is the same insight as last time; games won 0.8 (Performance already shows form);
-//                  recurring tags 0.75 (Build Next / Strengths already list them)
+//                  recurring tags 0.75 unless linked to results (Build Next / Strengths already list them)
 //   recency        0.85 when the latest match doesn't support it
+// quality is the same score without the "same as last time" discount; below KEY_MIN_QUALITY a candidate is dropped.
 export function rankCandidates(cands, previousId) {
   for (const c of cands) {
     const conf = c.strength === 'strong' ? 1 : 0.75;
-    const novelty = (c.id === previousId ? 0.6 : 1) * (c.lowNovelty ? 0.8 : 1) * (c.novelty || 1);
+    const novelty = (c.lowNovelty ? 0.8 : 1) * (c.novelty || 1);
     const recency = c.recentSupport === false ? 0.85 : 1;
-    c.score = Math.round(c.significance * conf * c.actionability * novelty * recency * 1000) / 1000;
+    c.quality = Math.round(c.significance * conf * c.actionability * novelty * recency * 1000) / 1000;
+    c.score = Math.round(c.quality * (c.id === previousId ? 0.6 : 1) * 1000) / 1000;
   }
   return cands.sort((a, b) => b.score - a.score || (a.source === 'scores' ? -1 : 0) - (b.source === 'scores' ? -1 : 0) || a.id.localeCompare(b.id));
 }
 
-export function keyCandidates(matches, previousId) {
+// The Key Insight candidates worth showing, best first. all: true keeps the ones under the quality bar (tests, reports).
+export function keyCandidates(matches, previousId, { all = false } = {}) {
   const chron = normalize(matches);
-  const all = [trendCandidate(chron), compareCandidate(chron, 'games'), compareCandidate(chron, 'close'), ...tagCandidates(chron)].filter(Boolean);
-  return rankCandidates(all, previousId);
+  const sides = topicSides(matches); // a tag that belongs on the other side (see Build Next) is not a Key Insight either
+  const found = [trendCandidate(chron), compareCandidate(chron, 'games'), compareCandidate(chron, 'close'),
+    ...tagCandidates(chron).filter(c => !sides[c.tag] || sides[c.tag] === c.side)].filter(Boolean);
+  const ranked = rankCandidates(found, previousId);
+  return all ? ranked : ranked.filter(c => c.quality >= KEY_MIN_QUALITY);
 }
 
 // ---- Key Insight template copy (also the fallback when AI copy fails validation) ----
+// Written as a coach's takeaway (Han, 2026-10-26): the title says what it means for the player, the body gives the
+// evidence in plain words. Self-reported evidence always says "you noted" / 「你记下」.
+const margin = (v, lang) => {
+  const x = Number.isInteger(v) ? String(Math.abs(v)) : Math.abs(v).toFixed(1);
+  if (lang === 'zh') return v > 0 ? `赢${x}分` : v < 0 ? `输${x}分` : '打平';
+  return v > 0 ? `winning by ${x}` : v < 0 ? `losing by ${x}` : 'level';
+};
 export function keyTemplate(c, lang) {
   const P = phr(lang, c), N = c.numbers;
   if (c.family === 'trend') {
     const up = c.direction === 'up', strong = c.strength === 'strong';
     if (lang === 'zh') return {
-      title: up ? (strong ? '最近比分越打越好' : '比分在慢慢变好') : (strong ? '最近比分一直在往下走' : '最近比分有点下滑'),
-      body: `${P.lastN(N.n)}，你每局的平均分差从${signed(N.a)}分变成了${signed(N.b)}分。`
+      title: up ? (strong ? '最近比分越打越好' : '比分在慢慢往上走') : (strong ? '最近比分一直在往下走' : '最近比分有点往下走'),
+      body: `${P.lastN(N.n)}，你平均每局从${margin(N.a, lang)}变成了${margin(N.b, lang)}。`
     };
     return {
-      title: up ? (strong ? 'Your scores are heading up' : 'Your scores are trending up') : (strong ? 'Your scores have been slipping' : 'Your scores have dipped lately'),
-      body: `From ${signed(N.a)} to ${signed(N.b)} ${pts(N.b)} per game over ${P.lastN(N.n)}.`
+      title: up ? (strong ? 'Your scores are on the rise' : 'Your scores are edging up') : (strong ? 'Your scores have been slipping' : 'Your scores have dipped a little'),
+      body: `On average, from ${margin(N.a, lang)} to ${margin(N.b, lang)} ${pts(N.b || N.a)} a game.`
     };
   }
   if (c.family === 'compare') {
     const close = c.id === 'compare:close_games', up = c.direction === 'up';
     if (lang === 'zh') {
       return {
-        title: close ? (up ? '关键局最近赢得多了' : '关键局最近赢得少了') : (up ? '最近赢的局多了' : '最近赢的局少了'),
-        body: close ? `${P.last3}打了${N.rn}个关键局，赢了${N.r}个；${P.prev3}${N.pn}个赢了${N.p}个。`
-          : `${P.last3}打了${N.rn}局赢了${N.r}局，${P.prev3}${N.pn}局赢了${N.p}局。`
+        title: close ? (up ? '关键局最近赢得多了' : '关键局最近赢得少了') : (up ? '最近赢下的局多了' : '最近赢下的局少了'),
+        body: close ? `${P.last3}的${N.rn}个关键局赢了${N.r}个，${P.prev3}${N.pn}个${up ? '只' : ''}赢了${N.p}个。`
+          : `${P.last3}打了${N.rn}局赢了${N.r}局，${P.prev3}${N.pn}局${up ? '只' : ''}赢了${N.p}局。`
       };
     }
     const g = close ? 'close games' : 'games';
     return {
-      title: close ? (up ? "You're winning more close games" : "You're losing more close games") : (up ? "You're winning more games lately" : "You've won fewer games lately"),
-      body: `You won ${N.r} of ${N.rn} ${g} in ${P.last3}, ${up ? 'up' : 'down'} from ${N.p} of ${N.pn}.`
+      title: close ? (up ? "You're winning more of the tight games" : 'Tight games have been slipping away') : (up ? 'More games are going your way' : 'Fewer games are going your way'),
+      body: `You won ${N.r} of ${N.rn} ${g} in ${P.last3.replace(/ matches$/, '')}, after ${N.p} of ${N.pn} before.`
     };
   }
-  const T = tagTitle(lang, c.tag), w = tagWord(lang, c.tag), cost = c.side === 'cost';
+  const T = tagTitle(lang, c.tag), w = tagWord(lang, c.tag), cost = c.side === 'cost', recurring = c.shape === 'recurring';
   if (lang === 'zh') {
-    const what = cost ? `${w}丢分` : `${w}打得好`;
-    if (c.shape === 'recurring') return { title: cost ? `${T}问题这几场反复出现` : `${T}这几场一直是亮点`, body: `${P.lastN(N.n)}里有${N.k}场你提到${what}，${P.last3}${N.r === 3 ? '每场都有' : `就有${N.r}场`}。` };
-    if (c.shape === 'fading') return { title: `最近提到${T}丢分少了`,
-      body: `${P.last3}${N.r === 0 ? '都没提到' : `只有${N.r}场提到`}${what}，${P.prev3}${N.p === 3 ? '每场都提到了' : `有${N.p}场`}。` };
-    return { title: cost ? `${T}问题最近冒出来了` : `最近常提到${T}打得好`,
-      body: `${P.last3}有${N.r}场提到${what}，${P.prev3}${N.p === 0 ? '都没提到' : `只有${N.p}场`}。` };
+    const what = cost ? `${w}丢分` : `${w}帮你得分`;
+    if (c.linked) return { title: `输球时常有${T}问题`, body: `${P.lastN(N.n)}输了${N.l}场，其中${N.lt === N.l ? '每场你都' : `${N.lt}场你`}记下了${what}。` };
+    if (recurring) return { title: cost ? `${T}还在让你丢分` : `${T}是你最近的得分点`,
+      body: `${P.lastN(N.n)}有${N.k}场你记下${what}${cost ? `，${P.last3}${N.r === 3 ? '场场都有' : `有${N.r}场`}` : ''}。` };
+    return { title: cost ? `${T}最近开始丢分了` : `${T}开始帮你得分了`,
+      body: `${P.last3}有${N.r}场你记下${what}，${P.prev3}${N.p === 0 ? '都没有' : `只有${N.p}场`}。` };
   }
-  // The title names the skill; the body says what the strip counts (Han: title 2 lines, body 3).
-  const what = cost ? 'Noted as costing points' : 'Noted as winning points';
-  if (c.shape === 'recurring') return { title: cost ? `${T} keeps coming up` : `${T} keeps standing out`,
-    body: `${what} in ${N.k} of ${P.lastN(N.n)}.` };
-  if (c.shape === 'fading') return { title: `${T} is coming up less`,
-    body: `${what} in ${N.r === 0 ? 'none' : N.r} of ${P.last3}, down from ${N.p}.` };
-  return { title: cost ? `${T} has started coming up` : `${T} is starting to click`,
-    body: `${what} in ${N.r} of ${P.last3}, up from ${N.p === 0 ? 'none' : N.p}.` };
+  if (c.linked) return { title: `${T} shows up in your losses`,
+    body: `You noted it in ${N.lt === N.l ? `all ${N.l}` : `${N.lt} of the ${N.l}`} losses in ${P.lastN(N.n)}.` };
+  if (recurring) return cost
+    ? { title: `${T} is still costing you points`, body: `You noted it in ${N.k} of ${P.lastN(N.n)}, ${N.r === 3 ? 'all 3' : N.r} of the last 3.` }
+    : { title: `${T} is working for you`, body: `You noted it winning points in ${N.k} of ${P.lastN(N.n)}.` };
+  return { title: cost ? `${T} has started to cost you` : `${T} is starting to pay off`,
+    body: `You noted it in ${N.r} of ${P.last3.replace(/ matches$/, '')}, ${N.p === 0 ? 'none' : N.p} in the 3 before.` };
 }
 
 // ---- Fit: lines on the Key Insight tile ----
@@ -310,6 +342,57 @@ export function lineCount(text, size, width = KEY_FIT.width) {
 }
 export const fits = ({ title, body }) => lineCount(title, KEY_FIT.title.size) <= KEY_FIT.title.lines && lineCount(body, KEY_FIT.body.size) <= KEY_FIT.body.lines;
 
+// ---- Grounding: specific details must come from the player's own notes ----
+// Han (2026-10-26): never invent a cause, technique, weakness or match situation. A copy that names one of these
+// concepts (in either language) must have it in the notes it was written from; the notes may be in the other
+// language, so each concept has English and Chinese forms.
+const CONCEPTS = {
+  backhand: [/backhand/i, /反手/], forehand: [/forehand/i, /正手/],
+  lift: [/\blift(s|ed|ing)?\b/i, /挑球|挑后场|挑高/], clear: [/\bclears?\b/i, /高远球|打高远/],
+  drop: [/\bdrop ?shots?\b|\bdrops\b/i, /吊球|吊网/], drive: [/\bdrives?\b|\bdriving\b/i, /平抽|抽挡/],
+  push: [/\bpush(es|ed|ing)?\b/i, /推球|推后场/], kill: [/\bnet kills?\b|\bkill(s|ed|ing)? (it|the shuttle)\b/i, /扑球|扑杀/],
+  shortServe: [/short serves?/i, /发小球|发短球|发网前/], longServe: [/(long|high|flick) serves?/i, /发高远|发后场|发平快/],
+  grip: [/\bgrip/i, /握拍/], wrist: [/\bwrist/i, /手腕/], splitStep: [/split[- ]?step/i, /启动步|垫步|分腿/],
+  rotation: [/\brotat/i, /轮转/], rearCourt: [/rear ?court|back ?court|baseline/i, /后场|底线/],
+  body: [/\bbody (shots?|smash(es)?)\b|at the body/i, /追身/], crossCourt: [/cross[- ]?court/i, /对角/], straight: [/\bstraight\b/i, /直线/],
+  longRally: [/long rall/i, /多拍|长回合|相持/], endgame: [/deuce|game point|end of (the )?game|closing (out|points)|big points/i, /关键分|局末|赛点|局点/],
+  decider: [/third game|deciding game|decider/i, /第三局|决胜局/], fitness: [/tired|stamina|fitness|fatigue/i, /体能|累了|疲劳/],
+  nerves: [/nerv|pressure|tense/i, /紧张|压力|心态/], height: [/too (high|low|flat)|\bheight\b/i, /太高|太低|过高|高度/],
+  intoNet: [/into the net|net cord|hit the net/i, /(?<![记写])下网(?!前)|挂网/], out: [/\bwent out\b|hit (it )?out\b|\bwide\b/i, /出界|打出界/],
+  sideBySide: [/side[- ]by[- ]side/i, /平行站位|左右站位/], frontBack: [/front[- ]and[- ]back|front[- ]back/i, /前后站位/],
+  pace: [/slow(ed)? (it )?down|change (of )?pace|tempo/i, /节奏|放慢/], deception: [/decept|disguise|hold the shot/i, /假动作|骗/]
+};
+export function conceptsIn(text) {
+  const t = String(text || '');
+  return Object.keys(CONCEPTS).filter(k => CONCEPTS[k].some(r => r.test(t)));
+}
+// Concepts in the copy that the notes don't have. In advice (an action or a plan) a shot or habit to try is a
+// suggestion, not a claim about what happened, so only the concepts that describe what went wrong or where
+// (a side, a situation, height, nerves...) must come from the notes there.
+const REMEDY = new Set(['lift', 'clear', 'drop', 'drive', 'push', 'kill', 'shortServe', 'longServe', 'grip', 'wrist', 'splitStep', 'rotation', 'frontBack', 'pace', 'deception', 'crossCourt', 'straight']);
+export function ungrounded(text, notes, { advice = false } = {}) {
+  const have = new Set(conceptsIn((notes || []).join(' \n ')));
+  return conceptsIn(text).filter(k => !have.has(k) && !(advice && REMEDY.has(k)));
+}
+// Copy is anchored in notes when it shares a concept or a content word with them (any language for concepts).
+const STOP_EN = new Set(['their', 'there', 'about', 'again', 'match', 'matches', 'points', 'point', 'games', 'game', 'every', 'would', 'could', 'should', 'which', 'while', 'where', 'other', 'opponent', 'shots', 'shot', 'really', 'still', 'often', 'start', 'early', 'keep', 'more', 'them', 'they', 'with', 'from', 'that', 'this', 'your', 'when', 'than', 'then', 'have']);
+const STOP_ZH = new Set(['最近', '比赛', '对手', '可以', '一下', '注意', '时候', '我们', '他们', '自己', '一点', '比较', '还是', '就是', '这个', '那个', '没有', '打得', '的时', '一些', '多打', '多用', '一直', '不要', '尽量']);
+function contentTokens(t) {
+  const s = String(t || '').toLowerCase(), out = new Set();
+  for (const w of s.match(/[a-z]{4,}/g) || []) if (!STOP_EN.has(w)) out.add(w.replace(/(ing|ed|es|s)$/, ''));
+  for (const run of s.match(/[㐀-鿿]+/g) || []) for (let i = 0; i + 1 < run.length; i++) { const b = run.slice(i, i + 2); if (!STOP_ZH.has(b)) out.add(b); }
+  return out;
+}
+export function anchored(text, notes) {
+  const n = (notes || []).join(' \n ');
+  if (conceptsIn(text).some(k => conceptsIn(n).includes(k))) return true;
+  const a = contentTokens(text), b = contentTokens(n);
+  return [...a].some(x => b.has(x));
+}
+// A note says something specific (not just "bad day" or the tag again): it names a concept, or has 4+ English
+// words / 6+ Chinese characters.
+export const specificNote = s => conceptsIn(s).length > 0 || words(s) >= 4 || zhLen(s) >= 6 && CJK.test(s);
+
 // ---- Validation ----
 const ZH_NUM = { 零: 0, 一: 1, 两: 2, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9, 十: 10 };
 const EN_NUM = { zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, both: 2 };
@@ -322,13 +405,16 @@ export function numbersIn(s) {
   for (const [, w] of t.toLowerCase().matchAll(/\b([a-z]+)\s+(?=(?:of|matches?|games?|times?|points?)\b)/g)) if (w in EN_NUM && w !== 'both') out.push(EN_NUM[w]);
   return out;
 }
-const CJK = /[㐀-鿿]/;
+// Mechanical or database wording (Han, 2026-10-26: 「网前丢分提及减少」「最近提到网前丢分少了」「有标签的比赛」
+// 「你提到杀球问题，2/6场」 "Net play is coming up less"), and "fewer mentions" read as a result.
 const BAN = {
-  en: [/\bmatch(es)?\s*\d+\s*(?:-|–|—|to)\s*\d+/i, /\bdata (shows|indicates|suggests)\b/i, /\bmetrics?\b/i, /\bstatistic/i, /\baccording to\b/i, /\bkey_metrics|metric_id|candidate|cost:|worked:|strip:|trend:/i, /\bAI\b/],
-  zh: [/第\s*[\d一二三四五六七八九十]+\s*(?:至|到|-|–|—)\s*(?:第\s*)?[\d一二三四五六七八九十]+\s*场/, /第\s*[\d一二三四五六七八九十]+\s*场/, /数据显示|呈现.*趋势|有所提升|指标|统计|根据记录/, /candidate|strip:|trend:|cost:|AI/]
+  en: [/\bmatch(es)?\s*\d+\s*(?:-|–|—|to)\s*\d+/i, /\bdata (shows|indicates|suggests)\b/i, /\bmetrics?\b/i, /\bstatistic/i, /\baccording to\b/i, /\bkey_metrics|metric_id|candidate|cost:|worked:|strip:|trend:/i, /\bAI\b/,
+    /\d+\s*\/\s*\d+/, /\btag(s|ged)?\b/i, /\bcom(es|ing) up (less|more)( often)?\b/i, /\b(mentions?|notes?) (dropped|fell|decreased|went down)\b/i, /\bfewer (mentions|notes)\b/i],
+  zh: [/第\s*[\d一二三四五六七八九十]+\s*(?:至|到|-|–|—)\s*(?:第\s*)?[\d一二三四五六七八九十]+\s*场/, /第\s*[\d一二三四五六七八九十]+\s*场/, /数据显示|呈现.*趋势|有所提升|指标|统计|根据记录/, /candidate|strip:|trend:|cost:|AI/,
+    /\d+\s*\/\s*\d+/, /标签/, /提及/, /提到.{0,8}(少了|减少|变少)/, /(丢分|问题).{0,4}(少了|减少)/]
 };
 // Self-reported evidence must sound self-reported, and may not claim measured outcomes.
-const NOTE_WORDS = { en: /\b(not(e|ed|es|ing)|mention(ed|s)?|tag(ged|s)?|com(ing|es|e) up|came up|show(ing|s|ed)? up|wr(ote|itten))\b/i, zh: /提到|记录|记下|笔记|标记|写到/ };
+const NOTE_WORDS = { en: /\b(not(e|ed|es|ing)|mention(ed|s)?|said|wr(ote|itten))\b/i, zh: /提到|记录|记下|笔记|写到|你说/ };
 const MEASURED = { en: /%|\bpercent|\brate\b|\bpoints? won\b|\bwon \d+ points|\bimprov|\bbetter\b|\bstronger\b|\bfixed\b|\bsolved\b|\bmistakes? (dropped|fell)/i, zh: /%|得分率|胜率|成功率|进步|变强|提升|改善|解决了|失误.{0,4}(次|个)/ };
 const UP_WORDS = { en: /\b(more|keeps?|again|started|starting|rising|rose|up|climb)/i, zh: /多了|多起来|越来越多|反复|又|开始/ };
 const DOWN_WORDS = { en: /\b(fewer|less|dropped|down|haven't|slipp|dipped|fell|lower)/i, zh: /少了|减少|没提到|下滑|往下|降/ };
@@ -342,7 +428,7 @@ export function checkCopy({ title, body }, c, lang) {
   if (BAN[lang].some(r => r.test(text))) issues.push('banned_phrase');
   const nums = numbersIn(text).map(Math.abs);
   if (nums.some(n => !c.allowed.includes(n))) issues.push('number_not_in_evidence');
-  if (c.required.some(n => !nums.includes(n) && !(n === 3 && /all 3|每场都/.test(text)) && !(n === 0 && /(haven't|none|都没|没提到)/i.test(text)))) issues.push('number_missing');
+  if (c.required.some(n => !nums.includes(n) && !(n === 3 && /all 3|每场都/.test(text)) && !(n === 0 && /(haven't|none|level|都没|没提到|打平)/i.test(text)))) issues.push('number_missing');
   if (c.chart.unit !== '%' && /%/.test(text)) issues.push('unit');
   if (c.family === 'trend' && !(lang === 'zh' ? /分/.test(body) : /\bpoints?\b/i.test(body))) issues.push('unit');
   if (c.direction === 'down' && c.shape !== 'recurring' && UP_WORDS[lang].test(text) && !DOWN_WORDS[lang].test(text)) issues.push('direction');
@@ -351,6 +437,7 @@ export function checkCopy({ title, body }, c, lang) {
     if (!NOTE_WORDS[lang].test(text)) issues.push('not_marked_self_reported');
     if (MEASURED[lang].test(text)) issues.push('measured_claim_from_notes');
   } else if (c.strength !== 'strong' && (lang === 'zh' ? /进步|越来越好/.test(title) : /\b(improv|better|stronger)/i.test(title))) issues.push('overclaim');
+  if (ungrounded(text, c.notes).length) issues.push('detail_not_in_notes');
   if (c.pattern === 'compare' || (c.pattern === 'strip' && c.shape !== 'recurring')) {
     const okWindow = lang === 'zh' ? /最近(有记录的)?3场/.test(body) && /之前/.test(body) : /last 3/i.test(body) && /\b(before|previous|earlier)\b|\b(up|down) from\b/i.test(body);
     if (!okWindow) issues.push('window');
@@ -368,7 +455,8 @@ export function finalizeKey(cands, ai, lang) {
   const tIssues = source === 'template' ? checkCopy(copy, c, lang) : [];
   return {
     status: 'ok', candidate_id: c.id, metric_id: c.id, title: copy.title, body: copy.body, pattern: c.pattern,
-    chart: { ...c.chart },
+    // A linked strip writes each match's result under its pill (RWKeyChart xLabels) instead of 1..6.
+    chart: { ...c.chart, ...(c.chart.results ? { xLabels: c.chart.results.map(r => (lang === 'zh' ? { W: '胜', L: '负' } : { W: 'W', L: 'L' })[r] || '·') } : {}) },
     evidence: { source: c.source, family: c.family, tag: c.tag || null, side: c.side || null, shape: c.shape, direction: c.direction, strength: c.strength,
       score: c.score, numbers: c.numbers, ...c.evidence },
     match_ids: c.match_ids, copy_source: source,
@@ -381,14 +469,33 @@ export function finalizeKey(cands, ai, lang) {
 // how often, then by the last 3, then by the latest match. Active Focus topics are left out. A completed Focus
 // topic comes back only with new evidence: 3+ matches with notes logged since it was completed, and the tag
 // noted as costing points in 2+ of them; its evidence is then counted over those matches only.
+// Strengths: Skill Tags noted as working in 2+ of the same window.
+// One side per skill (Han, 2026-10-26): a tag noted 2+ times on both sides (in different matches) would show up as a
+// strength and a weakness at once, and a Skill Tag can't tell two subskills apart, so it keeps only the side noted
+// in more of the last 3 matches (then in more of the 6, then cost points) in Build Next, Strengths and the Key Insight.
+// Each item carries the player's free-text notes from the matches behind it. advice_basis is "notes" when one of
+// them says something specific, else "general": the advice is then a plainly general drill, never a diagnosis.
 // focus: [{ topic, status: 'active' | 'completed', completed_at }]
+const noteWindow = matches => { const chron = normalize(matches), noted = chron.filter(hasNotes); return { chron, noted, win: noted.slice(-NOTE_N) }; };
+const has = (m, f, tag) => (m[f] || []).includes(tag);
+export function topicSides(matches) {
+  const { win } = noteWindow(matches), out = {};
+  for (const tag of SKILL_TAGS) {
+    const c = win.filter(m => has(m, 'lt', tag)).length, w = win.filter(m => has(m, 'wt', tag)).length;
+    if (c < 2 || w < 2) continue;
+    const l3 = win.slice(-3), rc = l3.filter(m => has(m, 'lt', tag)).length, rw = l3.filter(m => has(m, 'wt', tag)).length;
+    out[tag] = rc !== rw ? (rc > rw ? 'cost' : 'worked') : c !== w ? (c > w ? 'cost' : 'worked') : 'cost';
+  }
+  return out;
+}
+const basisOf = notes => (notes.some(specificNote) ? 'notes' : 'general');
 export function buildCandidates(matches, focus = [], max = 4) {
-  const chron = normalize(matches), noted = chron.filter(hasNotes), win = noted.slice(-NOTE_N);
+  const { chron, noted, win } = noteWindow(matches);
   if (win.length < 3) return [];
-  const out = [];
+  const sides = topicSides(matches), out = [];
   for (const tag of SKILL_TAGS) {
     const topic = 'tag:' + tag, fs = focus.filter(f => f.topic === topic);
-    if (fs.some(f => f.status === 'active')) continue;
+    if (fs.some(f => f.status === 'active') || sides[tag] === 'worked') continue;
     const done = fs.filter(f => f.status === 'completed').map(f => String(f.completed_at || '')).sort().pop();
     let list = win, returning = false;
     if (done) {
@@ -396,39 +503,57 @@ export function buildCandidates(matches, focus = [], max = 4) {
       if (after.length < 3) continue;
       list = after.slice(-NOTE_N); returning = true;
     }
-    const values = list.map(m => ((m.lt || []).includes(tag) ? 1 : 0)), k = sum(values);
+    const values = list.map(m => (has(m, 'lt', tag) ? 1 : 0)), k = sum(values);
     if (k < 2) continue;
-    const both = list.filter(m => (m.lt || []).includes(tag) && (m.wt || []).includes(tag)).length;
+    const both = list.filter(m => has(m, 'lt', tag) && has(m, 'wt', tag)).length;
     if (both * 2 >= k) continue;
+    const notes = notesFor(list.filter(m => has(m, 'lt', tag)), ['lost']);
     out.push({ topic_id: topic, tag, k, n: list.length, recent: sum(values.slice(-3)), latest: values[values.length - 1], returning,
-      skipped: returning ? 0 : chron.slice(chron.indexOf(win[0])).filter(m => !hasNotes(m)).length });
+      skipped: returning ? 0 : chron.slice(chron.indexOf(win[0])).filter(m => !hasNotes(m)).length, notes, basis: basisOf(notes) });
   }
   return out.sort((a, b) => b.k / b.n - a.k / a.n || b.recent - a.recent || b.latest - a.latest || a.tag.localeCompare(b.tag)).slice(0, max);
 }
 export function strengthCandidates(matches, max = 2) {
-  const chron = normalize(matches), win = chron.filter(hasNotes).slice(-NOTE_N);
+  const { chron, win } = noteWindow(matches);
   if (win.length < 3) return [];
-  const out = [];
+  const sides = topicSides(matches), out = [];
   for (const tag of SKILL_TAGS) {
-    const values = win.map(m => ((m.wt || []).includes(tag) ? 1 : 0)), k = sum(values);
+    if (sides[tag] === 'cost') continue;
+    const values = win.map(m => (has(m, 'wt', tag) ? 1 : 0)), k = sum(values);
     if (k < 2) continue;
-    const both = win.filter(m => (m.lt || []).includes(tag) && (m.wt || []).includes(tag)).length;
+    const both = win.filter(m => has(m, 'lt', tag) && has(m, 'wt', tag)).length;
     if (both * 2 >= k) continue;
-    out.push({ topic_id: 'tag:' + tag, tag, k, n: win.length, recent: sum(values.slice(-3)) });
+    const notes = notesFor(win.filter(m => has(m, 'wt', tag)), ['worked']);
+    out.push({ topic_id: 'tag:' + tag, tag, k, n: win.length, recent: sum(values.slice(-3)), notes, basis: basisOf(notes),
+      skipped: chron.slice(chron.indexOf(win[0])).filter(m => !hasNotes(m)).length });
   }
   return out.sort((a, b) => b.k - a.k || b.recent - a.recent || a.tag.localeCompare(b.tag)).slice(0, max);
 }
+// General advice for a skill when the notes don't say what went wrong (or right): practical, and labelled general.
+const GENERAL = {
+  en: { Serve: 'General drill: serve to a target at the start of every session.', Return: 'General drill: have a partner mix up serves while you return from a ready stance.',
+    Net: 'General drill: spend a few minutes each session on tight net shots with a partner.', Smash: "General drill: smash from a partner's feed, aiming for control before power.",
+    Defence: 'General drill: let a partner attack while you focus on getting every shot back.', Footwork: 'General drill: add a few minutes of shadow footwork to every warm-up.',
+    Placement: 'General drill: rally with a partner, aiming each shot at a chosen corner.', strength: 'General tip: keep looking for chances to use it in rallies.' },
+  zh: { Serve: '通用练法：每次练球先对着目标区发一组球。', Return: '通用练法：请搭档变换发球，你从准备姿势接发。', Net: '通用练法：每次练球花几分钟和搭档练网前小球。',
+    Smash: '通用练法：请搭档喂球练杀球，先求控制再求力量。', Defence: '通用练法：让搭档连续进攻，你专心把每一拍接回去。', Footwork: '通用练法：热身时加几分钟无球步法。',
+    Placement: '通用练法：和搭档对拉，每一拍都打向选定的角落。', strength: '通用建议：比赛里继续多找机会用它。' }
+};
+export const generalAction = (tag, kind, lang) => GENERAL[lang][kind === 'strength' ? 'strength' : tag] || '';
 export function itemTemplate(item, kind, lang) {
   const name = APP_TAG_LABELS[lang][item.tag]; // the app's own tag name, as on the Skill Tag chips
+  const action = generalAction(item.tag, kind, lang);
   if (lang === 'zh') {
     const lastN = `最近${item.skipped ? '有记录的' : ''}${item.n}场`;
-    if (kind === 'strength') return { name, signal: `${lastN}里有${item.k}场提到这里帮你得分。` };
-    return { name, evidence: item.returning ? `完成后的${item.n}场里，又有${item.k}场提到这里丢分。` : `${lastN}里有${item.k}场提到这里丢分。` };
+    if (kind === 'strength') return { name, signal: `${lastN}有${item.k}场你记下这里帮你得分。`, action };
+    return { name, evidence: item.returning ? `完成这个训练目标后的${item.n}场里，又有${item.k}场你记下这里丢分。` : `${lastN}有${item.k}场你记下这里丢分。`, action };
   }
   const lastN = `your last ${item.n} ${item.skipped ? 'noted ' : ''}matches`;
-  if (kind === 'strength') return { name, signal: `Noted as winning you points in ${item.k} of ${lastN}.` };
-  return { name, evidence: item.returning ? `Noted as costing points again in ${item.k} of ${item.n} matches since you completed it.` : `Noted as costing you points in ${item.k} of ${lastN}.` };
+  if (kind === 'strength') return { name, signal: `You noted it winning you points in ${item.k} of ${lastN}.`, action };
+  return { name, evidence: item.returning ? `You noted it costing points again in ${item.k} of ${item.n} matches since you completed it.` : `You noted it costing you points in ${item.k} of ${lastN}.`, action };
 }
+// A cause or diagnosis the notes would have to support.
+const CAUSE = { en: /\b(because|due to|caused by|the reason|that's why)\b/i, zh: /因为|导致|原因是|由于|所以才/ };
 // Checks one AI Build Next / Strengths item. Field limits match the Grow tiles.
 export function checkItem(ai, item, kind, lang) {
   const issues = [], textKey = kind === 'strength' ? 'signal' : 'evidence';
@@ -440,34 +565,103 @@ export function checkItem(ai, item, kind, lang) {
     if (BAN[lang].some(r => r.test(s))) issues.push(f + ':banned_phrase');
     if (numbersIn(s).some(n => !allowed.includes(Math.abs(n)))) issues.push(f + ':number_not_in_evidence');
     if (MEASURED[lang].test(s) && f !== 'action') issues.push(f + ':measured_claim_from_notes');
+    if (ungrounded(s, item.notes, { advice: f === 'action' }).length) issues.push(f + ':detail_not_in_notes');
+    if (item.basis !== 'notes' && f !== 'action' && CAUSE[lang].test(s)) issues.push(f + ':invented_cause');
   }
   if (lang === 'zh' ? zhLen(name) > 8 : words(name) > 4) issues.push('name:length');
   if (numbersIn(name).length) issues.push('name:number');
   if (lang === 'zh' ? zhLen(ev) > 26 : words(ev) > 16) issues.push(textKey + ':length');
   if (lang === 'zh' ? zhLen(act) > 26 : words(act) > 16) issues.push('action:length');
+  if (ev && !NOTE_WORDS[lang].test(ev)) issues.push(textKey + ':not_marked_self_reported');
   return issues;
 }
 // ai: the model's array (each item names its topic_id). Returns the stored items in engine order.
+// The action is the AI's only when the notes behind the item are specific and it passes the checks; otherwise it is
+// the general drill for that skill (advice_basis "general").
 export function finalizeItems(items, ai, kind, lang) {
   const textKey = kind === 'strength' ? 'signal' : 'evidence';
   return items.map((item, rank) => {
     const a = (ai || []).find(x => x && x.topic_id === item.topic_id), t = itemTemplate(item, kind, lang);
     const issues = a ? checkItem(a, item, kind, lang) : ['no_ai_copy'];
     const bad = f => issues.some(i => i.startsWith(f + ':')) || !a;
+    const aiAction = item.basis === 'notes' && !bad('action') && String(a.action || '').trim();
     return {
       topic_id: item.topic_id, tag: item.tag, rank: rank + 1,
       name: bad('name') ? t.name : String(a.name).trim(),
       [textKey]: bad(textKey) ? t[textKey] : String(a[textKey]).trim(),
-      action: bad('action') ? '' : String(a.action || '').trim(),
+      action: aiAction || t.action, advice_basis: aiAction ? 'notes' : 'general',
       evidence_numbers: { k: item.k, n: item.n }, returning: item.returning || false,
       copy_source: issues.length ? (a ? 'mixed' : 'template') : 'ai', issues
     };
   });
 }
 
+// ---- Opponent plans ----
+// Han (2026-10-26): a plan only for an opponent the player wrote notes about, and only from those notes. A
+// win/loss record says nothing about how someone plays, so it is not given to the model at all, and a plan that
+// isn't anchored in the notes (or adds details they don't have) is left out, never replaced by generic advice.
+// "unknown:<heard name>" is a voice-logged opponent nobody identified: no profile, no plan.
+export function opponentFacts(matches, names = {}) {
+  const by = {};
+  for (const m of [...(matches || [])].slice(0, WINDOW)) for (const pid of (m.opps || []).filter(p => p && !String(p).startsWith('unknown:'))) {
+    const note = String(m.opp_notes || '').trim().slice(0, 300);
+    if (!note) continue;
+    (by[pid] ||= { player_id: pid, name: names[pid] || 'Opponent', notes: [] }).notes.push(note);
+  }
+  return Object.values(by).map(o => ({ ...o, notes: o.notes.slice(0, 4) })).slice(0, 5);
+}
+const RECORD = { en: /\b(record|head[- ]to[- ]head|lost to (them|him|her)|beat (you|them)|you('ve| have) (lost|won|beaten)|losses|losing streak)\b/i,
+  zh: /战绩|交手|输给|赢过|胜率|连输|连赢|胜负/ };
+export function checkPlan(plan, o, lang) {
+  const issues = [];
+  if (!plan) return ['empty'];
+  if (lang === 'zh' ? !CJK.test(plan) : CJK.test(plan)) issues.push('language');
+  if (BAN[lang].some(r => r.test(plan))) issues.push('banned_phrase');
+  if (numbersIn(plan).some(n => !numbersIn(o.notes.join(' ')).includes(n))) issues.push('number_not_in_evidence');
+  if (RECORD[lang].test(plan)) issues.push('record_inference');
+  if (ungrounded(plan, o.notes, { advice: true }).length) issues.push('detail_not_in_notes');
+  if (!anchored(plan, o.notes)) issues.push('not_from_notes');
+  if (lang === 'zh' ? zhLen(plan) > 36 : words(plan) > 24) issues.push('length');
+  return issues;
+}
+export function finalizeOpponents(ai, opps, lang) {
+  return (ai || []).map(p => {
+    const o = opps.find(x => x.player_id === p.player_id);
+    if (!o) return null;
+    let plan = String(p.plan || '').trim();
+    const name = String(o.name || '').trim();
+    if (name) for (const pre of [name + ':', name + '：', 'against ' + name + ':']) if (plan.toLowerCase().startsWith(pre.toLowerCase())) { plan = plan.slice(pre.length).trim(); break; }
+    const issues = checkPlan(plan, o, lang);
+    return issues.length ? { player_id: o.player_id, dropped: issues } : { player_id: o.player_id, plan };
+  }).filter(Boolean);
+}
+
+// ---- Doubles play ----
+// Only from 3+ doubles matches with notes; each item must be anchored in those notes, with no new details.
+export function doublesFacts(matches) {
+  const ds = normalize(matches).filter(m => m.type === 'Doubles').slice(-6), noted = ds.filter(m => hasNotes(m) || m.worked || m.lost);
+  if (noted.length < 3) return null;
+  const cnt = f => { const c = {}; for (const m of ds) for (const t of (m[f] || [])) c[t] = (c[t] || 0) + 1; return Object.entries(c).sort((a, b) => b[1] - a[1]).map(([tag, count]) => ({ tag, count })); };
+  const notes = ds.flatMap(m => [m.worked ? { kind: 'worked', text: String(m.worked).trim().slice(0, 300) } : null, m.lost ? { kind: 'cost_points', text: String(m.lost).trim().slice(0, 300) } : null]).filter(Boolean).slice(-8);
+  return { matches: ds.length, cost_points: cnt('lt'), strengths: cnt('wt'), notes };
+}
+export function finalizeDoubles(ai, facts, lang) {
+  if (!facts) return [];
+  const notes = facts.notes.map(n => n.text), counts = [facts.matches, ...facts.cost_points.map(x => x.count), ...facts.strengths.map(x => x.count), 3];
+  const tags = [...facts.cost_points, ...facts.strengths].map(x => x.tag);
+  const labels = tags.flatMap(t => [APP_TAG_LABELS.en[t], APP_TAG_LABELS.zh[t], TAG.en[t] && TAG.en[t][1]]).filter(Boolean);
+  return (ai || []).filter(d => {
+    const text = `${d.name || ''} ${d.pattern || ''} ${d.action || ''}`;
+    if (!d.name || !d.pattern || (lang === 'zh' ? !CJK.test(text) : CJK.test(text))) return false;
+    if (BAN[lang].some(r => r.test(text)) || numbersIn(text).some(n => !counts.includes(n))) return false;
+    return !ungrounded(`${d.name} ${d.pattern}`, notes).length && !ungrounded(d.action || '', notes, { advice: true }).length &&
+      anchored(`${d.name} ${d.pattern}`, [...notes, ...labels]);
+  }).slice(0, 2);
+}
+
 // ---- The model's part ----
 // The strict schema is built per request so the model can only name candidates that exist.
-export function modelSchema(keyIds, buildIds, strengthIds) {
+export function modelSchema(keyIds, buildIds, strengthIds, oppIds = []) {
   const en = ids => ({ type: 'string', enum: ids.length ? ids : ['none'] });
   return {
     type: 'object', additionalProperties: false,
@@ -479,8 +673,8 @@ export function modelSchema(keyIds, buildIds, strengthIds) {
         properties: { topic_id: en(buildIds), name: { type: 'string' }, evidence: { type: 'string' }, action: { type: 'string' } } } },
       strengths: { type: 'array', maxItems: 2, items: { type: 'object', additionalProperties: false, required: ['topic_id', 'name', 'signal', 'action'],
         properties: { topic_id: en(strengthIds), name: { type: 'string' }, signal: { type: 'string' }, action: { type: 'string' } } } },
-      opponentPlans: { type: 'array', maxItems: 2, items: { type: 'object', additionalProperties: false, required: ['player_id', 'plan'],
-        properties: { player_id: { type: 'string' }, plan: { type: 'string' } } } },
+      opponentPlans: { type: 'array', maxItems: oppIds.length ? 2 : 0, items: { type: 'object', additionalProperties: false, required: ['player_id', 'plan'],
+        properties: { player_id: en(oppIds), plan: { type: 'string' } } } },
       doublesPlay: { type: 'array', maxItems: 2, items: { type: 'object', additionalProperties: false, required: ['name', 'pattern', 'label', 'action'],
         properties: { name: { type: 'string' }, pattern: { type: 'string' }, label: { type: 'string', enum: ['Try Next', 'Keep Doing'] }, action: { type: 'string' } } } }
     }
@@ -494,25 +688,39 @@ export function candidateFacts(c, lang) {
     compare: c.id === 'compare:close_games'
       ? 'Close games (decided by 3 points or fewer) won in your last 3 matches (r of rn) vs the 3 before (p of pn). Objective score data.'
       : 'Games won in your last 3 matches (r of rn) vs the 3 before (p of pn). Objective score data.',
-    tag: `Self-reported: whether the player noted ${c.tag} under "${c.side === 'cost' ? 'What Cost Points' : 'What Worked'}" in each of their latest 6 matches with notes (k of n; r = last 3, p = the 3 before). This is mentions in notes, not counted mistakes or points.`
+    tag: `Self-reported: whether the player noted ${c.tag} under "${c.side === 'cost' ? 'What Cost Points' : 'What Worked'}" in each of their latest 6 matches with notes (k of n; r = last 3, p = the 3 before). This is mentions in notes, not counted mistakes or points.` +
+      (c.linked ? ` Linked to results: of the l losses in those matches, lt had this note (the chart marks each match W/L). Say it showed up in the losses; never say it caused them.` : '')
   }[c.family];
   return { candidate_id: c.id, pattern: c.pattern, source: c.source, shape: c.shape, direction: c.direction, strength: c.strength,
-    numbers: c.numbers, skipped_matches_without_notes: c.evidence.window.skipped || 0, how_to_read: how, reference: keyTemplate(c, lang) };
+    numbers: c.numbers, linked_to_losses: !!c.linked, skipped_matches_without_notes: c.evidence.window.skipped || 0, how_to_read: how,
+    notes: c.notes || [], reference: keyTemplate(c, lang) };
 }
 
 export const KEY_RULES = `KEY INSIGHT (Engine V2):
-- The engine already found and ranked the candidates in key_candidates and computed every number. Pick ONE candidate_id (the first is the strongest; choose another only if the notes make it more specific and useful) and write its title and body. If key_candidates is empty, return null.
-- Title: the takeaway, like a coach would say it. Body: what the chart counts, over which matches, and the numbers.
-- The card is narrow (text column about 172px): the title must fit in 2 lines and the body in 3 lines. That is about 30 characters for an English title and 60 for an English body, 12 Chinese characters for a title and 34 for a body (punctuation counts). Copy that is longer is thrown away. Leave the skill name to the title and keep the body to the numbers.
-- Use ONLY the candidate's numbers. Never compute, round differently, add percentages or add other numbers. Every number you write must be one of them.
-- source "notes_tags" is self-reported: say the player noted / mentioned it (「你提到」「记录里」). Never say mistakes were counted, points were won or lost with that skill, or that a skill improved, got better or worse. A match without notes is not evidence that something didn't happen.
+- The engine already found, ranked and quality-checked the candidates in key_candidates and computed every number. Pick ONE candidate_id (the first is the strongest; choose another only if its notes make it more specific and useful) and write its title and body. If key_candidates is empty, return null: there is nothing worth highlighting yet, and that is fine.
+- Title: the takeaway in plain words, like a coach after a few matches ("Your serve is still costing you points", 「发球还在让你丢分」). Never a database description ("Net play is coming up less", 「网前丢分提及减少」, 「最近提到网前丢分少了」). Body: the evidence in one natural sentence, matching the chart.
+- The card is narrow (text column about 172px): the title must fit in 2 lines and the body in 3 lines. That is about 30 characters for an English title and 60 for an English body, 12 Chinese characters for a title and 34 for a body (punctuation counts). Copy that is longer is thrown away. Say it simply rather than squeeze it.
+- Use ONLY the candidate's numbers. Never compute, round differently, add percentages, fractions like "2/6" or other numbers. Every number you write must be one of them.
+- source "notes_tags" is self-reported: say the player noted / mentioned it (「你记下」「你提到」). Never say mistakes were counted, points were won or lost with that skill, or that a skill improved, got better or worse. Notes that stop mentioning a problem are not evidence it went away.
+- linked_to_losses: it showed up in the losses; never say it caused them.
 - source "scores" is measured: you may say games were won or the margin changed, but don't claim why.
 - Only strength "strong" may use outcome words in the title ("heading the right way"); otherwise stay measured.
-- Time words: "your last 3 matches", "the 3 before", "lately"; Chinese 「最近3场」「之前3场」「这几场」. If skipped_matches_without_notes > 0, say "noted matches" / 「有记录的」. Never "matches 1–3" or 「第1至第3场」「第N场」.
-- For compare and for a strip that changed (fading / emerging), the body must name both groups: the last 3 and the 3 before ("up from 1" / 「之前3场有1场」 is enough).
-- reference is a correct wording: improve it with a concrete detail from the notes of those matches if there is one, otherwise use it.
-BUILD NEXT / STRENGTHS (Engine V2):
-- Write one item for each of build_candidates / strength_candidates, in the same order, with its topic_id. Do not add others.
-- name: the skill in 1–4 words (Chinese max 8 characters), may be more specific from the notes ("Backhand defence"). No numbers.
-- evidence / signal: why it is here, conversationally, using only k and n if you use numbers. These are the player's own notes: "you noted", 「你提到」.
+- Time words: "your last 3 matches", "the 3 before", "lately"; Chinese 「最近3场」「之前3场」「这几场」. If skipped_matches_without_notes > 0, say "noted matches" / 「有记录的」. Never "matches 1–3", 「第1至第3场」「第N场」, "tagged" or 「标签」.
+- For compare and for an emerging strip, the body must name both groups: the last 3 and the 3 before.
+- A concrete detail (a shot, a side, a situation) only if it is in that candidate's notes. Otherwise use reference, which is a correct wording.`;
+
+export const ITEM_RULES = `BUILD NEXT / STRENGTHS (Engine V2):
+- Write one item for each of build_candidates / strength_candidates, in the same order, with its topic_id. Do not add others. The engine already removed any skill that would be both a strength and a weakness.
+- name: the skill in 1–4 words (Chinese max 8 characters). Make it more specific ("Backhand defence") only when its notes say so. No numbers.
+- evidence / signal: why it is here, conversationally, using only k and n if you use numbers. These are the player's own notes: "you noted", 「你记下」.
+- advice_basis "notes": the action may use what the notes say, one concrete thing to try. advice_basis "general": the notes don't say what went wrong, so don't guess a cause, technique, weakness or match situation anywhere in the item; the engine shows a general drill as the action.
 - If returning is true, the player completed a Focus on this before and it came up again since; say so naturally.`;
+
+export const OPPONENT_RULES = `OPPONENT PLANS:
+- opponents lists only opponents the player wrote notes about, with those notes. Give a plan only when the notes say something about how that opponent plays; otherwise leave them out. Return an empty list rather than generic advice.
+- Never infer a style or weakness from results; you don't have them. Never mention the record, wins or losses.
+- Every detail in the plan (shots, sides, situations) must come from that opponent's notes. One concise instruction, no name prefix.`;
+
+export const DOUBLES_RULES = `DOUBLES PLAY:
+- If doubles is null there are not enough doubles matches with notes: return an empty list.
+- Otherwise write at most 2 items, each from what the doubles notes and tags actually say. Describe the pattern naturally, then one practical adjustment or habit to keep. No details the notes don't have.`;
