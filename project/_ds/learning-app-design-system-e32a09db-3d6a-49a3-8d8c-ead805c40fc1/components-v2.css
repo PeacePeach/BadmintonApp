@@ -43,6 +43,7 @@
      Waveform ..................... .rw-wave[.is-live] > i (one per bar; height, opacity and delay set per bar)
      Record controls .............. .rw-rec > .rw-rec-side + .rw-rec-btn + .rw-rec-side.is-end; .rw-rec-timer (.is-live: green dot)
      InputTile (Figma 329:7089) ... .rw-surface.rw-tile.rw-input-tile[.is-warning] > .rw-input-tile-text (.rw-eyebrow + .rw-input-tile-value) + .rw-input-tile-end (.rw-flag, chevron 16px)
+   Grouped list (Settings) ...... .rw-surface.rw-group > .rw-group-row (Lucide 18 + .rw-group-row-text (.rw-group-row-label + .rw-caption) + .rw-group-row-end chevron 20); no Figma component, built from V2 tokens
    Overflow menu (⋯) ............ .rw-menu-scrim + .rw-menu > .rw-menu-item[.has-sep] (Lucide icon 24 + label); no Figma component, built from V2 tokens
    Player row (Figma 228:8835) ... .rw-surface.rw-player[.is-empty][.is-warning] > .rw-avatar | IconButton variant "add" + .rw-name + .rw-caption
    Search bar (Figma 329:7330) ... .rw-search[.is-filled] > Search icon + .rw-search-input + .rw-search-clear (states: Unfilled, Filled Inactive, Active Typing = :focus-within)
@@ -469,3 +470,16 @@
 /* Disclosure: a 48px row that shows or hides a list (Completed · n). */
 .rw-disclosure{width:100%;height:48px;padding:0;border:none;background:transparent;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font:var(--rw-type-disclosure);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
 :root[lang="zh-Hans"] .rw-disclosure{line-height:1.25;}
+
+/* Grouped list (Settings): one tile per section, rows separated by a tile divider. No Figma component; built from
+   existing V2 tokens (tile fill, radius and pad, divider N150, Highlight Fill pressed). Approved by Han 2026-10-25. */
+.rw-group{border-radius:var(--rw-tile-radius);overflow:hidden;display:flex;flex-direction:column;}
+.rw-group-row{position:relative;width:100%;min-height:56px;box-sizing:border-box;padding:var(--rw-tile-pad);display:flex;align-items:center;gap:12px;border:none;background:transparent;color:var(--rw-text-primary);text-align:left;font:inherit;cursor:pointer;transition:background var(--dur-fast) var(--ease-out);}
+.rw-group-row>:first-child{flex-shrink:0;color:var(--rw-text-primary);}
+.rw-group-row:active,.rw-group-row:focus-visible{background:var(--rw-color-surface-highlight);outline:none;}
+.rw-group-row+.rw-group-row::before{content:"";position:absolute;left:var(--rw-tile-pad);right:var(--rw-tile-pad);top:0;height:1px;background:var(--rw-color-divider);}
+.rw-group-row-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
+.rw-group-row-label{font:var(--rw-type-list-value);letter-spacing:var(--rw-tracking);}
+.rw-group-row-text>.rw-caption{color:var(--rw-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.rw-group-row-end{display:flex;flex-shrink:0;color:var(--rw-text-secondary);}
+:root[lang="zh-Hans"] .rw-group-row-label{line-height:1.25;}

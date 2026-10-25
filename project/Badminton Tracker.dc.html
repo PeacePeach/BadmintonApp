@@ -1315,29 +1315,30 @@ button:disabled{cursor:default !important;}
       </div>
     </sc-if>
 
-    <!-- SETTINGS -->
+    <!-- SETTINGS (V2): detail-page App bar, all rows in one Grouped list tile, Log Out on its own tile. -->
     <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Settings" style="display:flex;flex-direction:column;gap:20px;">
-        <div style="display:flex;align-items:center;gap:14px;">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
-          <div style="font:600 28px/1.2 var(--font-sans);">{{ tx.settings }}</div>
+      <div data-screen-label="Settings" style="display:flex;flex-direction:column;gap:24px;">
+        <div class="rw-appbar-title is-centered">
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ArrowLeft" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="44px,44px"></x-import>
+          <h1 class="rw-appbar-name">{{ tx.settings }}</h1>
         </div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <sc-for list="{{ settingsRows }}" as="r" hint-placeholder-count="4">
-            <button onClick="{{ r.open }}" style="min-height:64px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);display:flex;align-items:center;gap:12px;padding:10px;cursor:pointer;text-align:left;" style-active="transform:scale(.98);">
-              <div style="width:var(--size-icon-badge);height:var(--size-icon-badge);border-radius:50%;background:var(--icon-badge-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--icon-badge-fg);"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ r.icon }}" size="{{ 18 }}" hint-size="18px,18px"></x-import></div>
-              <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;">
-                <div style="font:500 15px/1.2 var(--font-sans);">{{ r.label }}</div>
-                <div style="font:400 12px/1.2 var(--font-sans);color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.sub }}</div>
-              </div>
-              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 24 }}" color="var(--grey-400)" style="margin-right:10px" hint-size="24px,24px"></x-import>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="rw-surface rw-group">
+            <sc-for list="{{ settingsRows }}" as="r" hint-placeholder-count="5">
+              <button type="button" class="rw-group-row" onClick="{{ r.open }}">
+                <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ r.icon }}" size="{{ 18 }}" hint-size="18px,18px"></x-import>
+                <span class="rw-group-row-text"><span class="rw-group-row-label">{{ r.label }}</span><span class="rw-caption">{{ r.sub }}</span></span>
+                <span class="rw-group-row-end"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 20 }}" hint-size="20px,20px"></x-import></span>
+              </button>
+            </sc-for>
+          </div>
+          <div class="rw-surface rw-group">
+            <button type="button" class="rw-group-row" onClick="{{ logOut }}">
+              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LogOut" size="{{ 18 }}" hint-size="18px,18px"></x-import>
+              <span class="rw-group-row-text"><span class="rw-group-row-label">{{ tx.logOut }}</span></span>
             </button>
-          </sc-for>
+          </div>
         </div>
-        <button onClick="{{ logOut }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-primary);color:var(--text-primary);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;" style-active="transform:scale(.98);">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LogOut" size="{{ 24 }}" hint-size="24px,24px"></x-import>
-          {{ tx.logOut }}
-        </button>
       </div>
     </sc-if>
 
@@ -3502,7 +3503,7 @@ class Component extends DCLogic {
     const exists = s.players.some(p => p.name.toLowerCase() === q);
     const v = {
       scrollRef: this.scrollRef, onScroll: this.onScroll, overall, greeting: this.greeting(all),
-      scrollCls: ['matches', 'insights', 'focus', 'voice', 'review', 'players', 'profile'].includes(s.screen) ? 'rw-scroll is-v2' : 'rw-scroll',
+      scrollCls: ['matches', 'insights', 'focus', 'voice', 'review', 'players', 'profile', 'settings'].includes(s.screen) ? 'rw-scroll is-v2' : 'rw-scroll',
       isMatches: s.screen === 'matches', isInsights: s.screen === 'insights', isLog: s.screen === 'log', isVoice: s.screen === 'voice' && !!s.voice, isReview: s.screen === 'review' && !!s.log, voiceRef: this.voiceRef,
       isDetail: s.screen === 'detail', isPlayers: s.screen === 'players', isPlayer: s.screen === 'player',
       isLogin: s.screen === 'login', isSignup: s.screen === 'signup', isSplash: s.screen === 'splash', skipSplash: () => this.leaveSplash(),
