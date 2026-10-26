@@ -115,7 +115,7 @@ for (const lang of process.env.ONLY ? [] : ['en', 'zh']) {
   ok(/Looking at your matches|正在分析你的比赛/.test(g.keyTitle) && !NOT_ENOUGH.test(g.keyTitle) && !g.build.length, `${lang} loading: "${g.keyTitle}" / "${g.keyBody}", no local Build Next`);
   await shot(pg, lang, '1-loading.png');
   await pg.waitForTimeout(3200); g = await grow(pg);
-  ok(g.chart && g.build.length === 3, `${lang} after loading: Key chart ${g.chart}, Build Next ${JSON.stringify(g.build)}`);
+  ok(g.chart && g.build.length === 2, `${lang} after loading: Key chart ${g.chart}, Build Next (first 2 of the engine's 3) ${JSON.stringify(g.build)}`);
   await shot(pg, lang, '2-han-records.png');
   ok(g.build[0][0] === (zh ? '杀球' : 'Smash') && (zh ? /2场你记下它丢分，2场记下它打得好/ : /costing points in 2 of your last 6 matches, and working in 2/).test(g.build[0][1]), `${lang} Han records: mixed Smash item first, with both counts`);
   ok(g.build.slice(1).every(b => (zh ? /^初步观察：/ : /^Early sign: /).test(b[1])), `${lang} Han records: the one-note items are labelled early: ${JSON.stringify(g.build.slice(1).map(b => b[1]))}`);
@@ -163,7 +163,7 @@ for (const lang of process.env.ONLY ? [] : ['en', 'zh']) {
   // 6. The model fails: the engine's sections still show (template copy).
   server.row = null; server.aiFail = true;
   pg = await open(lang, 'han'); await pg.waitForTimeout(1500); g = await grow(pg); server.aiFail = false;
-  ok(g.chart && g.build.length === 3, `${lang} model failed: Key chart ${g.chart} + Build Next still shown`);
+  ok(g.chart && g.build.length === 2, `${lang} model failed: Key chart ${g.chart} + Build Next still shown`);
   await shot(pg, lang, '7-model-failed.png'); await pg.close();
 
   // 7. v13 coverage: Han-shaped account (17 matches). Every section has cards, early ones labelled.
@@ -172,7 +172,7 @@ for (const lang of process.env.ONLY ? [] : ['en', 'zh']) {
     pg = await open(lang, 'han17'); await pg.waitForTimeout(1800); g = await grow(pg); server.aiFail = false;
     const t = zh ? { b: '下一步提升', s: '你的优势', o: '对手策略', d: '双打配合' } : { b: 'Build Next', s: 'Your Strengths', o: 'Opponent Plans', d: 'Doubles Play' };
     const n = Object.fromEntries(Object.entries(t).map(([k, v]) => [k, g.counts[v] || 0]));
-    ok(g.keyTitle && !NOT_ENOUGH.test(g.keyTitle) && n.b === 4 && n.s === 2 && n.o === 3 && n.d === 2, `${lang} han17${fail ? ' (model failed)' : ''}: Key "${g.keyTitle}", cards ${JSON.stringify(n)} (sections ${JSON.stringify(g.counts)})`);
+    ok(g.keyTitle && !NOT_ENOUGH.test(g.keyTitle) && n.b === 2 && (fail || server.row.insight_json.buildNext.length === 4) && n.s === 2 && n.o === 3 && n.d === 2, `${lang} han17${fail ? ' (model failed)' : ''}: Key "${g.keyTitle}", Build Next 2 shown of ${server.row ? server.row.insight_json.buildNext.length : '4 (not cached: model failed)'} stored, cards ${JSON.stringify(n)} (sections ${JSON.stringify(g.counts)})`);
     ok(g.opps.some(o => (zh ? /^初步判断：/ : /^Early read: /).test(o[1])) && g.doubles.every(d => (zh ? /^初步观察：/ : /^Early observation: /).test(d[1])), `${lang} han17: early opponent read and doubles observations labelled ${JSON.stringify([g.opps, g.doubles])}`);
     ok(!g.build.some(b => g.strengths.some(s => s[0] === b[0])), `${lang} han17: no skill in both Build Next and Strengths`);
     ok(!pg.errs.length, `${lang} han17: no console errors ${pg.errs.join(' | ')}`);
@@ -182,7 +182,7 @@ for (const lang of process.env.ONLY ? [] : ['en', 'zh']) {
   // as a text tile (its 12-match window has no 6-pill chart), never "No clear change yet" above 11 cards.
   server.row = null;
   pg = await open(lang, 'han17flat'); await pg.waitForTimeout(1800); g = await grow(pg);
-  ok(/Defence keeps costing you points|防守还在反复丢分/.test(g.keyTitle) && !g.chart && !g.keyNaN && g.build.length === 4, `${lang} han17flat: "${g.keyTitle}" / "${g.keyBody}", chart ${g.chart}, cards ${JSON.stringify(g.counts)}`);
+  ok(/Defence keeps costing you points|防守还在反复丢分/.test(g.keyTitle) && !g.chart && !g.keyNaN && g.build.length === 2, `${lang} han17flat: "${g.keyTitle}" / "${g.keyBody}", chart ${g.chart}, cards ${JSON.stringify(g.counts)}`);
   ok(!pg.errs.length, `${lang} han17flat: no console errors ${pg.errs.join(' | ')}`);
   await shot(pg, lang, '11-han17-no-trend.png'); await pg.close();
 }
@@ -317,7 +317,7 @@ if (!process.env.ONLY || process.env.ONLY === 'layout') for (const lang of ['en'
   await shot(pg, lang, `13-performance-${vp.width}.png`);
   await pg.getByRole('tab', { name: zh ? '提升' : 'Grow', exact: true }).first().click(); await pg.waitForTimeout(1800);
   L = await layout(pg);
-  ok(!L.over && JSON.stringify(L.perRow) === '[2,2]' && L.gaps.every(x => x === 10) && (L.navTop == null || L.lastBottom <= L.navTop), `${tag} Grow layout: Build Next rows ${JSON.stringify(L.perRow)}, gaps ${L.gaps}, last tile ${L.lastBottom} / nav ${L.navTop}, sideways ${L.over}`);
+  ok(!L.over && JSON.stringify(L.perRow) === '[2]' && L.gaps.every(x => x === 10) && (L.navTop == null || L.lastBottom <= L.navTop), `${tag} Grow layout: Build Next rows ${JSON.stringify(L.perRow)}, gaps ${L.gaps}, last tile ${L.lastBottom} / nav ${L.navTop}, sideways ${L.over}`);
   // Tab switching back and forth: answered from the cache, no new model call, no flash of the loading tile.
   const calls = server.aiCalls, seen = [];
   for (let i = 0; i < 2; i++) {
@@ -514,6 +514,33 @@ if (!process.env.ONLY || process.env.ONLY === 'people') {
     ok(t.length === 2 && t[0][1] === 'Yang' && t[1][1] === 'Yang' && t[1][2] === '8', `${lang} people, Yang leads two tiles: ${JSON.stringify(t)}`);
     await pg.close();
   }
+}
+
+// 13. Build Next shows at most 2 cards (Han, 2026-10-26 17:37), in the engine's order; the insight keeps up to 4.
+if (!process.env.ONLY || process.env.ONLY === 'build') for (const lang of ['en', 'zh']) {
+  const zh = lang === 'zh', title = zh ? '下一步提升' : 'Build Next';
+  const box = pg => pg.evaluate(t => { const sec = [...document.querySelectorAll('section')].find(x => (x.querySelector('.rw-section-title') || {}).textContent === t);
+    if (!sec) return null; const cards = [...sec.querySelectorAll('.rw-advice')].map(e => e.getBoundingClientRect()), w = sec.getBoundingClientRect().width;
+    return { n: cards.length, names: [...sec.querySelectorAll('.rw-advice .rw-name')].map(e => e.textContent.trim()), full: cards.length === 1 && Math.abs(cards[0].width - w) < 1,
+      row: cards.length === 2 && Math.abs(cards[0].top - cards[1].top) < 1, gap: cards.length === 2 ? Math.round(cards[1].left - cards[0].right) : null }; }, title);
+  const label = id => ({ en: { Defence: 'Defence', Net: 'Net', Smash: 'Smash', Placement: 'Placement', Return: 'Return', Serve: 'Serve', Footwork: 'Footwork' }, zh: { Defence: '防守', Net: '网前', Smash: '杀球', Placement: '落点', Return: '接发', Serve: '发球', Footwork: '步法' } })[lang][id.slice(4)];
+  server.row = null; server.aiCalls = 0;
+  let pg = await open(lang, 'han17'); await pg.waitForTimeout(1500);
+  let b = await box(pg), stored = server.row.insight_json.buildNext.map(x => x.topic_id);
+  ok(stored.length === 4 && b.n === 2 && b.row && b.gap === 10 && JSON.stringify(b.names) === JSON.stringify(stored.slice(0, 2).map(label)),
+    `${lang} build: ${stored.length} stored (${stored}), 2 shown side by side, gap ${b.gap}: ${JSON.stringify(b.names)}`);
+  await shot(pg, lang, '19-build-two.png');
+  // Add the first shown one to Focus: it leaves, and the next in the engine's order takes its place.
+  await pg.locator('.rw-advice.is-half').first().locator('button').click(); await pg.waitForTimeout(400);
+  await pg.locator('.rw-sheet button', { hasText: zh ? '添加训练目标' : 'Add to Focus' }).last().click(); await pg.waitForTimeout(1500);
+  b = await box(pg);
+  ok(b.n === 2 && JSON.stringify(b.names) === JSON.stringify([stored[1], stored[2]].map(label)), `${lang} build after Add to Focus: ${JSON.stringify(b.names)} (next in order moved up)`);
+  ok(!pg.errs.length, `${lang} build: no console errors ${pg.errs.join(' | ')}`); await pg.close();
+  ACCOUNTS.oneBuild = { matches: [M(0, W, ['Net'], []), M(1, L, ['Other'], []), M(2, W, ['Other'], [])], focuses: [] };
+  pg = await open(lang, 'oneBuild'); await pg.waitForTimeout(1500); b = await box(pg);
+  ok(b && b.n === 1 && b.full, `${lang} build: 1 card is full width (${JSON.stringify(b)})`); await shot(pg, lang, '19-build-one.png'); await pg.close();
+  pg = await open(lang, 'bare'); await pg.waitForTimeout(1500); b = await box(pg);
+  ok(b === null, `${lang} build: 0 cards, no Build Next section`); await pg.close();
 }
 console.log(fails ? `\n${fails} FAILED` : '\nALL PASS');
 await browser.close();

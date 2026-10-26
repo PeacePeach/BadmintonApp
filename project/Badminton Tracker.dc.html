@@ -4360,8 +4360,9 @@ class Component extends DCLogic {
     const doneIn = r => r ? r.marks.filter(Boolean).length : 0;
     // Build Next only offers what isn't in Focus; once added, the tile leaves (the next candidate, if any, moves up).
     if (v.grow && v.grow.build) {
-      // Up to 4 (the engine sends at most 4): 1 full width, 2 side by side, 3-4 two per row (.rw-advice-grid).
-      v.grow.build = this.openRecs(v.grow.build, { generatedAt: s.aiGrow && this.live() ? s.aiGrow._generatedAt : null, max: 4 }).map(b => ({ ...b,
+      // Han 2026-10-26: the engine may send up to 4; Grow shows the first 2 in its order (1 full width, 2 side by side
+      // with a 10px gap). The rest stay in the insight and move up once a shown one is in Focus.
+      v.grow.build = this.openRecs(v.grow.build, { generatedAt: s.aiGrow && this.live() ? s.aiGrow._generatedAt : null, max: 2 }).map(b => ({ ...b,
         fLabel: this.t('addToFocus'), fIcon: 'Plus', fCls: 'rw-btn-secondary',
         focus: () => this.openFocusSheet({ mode: 'grow', title: b.name, goal: b.action || '', topicId: b.topicId || this.topicKey(b.name, b.tag) || null }) }));
       v.grow.showBuild = !!v.grow.build.length;
