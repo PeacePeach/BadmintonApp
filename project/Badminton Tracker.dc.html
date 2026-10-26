@@ -1537,6 +1537,24 @@ button:disabled{cursor:default !important;}
     </div>
   </sc-if>
 
+  <!-- iOS app: Microphone or Speech Recognition is off (denied in iOS's dialog or in Settings). Same sheet as One lineup. -->
+  <sc-if value="{{ vc.perm }}" hint-placeholder-val="{{ false }}">
+    <div class="rw-sheet-scrim" onClick="{{ vc.closePerm }}"></div>
+    <div class="rw-sheet" role="dialog" aria-modal="true" aria-labelledby="perm-title" aria-describedby="perm-body" data-screen-label="Voice permission">
+      <div class="rw-sheet-head">
+        <span class="rw-sheet-grabber" aria-hidden="true"></span>
+        <div class="rw-sheet-bar">
+          <span></span>
+          <h2 id="perm-title" class="rw-sheet-title">{{ vc.permTitle }}</h2>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="X" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.close }}" onClick="{{ vc.closePerm }}" hint-size="44px,44px"></x-import>
+        </div>
+        <span class="rw-sheet-divider"></span>
+      </div>
+      <p id="perm-body" class="rw-sheet-text">{{ vc.permBody }}</p>
+      <div class="rw-sheet-foot"><button type="button" class="rw-btn rw-btn-primary" onClick="{{ vc.openSettings }}">{{ tx.openSettings }}</button></div>
+    </div>
+  </sc-if>
+
   <!-- Review footer -->
   <sc-if value="{{ isReview }}" hint-placeholder-val="{{ false }}">
     <div style="position:absolute;left:0;right:0;bottom:0;padding:14px 20px 34px;display:flex;flex-direction:column;gap:10px;">
@@ -2192,7 +2210,10 @@ const I18N = {
     micOff: 'Speech recognition is turned off on this device. On iPhone, turn on Siri, or type instead.', micNetwork: 'Speech recognition needs an internet connection. Type instead.',
     micLang: 'This device can’t recognise this language. Type instead.', micFailed: 'Speech recognition stopped. Try again, or type instead.',
     micNothing: 'Nothing was recognised. Try again a little closer to the mic.',
-    micBlockedApp: 'Rallywise can’t use the microphone or speech recognition. Turn both on in Settings › Rallywise, or type instead.',
+    micNoPlugin: 'Voice input needs the latest Rallywise app. Update it, or type instead.',
+    permTitleMic: 'Allow microphone access', permTitleSpeech: 'Allow speech recognition', openSettings: 'Open Settings',
+    permBodyMic: 'Rallywise needs the microphone to hear you describe your match. Open Settings, turn on Microphone, then come back. You can also type instead.',
+    permBodySpeech: 'Rallywise uses Apple speech recognition to turn your voice into text. Open Settings, turn on Speech Recognition and Microphone, then come back. You can also type instead.',
     vErrSignin: 'Sign in again to read your description.', vErrTooLong: 'That description is too long. Shorten it a little and try again.',
     vErrRate: 'Too many requests in a short time. Wait a minute and try again.', vErrNetwork: 'Couldn’t reach the server. Check your connection and try again.',
     vEngineOld: 'Server parser is {v}, not {want}.',
@@ -2348,7 +2369,10 @@ const I18N = {
     micOff: '这台设备关闭了语音识别。iPhone 上请打开 Siri，或直接打字。', micNetwork: '语音识别需要联网，请直接打字。',
     micLang: '这台设备不能识别这种语言，请直接打字。', micFailed: '语音识别中断了。请再试一次，或直接打字。',
     micNothing: '没有识别到内容。靠近麦克风再试一次。',
-    micBlockedApp: 'Rallywise 没有麦克风或语音识别权限。请在 设置 › Rallywise 里打开，或直接打字。',
+    micNoPlugin: '语音输入需要最新版 Rallywise。请更新应用，或直接打字。',
+    permTitleMic: '允许使用麦克风', permTitleSpeech: '允许语音识别', openSettings: '打开设置',
+    permBodyMic: 'Rallywise 需要麦克风来听你描述比赛。请打开设置，开启“麦克风”，然后回来。也可以直接打字。',
+    permBodySpeech: 'Rallywise 用 Apple 语音识别把你说的话转成文字。请打开设置，开启“语音识别”和“麦克风”，然后回来。也可以直接打字。',
     vErrSignin: '请重新登录后再读取描述。', vErrTooLong: '描述太长了，请稍微删减后再试。',
     vErrRate: '短时间内请求太多，请等一分钟再试。', vErrNetwork: '连不上服务器，请检查网络后再试。',
     vEngineOld: '服务器解析器是 {v}，不是 {want}。',
@@ -2782,6 +2806,7 @@ class Component extends DCLogic {
       return;
     }
     this.setState({ day: this.today() }); // back after midnight: Focus moves to the new week
+    if (this.state.voice && this.state.voice.perm) this.recPermRecheck(); // back from Settings
     const away = this._hiddenAt ? Date.now() - this._hiddenAt : 0; this._hiddenAt = null;
     if (away < 30 * 60e3 || !this.user) return;
     if (window.RallywiseAnalytics) window.RallywiseAnalytics.newSession();
@@ -2823,7 +2848,11 @@ class Component extends DCLogic {
   }
   recStart() {
     if (!this.state.voice || this.state.voice.phase === 'rec') return;
-    if (!this.voiceMock()) { const NS = this.nativeSpeech(); if (NS) return this.recStartNative(NS); }
+    if (!this.voiceMock() && this.nativeApp()) {
+      // iOS app: never the browser recognizer (WKWebView can't), and never a recording screen without a recorder.
+      const NS = this.nativeSpeech();
+      return NS ? this.recStartNative(NS) : this.flash(this.t('micNoPlugin'), 'error');
+    }
     this._recT = setInterval(() => this.setVoice(v => ({ secs: v.secs + 1 })), 1000);
     if (this.voiceMock()) return this.mockRec();
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -2859,13 +2888,39 @@ class Component extends DCLogic {
     rec.r = r; r.start();
   }
   // iOS app: WKWebView has no working Web Speech API, so the Capacitor shell uses Apple's recognizer through
-  // @capacitor-community/speech-recognition. Web (and an app build without the plugin) keeps the browser recognizer above.
+  // @capacitor-community/speech-recognition. Web keeps the browser recognizer above.
+  nativeApp() { try { const C = window.Capacitor; return !!(C && C.isNativePlatform && C.isNativePlatform()); } catch (e) { return false; } }
   nativeSpeech() {
     try {
       const C = window.Capacitor;
-      if (!C || !C.isNativePlatform || !C.isNativePlatform() || !C.isPluginAvailable || !C.isPluginAvailable('SpeechRecognition')) return null;
+      if (!this.nativeApp() || !C.isPluginAvailable || !C.isPluginAvailable('SpeechRecognition')) return null;
       return (C.Plugins && C.Plugins.SpeechRecognition) || (C.registerPlugin && C.registerPlugin('SpeechRecognition')) || null;
     } catch (e) { return null; }
+  }
+  // Which permission is missing: null (both granted), 'speech' or 'mic'. The plugin's checkPermissions only reports
+  // Speech Recognition; its requestPermissions shows iOS's own dialog for Speech Recognition and then the Microphone,
+  // whichever iOS hasn't asked yet, and with both already decided it shows nothing and just answers (granted = both).
+  async recNativePerm(NS) {
+    if ((await NS.checkPermissions()).speechRecognition === 'denied') return 'speech';
+    if ((await NS.requestPermissions()).speechRecognition === 'granted') return null;
+    return (await NS.checkPermissions()).speechRecognition === 'granted' ? 'mic' : 'speech';
+  }
+  // Back from Settings with the permission sheet open: check again, and record if both are now allowed.
+  async recPermRecheck() {
+    const NS = this.nativeSpeech(), v = this.state.voice;
+    if (!NS || !v || !v.perm || this._rec || this._permCheck) return;
+    this._permCheck = true;
+    try {
+      const miss = await this.recNativePerm(NS);
+      if (!this.state.voice || this.state.screen !== 'voice') return;
+      if (miss) return this.setVoice({ perm: miss });
+      this.setVoice({ perm: null });
+      this.recStart();
+    } catch (e) {} finally { this._permCheck = false; }
+  }
+  openAppSettings() {
+    // Capacitor hands any non-app URL to iOS; app-settings: is UIApplication.openSettingsURLString (Settings › Rallywise).
+    try { window.location.href = 'app-settings:'; } catch (e) {}
   }
   // Same rec object and recStop/recFinish as the browser path. The plugin streams the whole session's text as
   // partialResults and reports 'stopped' when Apple ends a session (a pause, about a minute of audio, an error),
@@ -2881,20 +2936,22 @@ class Component extends DCLogic {
       stop: () => { rec.stops = 0; setTimeout(rec.settle, 1500); NS.stop().catch(() => rec.settle()); },
       abort: () => { rec.off(); NS.stop().catch(() => {}); this._recSettle = new Promise(res => setTimeout(res, 1000)); },
     };
-    this.setVoice({ phase: 'rec' });
+    // The screen shows recording only once Apple's recognizer is really listening (after any permission dialogs).
+    this.setVoice({ perm: null });
     try {
       // A session that was just aborted may still deliver its final result; let it land before starting again.
       await this._recSettle;
-      let p = (await NS.checkPermissions()).speechRecognition;
-      if (p !== 'granted' && this._rec === rec) p = (await NS.requestPermissions()).speechRecognition;
+      const miss = await this.recNativePerm(NS);
       if (this._rec !== rec) return rec.off();
-      if (p !== 'granted') { rec.error = 'app-not-allowed'; return this.recFinish(rec); }
+      if (miss) { rec.perm = miss; return this.recFinish(rec); }
       rec.subs.push(await NS.addListener('partialResults', d => this.recNativeText(rec, d)));
       rec.subs.push(await NS.addListener('listeningState', d => this.recNativeState(rec, NS, d)));
       if (this._rec !== rec) return rec.off();
       if (rec.stopping) return rec.settle();
       await this.recNativeListen(rec, NS);
-      if (this._rec === rec) this._recT = setInterval(() => this.setVoice(v => ({ secs: v.secs + 1 })), 1000);
+      if (this._rec !== rec) return;
+      this.setVoice({ phase: 'rec' });
+      this._recT = setInterval(() => this.setVoice(v => ({ secs: v.secs + 1 })), 1000);
     } catch (e) { this.recNativeFail(rec, e); }
   }
   recNativeListen(rec, NS) {
@@ -2922,7 +2979,10 @@ class Component extends DCLogic {
   recNativeFail(rec, e) {
     if (this._rec !== rec) return rec.off();
     const m = String((e && (e.message || e.errorMessage)) || e || '');
-    rec.error = /permission|denied|not determined|restricted/i.test(m) ? 'app-not-allowed' : navigator.onLine === false ? 'network' : 'native';
+    // The plugin's start() rejects with 'User denied access to microphone' or 'Missing permission' (speech).
+    if (/microphone/i.test(m) && /denied/i.test(m)) rec.perm = 'mic';
+    else if (/permission|denied|not determined|restricted/i.test(m)) rec.perm = 'speech';
+    else rec.error = navigator.onLine === false ? 'network' : 'native';
     rec.done = this.joinText(rec.done, rec.seg); rec.seg = '';
     this.recFinish(rec);
   }
@@ -2930,11 +2990,12 @@ class Component extends DCLogic {
     if (this._rec !== rec) return;
     this._rec = null; clearInterval(this._recT);
     if (rec.off) rec.off();
-    const MIC = { 'app-not-allowed': 'micBlockedApp', 'not-allowed': 'micBlocked', 'service-not-allowed': 'micOff', 'audio-capture': 'micNone', network: 'micNetwork', 'language-not-supported': 'micLang' };
+    const MIC = { 'not-allowed': 'micBlocked', 'service-not-allowed': 'micOff', 'audio-capture': 'micNone', network: 'micNetwork', 'language-not-supported': 'micLang' };
     this.setState(state => state.voice ? { voice: { ...state.voice, phase: 'idle', awaitingStop: false, text: this.joinText(rec.lead, rec.done) } } : null, () => {
       if (rec.advance && !rec.error && this.state.screen === 'voice') this.voiceNext();
     });
-    if (rec.error) this.flash(this.t(MIC[rec.error] || 'micFailed'), 'error');
+    if (rec.perm) this.setVoice({ perm: rec.perm }); // iOS app: explain, with Open Settings
+    else if (rec.error) this.flash(this.t(MIC[rec.error] || 'micFailed'), 'error');
     else if (!rec.done.trim()) this.flash(this.t('micNothing'), 'error');
   }
   mockRec() {
@@ -4332,6 +4393,8 @@ class Component extends DCLogic {
         onText: e => { if (this._rec) this.recEditFocus(); this.setVoice({ text: e.target.value }); },
         next: () => this.voiceNext(),
         lineup: !!vo.lineup, closeLineup: () => this.setVoice({ lineup: false }),
+        perm: !!vo.perm, permTitle: this.t(vo.perm === 'mic' ? 'permTitleMic' : 'permTitleSpeech'), permBody: this.t(vo.perm === 'mic' ? 'permBodyMic' : 'permBodySpeech'),
+        closePerm: () => this.setVoice({ perm: null }), openSettings: () => this.openAppSettings(),
         close: () => { this.recStop(true); this.setState({ screen: 'matches', voice: null, log: null, back: [] }); } };
     }
     if (v.isReview) {

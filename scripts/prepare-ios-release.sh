@@ -206,14 +206,21 @@ if [ "$SPEECH" = 1 ]; then
   plist_added=0
   for kv in "NSMicrophoneUsageDescription|$MIC_TEXT" "NSSpeechRecognitionUsageDescription|$SPEECH_TEXT"; do
     k="${kv%%|*}"; v="${kv#*|}"
-    if /usr/libexec/PlistBuddy -c "Print :$k" "$PLIST" >/dev/null 2>&1; then
-      ok "Info.plist already has $k"
+    cur="$(/usr/libexec/PlistBuddy -c "Print :$k" "$PLIST" 2>/dev/null || true)"
+    if [ -n "$(printf '%s' "$cur" | tr -d '[:space:]')" ]; then
+      ok "Info.plist already has $k: \"$cur\""
     else
       [ "$plist_added" = 1 ] || cp "$PLIST" "$BACKUP_ROOT/Info.plist-$(date +%Y%m%d-%H%M%S)"
+      /usr/libexec/PlistBuddy -c "Delete :$k" "$PLIST" >/dev/null 2>&1 || true
       /usr/libexec/PlistBuddy -c "Add :$k string $v" "$PLIST"; plist_added=1
       ok "Added $k to Info.plist"
     fi
   done
+  # Verify both texts are really there: without them iOS ends the app on the first tap of the mic.
+  for k in NSMicrophoneUsageDescription NSSpeechRecognitionUsageDescription; do
+    [ -n "$(/usr/libexec/PlistBuddy -c "Print :$k" "$PLIST" 2>/dev/null | tr -d '[:space:]')" ] || die "$k is still missing from $PLIST."
+  done
+  ok "Info.plist has both usage descriptions (Microphone, Speech Recognition)"
 fi
 
 npx cap sync ios || die "npx cap sync ios failed (output above). The web folder backup is in $BACKUP_ROOT."

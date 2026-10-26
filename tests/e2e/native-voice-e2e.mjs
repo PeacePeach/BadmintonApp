@@ -11,14 +11,26 @@ const { chromium } = require(execSync('npm root -g').toString().trim() + '/playw
 const HERE = import.meta.dirname, MOCK = fs.readFileSync(path.join(HERE, 'mock-backend.js'), 'utf8');
 const OUT = process.argv[2] || path.join(HERE, '..', 'out', 'native-voice');
 
-const FAKE_SHELL = () => {
-  const L = {}, S = window.__sr = { perm: 'prompt', grant: 'granted', running: false, text: '', starts: [], stops: 0, failStart: null, live: 0 };
+// Permissions copy the plugin's Swift code: checkPermissions reports Speech Recognition only; requestPermissions
+// asks Speech Recognition (if undetermined), then, only if that is granted, the Microphone (if undetermined), and
+// answers 'granted' only when both are; start() rejects 'Missing permission' (speech) or asks/rejects for the mic.
+// Each iOS dialog is logged in S.dialogs and takes 300 ms; S.answer says what the user taps.
+const FAKE_SHELL = (opts) => {
+  const L = {}, S = window.__sr = { speech: 'prompt', mic: 'prompt', answer: { speech: 'granted', mic: 'granted' }, dialogs: [], running: false, text: '', starts: [], stops: 0, failStart: null, live: 0, ...(opts || {}) };
   const emit = (n, d) => (L[n] || []).forEach(f => f(d));
+  const dialog = async k => { S.dialogs.push(k); S.inDialog = true; await new Promise(r => setTimeout(r, 300)); S.inDialog = false; S[k] = S.answer[k]; };
   const plugin = {
-    checkPermissions: async () => ({ speechRecognition: S.perm }),
-    requestPermissions: async () => { S.perm = S.grant; return { speechRecognition: S.perm }; },
+    checkPermissions: async () => ({ speechRecognition: S.speech }),
+    requestPermissions: async () => {
+      if (S.speech === 'prompt') await dialog('speech');
+      if (S.speech !== 'granted') return { speechRecognition: S.speech };
+      if (S.mic === 'prompt') await dialog('mic');
+      return { speechRecognition: S.mic === 'granted' ? 'granted' : 'denied' };
+    },
     start: async o => {
-      if (S.perm !== 'granted') throw new Error('Missing permission');
+      if (S.speech !== 'granted') throw new Error('Missing permission');
+      if (S.mic === 'prompt') await dialog('mic');
+      if (S.mic !== 'granted') throw new Error('User denied access to microphone');
       if (S.failStart) throw new Error(S.failStart);
       if (S.running) throw new Error('Ongoing speech recognition');
       S.running = true; S.text = ''; S.starts.push(o); emit('listeningState', { status: 'started' });
@@ -44,16 +56,20 @@ const check = (name, ok, info) => { results.push(`${ok ? 'PASS' : 'FAIL'} ${name
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
 const browser = await chromium.launch();
-async function open(lang, { native = true, web = false } = {}) {
+async function open(lang, { native = true, web = false, plugin = true, sr = null } = {}) {
   const ctx = await browser.newContext({ viewport: { width: 393, height: 852 }, deviceScaleFactor: 2 });
   await ctx.route('https://unpkg.com/**', async r => { const res = await r.fetch({ url: r.request().url().replace('https://unpkg.com/', 'https://cdn.jsdelivr.net/npm/') }); await r.fulfill({ response: res }); });
   await ctx.route('**/rallywise-backend.js', r => r.fulfill({ contentType: 'application/javascript', body: MOCK }));
-  if (native) await ctx.addInitScript(FAKE_SHELL);
+  if (native) await ctx.addInitScript(FAKE_SHELL, sr);
+  if (native && !plugin) await ctx.addInitScript(() => { window.Capacitor.isPluginAvailable = () => false; delete window.Capacitor.Plugins.SpeechRecognition; });
   if (web) await ctx.addInitScript(() => {
     window.__web = { made: 0 };
     window.SpeechRecognition = window.webkitSpeechRecognition = class { constructor() { window.__web.made++; window.__web.r = this; } start() { window.__web.lang = this.lang; } stop() { setTimeout(() => this.onend && this.onend(), 50); } abort() {} };
   });
   const pg = await ctx.newPage();
+  // Open Settings: Capacitor hands app-settings: to iOS; here, record the navigation the page asks for.
+  pg.__nav = []; const cdp = await ctx.newCDPSession(pg); await cdp.send('Page.enable');
+  cdp.on('Page.frameRequestedNavigation', e => pg.__nav.push(e.url));
   pg.on('pageerror', e => check(`${lang}: no page errors`, false, String(e)));
   await pg.goto('http://localhost:8123/assets/rallywise-mark.svg');
   await pg.evaluate(SEED, lang);
@@ -66,18 +82,25 @@ const live = pg => pg.$eval('.rw-rec-btn', e => e.getAttribute('aria-pressed'));
 const toast = pg => pg.evaluate(() => document.body.innerText);
 const tap = pg => pg.click('.rw-rec-btn');
 const sr = pg => pg.evaluate(() => ({ ...window.__sr }));
+const sheet = pg => pg.evaluate(() => { const e = document.querySelector('[data-screen-label="Voice permission"]'); return e ? e.querySelector('.rw-sheet-title').innerText : null; });
+const back = pg => pg.evaluate(() => { for (const v of ['hidden', 'visible']) { Object.defineProperty(document, 'visibilityState', { value: v, configurable: true }); document.dispatchEvent(new Event('visibilitychange')); } });
 const shot = async (pg, lang, f) => { fs.mkdirSync(path.join(OUT, lang), { recursive: true }); await pg.screenshot({ path: path.join(OUT, lang, f) }); };
 
 for (const lang of ['en', 'zh']) {
   const T = lang === 'zh'
-    ? { a: '我和小明打单打，', b: '第一局21比15赢了', c: '网前打得好', blocked: '没有麦克风或语音识别权限', nothing: '没有识别到内容', failed: '语音识别中断了', want: '我和小明打单打，第一局21比15赢了' }
-    : { a: 'I played singles with Alex', b: 'won the first game 21 15', c: 'my net play was good', blocked: 'can’t use the microphone or speech recognition', nothing: 'Nothing was recognised', failed: 'Speech recognition stopped', want: 'I played singles with Alex won the first game 21 15' };
-  // 1. First use: permission prompt, live text, Apple ends a session after a minute, Stop keeps everything.
+    ? { a: '我和小明打单打，', b: '第一局21比15赢了', c: '网前打得好', close: '关闭', speechTitle: '允许语音识别', micTitle: '允许使用麦克风', noPlugin: '语音输入需要最新版', nothing: '没有识别到内容', failed: '语音识别中断了', want: '我和小明打单打，第一局21比15赢了' }
+    : { a: 'I played singles with Alex', b: 'won the first game 21 15', c: 'my net play was good', close: 'Close', speechTitle: 'Allow speech recognition', micTitle: 'Allow microphone access', noPlugin: 'Voice input needs the latest Rallywise app', nothing: 'Nothing was recognised', failed: 'Speech recognition stopped', want: 'I played singles with Alex won the first game 21 15' };
+  // 1. First use: one tap -> iOS asks Speech Recognition, then Microphone -> recording starts by itself.
   let { ctx, pg } = await open(lang);
-  await tap(pg); await wait(300);
+  await tap(pg); await wait(150);
   let s = await sr(pg);
-  check(`${lang}: asks permission, then starts Apple's recognizer in ${lang === 'zh' ? 'zh-CN' : 'en-US'}`, s.perm === 'granted' && s.starts.length === 1 && s.starts[0].language === (lang === 'zh' ? 'zh-CN' : 'en-US') && s.starts[0].partialResults === true, s);
-  check(`${lang}: shows recording`, await live(pg) === 'true');
+  check(`${lang}: first tap opens the native Speech Recognition dialog; screen does not pretend to record`, s.inDialog && s.dialogs[0] === 'speech' && await live(pg) === 'false' && s.starts.length === 0, s);
+  await wait(300);
+  s = await sr(pg);
+  check(`${lang}: then the native Microphone dialog`, s.inDialog && s.dialogs.join() === 'speech,mic' && await live(pg) === 'false', s);
+  await wait(400);
+  s = await sr(pg);
+  check(`${lang}: both allowed -> records without another tap, in ${lang === 'zh' ? 'zh-CN' : 'en-US'}`, s.speech === 'granted' && s.mic === 'granted' && s.starts.length === 1 && s.starts[0].language === (lang === 'zh' ? 'zh-CN' : 'en-US') && s.starts[0].partialResults === true && await live(pg) === 'true', s);
   await pg.evaluate(t => window.__say(t), T.a); await wait(100);
   check(`${lang}: live transcription`, await text(pg) === T.a, await text(pg));
   await shot(pg, lang, '1-recording.png');
@@ -92,8 +115,9 @@ for (const lang of ['en', 'zh']) {
   s = await sr(pg);
   check(`${lang}: Stop ends recording, keeps text, removes listeners`, await live(pg) === 'false' && await text(pg) === T.want && !s.running && s.live === 0, { t: await text(pg), s });
   await shot(pg, lang, '2-stopped.png');
-  // 2. Repeat session: appends to the text already there.
+  // 2. Repeat session: already allowed, so no dialog; appends to the text already there.
   await tap(pg); await wait(300);
+  check(`${lang}: already allowed -> starts at once, no dialog`, (await sr(pg)).dialogs.length === 2 && await live(pg) === 'true');
   await pg.evaluate(t => window.__say(t), T.c); await wait(100);
   await tap(pg); await wait(600);
   const sep = lang === 'zh' ? '' : ' ';
@@ -143,19 +167,60 @@ for (const lang of ['en', 'zh']) {
   await shot(pg, lang, '4-continue.png');
   await ctx.close();
 
-  // 9. Permission denied.
-  ({ ctx, pg } = await open(lang));
-  await pg.evaluate(() => { window.__sr.grant = 'denied'; });
-  await tap(pg); await wait(400);
+  // 9. Speech Recognition denied in iOS's dialog: explanation sheet with Open Settings; mic never asked, never records.
+  ({ ctx, pg } = await open(lang, { sr: { answer: { speech: 'denied', mic: 'granted' } } }));
+  await tap(pg); await wait(800);
   s = await sr(pg);
-  check(`${lang}: denied permission -> settings toast, never starts`, (await toast(pg)).includes(T.blocked) && await live(pg) === 'false' && s.starts.length === 0 && s.live === 0, s);
-  await shot(pg, lang, '5-denied.png');
-  await wait(3500);
-  await tap(pg); await wait(400);
-  check(`${lang}: tapping again after denial shows the toast again`, (await toast(pg)).includes(T.blocked) && (await sr(pg)).starts.length === 0);
+  check(`${lang}: speech denied -> "${T.speechTitle}" sheet, not recording, no toast`, await sheet(pg) === T.speechTitle && await live(pg) === 'false' && s.starts.length === 0 && s.live === 0 && s.dialogs.join() === 'speech' && !(await toast(pg)).includes(T.nothing), { s, sheet: await sheet(pg) });
+  await shot(pg, lang, '5-speech-denied.png');
+  await pg.click('[data-screen-label="Voice permission"] .rw-btn-primary');
+  await wait(200);
+  check(`${lang}: Open Settings asks iOS to open app-settings:`, pg.__nav.includes('app-settings:') && await pg.$('.rw-rec-btn') !== null, pg.__nav);
+  // Back from Settings, still off: sheet stays, no dialog.
+  await back(pg); await wait(400);
+  check(`${lang}: back from Settings still off -> sheet stays, no dialog`, await sheet(pg) === T.speechTitle && (await sr(pg)).dialogs.length === 1 && await live(pg) === 'false');
+  // Back from Settings with both turned on: sheet closes and recording starts by itself.
+  await pg.evaluate(() => { window.__sr.speech = 'granted'; window.__sr.mic = 'granted'; });
+  await back(pg); await wait(500);
+  s = await sr(pg);
+  check(`${lang}: back from Settings allowed -> sheet closes, records`, await sheet(pg) === null && await live(pg) === 'true' && s.starts.length === 1, s);
+  await tap(pg); await wait(1700);
   await ctx.close();
 
-  // 10. Web (no Capacitor): the browser recognizer path, unchanged.
+  // 10. Partial grant: Speech Recognition allowed, Microphone denied -> microphone sheet.
+  ({ ctx, pg } = await open(lang, { sr: { answer: { speech: 'granted', mic: 'denied' } } }));
+  await tap(pg); await wait(900);
+  s = await sr(pg);
+  check(`${lang}: mic denied -> "${T.micTitle}" sheet, not recording`, await sheet(pg) === T.micTitle && await live(pg) === 'false' && s.starts.length === 0 && s.dialogs.join() === 'speech,mic', { s, sheet: await sheet(pg) });
+  await shot(pg, lang, '6-mic-denied.png');
+  await pg.click(`[data-screen-label="Voice permission"] button[aria-label="${T.close}"]`);
+  await wait(300);
+  check(`${lang}: X closes the sheet`, await sheet(pg) === null, await sheet(pg));
+  await pg.fill('.rw-voice-text', 'typed'); check(`${lang}: can type after denial`, await text(pg) === 'typed');
+  await tap(pg); await wait(400);
+  check(`${lang}: tapping the mic again shows the sheet again, no dialog`, await sheet(pg) === T.micTitle && (await sr(pg)).dialogs.length === 2);
+  await ctx.close();
+
+  // 11. Denied earlier (both already decided): no dialog at all, sheet at once.
+  ({ ctx, pg } = await open(lang, { sr: { speech: 'denied', mic: 'denied' } }));
+  await tap(pg); await wait(300);
+  check(`${lang}: denied before -> sheet at once, no dialog`, await sheet(pg) === T.speechTitle && (await sr(pg)).dialogs.length === 0 && await live(pg) === 'false');
+  await ctx.close();
+
+  // 12. Speech allowed earlier but microphone never asked: the mic dialog only, then records.
+  ({ ctx, pg } = await open(lang, { sr: { speech: 'granted' } }));
+  await tap(pg); await wait(700);
+  s = await sr(pg);
+  check(`${lang}: speech already allowed -> only the mic dialog, then records`, s.dialogs.join() === 'mic' && await live(pg) === 'true' && s.starts.length === 1, s);
+  await ctx.close();
+
+  // 13. iOS app build without the plugin: clear message, never the browser recognizer, never a recording state.
+  ({ ctx, pg } = await open(lang, { plugin: false, web: true }));
+  await tap(pg); await wait(300);
+  check(`${lang}: app without plugin -> "${T.noPlugin}" toast, no web fallback`, (await toast(pg)).includes(T.noPlugin) && await live(pg) === 'false' && await pg.evaluate(() => window.__web.made) === 0);
+  await ctx.close();
+
+  // 14. Web (no Capacitor): the browser recognizer path, unchanged.
   ({ ctx, pg } = await open(lang, { native: false, web: true }));
   await tap(pg); await wait(300);
   const w = await pg.evaluate(() => ({ made: window.__web.made, lang: window.__web.lang }));
