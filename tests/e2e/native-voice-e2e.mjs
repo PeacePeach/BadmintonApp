@@ -15,15 +15,16 @@ const OUT = process.argv[2] || path.join(HERE, '..', 'out', 'native-voice');
 // asks Speech Recognition (if undetermined), then, only if that is granted, the Microphone (if undetermined), and
 // answers 'granted' only when both are; start() rejects 'Missing permission' (speech) or asks/rejects for the mic.
 // Each iOS dialog is logged in S.dialogs and takes 300 ms; S.answer says what the user taps.
-// flavor 'capgo' copies @capgo/capacitor-speech-recognition 8 instead (Capacitor 8 / SPM): checkPermissions reports
+// flavor 'capgo7' is Capgo 7 (Capacitor 7 with SPM): same permissions as 'capgo'; stop() cancels at once and sends one
+// listeningState {status:'stopped'}, no final text. flavor 'capgo' copies @capgo/capacitor-speech-recognition 8 instead (Capacitor 8 / SPM): checkPermissions reports
 // both permissions together (denied if either is), start() rejects 'Missing speech recognition permission.' /
 // 'User denied microphone access.', and a session ends with ONE listeningState {state:'stopped', status:'stopped'}
 // after the final text (stop() first sends {state:'stoppingListening'}).
 const FAKE_SHELL = ([flavor, opts]) => {
   const L = {}, S = window.__sr = { speech: 'prompt', mic: 'prompt', answer: { speech: 'granted', mic: 'granted' }, dialogs: [], running: false, text: '', starts: [], stops: 0, failStart: null, live: 0, ...(opts || {}) };
-  const capgo = flavor === 'capgo';
+  const capgo = flavor.startsWith('capgo'), capgo7 = flavor === 'capgo7';
   const both = () => S.speech === 'denied' || S.mic === 'denied' ? 'denied' : S.speech === 'prompt' || S.mic === 'prompt' ? 'prompt' : 'granted';
-  const STOPPED = capgo ? { state: 'stopped', status: 'stopped', sessionId: 1, reason: 'results' } : { status: 'stopped' };
+  const STOPPED = capgo && !capgo7 ? { state: 'stopped', status: 'stopped', sessionId: 1, reason: 'results' } : { status: 'stopped' };
   const emit = (n, d) => (L[n] || []).forEach(f => f(d));
   const dialog = async k => { S.dialogs.push(k); S.inDialog = true; await new Promise(r => setTimeout(r, 300)); S.inDialog = false; S[k] = S.answer[k]; };
   const plugin = {
@@ -45,6 +46,8 @@ const FAKE_SHELL = ([flavor, opts]) => {
     stop: async () => {
       S.stops++;
       if (!S.running) return;
+      // Capgo 7: stop() cancels the task, so one 'stopped' and no final text.
+      if (capgo7) { S.running = false; setTimeout(() => emit('listeningState', { status: 'stopped' }), 20); return; }
       S.running = false; emit('listeningState', capgo ? { state: 'stoppingListening', sessionId: 1, reason: 'userStop' } : { status: 'stopped' });
       setTimeout(() => { if (S.text) emit('partialResults', { matches: [S.text] }); emit('listeningState', STOPPED); }, 200);
     },
@@ -94,7 +97,7 @@ const sheet = pg => pg.evaluate(() => { const e = document.querySelector('[data-
 const back = pg => pg.evaluate(() => { for (const v of ['hidden', 'visible']) { Object.defineProperty(document, 'visibilityState', { value: v, configurable: true }); document.dispatchEvent(new Event('visibilitychange')); } });
 const shot = async (pg, lang, f) => { const d = path.join(OUT, FLAVOR, lang); fs.mkdirSync(d, { recursive: true }); await pg.screenshot({ path: path.join(d, f) }); };
 
-for (const flavor of ['community', 'capgo']) for (const lang0 of ['en', 'zh']) {
+for (const flavor of ['community', 'capgo', 'capgo7']) for (const lang0 of ['en', 'zh']) {
   FLAVOR = flavor; const lang = lang0, L = `${flavor} ${lang}`;
   const T = lang === 'zh'
     ? { a: '我和小明打单打，', b: '第一局21比15赢了', c: '网前打得好', close: '关闭', speechTitle: '允许语音输入', micTitle: '允许使用麦克风', noPlugin: '语音输入需要最新版', nothing: '没有识别到内容', failed: '语音识别中断了', want: '我和小明打单打，第一局21比15赢了' }
@@ -120,7 +123,7 @@ for (const flavor of ['community', 'capgo']) for (const lang0 of ['en', 'zh']) {
   check(`${L}: second session joins the first`, await text(pg) === T.want, await text(pg));
   await wait(1200);
   check(`${L}: timer runs`, /0:0[1-9]/.test(await pg.$eval('.rw-rec-timer', e => e.innerText)), await pg.$eval('.rw-rec-timer', e => e.innerText));
-  await tap(pg); await wait(600);
+  await tap(pg); await wait(900);
   s = await sr(pg);
   check(`${L}: Stop ends recording, keeps text, removes listeners`, await live(pg) === 'false' && await text(pg) === T.want && !s.running && s.live === 0, { t: await text(pg), s });
   await shot(pg, lang, '2-stopped.png');
@@ -128,7 +131,7 @@ for (const flavor of ['community', 'capgo']) for (const lang0 of ['en', 'zh']) {
   await tap(pg); await wait(300);
   check(`${L}: already allowed -> starts at once, no dialog`, (await sr(pg)).dialogs.length === 2 && await live(pg) === 'true');
   await pg.evaluate(t => window.__say(t), T.c); await wait(100);
-  await tap(pg); await wait(600);
+  await tap(pg); await wait(900);
   const sep = lang === 'zh' ? '' : ' ';
   check(`${L}: second recording appends`, await text(pg) === T.want + sep + T.c && (await sr(pg)).starts.length === 3, await text(pg));
   // 3. Typing while recording stops the mic and keeps the words.
@@ -201,7 +204,7 @@ for (const flavor of ['community', 'capgo']) for (const lang0 of ['en', 'zh']) {
   await tap(pg); await wait(900);
   s = await sr(pg);
   // Capgo reports both permissions as one, so a denied mic gets the both-permissions sheet.
-  const micT = flavor === 'capgo' ? T.speechTitle : T.micTitle;
+  const micT = flavor.startsWith('capgo') ? T.speechTitle : T.micTitle;
   check(`${L}: mic denied -> "${micT}" sheet, not recording`, await sheet(pg) === micT && await live(pg) === 'false' && s.starts.length === 0 && s.dialogs.join() === 'speech,mic', { s, sheet: await sheet(pg) });
   await shot(pg, lang, '6-mic-denied.png');
   await pg.click(`[data-screen-label="Voice permission"] button[aria-label="${T.close}"]`);

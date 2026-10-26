@@ -2970,8 +2970,9 @@ class Component extends DCLogic {
   }
   recNativeState(rec, NS, d) {
     if (this._rec !== rec || !d || d.status !== 'stopped') return;
-    // Capgo's plugin sends one 'stopped' (with state) after the final text; the community plugin sends stop()'s own first.
-    if (rec.stopping) { if (d.state === 'stopped' || ++rec.stops >= 2) rec.settle(); return; }
+    // After Stop: Capgo 8 sends one 'stopped' (with state) after the final text; the community plugin sends stop()'s
+    // own 'stopped', then the final text and a second one; Capgo 7 sends one and no final text. Wait briefly after a first.
+    if (rec.stopping) { if (d.state === 'stopped' || ++rec.stops >= 2) rec.settle(); else setTimeout(rec.settle, 500); return; }
     rec.done = this.joinText(rec.done, rec.seg); rec.seg = '';
     // Sessions that end at once without words (no network, mic taken by a call) three times in a row: give up.
     rec.fails = !rec.heard && Date.now() - rec.t0 < 2000 ? rec.fails + 1 : 0;

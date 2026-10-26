@@ -10,8 +10,8 @@
 #      Bundle ID, version, build number and signing team.
 #   6. Checks Simplified Chinese (zh-Hans) is declared, and adds it to Info.plist only if missing.
 #   7. Voice input: installs a speech recognition plugin in the Capacitor project if missing
-#      (@capgo/capacitor-speech-recognition for Capacitor 8, which supports Swift Package Manager and
-#      CocoaPods; @capacitor-community/speech-recognition for Capacitor 5-7 with CocoaPods), and adds the
+#      (@capgo/capacitor-speech-recognition for Capacitor 8, or 7 with Swift Package Manager;
+#      @capacitor-community/speech-recognition for Capacitor 5-7 with CocoaPods), and adds the
 #      microphone and speech recognition permission texts to Info.plist if missing. WKWebView has no
 #      working Web Speech API. It never switches the project between SPM and CocoaPods.
 #
@@ -195,12 +195,12 @@ if [ "$SPEECH" = 1 ]; then
   [ -n "$CAP_MAJOR" ] || die "Could not read the @capacitor/core version in $CAP/node_modules."
   if [ -f "$IOS/Podfile" ]; then IOS_DEPS="CocoaPods"; else IOS_DEPS="Swift Package Manager"; fi
   ok "Capacitor $CAP_MAJOR, iOS dependencies via $IOS_DEPS"
-  if [ "$CAP_MAJOR" -ge 8 ]; then
-    SPEECH_PKG="@capgo/capacitor-speech-recognition"; PLUGIN_MAJOR=8; SPEECH_NATIVE="CapgoCapacitorSpeechRecognition"
+  if [ "$CAP_MAJOR" -ge 8 ] || { [ "$CAP_MAJOR" = 7 ] && [ "$IOS_DEPS" != "CocoaPods" ]; }; then
+    SPEECH_PKG="@capgo/capacitor-speech-recognition"; PLUGIN_MAJOR=$([ "$CAP_MAJOR" -ge 8 ] && echo 8 || echo 7); SPEECH_NATIVE="CapgoCapacitorSpeechRecognition"
   elif [ "$CAP_MAJOR" -ge 5 ] && [ "$IOS_DEPS" = "CocoaPods" ]; then
     SPEECH_PKG="@capacitor-community/speech-recognition"; PLUGIN_MAJOR="$CAP_MAJOR"; SPEECH_NATIVE="CapacitorCommunitySpeechRecognition"
   else
-    die "Capacitor $CAP_MAJOR with $IOS_DEPS has no supported speech plugin here (needs Capacitor 8, or 5-7 with CocoaPods). Nothing was changed for voice; the web files were already copied. Run again with --no-speech to finish the sync."
+    die "Capacitor $CAP_MAJOR with $IOS_DEPS has no supported speech plugin here (needs Capacitor 7 or 8, or 5-6 with CocoaPods). Nothing was changed for voice; the web files were already copied. Run again with --no-speech to finish the sync."
   fi
   OTHER="@capacitor-community/speech-recognition"; [ "$SPEECH_PKG" = "$OTHER" ] && OTHER="@capgo/capacitor-speech-recognition"
   [ -d "node_modules/$OTHER" ] && die "$OTHER is also installed. Both register the same SpeechRecognition plugin; remove it first (npm uninstall $OTHER)."
