@@ -643,3 +643,23 @@ test('secondary Build Next only from 2 actual notes across wider history, never 
   const olderOnly=ms.map((m,i)=>i===2?{...m,lt:['Other']}:m);
   assert.deepEqual(G.buildCandidates(olderOnly,focus,4).map(x=>x.tag),['Smash']);
 });
+
+test('tentative second suggestion needs a real skill-specific note and stays clearly one-off', () => {
+  fresh();
+  const ms=[
+    M(W,['Net'],['Smash']),M(W,['Net'],['Smash']),
+    M(L,['Smash'],[],{lost:'后场杀球失误比较多'}),
+    M(L,['Return'],['Serve'],{lost:'接发比较被动'}),
+    M(L,['Smash','Defence'],[],{lost:'杀球太多。反手防守比较弱。'}),
+    M(L,['Placement'],[],{lost:'网前吊球不好'})
+  ];
+  const focus=[{topic:'tag:Net',status:'active'}];
+  const items=G.buildCandidates(ms,focus,4);
+  assert.deepEqual(items.map(x=>x.tag),['Smash','Defence']);
+  assert.equal(items[1].exploratory,true);
+  for(const lang of BOTH) {
+    const out=G.finalizeItems(items,null,'build',lang);
+    assert.match(out[1].evidence,lang==='zh'?/1场/:/1 of 6/);
+    assert.equal(out[1].advice_basis,'general');
+  }
+});
