@@ -428,7 +428,7 @@ button:disabled{cursor:default !important;}
               </div>
             </sc-for>
             <sc-if value="{{ matchesEmpty }}" hint-placeholder-val="{{ false }}">
-              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ matchesEmpty.illustration }}" title="{{ matchesEmpty.title }}" body="{{ matchesEmpty.body }}" actionLabel="{{ matchesEmpty.actionLabel }}" onAction="{{ matchesEmpty.onAction }}" hint-size="350px,300px"></x-import>
+              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ matchesEmpty.illustration }}" title="{{ matchesEmpty.title }}" body="{{ matchesEmpty.body }}" actionLabel="{{ matchesEmpty.actionLabel }}" onAction="{{ matchesEmpty.onAction }}" compact="{{ true }}" hint-size="350px,300px"></x-import>
             </sc-if>
           </div>
         </div>

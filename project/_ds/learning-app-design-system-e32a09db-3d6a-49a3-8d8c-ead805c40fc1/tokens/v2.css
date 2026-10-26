@@ -221,14 +221,18 @@
   --rw-illustration-line: var(--rw-b100);
   --rw-illustration-fill: var(--rw-b200);
   --rw-illustration-detail: var(--rw-b50);
-  /* Backdrop circle (Han, 2026-10-26 05:05, after trying Soft Glow): a translucent B100 disc, lighter toward the bottom,
-     large enough to sit behind the whole drawing (reference: Han's shared empty-state set): disc 120px (compact 104px),
-     drawings 60-90px inside it. The old V1 circle was the same size but faded to nothing at the bottom, so it read small. */
-  --rw-illustration-backdrop: linear-gradient(180deg, color-mix(in srgb, var(--rw-b100) 14%, transparent) 0%, color-mix(in srgb, var(--rw-b100) 4%, transparent) 100%);
-  --rw-illus-size: 110px;
-  --rw-illus-box-size: 120px;
-  --rw-illus-size-compact: 96px;
-  --rw-illus-box-size-compact: 104px;
+  /* Backdrop circle (Han, 2026-10-26, after trying Soft Glow), proportions measured from Han's reference set:
+     drawing ~54% of the circle, sitting low (centre 15% below the circle's, base just inside the rim), title 25% of the
+     circle below it. The B100 tint is strongest at the top and is gone by ~88%, so the circle's base melts into the page. */
+  --rw-illustration-backdrop: linear-gradient(180deg, color-mix(in srgb, var(--rw-b100) 14%, transparent) 0%, color-mix(in srgb, var(--rw-b100) 9%, transparent) 35%, color-mix(in srgb, var(--rw-b100) 3%, transparent) 65%, transparent 88%);
+  --rw-illus-box-size: 128px;       /* circle */
+  --rw-illus-size: 100px;           /* drawing box (drawings are 57-83px inside it) */
+  --rw-illus-offset: 19px;          /* drawing moved down inside the circle */
+  --rw-illus-title-gap: 32px;       /* circle to title */
+  --rw-illus-box-size-compact: 112px;   /* dense screens: Matches, Insights, Player profile */
+  --rw-illus-size-compact: 88px;
+  --rw-illus-offset-compact: 17px;
+  --rw-illus-title-gap-compact: 28px;
   --rw-illustration-surface: var(--rw-color-bg-app);
   --rw-icon-btn-size: 40px;
   /* InlineBanner (Figma Foundation 333:8797): a reusable in-content prompt, e.g. "Who is “Chris”?" (Han, 2026-10-23).

@@ -495,12 +495,13 @@ button.rw-input-row{cursor:pointer;}
 /* Illustration: the drawing centred on a translucent backdrop circle that covers all of it. */
 .rw-illus{position:relative;display:grid;place-items:center;flex-shrink:0;width:var(--rw-illus-box-size);height:var(--rw-illus-box-size);}
 .rw-illus::before{content:"";position:absolute;inset:0;border-radius:50%;background:var(--rw-illustration-backdrop);pointer-events:none;}
-.rw-illus>svg{position:relative;width:var(--rw-illus-size);height:var(--rw-illus-size);}
-.rw-illus.is-compact{--rw-illus-size:var(--rw-illus-size-compact);--rw-illus-box-size:var(--rw-illus-box-size-compact);}
+.rw-illus>svg{position:relative;top:var(--rw-illus-offset);width:var(--rw-illus-size);height:var(--rw-illus-size);}
+.rw-illus.is-compact{--rw-illus-size:var(--rw-illus-size-compact);--rw-illus-box-size:var(--rw-illus-box-size-compact);--rw-illus-offset:var(--rw-illus-offset-compact);}
 /* EmptyState (illustrations.js): title, body and the one action, centred under the illustration. */
-/* 16px top / 12px to the title: the backdrop circle already adds air around the drawing, and this keeps an in-content empty state
-   (e.g. Matches filtered to Doubles) clear of the bottom nav on a 390 x 844 screen; shorter screens scroll (Han, 2026-10-26). */
-.rw-empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:16px 16px 32px;}
+/* 8px top: the circle's faint top edge already gives the air above it (keeps Matches -> Doubles clear of the nav at 390 x 844). */
+.rw-empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:8px 16px 32px;}
+.rw-empty .rw-illus + .rw-empty-title{margin-top:var(--rw-illus-title-gap);}
+.rw-empty .rw-illus.is-compact + .rw-empty-title{margin-top:var(--rw-illus-title-gap-compact);}
 .rw-empty-title{margin-top:12px;font:var(--rw-type-empty-title);letter-spacing:var(--rw-tracking);color:var(--rw-empty-title-fg);}
 .rw-empty-body{margin-top:8px;max-width:280px;font:var(--rw-type-empty-body);letter-spacing:var(--rw-tracking);color:var(--rw-empty-body-fg);}
 .rw-empty .rw-btn-primary{margin-top:24px;}
