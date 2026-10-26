@@ -360,6 +360,7 @@ const CONCEPTS = {
   shortServe: [/short serves?/i, /发小球|发短球|发网前/], longServe: [/(long|high|flick) serves?/i, /发高远|发后场|发平快/],
   grip: [/\bgrip/i, /握拍/], wrist: [/\bwrist/i, /手腕/], splitStep: [/split[- ]?step/i, /启动步|垫步|分腿/],
   rotation: [/\brotat/i, /轮转/], rearCourt: [/rear ?court|back ?court|baseline/i, /后场|底线/],
+  sideline: [/side ?line|near the line/i, /边线|靠线/],
   body: [/\bbody (shots?|smash(es)?)\b|at the body/i, /追身/], crossCourt: [/cross[- ]?court/i, /对角/], straight: [/\bstraight\b/i, /直线/],
   longRally: [/long rall/i, /多拍|长回合|相持/], endgame: [/deuce|game point|end of (the )?game|closing (out|points)|big points/i, /关键分|局末|赛点|局点/],
   decider: [/third game|deciding game|decider/i, /第三局|决胜局/], fitness: [/tired|stamina|fitness|fatigue/i, /体能|累了|疲劳/],
@@ -500,6 +501,12 @@ const SKILL_MENTION = {
   Placement: /\\bplacement\\b|落点|线路/i
 };
 const mentionsSkill = (note, tag) => SKILL_MENTION[tag]?.test(note) || false;
+// Count only concepts in the clauses about this skill. A note can also discuss
+// an unrelated skill (e.g. Smash + backhand Defence); those are not Smash evidence.
+const skillClauses = (notes, tag) => notes.flatMap(note =>
+  String(note).split(/[。！？；;，,.!?]/).map(s => s.trim())
+    .filter(s => mentionsSkill(s, tag)));
+
 export function topicSides(matches) {
   const { win } = noteWindow(matches), out = {};
   for (const tag of SKILL_TAGS) {
@@ -511,8 +518,10 @@ export function topicSides(matches) {
       // documented situations may legitimately coexist, otherwise suppress both.
       const costNotes = notesFor(win.filter(m => has(m, 'lt', tag)), ['lost']);
       const workedNotes = notesFor(win.filter(m => has(m, 'wt', tag)), ['worked']);
-      const costKinds = new Set(costNotes.flatMap(conceptsIn));
-      const workedKinds = new Set(workedNotes.flatMap(conceptsIn));
+      const costClauses = skillClauses(costNotes, tag);
+      const workedClauses = skillClauses(workedNotes, tag);
+      const costKinds = new Set(costClauses.flatMap(conceptsIn));
+      const workedKinds = new Set(workedClauses.flatMap(conceptsIn));
       const distinct = costKinds.size && workedKinds.size &&
         [...costKinds].every(k => !workedKinds.has(k)) &&
         costNotes.some(n => mentionsSkill(n, tag)) && workedNotes.some(n => mentionsSkill(n, tag));
