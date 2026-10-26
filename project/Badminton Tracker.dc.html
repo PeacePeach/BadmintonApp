@@ -1258,10 +1258,7 @@ button:disabled{cursor:default !important;}
             <div class="rw-surface rw-tile" style="display:flex;flex-direction:column;gap:12px;">
               <div class="rw-eyebrow tl">{{ s.label }}</div>
               <div style="display:flex;flex-direction:column;gap:8px;">
-                <sc-if value="{{ s.has }}" hint-placeholder-val="{{ true }}">
-                  <div class="rw-metric-value rw-record" role="text" aria-label="{{ s.aria }}"><span aria-hidden="true">{{ s.w }}</span><span class="rw-record-unit" aria-hidden="true">{{ tx.dotW }}</span><span class="rw-record-sep" aria-hidden="true">·</span><span aria-hidden="true">{{ s.l }}</span><span class="rw-record-unit" aria-hidden="true">{{ tx.dotL }}</span></div>
-                </sc-if>
-                <sc-if value="{{ s.none }}" hint-placeholder-val="{{ false }}"><div class="rw-metric-value" aria-hidden="true">–</div></sc-if>
+                <div class="rw-metric-value">{{ s.value }}</div>
                 <div class="rw-subtitle">{{ s.sub }}</div>
               </div>
             </div>
@@ -4088,9 +4085,8 @@ class Component extends DCLogic {
     if (v.isPlayer) {
       const id = s.playerId, o = this.vs(id), si = this.vs(id, 'Singles'), du = this.vs(id, 'Doubles'), w = this.with(id);
       const inv = all.filter(m => m.opps.includes(id) || m.partner === id);
-      // Each Metric tile shows the record like Recent Record (big numbers, small W / L units), or a dash with no matches.
-      const st = (label, r) => ({ label, has: r.n > 0, none: !r.n, w: r.w, l: r.l, aria: r.n ? this.recWords(r) : '',
-        sub: r.n ? this.t('pctWinRate', { p: r.pctStr }) : this.t('noMatchesShort') });
+      // Each Metric tile: win rate as the big value, games record (1W : 2L) below; a dash with no matches.
+      const st = (label, r) => ({ label, value: r.n ? r.pctStr : '–', sub: r.n ? this.t('wlShort', { w: r.w, l: r.l }) : this.t('noMatchesShort') });
       v.profile = { name: this.nm(id), initials: this.ini(id), avCls: this.avDir(id), sub: this.t(inv.length === 1 ? 'playedTogether1' : 'playedTogether', { n: inv.length }),
         stats: [st(this.t('overallH2H'), o), st(this.t('singlesH2H'), si), st(this.t('doublesH2H'), du), st(this.t('asPartner'), w)],
         recent: inv.slice(0, 5).map(m => this.card(m)),
