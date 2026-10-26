@@ -1,0 +1,538 @@
+/* =========================================================
+   RALLYWISE DESIGN SYSTEM V2: TOKENS
+   Source: Figma "Badminton App": Foundation paint styles, the Design System page (159:5834)
+   and the Matches screen (199:3497), which is the reference for every value below.
+   Three layers. Components use component or semantic tokens only, never primitives or hex.
+   Added beside the V1 tokens so screens not yet moved to V2 keep their current look.
+   ========================================================= */
+:root {
+  /* ---------- 1. Primitives: the full Figma Foundation palette (Section 2, node 3:1854), same names ----------
+     Values come from the Foundation paint styles. The palette sheet's text labels for Blue and Orange still show
+     older values (e.g. B100 #6C9FEF); the paint styles, which the screens use, win. */
+  /* Blue */
+  --rw-b50:               #e6f0ff;
+  --rw-b75:               #96c0ff;
+  --rw-b100:              #6ba6ff;
+  --rw-b200:              #2b7fff;
+  --rw-b300:              #0065ff;
+  --rw-b400:              #0047b3;
+  --rw-b500:              #003e9c;
+  /* Orange */
+  --rw-o50:               #fef3e6;
+  --rw-o75:               #fccd99;
+  --rw-o100:              #efb16a;
+  --rw-o200:              #f89930;
+  --rw-o300:              #f78406;
+  --rw-o400:              #ad5c04;
+  --rw-o500:              #975104;
+  /* Ocean */
+  --rw-ocean-50:          #e6fafc;
+  --rw-ocean-75:          #96ebf1;
+  --rw-ocean-100:         #6be3eb;
+  --rw-ocean-200:         #2bd6e3;
+  --rw-ocean-300:         #00cedd;
+  --rw-ocean-400:         #00909b;
+  --rw-ocean-500:         #007e87;
+  /* Green */
+  --rw-g50:               #e6f9f1;
+  --rw-g75:               #98e6c4;
+  --rw-g100:              #6ddcac;
+  --rw-g200:              #2ecd88;
+  --rw-g300:              #03c370;
+  --rw-g400:              #02894e;
+  --rw-g500:              #027744;
+  /* Yellow */
+  --rw-y50:               #fffae6;
+  --rw-y75:               #ffea97;
+  --rw-y100:              #ffe16c;
+  --rw-y200:              #ffd52d;
+  --rw-y300:              #ffcc02;
+  --rw-y400:              #b38f01;
+  --rw-y500:              #9c7c01;
+  /* Purple */
+  --rw-p50:               #f0e6fa;
+  --rw-p75:               #c096eb;
+  --rw-p100:              #a66be2;
+  --rw-p200:              #802bd6;
+  --rw-p300:              #6600cd;
+  --rw-p400:              #470090;
+  --rw-p500:              #3e007d;
+  /* Red */
+  --rw-r50:               #ffefef;
+  --rw-r75:               #ffbcbc;
+  --rw-r100:              #ffa0a0;
+  --rw-r150:              #f28c85;   /* Error red, between R100 and R200 in brightness (Han 2026-10-25) */
+  --rw-r200:              #ff7878;
+  --rw-r300:              #ff5c5c;
+  --rw-r350:              #b95454;   /* Destructive red, between R300 and R400 (Han 2026-10-26): destructive button fill */
+  --rw-r400:              #b34040;
+  --rw-r500:              #9c3838;
+  /* Red (second red family in the Foundation styles, "red-50/100/800"; used by the Toast, Figma 360:7533) */
+  --rw-red-50:            #ffebeb;
+  --rw-red-100:           #ffc2c2;
+  --rw-red-800:           #8c2020;
+  /* Violet */
+  --rw-violet-1:          #eaeaec;
+  --rw-violet-2:          #cbccd1;
+  --rw-violet-3:          #a3a3ac;
+  --rw-violet-4:          #787885;
+  --rw-violet-5:          #4f5061;
+  --rw-violet-6:          #28293e;
+  --rw-violet-7:          #222335;
+  --rw-violet-8:          #1c1d2c;
+  --rw-violet-9:          #171723;
+  --rw-violet-10:         #12121c;
+  /* Neutral */
+  --rw-n0:                #000000;
+  --rw-n75:               #202020;
+  --rw-n100:              #242425;
+  --rw-n150:              #2c2c2c;
+  --rw-n200:              #474749;
+  --rw-n300:              #6b6b6d;
+  --rw-n400:              #8f8f91;
+  --rw-n500:              #a6a6a8;
+  --rw-n600:              #bdbdbf;
+  --rw-n700:              #d4d4d5;
+  --rw-n800:              #ebebec;
+  --rw-n900:              #ffffff;
+  /* PurpleGrey */
+  --rw-purplegrey-50:     #eaeaea;
+  --rw-purplegrey-100:    #bdbdbe;
+  --rw-purplegrey-200:    #9d9d9f;
+  --rw-purplegrey-300:    #707073;
+  --rw-purplegrey-400:    #555458;
+  --rw-purplegrey-500:    #2a292e;
+  --rw-purplegrey-600:    #26252a;
+  --rw-purplegrey-700:    #1e1d21;
+  --rw-purplegrey-800:    #171719;
+  --rw-purplegrey-900:    #121113;
+  /* Effects and gradients */
+  --rw-glassfill: rgba(255, 255, 255, .05);                              /* GlassFill: #FFFFFF at 5% */
+  --rw-highlightfill: rgba(255, 255, 255, .08);                          /* Highlight Fill: #FFFFFF at 8% (Log Match, 207:7730) */
+  --rw-inactivefill: rgba(255, 255, 255, .03);                           /* Inactive Fill: #FFFFFF at 3% */
+  --rw-blue-gradient-01-from: #5b9dff;                                   /* Blue Gradient 01 start (also Blue Gradient 02 start) */
+  --rw-blue-gradient-01-to: #2c3f5c;                                     /* Blue Gradient 01 end */
+  --rw-blue-gradient-02-to: rgba(55, 94, 153, .8);                       /* Blue Gradient 02 end */
+  --rw-blue-gradient-01-stops: var(--rw-blue-gradient-01-from) 0%, var(--rw-blue-gradient-01-to) 100%; /* Blue Gradient 01 stops, reused at another angle */
+  --rw-blue-gradient-01: linear-gradient(90deg, var(--rw-blue-gradient-01-stops)); /* Blue Gradient 01 */
+  --rw-blue-gradient-01-8: linear-gradient(90deg, rgba(91, 157, 255, .08) 0%, rgba(44, 63, 92, .08) 100%); /* Blue Gradient 01 at 8% (InlineBanner) */
+  --rw-blue-gradient-02: linear-gradient(180deg, var(--rw-blue-gradient-01-from) 0%, var(--rw-blue-gradient-02-to) 100%); /* Blue Gradient 02 (vertical) */
+  --rw-orange-gradient-stops: #efb16a 0%, #212328 100%;                  /* OrangeGrad stops, reused at another angle */
+  --rw-orange-gradient: linear-gradient(180deg, var(--rw-orange-gradient-stops)); /* OrangeGrad (vertical): O100 -> #212328, Figma paint style */
+  /* Input Border Gradient (voice transcript card stroke, 213:7972): B100 at 50% -> clear at 51% -> B100 at 50%.
+     Figma's middle stop is #C4DCFF at 0% alpha; it is fully transparent, so it is written as B100 at 0%.
+     Stops are Figma's 0 / 51% / 100% re-projected onto the CSS gradient line of the 350 x 302 card at 130deg. */
+  --rw-input-border-gradient: linear-gradient(130deg, color-mix(in srgb, var(--rw-b100) 50%, transparent) 1.5%, color-mix(in srgb, var(--rw-b100) 0%, transparent) 65.7%, color-mix(in srgb, var(--rw-b100) 50%, transparent) 127.3%);
+
+  /* ---------- 2. Semantic tokens: what a colour is for ---------- */
+  /* Backgrounds and surfaces */
+  --rw-color-bg-app: var(--rw-purplegrey-900);
+  --rw-color-bg-glow: radial-gradient(circle 552.5px at 167.5px -102.5px, rgba(108, 159, 239, .2) 0%, rgba(91, 157, 255, 0) 100%); /* Ellipse 2: #6C9FEF -> #5B9DFF, 20% */
+  --rw-color-surface: var(--rw-glassfill);            /* content in the page: tiles, pills */
+  --rw-color-surface-glass: var(--rw-glassfill);      /* floating controls, with the glass effect */
+  --rw-color-surface-selected: var(--rw-glassfill);      /* same fill as glass surfaces (Han, consolidate) */
+  /* Text */
+  --rw-color-text-primary: var(--rw-n800);
+  --rw-color-text-secondary: var(--rw-n400);
+  --rw-color-text-body: var(--rw-n600);       /* sheet body copy (Info sheet, Figma 342:12303) */
+  --rw-color-text-tertiary: var(--rw-n300);           /* chart axis labels */
+  --rw-color-text-inactive: var(--rw-n500);           /* unselected nav items */
+  --rw-color-text-on-selected: var(--rw-n600);
+  --rw-color-text-on-action: var(--rw-n75);
+  --rw-color-text-highlight: linear-gradient(90deg, var(--rw-n800) 0%, var(--rw-b100) 100%); /* greeting title */
+  /* Actions and borders */
+  --rw-color-action-primary: var(--rw-n800);
+  --rw-color-border-selected: var(--rw-n600);         /* every selected outline: pills, nav item, radios, focus ring (Han) */
+  /* Status and data */
+  --rw-color-status-win: var(--rw-b100);
+  --rw-color-status-loss: var(--rw-o100);
+  --rw-color-data-fill: var(--rw-blue-gradient-01);
+  --rw-color-data-fill-vertical: var(--rw-blue-gradient-02); /* vertical bars */
+  --rw-color-data-fill-vertical-down: var(--rw-orange-gradient); /* vertical bars when win rate is falling (Figma 360:7620) */
+  --rw-color-data-track: var(--rw-purplegrey-500);
+  --rw-color-data-neutral: var(--rw-n200);            /* a neutral / inactive data point, e.g. a match without the thing (Han, 2026-10-24) */
+  --rw-color-data-earlier: var(--rw-n300);            /* the previous / earlier series in a comparison (Han, 2026-10-24) */
+  /* Voice Log Match (Figma 207:7730, Review 217:8404 / 248:2470) */
+  --rw-color-surface-input: var(--rw-inactivefill);   /* Figma 207:7730 card uses Inactive Fill (Han, 2026-10-22) */
+  --rw-color-surface-done: var(--rw-highlightfill);     /* a recognised item */
+  --rw-color-border-banner: var(--rw-n100);
+  --rw-color-surface-banner: var(--rw-blue-gradient-01-8);   /* in-content prompt, e.g. InlineBanner */
+  --rw-color-surface-highlight: var(--rw-highlightfill); /* raised control inside a surface, e.g. the Plus button on an empty player slot */
+  --rw-color-surface-pending: var(--rw-inactivefill);   /* an item not heard yet */
+  --rw-color-border-input-active: var(--rw-input-border-gradient);
+  --rw-color-border-pending: var(--rw-n400);           /* dashed ring (Figma N400) */
+  --rw-color-mark-done: var(--rw-b75);
+  --rw-color-mark-done-icon: var(--rw-b300);          /* check on the B75 dot (Figma Pills ChatBox 216:8356, Han 2026-10-22) */
+  --rw-color-status-recording: var(--rw-g100);
+  --rw-color-data-wave: var(--rw-b100);                 /* Figma #6C9FEF is the palette sheet's old B100 label */
+  --rw-color-status-warning: var(--rw-y400);
+  --rw-color-border-warning: var(--rw-y500);
+  --rw-color-surface-warning: color-mix(in srgb, var(--rw-o75) 8%, transparent); /* O75 at 8% */
+  --rw-color-scrim: color-mix(in srgb, var(--rw-n75) 50%, transparent);      /* behind a sheet: N75 at 50% (Figma 236:9207) */
+  /* Avatars */
+  --rw-color-avatar-bg: var(--rw-n150);              /* the gradient end colour (at 10%) */
+  /* Han, 2026-10-25: the whole avatar background at 70% (it read too dark on the Players sheet), so both stops x0.7. */
+  --rw-color-avatar-grad-from: color-mix(in srgb, #3e3e3e 70%, transparent); /* gradient start: Figma 360:8020 unbound #3E3E3E (Han approved, 2026-10-23), at 70% */
+  --rw-color-avatar-grad-to: color-mix(in srgb, var(--rw-color-avatar-bg) 35%, transparent); /* gradient end: N150 at 35% (Figma 10%; Han chose 50%, 2026-10-23; x0.7 on 2026-10-25) */
+  --rw-color-avatar-fg: var(--rw-n600);               /* letter N600 (Figma 360:8022) */
+  --rw-color-avatar-me-bg: var(--rw-b75);             /* your own avatar (Han, 2026-10-23: Figma Player 228:8826) */
+  --rw-color-avatar-me-fg: var(--rw-n75);             /* Figma #1B1A1D is unbound; nearest Foundation N75 */
+  --rw-color-surface-input-filled: var(--rw-purplegrey-500); /* search field holding a value (Figma 329:7330) */
+  /* Result and Notes sheets (Figma 349:3528, 349:3793; Han approved 2026-10-23) */
+  /* Insights / Grow (Figma 203:5215; pending Han's review, 2026-10-24) */
+  --rw-color-divider: var(--rw-n150);                 /* line inside a tile (Figma Tile full wide / half width) */
+  --rw-color-status-error: var(--rw-r150);            /* the ONE error red: error text, borders and icons everywhere, 100% opacity (Han 2026-10-25) */
+  --rw-color-action-destructive: var(--rw-r350);      /* destructive button fill: Delete Match / Account / Focus (Han 2026-10-26) */
+  --rw-color-text-on-destructive: var(--rw-n800);     /* label on the destructive fill (3.95:1; N75 was 3.46:1) */
+  --rw-color-text-accent: var(--rw-b100);             /* TRY NEXT label in Build Next (Figma #6BA6FF) */
+  --rw-color-icon-accent: var(--rw-b100);             /* icon in the Avatar "Fancy" badge */
+  --rw-color-border-icon-badge: linear-gradient(120deg, color-mix(in srgb, var(--rw-b100) 60%, transparent) 0%, color-mix(in srgb, var(--rw-b100) 5%, transparent) 100%); /* Figma shows B 5% at the faded end */
+  --rw-color-select-win: var(--rw-b75);              /* selected W on the W / L check (Figma CheckBoxes 348:13628) */
+
+  /* Back-compat names used by screens and the IconButton component */
+  --rw-bg-app: var(--rw-color-bg-app);
+  --rw-bg-app-glow: var(--rw-color-bg-glow);
+  --rw-text-primary: var(--rw-color-text-primary);
+  --rw-text-secondary: var(--rw-color-text-secondary);
+
+  /* ---------- Effects ---------- */
+  /* Liquid Glass, effect style "Default Glass": frost 11, refraction 0.31, depth 38, light 331deg at 20%,
+     dispersion 0.61, splay 0.17. CSS has frost (Figma radius 11 = blur 5.5px) and the edge light it draws
+     (strong top, softer bottom, faint sides; sampled from Figma renders). Refraction is not reproduced. */
+  --rw-glass-fill: var(--rw-color-surface-glass);
+  --rw-glass-effect: blur(5.5px);
+  --rw-glass-rim: inset 0 1px 0 rgba(255, 255, 255, .12), inset 0 -1px 0 rgba(255, 255, 255, .07), inset 0 0 0 1px rgba(255, 255, 255, .02);
+
+  /* ---------- 3. Component tokens ---------- */
+  /* Tile Container */
+  --rw-surface-fill: var(--rw-color-surface);
+  --rw-tile-radius: 15px;
+  --rw-tile-pad: 16px;
+  /* Button: Primary/Large and Icon/Medium */
+  --rw-btn-primary-bg: var(--rw-color-action-primary);
+  --rw-btn-primary-fg: var(--rw-color-text-on-action);
+  --rw-btn-primary-h: 52px;
+  --rw-btn-danger-bg: var(--rw-color-action-destructive);
+  --rw-btn-danger-fg: var(--rw-color-text-on-destructive);
+  /* EmptyState + illustrations (empty, error, offline states). No Figma frame; built from existing V2 tokens.
+     Illustrations keep their drawings and move from V1 blue-50/100/200 + bg-primary to the matching V2 Foundation styles. */
+  --rw-empty-title-fg: var(--rw-color-text-primary);
+  --rw-empty-body-fg: var(--rw-color-text-secondary);
+  --rw-illustration-line: var(--rw-b100);
+  --rw-illustration-fill: var(--rw-b200);
+  --rw-illustration-detail: var(--rw-b50);
+  /* Backdrop circle (Han, 2026-10-26, after trying Soft Glow), proportions measured from Han's reference set:
+     the circle masks the drawing's base along its arc (FRAME in illustrations.js scales each drawing), title 25% of the
+     circle below it. The B100 tint is strongest at the top and is gone by ~88%, so the circle's base melts into the page. */
+  --rw-illustration-backdrop: linear-gradient(180deg, color-mix(in srgb, var(--rw-b75) 12%, transparent) 0%, color-mix(in srgb, var(--rw-b75) 7%, transparent) 40%, color-mix(in srgb, var(--rw-b75) 2%, transparent) 75%, transparent 100%); /* B75, kept faint (Han 05:20, 05:26) */
+  --rw-illus-box-size: 128px;       /* circle */
+  --rw-illus-title-gap: 32px;       /* circle to title */
+  --rw-illus-box-size-compact: 112px;   /* dense screens: Matches, Insights, Player profile */
+  --rw-illus-title-gap-compact: 28px;
+  --rw-illustration-surface: var(--rw-color-bg-app);
+  --rw-icon-btn-size: 40px;
+  /* InlineBanner (Figma Foundation 333:8797): a reusable in-content prompt, e.g. "Who is “Chris”?" (Han, 2026-10-23).
+     Fill is Blue Gradient 01 at 8% (unbound in Figma, same stops), border N100. */
+  --rw-banner-bg: var(--rw-color-surface-banner);
+  --rw-banner-border: var(--rw-color-border-banner);
+  --rw-banner-radius: 10px;
+  /* Toast (Figma 360:7533): light fill, dark badge with a light icon, dark text. */
+  --rw-toast-radius: 10px;
+  --rw-toast-pad: 16px;
+  --rw-toast-title-fg: var(--rw-n75);
+  --rw-toast-body-fg: var(--rw-n100);
+  --rw-toast-close-fg: var(--rw-n75);
+  --rw-toast-success-bg: var(--rw-g50);   --rw-toast-success-badge: var(--rw-g500);   --rw-toast-success-icon: var(--rw-g100);
+  --rw-toast-error-bg: var(--rw-red-50);  --rw-toast-error-badge: var(--rw-red-800);  --rw-toast-error-icon: var(--rw-red-100);   /* Figma Toast 360:7533 (Han 2026-10-26: must match Figma; exception to the one error red) */
+  --rw-toast-info-bg: var(--rw-b50);      --rw-toast-info-badge: var(--rw-b400);      --rw-toast-info-icon: var(--rw-b75);
+  --rw-toast-warning-bg: var(--rw-y50);   --rw-toast-warning-badge: var(--rw-o500);   --rw-toast-warning-icon: var(--rw-y75);
+  --rw-type-banner-title: 600 16px/14px var(--font-sans);
+  --rw-type-toast-title: 600 14px/14px var(--font-sans);   /* Toast headline (Figma 14px SemiBold) */
+  --rw-type-toast-body: 500 14px/14px var(--font-sans);    /* Toast secondary copy (Figma 14px Medium) */
+  /* Button: Secondary/Medium (Figma Button 171:12473). The fill follows its surface (Han, 2026-10-23):
+     purplegrey-500 on the page, Highlight Fill on a tile or banner. */
+  --rw-btn-secondary-h: 32px;
+  --rw-btn-secondary-bg: var(--rw-color-surface-input-filled);
+  --rw-btn-secondary-bg-on-surface: var(--rw-color-surface-highlight);
+  --rw-btn-secondary-fg: var(--rw-color-text-primary);
+  --rw-type-btn-secondary: 500 12px/13px var(--font-sans);
+  /* IconButton "add" (Figma Player, State=Unselected 228:8836): Highlight Fill, N600 ring and icon (Han: active border, label and icon N600) */
+  --rw-icon-btn-add-bg: var(--rw-color-surface-highlight);
+  --rw-icon-btn-add-border: var(--rw-color-border-selected);
+  --rw-icon-btn-add-fg: var(--rw-color-text-on-selected);
+  /* Player row (Figma Player 228:8835; Han approved 2026-10-23, reuses Avatar and IconButton) */
+  --rw-player-h: 48px;
+  --rw-player-warning-border: var(--rw-color-status-warning);  /* Y400, Figma Player Warning=Yes (Han 2026-10-23) */
+  /* Search + results (Han 2026-10-25): 12px from the Search bar to the list, 4px between Player rows */
+  --rw-search-results-gap: 12px;
+  --rw-player-list-gap: 4px;
+  /* Pills */
+  --rw-pill-h: 32px;
+  --rw-pill-fg: var(--rw-color-text-secondary);
+  --rw-pill-active-border: var(--rw-color-border-selected);
+  --rw-pill-active-fg: var(--rw-color-text-on-selected); /* active border, label and icon are all N600 (Han, 2026-10-23) */
+  /* Graphs / Simple bar */
+  --rw-bar-track: var(--rw-color-data-track);
+  --rw-bar-fill: var(--rw-color-data-fill);
+  /* Match Result */
+  --rw-win: var(--rw-color-status-win);
+  --rw-loss: var(--rw-color-status-loss);
+  --rw-draw: var(--rw-color-text-secondary);          /* tied record (shown as "1W : 1L", not "Draw"), neutral N400 (Han, 2026-10-23) */
+  /* Avatar / Letter */
+  --rw-avatar-bg: var(--rw-color-avatar-bg);
+  /* Letter avatar gradient (Han, 2026-10-23): one pair of colours, six directions. Each player gets one direction
+     from a hash of their ID (.is-dir-1 ... .is-dir-6), so it looks random but stays the same everywhere.
+     The angle is set on the avatar itself (--rw-avatar-angle in components-v2.css). */
+  --rw-avatar-grad-from: var(--rw-color-avatar-grad-from);
+  --rw-avatar-grad-to: var(--rw-color-avatar-grad-to);
+  --rw-avatar-fg: var(--rw-color-avatar-fg);
+  --rw-avatar-lg-size: 64px;                         /* Profile header (pending Han) */
+  --rw-avatar-me-bg: var(--rw-color-avatar-me-bg);
+  --rw-avatar-me-fg: var(--rw-color-avatar-me-fg);
+  /* Search bar (Figma 329:7330; Han approved a reusable search component, 2026-10-23) */
+  /* Detail page (centred App bar): 40px from the App bar to the first component, 24px between components (Han 2026-10-25) */
+  --rw-page-head-gap: 40px;
+  --rw-page-gap: 24px;
+  /* Between sections (a titled block, or a form's main button) on every screen (Han 2026-10-26: one value, 40) */
+  --rw-section-gap: 40px;
+  --rw-search-h: 48px;
+  --rw-search-pad-x: 18px;
+  --rw-search-input-pad-x: 2px;
+  /* Input row (label inside the tile, Han 2026-10-25): notes under the tile line up with the row text */
+  --rw-field-inset: var(--rw-tile-pad);
+  --rw-input-row-h: 64px;
+  --rw-input-list-gap: 8px;
+  --rw-input-row-radius: 10px;
+  --rw-input-row-pad-top: 15px;
+  --rw-input-row-pad-bottom: 11px;
+  --rw-search-bg: var(--rw-color-surface);
+  --rw-search-bg-filled: var(--rw-color-surface-input-filled);
+  --rw-search-border-active: var(--rw-color-border-selected);
+  --rw-search-fg: var(--rw-color-text-secondary);
+  --rw-search-fg-active: var(--rw-color-text-primary);
+  --rw-search-caret: var(--rw-color-text-on-selected);
+  /* Graphs / Large bar (form chart) */
+  --rw-form-bar-track: var(--rw-color-data-track);
+  --rw-form-bar-fill: var(--rw-color-data-fill-vertical);
+  --rw-form-bar-fill-down: var(--rw-color-data-fill-vertical-down);
+  /* Score gap bar (Performance breakdown, Avg. Score Gap): fill grows out from the zero line, brightest at zero like
+     every other bar in the tile. Same stops as Blue Gradient 01 (gap > 0) and OrangeGrad (gap < 0), only the angle
+     follows the direction of growth. Zero line: 1px, 12px tall, three 2px N300 dashes (top, middle, bottom). */
+  --rw-gap-fill-up: linear-gradient(90deg, var(--rw-blue-gradient-01-stops));
+  --rw-gap-fill-down: linear-gradient(270deg, var(--rw-orange-gradient-stops));
+  --rw-gap-zero: var(--rw-color-text-tertiary);
+  --rw-chart-label-fg: var(--rw-color-text-tertiary);
+  /* Insights / Grow: KeyInsight, section header, Tile full wide / half width (Figma 203:5215) */
+  --rw-key-icon: var(--rw-color-icon-accent);  /* B100 Sparkle (AI) on the Key insight head */
+  --rw-key-bar-w: 212px;
+  /* Split KeyInsight: text left, chart right, 6:4 (Han, 2026-10-25; was half and half). key-chart.js draws the chart. */
+  --rw-key-split-gap: 16px;
+  --rw-key-split-text: 6fr;
+  --rw-key-split-chart: 4fr;
+  --rw-key-chart-min-h: 55px;  /* the shortest text column (1 title line + gap + 1 body line), so the chart never runs below the text (Han, 2026-10-25; was 88px) */
+  --rw-key-chart-grid: var(--rw-color-data-track);     /* dashed ticks + per-match lines, PurpleGrey 500 */
+  --rw-key-chart-tick: var(--rw-chart-label-fg);       /* N300 */
+  --rw-key-chart-dot: var(--rw-color-status-win);      /* B100, flat (Han: no shaded dots) */
+  --rw-key-chart-latest: var(--rw-color-status-win);   /* the latest value's number */
+  --rw-key-chart-earlier: var(--rw-color-data-earlier); /* N300: bars before the split */
+  --rw-key-chart-on: var(--rw-color-status-loss);      /* O100: it happened in this match */
+  --rw-key-chart-none: var(--rw-color-data-neutral);   /* N200: it didn't happen in this match */
+  --rw-key-chart-line-from: var(--rw-blue-gradient-01-to);   /* trend line: Blue Gradient 01 reversed, latest match bright */
+  --rw-key-chart-line-to: var(--rw-blue-gradient-01-from);
+  --rw-key-chart-bar-from: var(--rw-blue-gradient-01-from);  /* recent bars: Blue Gradient 02 */
+  --rw-key-chart-bar-to: var(--rw-blue-gradient-02-to);
+  --rw-advice-divider: var(--rw-color-divider);
+  /* Focus screen (Figma 203:6012): Focus ListRow 171:12403, Dots indicator 172:12646, Completed disclosure */
+  --rw-dots-size: 8px;
+  --rw-dots-gap: 4px;
+  --rw-dots-on: var(--rw-color-status-win);           /* B100; Figma #5B9DFF is unbound (Blue Gradient 01 start), nearest Foundation B100 */
+  --rw-dots-off: var(--rw-purplegrey-400);            /* Figma purplegrey-400 */
+  --rw-focus-tag-icon: var(--rw-color-icon-accent);  /* B100 Insights icon on the From Grow tag */
+  /* Focus Detail (Figma 203:6272) */
+  --rw-focus-source-dot: var(--rw-color-icon-accent); /* B100 dot before Created by you / Added from Grow (Figma #6BA6FF) */
+  --rw-focus-marker-gap: 16px;                        /* session markers (Focus frequency 173:14128) */
+  --rw-check-done-bg: var(--rw-n900);                 /* done session marker: Default Fill #FFFFFF (Figma 173:14118) */
+  --rw-chip-bg: var(--rw-color-surface-highlight);    /* Current / Done week tag; Figma #3A393E is unbound, Highlight Fill pending Han */
+  --rw-chip-fg: var(--rw-color-text-body);            /* Figma #C9C9CB is unbound, nearest semantic text-body N600 */
+  --rw-focus-list-gap: 8px;                           /* between Focus tiles (Han 2026-10-25; Figma 16px) */
+  --rw-focus-row-gap: 14px;                           /* text to dots, dots to chevron */
+  --rw-advice-label-accent: var(--rw-color-text-accent);
+  --rw-icon-badge-size: 40px;
+  --rw-icon-badge-ring: var(--rw-color-border-icon-badge);
+  --rw-icon-badge-fg: var(--rw-color-icon-accent);
+  /* Trend (Insight Subtitle with change) */
+  --rw-trend-up: var(--rw-color-status-win);
+  --rw-trend-down: var(--rw-color-status-loss);
+  --rw-trend-flat: var(--rw-color-text-secondary);
+  /* Top Tab */
+  --rw-tab-h: 48px;
+  --rw-tab-sm-h: 32px;                                /* Horizontal toggle, Figma 226:8787 (Singles / Doubles) */
+  --rw-tab-fg: var(--rw-color-text-secondary);
+  --rw-tab-active-border: var(--rw-color-border-selected);
+  --rw-tab-active-fg: var(--rw-color-text-on-selected);  /* active border, label and icon are all N600 (Han, 2026-10-23) */
+  /* App bar: scrim height covers the status time and the 40px action (58 + 40) plus the fade */
+  --rw-appbar-scrim-h: 124px;
+  --rw-appbar-top: 58px;                              /* top of the App bar row (below the status time) */
+  --rw-appbar-inset: 20px;                            /* left/right edge of the Back and ⋯ buttons = screen side padding */
+  --rw-appbar-btn: 40px;                              /* visible glass button (44px hit area, margin -2) */
+  /* Bottom Nav */
+  --rw-nav-fg: var(--rw-color-text-inactive);
+  --rw-nav-active-bg: var(--rw-color-surface-selected);
+  --rw-nav-active-border: var(--rw-color-border-selected);
+  --rw-nav-active-fg: var(--rw-color-text-on-selected);
+  /* Greeting */
+  --rw-text-gradient: var(--rw-color-text-highlight);
+  /* App bar title (Back / Close + screen name) */
+  --rw-appbar-title-gap: 12px;
+  /* Voice Input: transcript card, recognition cues, waveform, record controls */
+  --rw-voice-input-fill: var(--rw-color-surface-input);
+  --rw-voice-input-border: var(--rw-color-border-input-active);
+  --rw-voice-input-radius: 26px;
+  --rw-voice-input-h: 302px;
+  /* Bottom Sheet (Figma 319:6349; Han approved a reusable V2 sheet, 2026-10-23) */
+  --rw-sheet-bg: var(--rw-color-bg-app);
+  --rw-sheet-radius: 34px;
+  --rw-sheet-scrim: var(--rw-color-scrim);
+  --rw-sheet-grabber: var(--rw-purplegrey-400);       /* Figma #4F4E53 is unbound; nearest Foundation primitive (Han, 2026-10-23) */
+  --rw-sheet-divider: var(--rw-purplegrey-600);
+  /* Overflow menu (the ⋯ button: Players / Profile / Settings / Log Out). Figma has no menu component, so it is built
+     from existing tokens only: the sheet's app background with Glass Fill on top (reads like a tile), glass rim, tile
+     radius, sheet scrim, tile divider before the last action (2026-10-25, for Han to review). */
+  --rw-menu-bg: linear-gradient(var(--rw-color-surface-glass), var(--rw-color-surface-glass)), var(--rw-color-bg-app);
+  --rw-menu-radius: var(--rw-tile-radius);
+  --rw-menu-scrim: var(--rw-color-scrim);
+  --rw-menu-item-radius: 10px;
+  --rw-menu-item-fg: var(--rw-color-text-primary);    /* N800 label and icon (Han tried N600, chose N800, 2026-10-25) */
+  --rw-menu-item-icon: var(--rw-color-text-primary);
+  --rw-menu-item-pressed: var(--rw-color-surface-highlight);
+  --rw-menu-divider: var(--rw-color-divider);
+  /* W / L check (Figma CheckBoxes 348:13628). Selected = fill (no outline); unselected = dashed N400 ring. Letter N75 (Figma N150, Han R4) */
+  --rw-check-size: 32px;
+  --rw-check-win-bg: var(--rw-color-select-win);
+  --rw-check-loss-bg: var(--rw-color-status-loss);
+  --rw-check-on-fg: var(--rw-color-text-on-action);
+  --rw-check-fg: var(--rw-color-text-secondary);
+  --rw-check-ring: var(--rw-color-border-pending);
+  /* Button / Tertiary, Medium (Figma Button 171:12474): no fill, 16px icon + label, both N400 */
+  --rw-btn-tertiary-h: 24px;
+  --rw-btn-tertiary-fg: var(--rw-color-text-secondary);
+  /* IconButton XSmall (score stepper, Figma 349:3787): 20px, Glass Fill, 12px icon N600 */
+  --rw-icon-btn-xs-size: 20px;
+  --rw-icon-btn-xs-bg: var(--rw-color-surface);
+  --rw-icon-btn-xs-fg: var(--rw-color-text-body);
+  /* Pills XSmall (Figma Pills Size=XSmall, Type=Selectable 349:4195 / 349:4201): 24px, 12px label */
+  --rw-pill-xs-h: 24px;
+  /* TextArea (Figma 349:4322): Unfilled / Filled Inactive on Inactive Fill; Typing = Highlight Fill + N600 ring (Han N3). Placeholder N400 (Han N4) */
+  --rw-textarea-h: 124px;
+  --rw-textarea-radius: 10px;
+  --rw-textarea-bg: var(--rw-color-surface-input);
+  --rw-textarea-bg-active: var(--rw-color-surface-highlight);
+  --rw-textarea-border-active: var(--rw-color-border-selected);
+  --rw-textarea-fg: var(--rw-color-text-body);
+  --rw-textarea-fg-active: var(--rw-color-text-primary);
+  --rw-placeholder-text: #59595b;
+  --rw-textarea-placeholder: var(--rw-placeholder-text);
+  /* Stepper (Figma Create Focus 173:13319, "How often?"): Glass Fill track, 44px purplegrey-500 buttons with 18px icons, 14px value */
+  --rw-stepper-pad: 6px;
+  --rw-stepper-btn-size: 44px;
+  --rw-stepper-btn-bg: var(--rw-color-surface-input-filled);
+  --rw-stepper-fg: var(--rw-color-text-primary);
+  /* Result indicator on a cue pill (Figma 349:4144): plain dot. More wins B75, more losses O100, tied or unresolved neutral (Han N7) */
+  --rw-cue-dot-win: var(--rw-color-select-win);
+  --rw-cue-dot-loss: var(--rw-color-status-loss);
+  --rw-cue-dot-even: var(--rw-color-text-secondary);
+  --rw-cue-h: 24px;                                   /* Figma Pills Type=Indicator 216:8356 */
+  --rw-cue-done-bg: var(--rw-color-surface-done);
+  --rw-cue-done-fg: var(--rw-color-text-on-selected);
+  --rw-cue-pending-bg: var(--rw-color-surface-pending);
+  --rw-cue-pending-fg: var(--rw-color-text-secondary);
+  --rw-cue-mark-bg: var(--rw-color-mark-done);
+  --rw-cue-mark-fg: var(--rw-color-mark-done-icon);
+  --rw-cue-ring: var(--rw-color-border-pending);
+  --rw-wave-fill: var(--rw-color-data-wave);
+  --rw-rec-btn-size: 76px;
+  --rw-rec-btn-bg: var(--rw-color-action-primary);
+  --rw-rec-btn-fg: var(--rw-color-text-on-action);   /* stop glyph N75 (Figma N75) */
+  --rw-rec-dot: var(--rw-color-status-recording);
+  --rw-rec-dot-idle: var(--rw-color-text-secondary);  /* not recording: dot matches the time */
+  /* Review row (Insight / ListRow with chevron) and its flag */
+  --rw-flag-bg: var(--rw-color-surface-warning);
+  --rw-flag-icon: var(--rw-color-status-warning);
+  --rw-flag-border: var(--rw-color-border-warning);
+  --rw-flag-fg: var(--rw-n600);                      /* Pills State=Warning label N600 (Figma 329:7164, Han 2026-10-23) */
+
+  /* ---------- Type: Poppins, -0.16px tracking except tracked eyebrows ----------
+     V2 never goes below Medium (500): no Regular weight anywhere on a V2 screen. Text colour is N800 (primary) or
+     N400 (secondary); Figma N100/N900 (white) text is built as N800 (Han, 2026-10-22). */
+  --rw-weight-min: 500;
+  --rw-tracking: -0.16px;
+  --rw-zh-ink-shift: 0.07em;   /* Chinese glyphs sit this far above a Poppins line box centre; zh text in centred components moves down by it */
+  --rw-type-title: 600 24px/28.8px var(--font-sans);
+  --rw-type-lead: 500 16px/1.4 var(--font-sans);
+  --rw-type-eyebrow: 500 12px/13px var(--font-sans);
+  --rw-type-metric: 500 32px/1 var(--font-sans);
+  --rw-type-subtitle: 500 12px/13px var(--font-sans);
+  --rw-type-record-unit: 500 16px/1 var(--font-sans);  /* W / L after a record number (Han picked, 2026-10-23) */
+  --rw-type-caption: 500 12px/12px var(--font-sans);
+  --rw-type-result: 600 12px/12px var(--font-sans);
+  --rw-type-name: 500 14px/18.2px var(--font-sans);
+  --rw-type-score: 500 24px/1 var(--font-sans);
+  --rw-type-game-score: 500 18px/18px var(--font-sans);   /* per-game score in the Match Detail game table (Figma 367:8270) */
+  --rw-type-button: 600 14px/14px var(--font-sans);   /* was 15px; Han 2026-10-25: no 15px in the DS, 14px instead */
+  --rw-type-pill: 500 14px/15px var(--font-sans);
+  --rw-type-pill-sm: 500 12px/15px var(--font-sans);
+  --rw-type-avatar: 700 14px/14px var(--font-sans);    /* 40px avatar: Bold 14px (Han, 2026-10-23; Figma 360:8022 shows 16px) */
+  --rw-type-avatar-lg: 700 20px/20px var(--font-sans);  /* 64px Me avatar on Profile (pending Han) */
+  --rw-type-avatar-sm: 700 12px/12px var(--font-sans); /* 32px Match Players avatar: Bold 12px (Han, 2026-10-23) */
+  --rw-type-nav: 500 11px/12px var(--font-sans);
+  --rw-type-tab: 500 14px/14px var(--font-sans);      /* was 15px (Han 2026-10-25) */
+  --rw-type-tab-sm: 500 12px/12px var(--font-sans);
+  --rw-type-section: 500 16px/19.2px var(--font-sans);
+  --rw-type-trend: 600 12px/13px var(--font-sans);
+  --rw-type-chart-label: 500 12px/11px var(--font-sans);
+  --rw-type-row-label: 500 12px/16.9px var(--font-sans);
+  --rw-type-row-value: 500 14px/14px var(--font-sans);
+  --rw-type-row-sub: 500 11px/11px var(--font-sans);
+  --rw-type-list-value: 500 14px/14px var(--font-sans);   /* was 15px (Han 2026-10-25) */
+  --rw-type-appbar-title: 600 16px/20px var(--font-sans);
+  --rw-type-heading: 600 24px/1 var(--font-sans);  /* Figma 20px; 24px for Han to review (2026-10-22) */
+  --rw-type-hint: 500 14px/1.2 var(--font-sans);        /* Figma Regular -> Medium (V2 minimum) */
+  --rw-type-transcript: 500 16px/26.4px var(--font-sans); /* Figma Regular -> Medium (V2 minimum) */
+  --rw-type-empty-title: 600 16px/20px var(--font-sans);  /* EmptyState title (was V1 500 19px) */
+  --rw-type-empty-body: 500 14px/20px var(--font-sans);   /* EmptyState body (was V1 15px) */
+  --rw-type-timer: 500 14px/14px var(--font-sans);
+  --rw-type-flag: 500 12px/15px var(--font-sans);   /* Pills State=Warning (Figma 329:7164) */
+  --rw-type-row-text: 500 14px/20px var(--font-sans);   /* InputTile value (Figma 329:7089) */
+  --rw-type-sheet-title: 600 16px/20px var(--font-sans);  /* Bottom Sheet title SemiBold (Figma DS component 172:13098); 20px line so a wrapped title and Chinese glyphs never collide (Figma 15px) */
+  --rw-type-check: 600 14px/15px var(--font-sans);    /* W / L letter, 胜 / 负 too (Figma CheckBoxes; 14px per Han 2026-10-23) */
+  --rw-type-textarea: 500 14px/21px var(--font-sans); /* TextArea (Figma 349:4321) */
+  --rw-type-meta: 500 13px/16.9px var(--font-sans);   /* 13px helper and score lines; Figma Regular -> Medium (Han N5) */
+  --rw-type-disclosure: 500 14px/14px var(--font-sans);   /* Completed · n (Figma 199:3668) */
+  --rw-type-focus-sub: 500 12px/16.9px var(--font-sans);   /* Focus ListRow progress line (Figma 171:12392); Figma Regular -> Medium (V2 minimum) */
+  --rw-type-key-title: 500 17px/22.1px var(--font-sans);  /* KeyInsight headline (Figma 203:5441) */
+  --rw-type-body: 500 14px/21px var(--font-sans);         /* KeyInsight body; Figma Regular -> Medium (V2 minimum) */
+  --rw-type-key-chart-tick: 500 9px/1 var(--font-sans);  /* micro-chart labels ONLY (KeyInsight chart ticks and values); 9px is not allowed anywhere else (Han, 2026-10-24) */
+  --rw-type-tile-desc: 500 12px/16.8px var(--font-sans);  /* Tile half width evidence line (Figma 12px, 1.4) */
+  --rw-type-tile-text: 500 12px/18.2px var(--font-sans);  /* advice under a tile label: TRY NEXT, KEEP GOING, GAME PLAN */
+  --rw-type-tile-title: 500 14px/19.2px var(--font-sans);  /* tile heading: This Week, Overall Progress, What to Work On (Figma 173:14114) */
+  --rw-type-chip: 500 11px/11px var(--font-sans);          /* week tag chip (Figma 173:14247) */
+
+  /* ---------- 4. Motion (Han, 2026-10-26) ----------
+     One timing set for the whole app. Navigation (View Transitions, components-v2.css "Motion"), sheets, the ⋯ menu
+     and in-page fades all read these; nothing else uses literal ms. Enter = things arriving (fast start, soft stop);
+     exit = things leaving with nothing arriving (sheet close, menu close, toast out). Push and pop both use enter,
+     so Back responds the moment it is tapped. */
+  --rw-motion-push: 250ms;        /* new page slides in from the right */
+  --rw-motion-pop: 250ms;         /* reverse of push */
+  --rw-motion-sheet-in: 250ms;    /* Bottom Sheet slides up */
+  --rw-motion-sheet-out: 200ms;   /* Bottom Sheet slides down */
+  --rw-motion-menu: 150ms;        /* ⋯ menu fade + subtle scale, in and out */
+  --rw-motion-fade: 180ms;        /* main tab and segment switch: content fade, no slide */
+  --rw-motion-fade-fast: 150ms;   /* content updates (data arriving, steps inside a sheet); reduced-motion fallback for every slide */
+  --rw-motion-state: 220ms;       /* small state changes inside a component (app bar scrim, cue, waveform, bars, toast in) */
+  --rw-motion-press: 140ms;       /* press feedback and selected-state colour changes */
+  --rw-ease-enter: cubic-bezier(.2,.7,.2,1);
+  --rw-ease-exit: cubic-bezier(.4,0,1,1);
+  --rw-push-shift: -30%;          /* how far the covered page moves left under a push */
+  --rw-menu-scale: .96;           /* ⋯ menu starts / ends at this scale */
+}

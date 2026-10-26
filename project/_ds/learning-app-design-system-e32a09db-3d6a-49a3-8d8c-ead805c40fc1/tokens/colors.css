@@ -160,6 +160,16 @@
 
   /* Border */
   --border-default: var(--violet-5);
+  /* Hairline between sections inside a tile: a quiet grey a step lighter than --surface-primary. */
+  --divider: var(--neutral-200);
+  /* Round icon badge (avatar-style circle) inside a tile or row: one fill and one soft-white icon everywhere. */
+  --icon-badge-bg: var(--surface-muted);
+  --icon-badge-fg: var(--neutral-600);
+  /* Outline of an unselected control: ghost buttons (+ / −), radio circles, checkboxes. Same colour and weight everywhere. */
+  --control-outline: var(--ghost-button-outline);
+  /* Selected radio / checkbox: off-white fill with a dark check (same pair as a selected chip). */
+  --control-selected-bg: var(--text-primary);
+  --control-selected-fg: var(--text-inverse);
   --border-strong: var(--white);
 
   /* Action */
@@ -186,7 +196,7 @@
   --status-win: var(--blue-100);
   --status-loss: var(--orange-200);
   /* Feedback */
-  --status-error: var(--red-400);
+  --status-error: var(--rw-color-status-error);   /* V1 alias of the V2 error red (#F28C85, Han 2026-10-25) */
 
   /* Illustration — empty, error, success and connection states */
   --illustration-backdrop: var(--blue-100);

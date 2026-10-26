@@ -1,4 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+// Engine V2: candidates, chart data, ranking, validation and template copy (shared with tests/grow-insights.test.mjs).
+import * as G from "../_shared/grow-insights-core.js";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -6,46 +8,8 @@ const CORS = {
   "Access-Control-Allow-Methods": "POST, OPTIONS"
 };
 
-const schema = {
-  type: "object",
-  additionalProperties: false,
-  required: ["keyInsight","buildNext","strengths","opponentPlans","doublesPlay"],
-  properties: {
-    keyInsight: { anyOf: [
-      { type: "null" },
-      { type: "object", additionalProperties: false, required: ["title","body","metric_id"], properties: {
-        title: { type: "string" }, body: { type: "string" }, metric_id: { type: "string" }
-      }}
-    ]},
-    buildNext: { type: "array", maxItems: 2, items: {
-      type: "object", additionalProperties: false, required: ["name","evidence","action"], properties: {
-        name:{type:"string"}, evidence:{type:"string"}, action:{type:"string"}
-      }
-    }},
-    strengths: { type: "array", maxItems: 2, items: {
-      type: "object", additionalProperties: false, required: ["name","signal","action"], properties: {
-        name:{type:"string"}, signal:{type:"string"}, action:{type:"string"}
-      }
-    }},
-    opponentPlans: { type: "array", maxItems: 2, items: {
-      type: "object", additionalProperties: false, required: ["player_id","plan"], properties: {
-        player_id:{type:"string"}, plan:{type:"string"}
-      }
-    }},
-    doublesPlay: { type: "array", maxItems: 2, items: {
-      type: "object", additionalProperties: false, required: ["name","pattern","label","action"], properties: {
-        name:{type:"string"}, pattern:{type:"string"},
-        label:{type:"string",enum:["Try Next","Keep Doing"]}, action:{type:"string"}
-      }
-    }}
-  }
-};
-
-function resultOf(games:any[]) {
-  let us=0, them=0;
-  for (const g of games || []) g[0] > g[1] ? us++ : them++;
-  return us > them ? "win" : "loss";
-}
+// "win" | "loss" | "even" | null. Games saved without a score ({ r: "W" }) count by their result (they used to read as losses).
+const resultOf = (games:any[]) => G.matchResult({ games });
 function counts(matches:any[], field:string) {
   const c:any = {};
   for (const m of matches) for (const t of (m[field] || [])) c[t] = (c[t] || 0) + 1;
@@ -64,103 +28,121 @@ function readOutput(data:any){
 
 Deno.serve(async req => {
   if (req.method === "OPTIONS") return new Response("ok",{headers:CORS});
+  // Where the time goes (returned as timing and logged): auth + the 4 reads, the model call, the cache write.
+  const t0 = Date.now(), timing:any = {};
+  const done = (body:any) => { timing.total_ms = Date.now() - t0; console.log("grow timing", JSON.stringify({ ...timing, cached: !!body.cached, ai_status: body.insight?.ai_status || null })); return Response.json({ ...body, timing }, { headers: CORS }); };
   try {
     const auth = req.headers.get("Authorization") || "";
     const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
       global:{ headers:{ Authorization:auth } }
     });
-    const { data:u } = await sb.auth.getUser();
-    if (!u.user) return Response.json({error:"unauthorized"},{status:401,headers:CORS});
-    const uid = u.user.id;
+    // App language. Insights are written in it, and it is part of the cache fingerprint, so a cached insight
+    // is only ever returned in the language it was written in. English keeps the fingerprint it had before.
+    const reqBody = await req.json().catch(() => ({}));
+    const lang = reqBody && reqBody.lang === "zh" ? "zh" : "en";
+    // The app's own signature of the data it showed this insight for (stored with it, so another device can tell
+    // the row is current without asking again).
+    const clientSig = typeof reqBody?.sig === "string" ? reqBody.sig.slice(0, 64) : null;
+    // The released app (main) sends no lang and draws any truthy keyInsight as a tile with its title and an
+    // old-style percent bar from chart.current_percent. For it, the Key Insight is only { title, body } when there
+    // is one, else null (no empty tile, no NaN bar). What is stored is always the full insight.
+    const legacy = !reqBody || !("lang" in reqBody);
+    const out = (full:any) => { if (!full) return full; const { ai_copy, ...insight } = full; return !legacy ? insight
+      : { ...insight, keyInsight: insight.keyInsight?.status === "ok" && insight.keyInsight.title ? { title: insight.keyInsight.title, body: insight.keyInsight.body } : null }; };
 
-    const [{data:players,error:pe},{data:matches,error:me}] = await Promise.all([
+    // Focus rows (select * so topic_id is read once its column exists); a missing Focus table just means no Focus.
+    // The user check runs alongside the reads (one round trip, not two): every table is owner-only under RLS, so the
+    // reads only ever return this user's rows, and nothing is used or written unless the check passes.
+    const [{data:u},{data:players,error:pe},{data:matches,error:me},{data:focusRows},{data:cached}] = await Promise.all([
+      sb.auth.getUser(),
       sb.from("players").select("id,name,level").order("created_at"),
       sb.from("matches").select("id,date,type,partner,opps,games,wt,lt,worked,lost,opp_notes,created_at")
-        .order("date",{ascending:false}).order("created_at",{ascending:false}).limit(20)
+        .order("date",{ascending:false}).order("created_at",{ascending:false}).limit(20),
+      sb.from("focus_items").select("*"),
+      sb.from("ai_insights").select("input_fingerprint,insight_json,generated_at").maybeSingle()
     ]);
+    timing.db_ms = Date.now() - t0;
+    if (!u?.user) return Response.json({error:"unauthorized"},{status:401,headers:CORS});
+    const uid = u.user.id;
     if (pe || me) throw pe || me;
 
-    const recent = (matches || []).slice(0,10);
-    const INSIGHT_VERSION = "2026-10-15-v5";
-    const fp = await hash(INSIGHT_VERSION + JSON.stringify(recent.map((m:any)=>({
+    // v13: Build Next, Strengths, opponent plans and Doubles Play read all the fetched history (20 matches); the Key
+    // Insight keeps its own 10-match window inside the engine (normalize), so its trend standards are unchanged.
+    const recent = matches || [];
+    // One ai_insights row per user holds the latest insight at the top level (what older app versions read) and the
+    // other language's latest under other_lang, so switching EN <-> ZH and back is served from cache instead of
+    // overwriting the other language and paying for it again.
+    const slots:any[] = [];
+    if (cached?.insight_json) {
+      const { other_lang, ...top } = cached.insight_json;
+      slots.push({ lang: top.lang || "en", fp: cached.input_fingerprint, insight: top, generated_at: cached.generated_at });
+      if (other_lang?.insight) slots.push(other_lang);
+    }
+    // previous: the last insight in this language (its Key Insight is ranked down as "same as last time"; never the
+    // other language's, or EN and ZH could lead with different insights for the same matches). Focus topics may come
+    // from either.
+    const previous:any = slots.find(x => x.lang === lang)?.insight || null, anyPrevious:any = previous || slots[0]?.insight || null;
+    // Every Focus as a topic, so Build Next can leave out active topics and bring back completed ones on new evidence.
+    const names:any = Object.fromEntries((players || []).map((p:any)=>[p.id,p.name]));
+    const focus = (focusRows || []).map((f:any) => ({ topic: G.focusTopic(f, anyPrevious), status: f.status, completed_at: f.completed_at }));
+    const INSIGHT_VERSION = G.ENGINE_VERSION;
+    const matchJson = JSON.stringify(recent.map((m:any)=>({
       id:m.id,date:m.date,type:m.type,partner:m.partner,opps:m.opps,games:m.games,wt:m.wt,lt:m.lt,
       worked:safe(m.worked),lost:safe(m.lost),opp_notes:safe(m.opp_notes)
-    }))));
+    })));
+    const fp = await hash(INSIGHT_VERSION + (lang === "zh" ? ":zh" : "") + matchJson + JSON.stringify(focus.map((f:any) => [f.topic, f.status, f.completed_at]).sort())
+      // Opponent notes are given to the player they name, so a renamed player is new input.
+      + JSON.stringify((players || []).map((p:any) => [p.id, p.name]).sort()));
 
-    const {data:cached} = await sb.from("ai_insights")
-      .select("input_fingerprint,insight_json,generated_at").eq("user_id",uid).maybeSingle();
-    if (cached?.input_fingerprint === fp)
-      return Response.json({insight:cached.insight_json,generated_at:cached.generated_at,cached:true},{headers:CORS});
-    if (!recent.length) return Response.json({insight:null,cached:false},{headers:CORS});
+    const hit = slots.find(x => x.fp === fp);
+    if (hit) return done({insight:out(hit.insight),generated_at:hit.generated_at,cached:true});
+    if (!recent.length) return done({insight:null,cached:false});
 
-    const names:any = Object.fromEntries((players || []).map((p:any)=>[p.id,p.name]));
-    const opponents:any = {};
-    for (const m of recent) for (const pid of (m.opps || [])) {
-      const o = opponents[pid] ||= {player_id:pid,name:names[pid] || "Opponent",wins:0,losses:0,notes:[],cost:{}};
-      resultOf(m.games)==="win" ? o.wins++ : o.losses++;
-      if (m.opp_notes) o.notes.push(safe(m.opp_notes));
-      for (const t of (m.lt || [])) o.cost[t]=(o.cost[t]||0)+1;
-    }
+    // Opponents the player wrote notes about, with only those notes (no record: it says nothing about how they play).
+    const oppDiag = { matches_with_notes:0, unknown_opponent:0, names_no_opponent:0 };
+    const opponents = G.opponentFacts(recent, names, oppDiag);
     const six = recent.slice(0,6);
-    const doubles = recent.filter((m:any)=>m.type==="Doubles").slice(0,6);
+    const doubles = G.doublesFacts(recent);
 
-    const newest = six.slice(0, Math.min(3, six.length));
-    const older = six.slice(newest.length);
-    const tagRate = (list:any[], field:string, tag:string) =>
-      list.length ? Math.round(list.filter(m => (m[field] || []).includes(tag)).length / list.length * 100) : 0;
-    const tags = [...new Set(six.flatMap((m:any) => [...(m.wt || []), ...(m.lt || [])]).filter((t:any) => t && t !== "Other"))];
-    const key_metrics:any[] = [];
-    if (older.length >= 2 && newest.length >= 2) {
-      for (const tag of tags) {
-        const goodNow = tagRate(newest,"wt",tag), goodBefore = tagRate(older,"wt",tag);
-        const costNow = tagRate(newest,"lt",tag), costBefore = tagRate(older,"lt",tag);
-        if (Math.abs(goodNow-goodBefore) >= 20) key_metrics.push({
-          metric_id:"worked:" + tag, direction:"worked", tag,
-          current_percent:goodNow, previous_percent:goodBefore,
-          current_matches:newest.length, previous_matches:older.length
-        });
-        if (Math.abs(costNow-costBefore) >= 20) key_metrics.push({
-          metric_id:"cost:" + tag, direction:"cost", tag,
-          current_percent:costNow, previous_percent:costBefore,
-          current_matches:newest.length, previous_matches:older.length
-        });
-      }
-    }
+    // Engine V2 evidence: everything numeric is decided here; the model only picks and words it.
+    // Engine v14: P1 score trend -> P2 repeated pattern -> P3 early observation, from the same evidence as the sections
+    // below. All are kept for finalizeKey (and the report); the model sees the best 3.
+    // "Same as last time" (the novelty rule) means the Key Insight shown for the previous matches: when only a Focus
+    // or a name changed, the matches are the same, so the ranking keeps the input it had and the Key Insight doesn't
+    // flip to another candidate just because a Focus was added.
+    const matchesFp = (await hash(matchJson)).slice(0, 16);
+    const prevKeyId = previous?.basis?.matches_fp === matchesFp ? previous.basis.prev_key_id : previous?.keyInsight?.candidate_id;
+    const keyAll = G.keyCandidates(recent, prevKeyId, { focus, names }), keyCands = keyAll.slice(0,3);
+    const buildCands = G.buildCandidates(recent, focus, 4);
+    const strengthCands = G.strengthCandidates(recent, 3);
     const facts = {
       summary:{
         recent_matches:recent.length,
         wins:recent.filter((m:any)=>resultOf(m.games)==="win").length,
-        losses:recent.filter((m:any)=>resultOf(m.games)!=="win").length,
+        losses:recent.filter((m:any)=>resultOf(m.games)==="loss").length,
         singles:recent.filter((m:any)=>m.type==="Singles").length,
         doubles:recent.filter((m:any)=>m.type==="Doubles").length
       },
       patterns:{ cost_points:counts(six,"lt"), worked:counts(six,"wt") },
-      key_metrics,
-      notes:recent.flatMap((m:any)=>[
-        m.worked?{match_id:m.id,kind:"worked",text:safe(m.worked)}:null,
-        m.lost?{match_id:m.id,kind:"cost_points",text:safe(m.lost)}:null
-      ]).filter(Boolean).slice(0,12),
-      opponents:Object.values(opponents).map((o:any)=>({
-        player_id:o.player_id,name:o.name,record:{wins:o.wins,losses:o.losses},
-        notes:o.notes.slice(0,4),
-        cost_points:Object.entries(o.cost).sort((a:any,b:any)=>b[1]-a[1]).slice(0,4).map(([tag,count])=>({tag,count}))
-      })).filter((o:any)=>o.notes.length || o.record.wins+o.record.losses>=2).slice(0,5),
-      doubles:{
-        matches:doubles.length,cost_points:counts(doubles,"lt"),strengths:counts(doubles,"wt"),
-        notes:doubles.flatMap((m:any)=>[
-          m.worked?{kind:"worked",text:safe(m.worked)}:null,
-          m.lost?{kind:"cost_points",text:safe(m.lost)}:null
-        ]).filter(Boolean).slice(0,8)
-      }
+      key_candidates:keyCands.map((c:any)=>G.candidateFacts(c, lang)),
+      build_candidates:buildCands.map((b:any)=>({topic_id:b.topic_id,tag:b.tag,level:b.level,k:b.k,n:b.n,mixed:b.mixed,...(b.mixed?{w:b.w}:{}),returning:b.returning,notes:b.notes,advice_basis:b.basis})),
+      strength_candidates:strengthCands.map((b:any)=>({topic_id:b.topic_id,tag:b.tag,level:b.level,k:b.k,n:b.n,notes:b.notes,advice_basis:b.basis})),
+      opponents,
+      doubles
     };
 
+    // The model only words what the engine found. With nothing to word, there is no call; when the call fails (or no
+    // key is set) every section still comes back from the engine with its template copy, and opponent plans and
+    // Doubles Play, which only the model writes, stay empty. A failed call is not cached, so the next visit retries.
     const key = Deno.env.get("OPENAI_API_KEY");
-    if (!key) return Response.json({error:"ai_not_configured"},{status:503,headers:CORS});
+    const needsAI = keyCands.length || buildCands.length || strengthCands.length || opponents.length || doubles;
+    let aiStatus = needsAI ? (key ? "ok" : "not_configured") : "skipped";
 
     const prompt = `You are Rallywise's badminton insight writer.
 Use only supplied verified facts and player notes. Never invent scores, counts, trends, opponents, or events.
 Numbers are already computed; do not recalculate or contradict them. Treat notes as observations, not objective facts.
-Find recurring themes across tags and free text, including Other. Prefer fewer strong insights over filler.
+Skill Tags are the player's own notes, once per match: they say a skill was mentioned, never how many mistakes or points.
+Each candidate carries the notes from its own matches; use those, not notes from other matches. Prefer fewer strong insights over filler, and leave a section empty rather than pad it.
 
 VOICE AND TONE:
 - Write like a thoughtful badminton coach who noticed something useful, not like a dashboard, analyst, or performance report.
@@ -178,91 +160,135 @@ VOICE AND TONE:
 - Do not add encouragement to every sentence; keep it subtle and credible.
 
 COPY LENGTH — hard limits:
-- Key Insight title: max 5 words and max 34 characters. Aim for one line; never exceed two lines on a 390px mobile screen.
-- Key Insight body: max 16 words and max 90 characters. Aim for two short lines on a 390px mobile screen.
+- Key Insight: see KEY INSIGHT below (title 2 lines, body 3 lines on the card).
 - Build Next evidence: max 12 words. Action: max 14 words.
 - Strength evidence: max 12 words. Action: max 14 words.
 - Opponent game plan: max 20 words.
 - Doubles pattern/action: max 14 words each.
 
-KEY INSIGHT:
-- Make it a synthesized coaching insight, not a restatement of raw tags.
-- Think of the card as: title = interpretation; body = quantitative evidence; chart = visualization of exactly that same evidence.
-- For improving trends, the title should frame the progress positively (for example, "Returns are getting steadier") rather than leading with the remaining problem (for example, "Return errors remain costly"). The body can then acknowledge what still needs attention.
-- If using the chart, choose exactly one metric_id from key_metrics.
-- When metric_id is non-empty, the body MUST explicitly name what is being measured, include BOTH current_percent and previous_percent, and make the comparison window understandable when possible.
-- The numbers in the body MUST exactly match the selected key_metrics entry. Never round them differently, substitute different values, or describe a different metric.
-- Example: title "Your net game is getting stronger"; body "62% in your last 3 matches, up from 47% in the previous 3."
-- Chinese example: title "网前正在变得更稳定"; body "最近3场网前发挥率62%，此前3场为47%。"
-- If no key_metrics candidate genuinely supports a clear quantitative insight, set metric_id to "" and do not imply a numeric trend. In that case no chart will be shown.
-- metric_id is internal metadata only. NEVER expose metric_id, field names, tag syntax, parentheses such as "(cost:Footwork)", or implementation language in visible copy.
+${G.KEY_RULES}
 
 BUILD NEXT / STRENGTHS:
 - Evidence must explain WHY the card exists, but phrase it conversationally rather than like a report.
-- Prefer human coaching language such as "Movement has still been costing you points lately" over "Cost points in 4 of your last 6 tagged matches."
 - Never quote a player note directly in evidence and never prefix with "Player note:".
-- Free-text notes may influence the recommendation, but the displayed evidence should be synthesized and concise.
 - Recommendations must be one concrete action, not a drill paragraph and not multiple clauses.
 - Strengths should acknowledge what is working without exaggerating it.
+${G.ITEM_RULES}
 
-OPPONENT PLANS:
-- Return only the plan text. Never start with the opponent's name, a colon, or "Against [name]".
-- Convert observations into one concise tactical instruction that sounds like advice from a coach.
+${G.OPPONENT_RULES}
 
-DOUBLES PLAY:
-- Describe the pattern naturally, then give one practical adjustment or habit to keep.
-- Avoid mechanical labels or report-style wording.
+${G.DOUBLES_RULES}
 
-Do not mention AI. Keep every card scannable on a phone.`
+Do not mention AI. Keep every card scannable on a phone.
 
-    const ai = await fetch("https://api.openai.com/v1/responses",{
-      method:"POST",
-      headers:{Authorization:`Bearer ${key}`,"Content-Type":"application/json"},
-      body:JSON.stringify({
-        model:"gpt-5-mini",
-        input:[{role:"system",content:prompt},{role:"user",content:JSON.stringify(facts)}],
-        text:{format:{type:"json_schema",name:"rallywise_grow",strict:true,schema}}
-      })
-    });
-    if (!ai.ok) {
-      const detail = await ai.text();
-      console.error("OpenAI request failed", ai.status, detail.slice(0, 2000));
-      return Response.json({error:"ai_failed",upstream_status:ai.status},{status:502,headers:CORS});
-    }
-    const parsed = JSON.parse(readOutput(await ai.json()));
+OUTPUT LANGUAGE: write every visible string in ${lang === "zh" ? "natural Simplified Chinese" : "English"}. Keep JSON keys, candidate_id, topic_id, player_id and the doublesPlay label values ("Try Next" / "Keep Doing") exactly as specified.`
 
-    if (parsed.keyInsight) {
-      const chosen = key_metrics.find((m:any) => m.metric_id === parsed.keyInsight.metric_id);
-      if (chosen) {
-        parsed.keyInsight.chart = {
-          current_percent: chosen.current_percent,
-          previous_percent: chosen.previous_percent
-        };
-      } else {
-        parsed.keyInsight.metric_id = "";
+    // Copy reuse: each card's model copy is stored with the facts it was written from (ai_copy). When new data leaves a
+    // card's facts unchanged (a Focus added, one match edited), its copy is reused and only the cards whose facts
+    // changed go to the model, in one smaller call; with none, there is no call. Reused copy goes through the same
+    // checks below as new copy. Same language and same engine only.
+    const ck = async (x:any) => (await hash(lang + JSON.stringify(x))).slice(0, 16);
+    const prevCopy = previous?.engine_version === G.ENGINE_VERSION && previous?.ai_copy || null;
+    const copy:any = { key:null, build:{}, strengths:{}, opps:{}, doubles:null };
+    const keyCk = await ck(facts.key_candidates), doublesCk = await ck(doubles);
+    const reuse:any = { key: keyCands.length && prevCopy?.key?.ck === keyCk ? prevCopy.key : null, build:[], strengths:[], opps:[], doubles: doubles && prevCopy?.doubles?.ck === doublesCk ? prevCopy.doubles : null };
+    const need:any = { key: !!keyCands.length && !reuse.key, build:[], strengths:[], opps:[], doubles: !!doubles && !reuse.doubles };
+    for (const [list, kind, id] of [[facts.build_candidates, "build", "topic_id"], [facts.strength_candidates, "strengths", "topic_id"], [opponents, "opps", "player_id"]] as any[])
+      for (const f of list) {
+        const c = await ck(f), p = prevCopy?.[kind]?.[f[id]];
+        copy[kind][f[id]] = { ck: c, v: null };
+        if (p?.ck === c) { reuse[kind].push(p.v); copy[kind][f[id]].v = p.v; } else need[kind].push(f);
       }
+    copy.key = { ck: keyCk, v: reuse.key?.v || null }; copy.doubles = { ck: doublesCk, v: reuse.doubles?.v || null };
+    const asks = (need.key ? 1 : 0) + need.build.length + need.strengths.length + need.opps.length + (need.doubles ? 1 : 0);
+    if (aiStatus === "ok" && !asks) aiStatus = "reused";
+    timing.reused = { key: !!reuse.key, items: reuse.build.length + reuse.strengths.length + reuse.opps.length, doubles: !!reuse.doubles };
+    timing.asked = { key: need.key, items: need.build.length + need.strengths.length + need.opps.length, doubles: need.doubles };
+
+    const empty = () => ({ keyInsight:null, buildNext:[], strengths:[], opponentPlans:[], doublesPlay:[] });
+    let parsed:any = empty();
+    if (aiStatus === "ok") {
+      const ask = { ...facts, key_candidates: need.key ? facts.key_candidates : [], build_candidates: need.build, strength_candidates: need.strengths, opponents: need.opps, doubles: need.doubles ? doubles : null };
+      const schema:any = G.modelSchema(need.key ? keyCands.map((c:any)=>c.id) : [], need.build.map((b:any)=>b.topic_id), need.strengths.map((b:any)=>b.topic_id), need.opps.map((o:any)=>o.player_id));
+      if (!need.key) schema.properties.keyInsight = { type:"null" };
+      schema.properties.buildNext.maxItems = need.build.length; schema.properties.strengths.maxItems = need.strengths.length;
+      if (!need.doubles) schema.properties.doublesPlay.maxItems = 0;
+      const ta = Date.now();
+      try {
+        // A model call that hangs must not hold Grow on "Looking at your matches…": after 40s it counts as failed
+        // (engine sections with template copy, not cached, retried on the next visit).
+        const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), Number(Deno.env.get("GROW_AI_TIMEOUT_MS")) || 40000);
+        const ai = await fetch("https://api.openai.com/v1/responses",{
+          method:"POST", signal:ctl.signal,
+          headers:{Authorization:`Bearer ${key}`,"Content-Type":"application/json"},
+          body:JSON.stringify({
+            model:"gpt-5-mini",
+            input:[{role:"system",content:prompt},{role:"user",content:JSON.stringify(ask)}],
+            text:{format:{type:"json_schema",name:"rallywise_grow",strict:true, schema}}
+          })
+        });
+        clearTimeout(timer);
+        if (!ai.ok) {
+          const detail = await ai.text();
+          console.error("OpenAI request failed", ai.status, detail.slice(0, 2000));
+          aiStatus = "failed";
+        } else parsed = JSON.parse(readOutput(await ai.json()));
+      } catch (e) {
+        console.error("OpenAI answer unusable", e);
+        aiStatus = "failed"; parsed = empty();
+      }
+      timing.ai_ms = Date.now() - ta;
+      // What the model wrote now is stored with the facts it was written from (null where it wrote nothing: the
+      // same facts get the same template next time instead of another call).
+      if (need.key) copy.key.v = parsed.keyInsight || null;
+      for (const [kind, arr, id] of [["build", parsed.buildNext, "topic_id"], ["strengths", parsed.strengths, "topic_id"], ["opps", parsed.opponentPlans, "player_id"]] as any[])
+        for (const x of arr || []) if (x && copy[kind][x[id]] && !copy[kind][x[id]].v) copy[kind][x[id]].v = x;
+      if (need.doubles) copy.doubles.v = parsed.doublesPlay || [];
+    }
+    // Reused copy joins what the model wrote now (also when the call failed: those cards keep their copy).
+    if (reuse.key) parsed.keyInsight = reuse.key.v;
+    parsed.buildNext = [...reuse.build.filter(Boolean), ...(parsed.buildNext || [])];
+    parsed.strengths = [...reuse.strengths.filter(Boolean), ...(parsed.strengths || [])];
+    parsed.opponentPlans = [...reuse.opps.filter(Boolean), ...(parsed.opponentPlans || [])];
+    if (reuse.doubles) parsed.doublesPlay = reuse.doubles.v || [];
+    parsed.lang = lang;
+    parsed.ai_status = aiStatus;
+
+    parsed.engine_version = G.ENGINE_VERSION;
+    // The engine's evidence decides the chart; the AI copy is kept only if it passes the checks, else the template.
+    parsed.keyInsight = G.finalizeKey(keyAll, parsed.keyInsight, lang, recent);
+    parsed.buildNext = G.finalizeItems(buildCands, parsed.buildNext, "build", lang);
+    parsed.strengths = G.finalizeItems(strengthCands, parsed.strengths, "strength", lang);
+    const failed = [parsed.keyInsight, ...parsed.buildNext, ...parsed.strengths].filter((x:any) => x.copy_source && x.copy_source !== "ai");
+    if (failed.length) console.warn("grow copy replaced", JSON.stringify(failed.map((x:any) => [x.candidate_id || x.topic_id, x.validation?.ai_issues || x.issues])));
+
+    // Opponent plans and Doubles Play are checked against the notes they came from. A plan that fails falls back to
+    // the player's own note (when it says something specific); Doubles Play falls back to the noted doubles tags.
+    const plans = G.finalizeOpponents(parsed.opponentPlans, opponents, lang);
+    const droppedPlans = plans.filter((p:any) => p.dropped || p.issues);
+    if (droppedPlans.length) console.warn("opponent plans replaced or dropped", JSON.stringify(droppedPlans));
+    parsed.opponentPlans = plans.filter((p:any) => !p.dropped);
+    parsed.doublesPlay = G.finalizeDoubles(parsed.doublesPlay, doubles, lang);
+    // Engine v14 invariant: a section with cards means the Key Insight had a candidate.
+    if (parsed.keyInsight.status !== "ok" && (parsed.buildNext.length || parsed.strengths.length || parsed.opponentPlans.length || parsed.doublesPlay.length))
+      console.error("key insight empty while sections have cards", JSON.stringify(parsed.keyInsight));
+    parsed.coverage = G.coverage(recent, { build:parsed.buildNext, strengths:parsed.strengths, opps:opponents, plans, doubles, doublesPlay:parsed.doublesPlay, keyInsight:parsed.keyInsight, oppDiag });
+
+    if (aiStatus === "ok" || aiStatus === "reused") parsed.ai_copy = copy;
+    if (clientSig) parsed.client_sig = clientSig;
+    parsed.basis = { matches_fp: matchesFp, prev_key_id: prevKeyId || null };
+    const generated_at = new Date().toISOString();
+    if (aiStatus !== "failed") {
+      const tw = Date.now();
+      const other = slots.find(x => x.lang !== lang);
+      const {error:ce} = await sb.from("ai_insights").upsert({
+        user_id:uid,input_fingerprint:fp,insight_json:{ ...parsed, ...(other ? { other_lang:other } : {}) },generated_at
+      },{onConflict:"user_id"});
+      timing.write_ms = Date.now() - tw;
+      if (ce) throw ce;
     }
 
-    parsed.opponentPlans = (parsed.opponentPlans || []).map((p:any) => {
-      const o:any = Object.values(opponents).find((x:any) => x.player_id === p.player_id);
-      const name = String(o?.name || "").trim();
-      let plan = String(p.plan || "").trim();
-      if (name) {
-        const lower = plan.toLowerCase();
-        const prefix1 = (name + ":").toLowerCase();
-        const prefix2 = ("against " + name + ":").toLowerCase();
-        if (lower.startsWith(prefix1)) plan = plan.slice(prefix1.length).trim();
-        else if (lower.startsWith(prefix2)) plan = plan.slice(prefix2.length).trim();
-      }
-      return { ...p, plan };
-    });
-
-    const {error:ce} = await sb.from("ai_insights").upsert({
-      user_id:uid,input_fingerprint:fp,insight_json:parsed,generated_at:new Date().toISOString()
-    },{onConflict:"user_id"});
-    if (ce) throw ce;
-
-    return Response.json({insight:parsed,cached:false},{headers:CORS});
+    return done({insight:out(parsed),generated_at,cached:false});
   } catch (e) {
     console.error(e);
     return Response.json({error:"server_error"},{status:500,headers:CORS});

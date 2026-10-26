@@ -13,7 +13,14 @@
     href="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/typography.css"
   />
 
+  <link rel="stylesheet" href="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/fonts.css" />
+  <link rel="stylesheet" href="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/effects.css" />
+  <link rel="stylesheet" href="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/spacing.css" />
+  <link rel="stylesheet" href="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/v2.css" />
+  <link rel="stylesheet" href="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/components-v2.css" />
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
   <script src="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/illustrations.js"></script>
+  <script src="./_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/key-chart.js" defer></script>
 
   <title>Badminton Design System</title>
 
@@ -163,7 +170,7 @@
       gap: 6px;
     }
 
-    .illus-art { width: 160px; height: 160px; margin-bottom: 12px; }
+    .illus-art { width: 160px; height: 160px; margin-bottom: 12px; display: grid; place-items: center; }
     .illus-title { font: 500 17px/1.35 var(--font-sans, Poppins, sans-serif); }
     .illus-name { font: 400 13px/1.4 ui-monospace, monospace; color: var(--text-secondary); }
     .illus-use { font: 400 13px/1.4 var(--font-sans, Poppins, sans-serif); color: var(--text-secondary); }
@@ -177,7 +184,28 @@
         gap: 10px;
       }
     }
-  </style>
+    /* Design System V2 section */
+    .v2-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .v2-table th, .v2-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border-default); vertical-align: middle; }
+    .v2-table th { color: var(--text-secondary); font-weight: 500; }
+    .v2-table td:nth-child(2), .v2-table td:nth-child(3) { font-family: ui-monospace, monospace; font-size: 12px; }
+    .v2-sw { display: block; width: 28px; height: 28px; border-radius: 6px; border: 1px solid rgba(255,255,255,.15); }
+    .v2-stage { border-radius: 24px; padding: 32px 24px; font-family: var(--font-sans); }
+    .v2-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 32px 24px; }
+    .v2-fam { margin: 18px 0 8px; font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+    .v2-prims { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 10px; }
+    .v2-prim { display: flex; flex-direction: column; gap: 2px; font-size: 11px; }
+    .v2-prim i { display: block; height: 40px; border-radius: 8px; border: 1px solid rgba(255,255,255,.12); margin-bottom: 4px; }
+    .v2-prim b { font-weight: 600; font-size: 12px; }
+    .v2-prim span { color: var(--text-secondary); font-family: ui-monospace, monospace; }
+    .v2-wide { grid-column: 1 / -1; }
+    .v2-label { font: 500 11px/1.3 var(--font-sans); color: var(--rw-text-secondary); margin-bottom: 10px; }
+    .v2-iconbtn { width: var(--rw-icon-btn-size); height: var(--rw-icon-btn-size); border-radius: 50%; border: none; color: var(--rw-text-primary); display: flex; align-items: center; justify-content: center; }
+    .v2-navwrap { position: relative; height: 96px; }
+    @media (max-width: 600px) { .v2-table th:nth-child(4), .v2-table td:nth-child(4) { display: none; } }
+  .v2-slot{height:120px;border:1px dashed var(--rw-n200);border-radius:15px;display:flex;align-items:center;justify-content:center;color:var(--rw-n400);font:500 12px/1 var(--font-sans);}
+  .v2-typing{border-color:var(--rw-search-border-active);} .v2-typing .rw-search-input{color:var(--rw-search-fg-active);}
+</style>
 </head>
 
 <body>
@@ -320,6 +348,12 @@
     <h3>Border</h3>
     <div class="semantic-row"><div class="semantic-name">--border-default</div><div class="semantic-preview" style="background: var(--border-default);"></div><span class="usage">→ violet-5</span></div>
     <div class="semantic-row"><div class="semantic-name">--border-strong</div><div class="semantic-preview" style="background: var(--border-strong);"></div><span class="usage">→ white</span></div>
+    <div class="semantic-row"><div class="semantic-name">--divider</div><div class="semantic-preview" style="background: var(--divider);"></div><span class="usage">→ neutral-200 · lines inside tiles</span></div>
+    <div class="semantic-row"><div class="semantic-name">--icon-badge-bg</div><div class="semantic-preview" style="background: var(--icon-badge-bg);"></div><span class="usage">→ surface-muted · round icon badges</span></div>
+    <div class="semantic-row"><div class="semantic-name">--icon-badge-fg</div><div class="semantic-preview" style="background: var(--icon-badge-fg);"></div><span class="usage">→ neutral-600 · icon inside round badges</span></div>
+    <div class="semantic-row"><div class="semantic-name">--control-outline</div><div class="semantic-preview" style="background: var(--control-outline);"></div><span class="usage">→ ghost-button-outline · unselected radio, checkbox, ghost button (1px, --control-outline-width)</span></div>
+    <div class="semantic-row"><div class="semantic-name">--control-selected-bg</div><div class="semantic-preview" style="background: var(--control-selected-bg);"></div><span class="usage">→ text-primary · selected radio / checkbox fill</span></div>
+    <div class="semantic-row"><div class="semantic-name">--control-selected-fg</div><div class="semantic-preview" style="background: var(--control-selected-fg);"></div><span class="usage">→ text-inverse · check mark on a selected control</span></div>
 
     <h3>Action</h3>
     <div class="semantic-row"><div class="semantic-name">--action-primary</div><div class="semantic-preview" style="background: var(--action-primary);"></div><span class="usage">→ blue-300</span></div>
@@ -329,7 +363,7 @@
     <div class="semantic-row"><div class="semantic-name">--status-win</div><div class="semantic-preview" style="background: var(--status-win);"></div><span class="usage">→ blue-100</span></div>
     <div class="semantic-row"><div class="semantic-name">--status-loss</div><div class="semantic-preview" style="background: var(--status-loss);"></div><span class="usage">→ orange-300</span></div>
     <h3>Feedback</h3>
-    <div class="semantic-row"><div class="semantic-name">--status-error</div><div class="semantic-preview" style="background: var(--status-error);"></div><span class="usage">→ red-400</span></div>
+    <div class="semantic-row"><div class="semantic-name">--status-error</div><div class="semantic-preview" style="background: var(--status-error);"></div><span class="usage">→ --rw-color-status-error (R150 #F28C85)</span></div>
   
     <h2>Typography</h2>
     <div class="section-note">
@@ -391,18 +425,18 @@
 
     <h3>Style rules</h3>
     <ul class="rules">
-      <li>Soft circular backdrop (r 60 on a 160 canvas), centered, with plenty of space around it.</li>
-      <li>2px outlines in <code>--illustration-line</code>, object bodies in <code>--illustration-surface</code>.</li>
-      <li>One small filled area per drawing in <code>--illustration-fill</code>, with <code>--illustration-detail</code> for lines on top of it.</li>
+      <li>Translucent backdrop circle (<code>--rw-illustration-backdrop</code>, B75 12% at the top fading out) that is also the mask for the lower half: most drawings are framed larger (<code>FRAME</code> in illustrations.js) so their base is cut along the circle's arc. 128px circle; <code>compact</code> 112px on dense screens.</li>
+      <li>2px outlines in <code>--rw-illustration-line</code>, object bodies in <code>--rw-illustration-surface</code> (the app background).</li>
+      <li>One small filled area per drawing in <code>--rw-illustration-fill</code>, with <code>--rw-illustration-detail</code> for lines on top of it.</li>
       <li>Flat 2D only: no 3D, shading, scenes, heavy gradients or decoration. Not used in auth or onboarding.</li>
     </ul>
 
     <h3>Tokens</h3>
-    <div class="semantic-row"><div class="semantic-name">--illustration-backdrop</div><div class="semantic-preview" style="background: var(--illustration-backdrop);"></div><span class="usage">→ blue-100, 9% to 0% opacity</span></div>
-    <div class="semantic-row"><div class="semantic-name">--illustration-line</div><div class="semantic-preview" style="background: var(--illustration-line);"></div><span class="usage">→ blue-100</span></div>
-    <div class="semantic-row"><div class="semantic-name">--illustration-fill</div><div class="semantic-preview" style="background: var(--illustration-fill);"></div><span class="usage">→ blue-200</span></div>
-    <div class="semantic-row"><div class="semantic-name">--illustration-surface</div><div class="semantic-preview" style="background: var(--illustration-surface);"></div><span class="usage">→ bg-primary</span></div>
-    <div class="semantic-row"><div class="semantic-name">--illustration-detail</div><div class="semantic-preview" style="background: var(--illustration-detail);"></div><span class="usage">→ blue-50</span></div>
+    <div class="semantic-row"><div class="semantic-name">--rw-illustration-backdrop</div><div class="semantic-preview" style="background: var(--rw-illustration-backdrop);"></div><span class="usage">→ B75, 12% at the top fading to 0 (backdrop circle)</span></div>
+    <div class="semantic-row"><div class="semantic-name">--rw-illustration-line</div><div class="semantic-preview" style="background: var(--rw-illustration-line);"></div><span class="usage">→ B100 (V2; V1 --illustration-line is the fallback)</span></div>
+    <div class="semantic-row"><div class="semantic-name">--rw-illustration-fill</div><div class="semantic-preview" style="background: var(--rw-illustration-fill);"></div><span class="usage">→ B200 (V2; V1 --illustration-fill is the fallback)</span></div>
+    <div class="semantic-row"><div class="semantic-name">--rw-illustration-surface</div><div class="semantic-preview" style="background: var(--rw-illustration-surface);"></div><span class="usage">→ --rw-color-bg-app (Purplegrey 900) (V2; V1 --illustration-surface is the fallback)</span></div>
+    <div class="semantic-row"><div class="semantic-name">--rw-illustration-detail</div><div class="semantic-preview" style="background: var(--rw-illustration-detail);"></div><span class="usage">→ B50 (V2; V1 --illustration-detail is the fallback)</span></div>
 
     <h3>Set</h3>
     <div class="illus-grid" id="illus-grid"></div>
@@ -414,6 +448,7 @@
           ['no-players', 'No Players Yet', 'Players list'],
           ['no-insights', 'No Insights Yet', 'Insights before any data'],
           ['no-results', 'No Players Found', 'Search with no results'],
+          ['no-focus', 'Nothing in Focus Yet', 'Focus list before anything is added'],
           ['error', 'Something Went Wrong', 'Load or save failed'],
           ['success', 'All Done', 'Completed actions'],
           ['connection-lost', 'Connection Lost', 'Offline or network failure']
@@ -422,13 +457,565 @@
         items.forEach(function (it) {
           var card = document.createElement('div');
           card.className = 'illus-card';
-          card.innerHTML = '<div class="illus-art">' + ns.illustrationMarkup(it[0]) + '</div>' +
+          card.innerHTML = '<div class="illus-art">' + ns.illustrationHTML(it[0]) + '</div>' +
             '<div class="illus-title">' + it[1] + '</div><div class="illus-name">' + it[0] + '</div><div class="illus-use">' + it[2] + '</div>';
           grid.appendChild(card);
         });
       })();
     </script>
 
+    <!-- ===================== DESIGN SYSTEM V2 ===================== -->
+    <section class="v2" id="v2">
+    <h2>Design System V2 (Matches, Insights)</h2>
+    <div class="section-note">Source: Figma Design System page 159:5834, the Matches screen 199:3497 and Log Match (voice) 207:7730 / Review 217:8404. Tokens live in <code>tokens/v2.css</code>, component styles in <code>components-v2.css</code>. Components use semantic or component tokens only, never primitives. Minimum font weight is Medium (500).</div>
+
+    <h3>V2 primitives (Figma Foundation)</h3>
+    <h4 class="v2-fam">Blue</h4>
+    <div class="v2-prims">
+      <div class="v2-prim"><i style="background:var(--rw-b50)"></i><b>B50</b><span>--rw-b50</span><span>#E6F0FF</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-b75)"></i><b>B75</b><span>--rw-b75</span><span>#96C0FF</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-b100)"></i><b>B100</b><span>--rw-b100</span><span>#6BA6FF</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-b200)"></i><b>B200</b><span>--rw-b200</span><span>#2B7FFF</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-b300)"></i><b>B300</b><span>--rw-b300</span><span>#0065FF</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-b400)"></i><b>B400</b><span>--rw-b400</span><span>#0047B3</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-b500)"></i><b>B500</b><span>--rw-b500</span><span>#003E9C</span></div>
+    </div>
+    <h4 class="v2-fam">Orange</h4>
+    <div class="v2-prims">
+      <div class="v2-prim"><i style="background:var(--rw-o50)"></i><b>O50</b><span>--rw-o50</span><span>#FEF3E6</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-o75)"></i><b>O75</b><span>--rw-o75</span><span>#FCCD99</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-o100)"></i><b>O100</b><span>--rw-o100</span><span>#EFB16A</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-o200)"></i><b>O200</b><span>--rw-o200</span><span>#F89930</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-o300)"></i><b>O300</b><span>--rw-o300</span><span>#F78406</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-o400)"></i><b>O400</b><span>--rw-o400</span><span>#AD5C04</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-o500)"></i><b>O500</b><span>--rw-o500</span><span>#975104</span></div>
+    </div>
+    <h4 class="v2-fam">Ocean</h4>
+    <div class="v2-prims">
+      <div class="v2-prim"><i style="background:var(--rw-ocean-50)"></i><b>O50</b><span>--rw-ocean-50</span><span>#E6FAFC</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-ocean-75)"></i><b>O75</b><span>--rw-ocean-75</span><span>#96EBF1</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-ocean-100)"></i><b>O100</b><span>--rw-ocean-100</span><span>#6BE3EB</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-ocean-200)"></i><b>O200</b><span>--rw-ocean-200</span><span>#2BD6E3</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-ocean-300)"></i><b>O300</b><span>--rw-ocean-300</span><span>#00CEDD</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-ocean-400)"></i><b>O400</b><span>--rw-ocean-400</span><span>#00909B</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-ocean-500)"></i><b>O500</b><span>--rw-ocean-500</span><span>#007E87</span></div>
+    </div>
+    <h4 class="v2-fam">Green</h4>
+    <div class="v2-prims">
+      <div class="v2-prim"><i style="background:var(--rw-g50)"></i><b>G50</b><span>--rw-g50</span><span>#E6F9F1</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-g75)"></i><b>G75</b><span>--rw-g75</span><span>#98E6C4</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-g100)"></i><b>G100</b><span>--rw-g100</span><span>#6DDCAC</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-g200)"></i><b>G200</b><span>--rw-g200</span><span>#2ECD88</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-g300)"></i><b>G300</b><span>--rw-g300</span><span>#03C370</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-g400)"></i><b>G400</b><span>--rw-g400</span><span>#02894E</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-g500)"></i><b>G500</b><span>--rw-g500</span><span>#027744</span></div>
+    </div>
+    <h4 class="v2-fam">Yellow</h4>
+    <div class="v2-prims">
+      <div class="v2-prim"><i style="background:var(--rw-y50)"></i><b>Y50</b><span>--rw-y50</span><span>#FFFAE6</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-y75)"></i><b>Y75</b><span>--rw-y75</span><span>#FFEA97</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-y100)"></i><b>Y100</b><span>--rw-y100</span><span>#FFE16C</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-y200)"></i><b>Y200</b><span>--rw-y200</span><span>#FFD52D</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-y300)"></i><b>Y300</b><span>--rw-y300</span><span>#FFCC02</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-y400)"></i><b>Y400</b><span>--rw-y400</span><span>#B38F01</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-y500)"></i><b>Y500</b><span>--rw-y500</span><span>#9C7C01</span></div>
+    </div>
+    <h4 class="v2-fam">Purple</h4>
+    <div class="v2-prims">
+      <div class="v2-prim"><i style="background:var(--rw-p50)"></i><b>P50</b><span>--rw-p50</span><span>#F0E6FA</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-p75)"></i><b>P75</b><span>--rw-p75</span><span>#C096EB</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-p100)"></i><b>P100</b><span>--rw-p100</span><span>#A66BE2</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-p200)"></i><b>P200</b><span>--rw-p200</span><span>#802BD6</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-p300)"></i><b>P300</b><span>--rw-p300</span><span>#6600CD</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-p400)"></i><b>P400</b><span>--rw-p400</span><span>#470090</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-p500)"></i><b>P500</b><span>--rw-p500</span><span>#3E007D</span></div>
+    </div>
+    <h4 class="v2-fam">Red</h4>
+    <div class="v2-prims">
+      <div class="v2-prim"><i style="background:var(--rw-r50)"></i><b>R50</b><span>--rw-r50</span><span>#FFEFEF</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-r75)"></i><b>R75</b><span>--rw-r75</span><span>#FFBCBC</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-r100)"></i><b>R100</b><span>--rw-r100</span><span>#FFA0A0</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-r150)"></i><b>R150</b><span>--rw-r150</span><span>#F28C85</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-r200)"></i><b>R200</b><span>--rw-r200</span><span>#FF7878</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-r300)"></i><b>R300</b><span>--rw-r300</span><span>#FF5C5C</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-r350)"></i><b>R350</b><span>--rw-r350</span><span>#B95454</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-r400)"></i><b>R400</b><span>--rw-r400</span><span>#B34040</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-r500)"></i><b>R500</b><span>--rw-r500</span><span>#9C3838</span></div>
+    </div>
+    <h4 class="v2-fam">Violet</h4>
+    <div class="v2-prims">
+      <div class="v2-prim"><i style="background:var(--rw-violet-1)"></i><b>violet-1</b><span>--rw-violet-1</span><span>#EAEAEC</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-violet-2)"></i><b>violet-2</b><span>--rw-violet-2</span><span>#CBCCD1</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-violet-3)"></i><b>violet-3</b><span>--rw-violet-3</span><span>#A3A3AC</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-violet-4)"></i><b>violet-4</b><span>--rw-violet-4</span><span>#787885</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-violet-5)"></i><b>violet-5</b><span>--rw-violet-5</span><span>#4F5061</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-violet-6)"></i><b>violet-6</b><span>--rw-violet-6</span><span>#28293E</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-violet-7)"></i><b>violet-7</b><span>--rw-violet-7</span><span>#222335</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-violet-8)"></i><b>violet-8</b><span>--rw-violet-8</span><span>#1C1D2C</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-violet-9)"></i><b>violet-9</b><span>--rw-violet-9</span><span>#171723</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-violet-10)"></i><b>violet-10</b><span>--rw-violet-10</span><span>#12121C</span></div>
+    </div>
+    <h4 class="v2-fam">Neutral</h4>
+    <div class="v2-prims">
+      <div class="v2-prim"><i style="background:var(--rw-n0)"></i><b>N0</b><span>--rw-n0</span><span>#000000</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-n75)"></i><b>N75</b><span>--rw-n75</span><span>#202020</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-n100)"></i><b>N100</b><span>--rw-n100</span><span>#242425</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-n150)"></i><b>N150</b><span>--rw-n150</span><span>#2C2C2C</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-n200)"></i><b>N200</b><span>--rw-n200</span><span>#474749</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-n300)"></i><b>N300</b><span>--rw-n300</span><span>#6B6B6D</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-n400)"></i><b>N400</b><span>--rw-n400</span><span>#8F8F91</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-n500)"></i><b>N500</b><span>--rw-n500</span><span>#A6A6A8</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-n600)"></i><b>N600</b><span>--rw-n600</span><span>#BDBDBF</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-n700)"></i><b>N700</b><span>--rw-n700</span><span>#D4D4D5</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-n800)"></i><b>N800</b><span>--rw-n800</span><span>#EBEBEC</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-n900)"></i><b>N900</b><span>--rw-n900</span><span>#FFFFFF</span></div>
+    </div>
+    <h4 class="v2-fam">PurpleGrey</h4>
+    <div class="v2-prims">
+      <div class="v2-prim"><i style="background:var(--rw-purplegrey-50)"></i><b>purplegrey-50</b><span>--rw-purplegrey-50</span><span>#EAEAEA</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-purplegrey-100)"></i><b>purplegrey-100</b><span>--rw-purplegrey-100</span><span>#BDBDBE</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-purplegrey-200)"></i><b>purplegrey-200</b><span>--rw-purplegrey-200</span><span>#9D9D9F</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-purplegrey-300)"></i><b>purplegrey-300</b><span>--rw-purplegrey-300</span><span>#707073</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-purplegrey-400)"></i><b>purplegrey-400</b><span>--rw-purplegrey-400</span><span>#555458</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-purplegrey-500)"></i><b>purplegrey-500</b><span>--rw-purplegrey-500</span><span>#2A292E</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-purplegrey-600)"></i><b>purplegrey-600</b><span>--rw-purplegrey-600</span><span>#26252A</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-purplegrey-700)"></i><b>purplegrey-700</b><span>--rw-purplegrey-700</span><span>#1E1D21</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-purplegrey-800)"></i><b>purplegrey-800</b><span>--rw-purplegrey-800</span><span>#171719</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-purplegrey-900)"></i><b>purplegrey-900</b><span>--rw-purplegrey-900</span><span>#121113</span></div>
+    </div>
+
+    <h4 class="v2-fam">Fills and gradients (Figma paint styles)</h4>
+    <div class="v2-prims">
+      <div class="v2-prim"><i style="background:var(--rw-glassfill)"></i><b>GlassFill</b><span>--rw-glassfill</span><span>#FFFFFF 5%</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-highlightfill)"></i><b>Highlight Fill</b><span>--rw-highlightfill</span><span>#FFFFFF 8%</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-inactivefill)"></i><b>Inactive Fill</b><span>--rw-inactivefill</span><span>#FFFFFF 3%</span></div>
+      <div class="v2-prim"><i style="background:var(--rw-input-border-gradient)"></i><b>Input Border Gradient</b><span>--rw-input-border-gradient</span><span>B100 50% → 0% → 50%</span></div>
+    </div>
+
+    <h3>V2 semantic colors (Matches, Insights, Log Match)</h3>
+    <table class="v2-table">
+      <thead><tr><th></th><th>Semantic token</th><th>Primitive</th><th>Value</th><th>Used for</th></tr></thead>
+      <tbody>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-bg-app)"></i></td><td>--rw-color-bg-app</td><td>--rw-purplegrey-900</td><td>#121113</td><td>Screen background</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-bg-glow),var(--rw-color-bg-app);background-size:56px 56px,auto"></i></td><td>--rw-color-bg-glow</td><td>none (Ellipse 2)</td><td>#6C9FEF → #5B9DFF, 20%</td><td>Blue glow at the top, fixed while scrolling</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface)"></i></td><td>--rw-color-surface</td><td>--rw-glassfill</td><td>#FFFFFF 5%</td><td>Tiles, Match cards, Pills, Top Tab bar</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-glass)"></i></td><td>--rw-color-surface-glass</td><td>--rw-glassfill</td><td>#FFFFFF 5% + glass</td><td>Header icon button, Bottom Nav bar, active Top Tab</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-selected)"></i></td><td>--rw-color-surface-selected</td><td>--rw-glassfill</td><td>#FFFFFF 5%</td><td>Active Bottom Nav item</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-text-primary)"></i></td><td>--rw-color-text-primary</td><td>--rw-n800</td><td>#EBEBEC</td><td>Greeting line, metric values, names, scores, active pill text</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-text-secondary)"></i></td><td>--rw-color-text-secondary</td><td>--rw-n400</td><td>#8F8F91</td><td>Eyebrows, Insight Subtitle, dates, inactive pills, muted names</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-text-tertiary)"></i></td><td>--rw-color-text-tertiary</td><td>--rw-n300</td><td>#6B6B6D</td><td>Chart axis labels (5-match form, Now)</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-text-inactive)"></i></td><td>--rw-color-text-inactive</td><td>--rw-n500</td><td>#A6A6A8</td><td>Inactive Bottom Nav items</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-text-on-selected)"></i></td><td>--rw-color-text-on-selected</td><td>--rw-n600</td><td>#BDBDBF</td><td>Label and icon of every active state: Bottom Nav item, pill, Top Tab, Horizontal toggle, heard cue (Han, 2026-10-23)</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-text-on-action)"></i></td><td>--rw-color-text-on-action</td><td>--rw-n75</td><td>#202020</td><td>Label and icon on the primary button</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-text-highlight)"></i></td><td>--rw-color-text-highlight</td><td>--rw-n800 → --rw-b100</td><td>#EBEBEC → #6BA6FF</td><td>Greeting title gradient</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-action-primary)"></i></td><td>--rw-color-action-primary</td><td>--rw-n800</td><td>#EBEBEC</td><td>Primary button fill</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-border-selected)"></i></td><td>--rw-color-border-selected</td><td>--rw-n600</td><td>#BDBDBF</td><td>Every selected outline: active pill, active Top Tab and Horizontal toggle, active Bottom Nav item, the Plus button on an empty player slot, radios, focus ring</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-status-win)"></i></td><td>--rw-color-status-win</td><td>--rw-b100</td><td>#6BA6FF</td><td>Match Result Win, trend up</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-status-loss)"></i></td><td>--rw-color-status-loss</td><td>--rw-o100</td><td>#EFB16A</td><td>Match Result Loss, trend down</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-data-fill)"></i></td><td>--rw-color-data-fill</td><td>--rw-blue-gradient-01</td><td>#5B9DFF → #2C3F5C</td><td>Simple bar fill</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-data-fill-vertical)"></i></td><td>--rw-color-data-fill-vertical</td><td>--rw-blue-gradient-02</td><td>#5B9DFF → #375E99 80%</td><td>Recent bars in the form chart</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-data-fill-vertical-down)"></i></td><td>--rw-color-data-fill-vertical-down</td><td>--rw-orange-gradient</td><td>#EFB16A → #212328 (OrangeGrad)</td><td>Recent bars when the win rate is falling (.rw-form.is-down)</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-divider)"></i></td><td>--rw-color-divider</td><td>--rw-n150</td><td>#2C2C2C</td><td>Line inside a Grow tile (.rw-advice-divider), pending Han</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-text-accent)"></i></td><td>--rw-color-text-accent</td><td>--rw-b100</td><td>#6BA6FF</td><td>TRY NEXT label in Build Next (.rw-label.is-accent), pending Han</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-border-icon-badge)"></i></td><td>--rw-color-border-icon-badge</td><td>--rw-b100</td><td>B100 60% → 5% (120deg)</td><td>Ring of the Avatar "Fancy" icon badge (.rw-icon-badge), icon B100, pending Han</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-data-track)"></i></td><td>--rw-color-data-track</td><td>--rw-purplegrey-500</td><td>#2A292E</td><td>Simple bar track, older bars in the form chart</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-data-neutral)"></i></td><td>--rw-color-data-neutral</td><td>--rw-n200</td><td>#474749</td><td>Neutral / inactive data point, e.g. a match without the thing (Match Strip)</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-data-earlier)"></i></td><td>--rw-color-data-earlier</td><td>--rw-n300</td><td>#6B6B6D</td><td>Previous / earlier series in a comparison (Comparison Chart)</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-banner)"></i></td><td>--rw-color-surface-banner</td><td>--rw-blue-gradient-01-8</td><td>Blue Gradient 01 at 8%</td><td>InlineBanner fill</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-border-banner)"></i></td><td>--rw-color-border-banner</td><td>--rw-n100</td><td>#242425</td><td>InlineBanner border</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-text-body)"></i></td><td>--rw-color-text-body</td><td>--rw-n600</td><td>#BDBDBF</td><td>Bottom sheet body copy (.rw-sheet-text)</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-highlight)"></i></td><td>--rw-color-surface-highlight</td><td>--rw-highlightfill</td><td>#FFFFFF 8%</td><td>Raised control in a surface: Plus button on an empty player slot</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-input-filled)"></i></td><td>--rw-color-surface-input-filled</td><td>--rw-purplegrey-500</td><td>#2A292E</td><td>Search bar holding a value or typing</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-scrim)"></i></td><td>--rw-color-scrim</td><td>--rw-n75 at 50%</td><td>#202020 50%</td><td>Behind a Bottom Sheet</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-avatar-me-bg)"></i></td><td>--rw-color-avatar-me-bg</td><td>--rw-b75</td><td>#96C0FF</td><td>Your own avatar (letters --rw-color-avatar-me-fg = N75)</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-input)"></i></td><td>--rw-color-surface-input</td><td>--rw-inactivefill</td><td>#FFFFFF 3%</td><td>Voice transcript card fill</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-border-input-active)"></i></td><td>--rw-color-border-input-active</td><td>--rw-input-border-gradient</td><td>B100 50% → 0% → 50%, 130°</td><td>Voice transcript card stroke (1px, inside)</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-done)"></i></td><td>--rw-color-surface-done</td><td>--rw-highlightfill</td><td>#FFFFFF 8%</td><td>Recognition cue, heard</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-pending)"></i></td><td>--rw-color-surface-pending</td><td>--rw-inactivefill</td><td>#FFFFFF 3%</td><td>Recognition cue, not heard yet</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-border-pending)"></i></td><td>--rw-color-border-pending</td><td>--rw-n400</td><td>#8F8F91</td><td>Dashed ring on a cue not heard yet</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-mark-done)"></i></td><td>--rw-color-mark-done</td><td>--rw-b75</td><td>#96C0FF</td><td>Check dot on a heard cue</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-mark-done-icon)"></i></td><td>--rw-color-mark-done-icon</td><td>--rw-b300</td><td>#0065FF</td><td>Check on the B75 dot (1.5px stroke, like every icon)</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-status-recording)"></i></td><td>--rw-color-status-recording</td><td>--rw-g100</td><td>#6DDCAC</td><td>Recording dot beside the timer</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-data-wave)"></i></td><td>--rw-color-data-wave</td><td>--rw-b100</td><td>#6BA6FF</td><td>Waveform bars (opacity per bar from Figma)</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-status-error)"></i></td><td>--rw-color-status-error</td><td>--rw-r150</td><td>#F28C85</td><td>The one error red, 100% opacity: input border, field note, alert icon (the error Toast keeps Figma red-800 badge + red-100 icon) (V1 --status-error points here)</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-action-destructive)"></i></td><td>--rw-color-action-destructive</td><td>--rw-r350</td><td>#B95454</td><td>Destructive button fill (.rw-btn-primary.is-danger: Delete Match / Account / Focus)</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-text-on-destructive)"></i></td><td>--rw-color-text-on-destructive</td><td>--rw-n800</td><td>#EBEBEC</td><td>Label on the destructive fill</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-status-warning)"></i></td><td>--rw-color-status-warning</td><td>--rw-y400</td><td>#B38F01</td><td>Flag icon on Review</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-border-warning)"></i></td><td>--rw-color-border-warning</td><td>--rw-y500</td><td>#9C7C01</td><td>Flagged Review row outline</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-surface-warning)"></i></td><td>--rw-color-surface-warning</td><td>--rw-o75 at 8%</td><td>#FCCD99 8%</td><td>Flag pill fill</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-avatar-grad-from)"></i></td><td>--rw-color-avatar-grad-from</td><td>none (Figma unbound) at 70%</td><td>#3E3E3E 70%</td><td>Letter avatar gradient start (Figma 360:8020); whole fill at 70% (Han, 2026-10-25)</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-avatar-grad-to)"></i></td><td>--rw-color-avatar-grad-to</td><td>--rw-n150 at 35%</td><td>#2C2C2C 35%</td><td>Letter avatar gradient end; six directions (.is-dir-1 to 6), one per player from its ID. Older screens use .rw-avatar-fill for the same fill</td></tr>
+        <tr><td><i class="v2-sw" style="background:var(--rw-color-avatar-fg)"></i></td><td>--rw-color-avatar-fg</td><td>--rw-n600</td><td>#BDBDBF</td><td>Initials avatar letter (Bold 14px; 12px on the 32px size)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>V2 motion (Han, 2026-10-26)</h3>
+    <p>Curves: enter <code>--rw-ease-enter</code> cubic-bezier(.2,.7,.2,1), exit <code>--rw-ease-exit</code> cubic-bezier(.4,0,1,1). Navigation runs as a View Transition (html[data-nav="push|pop|tab|update"], components-v2.css "Motion"); browsers without View Transitions switch instantly with a 150ms content fade. Reduced motion turns every slide into a 150ms cross-fade.</p>
+    <table class="v2-table">
+      <thead><tr><th>Token</th><th>Value</th><th>Curve</th><th>Used for</th></tr></thead>
+      <tbody>
+        <tr><td>--rw-motion-push</td><td>250ms</td><td>enter</td><td>Push: new page slides in from the right; covered page moves --rw-push-shift (-30%)</td></tr>
+        <tr><td>--rw-motion-pop</td><td>250ms</td><td>enter</td><td>Pop (Back): exact reverse of push; the page returns at its old scroll position</td></tr>
+        <tr><td>--rw-motion-sheet-in</td><td>250ms</td><td>enter</td><td>Bottom Sheet slides up, scrim fades in</td></tr>
+        <tr><td>--rw-motion-sheet-out</td><td>200ms</td><td>exit</td><td>Bottom Sheet slides down, scrim fades out (also toast out)</td></tr>
+        <tr><td>--rw-motion-menu</td><td>150ms</td><td>enter / exit</td><td>⋯ menu fade + scale from --rw-menu-scale (.96), in and out</td></tr>
+        <tr><td>--rw-motion-fade</td><td>180ms</td><td>enter</td><td>Main tab and Performance / Grow switch: content cross-fade, no slide</td></tr>
+        <tr><td>--rw-motion-fade-fast</td><td>150ms</td><td>enter</td><td>Content updates (data arriving, steps inside a sheet); every slide under reduced motion</td></tr>
+        <tr><td>--rw-motion-state</td><td>220ms</td><td>enter</td><td>Small state changes inside a component: app bar scrim, cue, waveform, bars, toast in</td></tr>
+        <tr><td>--rw-motion-press</td><td>140ms</td><td>enter</td><td>Press feedback and selected-state colour changes</td></tr>
+      </tbody>
+    </table>
+
+    <h3>V2 components</h3>
+    <div class="v2-stage rw-scroll is-v2">
+      <div class="v2-grid">
+        <div class="v2-cell"><div class="v2-label">Greeting</div>
+          <div class="rw-greeting"><h1 class="rw-title rw-text-gradient">Hi, Han</h1><p class="rw-lead">Your win rate is up 12% this month.</p></div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Button / Icon, Medium (glass)</div>
+          <button class="rw-glass v2-iconbtn" aria-label="Settings"><i data-lucide="settings"></i></button>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Button / Primary, Large (enabled, disabled)</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <button class="rw-btn rw-btn-primary"><i data-lucide="plus"></i>Log match</button>
+            <button class="rw-btn rw-btn-primary" disabled><i data-lucide="plus"></i>Log match</button>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Pills (Medium Active, Medium Inactive, Small)</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="rw-surface rw-pill is-active">All</button>
+            <button class="rw-surface rw-pill">Singles</button>
+            <button class="rw-surface rw-pill rw-pill-sm is-active">30 days</button>
+            <button class="rw-surface rw-pill rw-pill-sm">All time</button>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Tile Container + Metric + Insight Subtitle</div>
+          <div class="rw-surface rw-tile" style="display:flex;flex-direction:column;gap:8px">
+            <span class="rw-eyebrow">Matches</span><span class="rw-metric-value">24</span><span class="rw-subtitle">Last 30 days</span>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Metric / Record value (.rw-record)</div>
+          <div class="rw-surface rw-tile" style="display:flex;flex-direction:column;gap:8px">
+            <span class="rw-eyebrow">Recent record</span><span class="rw-metric-value rw-record">3<span class="rw-record-unit">W</span><span class="rw-record-sep">·</span>2<span class="rw-record-unit">L</span></span><span class="rw-subtitle">Last 5 matches</span>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Metric + Graphs / Simple bar</div>
+          <div class="rw-surface rw-tile" style="display:flex;flex-direction:column;gap:8px">
+            <span class="rw-eyebrow">Win rate</span><span class="rw-metric-value">62%</span>
+            <div class="rw-bar"><div><div style="width:62%"></div></div></div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Match Result (Win, Loss) · Avatar / Letter · Match Players</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;gap:16px"><span class="rw-result is-win">Win</span><span class="rw-result is-loss">Loss</span></div>
+            <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+              <span class="rw-avatar is-dir-1">P</span><span class="rw-avatar is-dir-2">A</span><span class="rw-avatar is-dir-3">J</span><span class="rw-avatar is-dir-4">C</span><span class="rw-avatar is-dir-5">M</span><span class="rw-avatar is-dir-6">李</span>
+              <span class="rw-players"><span class="rw-avatar rw-avatar-sm">H</span><span class="rw-avatar rw-avatar-sm is-dir-2">L</span></span>
+              <span class="rw-players is-doubles"><span class="rw-avatar rw-avatar-sm">H</span><span class="rw-avatar rw-avatar-sm is-dir-3">M</span><span class="rw-avatar rw-avatar-sm is-dir-2">L</span><span class="rw-avatar rw-avatar-sm is-dir-4">K</span></span>
+            </div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Match (Singles, Win)</div>
+          <div class="rw-surface rw-tile rw-match">
+            <div style="display:flex;justify-content:space-between;align-items:center"><span class="rw-caption">Oct 18 · Singles</span><span class="rw-result is-win">Win</span></div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <span class="rw-players"><span class="rw-avatar rw-avatar-sm">H</span><span class="rw-avatar rw-avatar-sm is-dir-2">L</span></span>
+              <div style="flex:1;display:flex;flex-direction:column"><span class="rw-name">Han</span><span class="rw-name is-muted">Leo</span></div>
+              <span class="rw-score">21–17</span>
+            </div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Match (Doubles, Loss)</div>
+          <div class="rw-surface rw-tile rw-match">
+            <div style="display:flex;justify-content:space-between;align-items:center"><span class="rw-caption">Oct 16 · Doubles</span><span class="rw-result is-loss">Loss</span></div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <span class="rw-players is-doubles"><span class="rw-avatar rw-avatar-sm">H</span><span class="rw-avatar rw-avatar-sm is-dir-3">M</span><span class="rw-avatar rw-avatar-sm is-dir-2">L</span><span class="rw-avatar rw-avatar-sm is-dir-4">K</span></span>
+              <div style="flex:1;display:flex;flex-direction:column"><span class="rw-name">Han &amp; Mia</span><span class="rw-name is-muted">Leo &amp; Kai</span></div>
+              <span class="rw-score">18–21</span>
+            </div>
+          </div>
+        </div>
+        <div class="v2-cell v2-wide"><div class="v2-label">Top Tab (Performance active)</div>
+          <div class="rw-surface rw-tabs" role="tablist" style="max-width:350px"><button class="rw-tab is-active" role="tab">Performance</button><button class="rw-tab" role="tab">Grow</button></div>
+          <div class="rw-surface rw-tabs is-sm" role="tablist" style="max-width:350px;margin-top:16px"><button class="rw-tab is-active" role="tab">Singles</button><button class="rw-tab" role="tab">Doubles</button></div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Metric + Insight Subtitle (change: up, down, flat) + Graphs / Large bar</div>
+          <div class="rw-surface rw-tile" style="display:flex;flex-direction:column;gap:16px;max-width:170px">
+            <div style="display:flex;flex-direction:column;gap:12px"><span class="rw-eyebrow">Win rate</span>
+              <div style="display:flex;flex-direction:column;gap:8px"><span class="rw-metric-value">60%</span>
+                <div class="rw-trend"><span class="rw-trend-delta is-up"><i data-lucide="arrow-up-right" style="width:15px;height:15px"></i>+20%</span><span>vs prev 10</span></div></div></div>
+            <div class="rw-form"><div class="rw-form-bars"><div class="rw-form-bar" style="height:53%"></div><div class="rw-form-bar" style="height:75%"></div><div class="rw-form-bar" style="height:64%"></div><div class="rw-form-bar" style="height:58%"></div><div class="rw-form-bar" style="height:85%"></div><div class="rw-form-bar is-recent" style="height:64%"></div><div class="rw-form-bar is-recent" style="height:56%"></div><div class="rw-form-bar is-recent" style="height:64%"></div><div class="rw-form-bar is-recent" style="height:100%"></div><div class="rw-form-bar is-recent" style="height:88%"></div></div>
+              <div class="rw-chart-label"><span>5-match form</span><span>Now</span></div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+            <div class="rw-trend"><span class="rw-trend-delta is-down"><i data-lucide="arrow-down-right" style="width:15px;height:15px"></i>-10%</span><span>vs prev 10</span></div>
+            <div class="rw-trend"><span class="rw-trend-delta is-flat"><i data-lucide="minus" style="width:15px;height:15px"></i>0%</span><span>vs prev 10</span></div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Performance Breakdown (section title + rows, incl. centred margin bar)</div>
+          <div class="rw-surface rw-tile" style="display:flex;flex-direction:column;gap:16px">
+            <h2 class="rw-section-title">Performance Breakdown</h2>
+            <div class="rw-breakdown"><div class="rw-breakdown-label">Singles Win Rate</div><div class="rw-bar"><div><div style="left:0;width:45%"></div><div class="rw-breakdown-mid" style="opacity:0"></div></div></div><div class="rw-breakdown-value"><div class="rw-row-value">45%</div><div class="rw-row-sub">5 of 11</div></div></div>
+            <div class="rw-breakdown"><div class="rw-breakdown-label">Avg. Score Gap</div><div class="rw-bar"><div><div class="is-up" style="left:50%;width:30%"></div><div class="rw-breakdown-mid"></div></div></div><div class="rw-breakdown-value"><div class="rw-row-value">+3.0</div><div class="rw-row-sub">per game</div></div></div>
+            <div class="rw-breakdown"><div class="rw-breakdown-label">Avg. Score Gap</div><div class="rw-bar"><div><div class="is-down" style="left:40%;width:10%"></div><div class="rw-breakdown-mid"></div></div></div><div class="rw-breakdown-value"><div class="rw-row-value">-0.4</div><div class="rw-row-sub">per game</div></div></div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Insight / ListRow</div>
+          <div class="rw-surface rw-tile rw-list-row"><div class="rw-list-row-who"><div class="rw-avatar is-dir-1">PN</div><div class="rw-list-row-text"><div class="rw-eyebrow">Best partner</div><div class="rw-name">Priya Nair</div></div></div><div class="rw-list-row-end"><div class="rw-list-value">100%</div><div class="rw-caption">Win rate together</div></div></div>
+        </div>
+        <!-- KeyInsight, split (approved 2026-10-24): one primary example per pattern, EN / 中文 switch, edge cases in the test area below. Sample data only. -->
+        <div id="v2-key-split" class="v2-key-head" style="grid-column:1/-1;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div style="font:600 16px/1.2 var(--font-sans);color:var(--rw-text-primary)">KeyInsight (approved) · Trend Line · Comparison Chart · Match Strip</div>
+            <div class="rw-surface rw-tabs is-sm" role="tablist" aria-label="Sample language" id="v2-key-lang">
+              <button class="rw-tab is-active" role="tab" aria-selected="true" data-lang="en">English</button>
+              <button class="rw-tab" role="tab" aria-selected="false" data-lang="zh">中文</button>
+            </div>
+          </div>
+          <div style="font:500 12px/1.4 var(--font-sans);color:var(--rw-text-secondary)">Text and chart 6:4, 16px apart; the chart spans the title top to the body bottom; the body explains the chart with the same numbers. Charts are drawn from data: <code>data-kind</code> trend | compare | strip, <code>data-values</code> (one per match, oldest first), optional <code>data-min</code> <code>data-max</code> <code>data-ticks</code> (else picked from the data) <code>data-unit</code> <code>data-quote</code> <code>data-split</code> (compare) <code>data-xlabels</code> <code>data-labels="false"</code> <code>data-ylabels="true"</code> (y-axis numbers, off by default); or <code>RWKeyChart.render(el, chart)</code>. Which pattern an insight gets is decided by Growth Insights Engine V2, not here.</div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">A · Trend Line</div>
+          <div class="rw-surface rw-tile rw-key is-split"><div class="rw-key-head"><i data-lucide="sparkle" style="width:14px;height:14px"></i><span class="rw-label" data-en="Key insight" data-zh="关键洞察">Key insight</span></div><div class="rw-key-split"><div class="rw-key-split-text"><p class="rw-key-title" data-en="Your net game is getting stronger." data-zh="你的网前越来越强了。">Your net game is getting stronger.</p><p class="rw-key-body" data-en="Your share of net points won has climbed from 42% to 64% over your last 6 matches." data-zh="最近 6 场，你的网前得分率从 42% 升到了 64%。">Your share of net points won has climbed from 42% to 64% over your last 6 matches.</p></div><div class="rw-key-chart" data-kind="trend" data-values="42,47,45,53,58,64" data-min="30" data-max="70" data-ticks="30,50,70" data-unit="%"></div></div></div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">B · Comparison Chart</div>
+          <div class="rw-surface rw-tile rw-key is-split"><div class="rw-key-head"><i data-lucide="sparkle" style="width:14px;height:14px"></i><span class="rw-label" data-en="Key insight" data-zh="关键洞察">Key insight</span></div><div class="rw-key-split"><div class="rw-key-split-text"><p class="rw-key-title" data-en="Your defence is improving." data-zh="你的防守在进步。">Your defence is improving.</p><p class="rw-key-body" data-en="You mentioned defensive mistakes 3 times in your last 3 matches, compared with 7 in the previous 3." data-zh="最近 3 场你提到防守失误 3 次，之前 3 场是 7 次。">You mentioned defensive mistakes 3 times in your last 3 matches, compared with 7 in the previous 3.</p></div><div class="rw-key-chart" data-kind="compare" data-values="3,2,2,1,1,1" data-split="3" data-min="0" data-max="4" data-ticks="0,2,4"></div></div></div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">C · Match Strip</div>
+          <div class="rw-surface rw-tile rw-key is-split"><div class="rw-key-head"><i data-lucide="sparkle" style="width:14px;height:14px"></i><span class="rw-label" data-en="Key insight" data-zh="关键洞察">Key insight</span></div><div class="rw-key-split"><div class="rw-key-split-text"><p class="rw-key-title" data-en="Serve errors keep showing up." data-zh="发球失误反复出现。">Serve errors keep showing up.</p><p class="rw-key-body" data-en="You made serve errors in 4 of your last 6 matches, 8 in total." data-zh="最近 6 场里有 4 场出现发球失误，一共 8 次。">You made serve errors in 4 of your last 6 matches, 8 in total.</p></div><div class="rw-key-chart" data-kind="strip" data-values="2,0,1,3,0,2" data-min="0" data-max="4" data-ticks="0,2,4"></div></div></div>
+        </div>
+        <details class="v2-cell" style="grid-column:1/-1" id="v2-key-tests">
+          <summary class="v2-label" style="cursor:pointer">Testing area · KeyInsight chart edge cases (negative and decimal values, 4 / 5 / 8 matches, 0/1 tags, labels off). Not design references.</summary>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-top:16px">
+            <div class="rw-surface rw-tile rw-key is-split"><div class="rw-key-head"><i data-lucide="sparkle" style="width:14px;height:14px"></i><span class="rw-label">Key insight</span></div><div class="rw-key-split"><div class="rw-key-split-text"><p class="rw-key-title">Your games are getting closer.</p><p class="rw-key-body">Your average point margin per game went from −4.5 to +2 over your last 5 matches.</p></div><div class="rw-key-chart" data-kind="trend" data-values="-4.5,-3,-2.5,-1,2"></div></div></div>
+            <div class="rw-surface rw-tile rw-key is-split"><div class="rw-key-head"><i data-lucide="sparkle" style="width:14px;height:14px"></i><span class="rw-label">关键洞察</span></div><div class="rw-key-split"><div class="rw-key-split-text"><p class="rw-key-title">你的比分越来越接近了。</p><p class="rw-key-body">最近 5 场，你每局的平均分差从 −4.5 变成了 +2。</p></div><div class="rw-key-chart" data-kind="trend" data-values="-4.5,-3,-2.5,-1,2"></div></div></div>
+            <div class="rw-surface rw-tile rw-key is-split"><div class="rw-key-head"><i data-lucide="sparkle" style="width:14px;height:14px"></i><span class="rw-label">Key insight</span></div><div class="rw-key-split"><div class="rw-key-split-text"><p class="rw-key-title">Fewer net errors lately.</p><p class="rw-key-body">You tagged net errors in 1 of your last 3 matches, compared with 3 of the previous 3.</p></div><div class="rw-key-chart" data-kind="compare" data-values="1,1,1,0,1,0" data-split="3"></div></div></div>
+            <div class="rw-surface rw-tile rw-key is-split"><div class="rw-key-head"><i data-lucide="sparkle" style="width:14px;height:14px"></i><span class="rw-label">Key insight</span></div><div class="rw-key-split"><div class="rw-key-split-text"><p class="rw-key-title">Fewer unforced errors.</p><p class="rw-key-body">You mentioned unforced errors 6 times in your last 4 matches, compared with 14 in the previous 4.</p></div><div class="rw-key-chart" data-kind="compare" data-values="4,3,4,3,2,1,2,1" data-split="4"></div></div></div>
+            <div class="rw-surface rw-tile rw-key is-split"><div class="rw-key-head"><i data-lucide="sparkle" style="width:14px;height:14px"></i><span class="rw-label">关键洞察</span></div><div class="rw-key-split"><div class="rw-key-split-text"><p class="rw-key-title">发球失误反复出现。</p><p class="rw-key-body">最近 6 场里有 4 场标记了发球失误。</p></div><div class="rw-key-chart" data-kind="strip" data-values="1,0,1,1,0,1"></div></div></div>
+            <div class="rw-surface rw-tile rw-key is-split"><div class="rw-key-head"><i data-lucide="sparkle" style="width:14px;height:14px"></i><span class="rw-label">Key insight</span></div><div class="rw-key-split"><div class="rw-key-split-text"><p class="rw-key-title">Your backhand transitions are still shaky.</p><p class="rw-key-body">Backhand transition errors came up in 3 of your last 4 matches.</p></div><div class="rw-key-chart" data-kind="strip" data-values="1,1,0,1" data-labels="false"></div></div></div>
+          </div>
+        </details>
+        <div class="v2-cell"><div class="v2-label"><span style="color:var(--rw-loss)">LEGACY, do not use for new work</span> · KeyInsight with Simple bar (still on the Grow screen until it is wired to Engine V2) · Section header (Figma 203:5215)</div>
+          <div style="display:flex;flex-direction:column;gap:24px">
+            <div class="rw-surface rw-tile rw-key" style="opacity:.55;outline:1px dashed var(--rw-loss);outline-offset:4px"><div class="rw-key-head"><i data-lucide="sparkle" style="width:14px;height:14px"></i><span class="rw-label">Key insight</span></div><p class="rw-key-title">Your net game is getting stronger.</p><p class="rw-key-body">You've won a higher share of net points in your last 6 matches.</p><div class="rw-bar rw-key-bar"><div><div style="width:32%"></div></div></div></div>
+            <div class="rw-section-head"><h2 class="rw-section-title">Build Next</h2><p class="rw-hint">Top areas to improve from recent matches</p></div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Tile half width (Add to Focus; a recommendation already in Focus is not shown) · Tile full wide (Avatar Fancy icon badge · letter avatar)</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div class="rw-surface rw-tile rw-advice is-half"><div class="rw-advice-body"><div class="rw-advice-text"><div class="rw-name">Backhand Defence</div><div class="rw-advice-desc">Lost points in 4 of your last 6 matches.</div></div><div class="rw-advice-divider"></div><div class="rw-advice-tip"><div class="rw-label is-accent">Try next</div><div class="rw-advice-tip-text">Keep your racket higher during flat exchanges.</div></div></div><button class="rw-btn rw-btn-secondary"><i data-lucide="plus" style="width:16px;height:16px"></i>Add to Focus</button></div>
+              <div class="rw-surface rw-tile rw-advice is-half"><div class="rw-advice-body"><div class="rw-advice-text"><div class="rw-name">Serve Return</div><div class="rw-advice-desc">Won 38% of return points.</div></div><div class="rw-advice-divider"></div><div class="rw-advice-tip"><div class="rw-label is-accent">Try next</div><div class="rw-advice-tip-text">Return deeper and higher.</div></div></div><button class="rw-btn rw-btn-secondary"><i data-lucide="plus" style="width:16px;height:16px"></i>Add to Focus</button></div>
+            </div>
+            <div class="rw-surface rw-tile rw-advice"><div class="rw-advice-head"><div class="rw-icon-badge"><i data-lucide="check" style="width:20px;height:20px"></i></div><div class="rw-advice-text"><div class="rw-name">Net Play</div><p class="rw-meta">Tagged as working in each of your last 6 wins.</p></div></div><div class="rw-advice-divider"></div><div class="rw-advice-tip"><div class="rw-label">Keep doing</div><div class="rw-advice-tip-text">Keep your racket higher during flat exchanges.</div></div></div>
+            <div class="rw-surface rw-tile rw-advice"><div class="rw-advice-head"><div class="rw-avatar is-dir-2">AC</div><div class="rw-advice-text"><div class="rw-name">Alex Chen</div><p class="rw-meta">You're 2–5 against Alex.</p></div></div><div class="rw-advice-divider"></div><div class="rw-advice-tip"><div class="rw-label">Game plan</div><div class="rw-advice-tip-text">Push him deep first and avoid short lifts.</div></div></div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">App bar title (Close / Back + screen name; .is-centered for detail pages) · Avatar Large · Page heading</div>
+          <div style="display:flex;flex-direction:column;gap:24px;">
+            <div class="rw-appbar-title"><button class="rw-glass v2-iconbtn" aria-label="Close"><i data-lucide="x" style="width:18px;height:18px"></i></button><h1 class="rw-appbar-name">Log Match</h1></div>
+            <div class="rw-appbar-title is-centered"><button class="rw-glass v2-iconbtn" aria-label="Back"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button><h1 class="rw-appbar-name">Profile</h1></div>
+            <div style="display:flex;justify-content:center;"><div class="rw-avatar rw-avatar-lg is-dir-1">XH</div></div>
+            <div class="rw-page-head"><h2 class="rw-heading">Describe Your Session</h2><p class="rw-hint">Who you played, how many games, how it went.</p></div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Voice Input (transcript card) + Pills / Recognition cue (heard, not heard)</div>
+          <div class="rw-voice-input" style="height:220px;">
+            <textarea class="rw-voice-text" aria-label="Session">Played singles against Alex today. Lost the first game 18-21…</textarea>
+            <div class="rw-cues">
+              <div class="rw-pill rw-pill-sm rw-cue is-done"><span class="rw-cue-mark"><i data-lucide="check" style="width:10px;height:10px;stroke-width:3.6"></i></span>Players</div>
+              <div class="rw-pill rw-pill-sm rw-cue"><span class="rw-cue-mark"><i data-lucide="check" style="width:10px;height:10px;stroke-width:3.6"></i></span>Number of games</div>
+              <div class="rw-pill rw-pill-sm rw-cue"><span class="rw-cue-mark"><i data-lucide="check" style="width:10px;height:10px;stroke-width:3.6"></i></span>Win vs Loss</div>
+            </div>
+          </div>
+        </div>
+        <div class="v2-cell v2-wide"><div class="v2-label">Waveform (recording) + Record controls (recording, idle)</div>
+          <div style="display:flex;flex-direction:column;gap:16px;max-width:390px;">
+            <div class="rw-wave is-live" id="v2-wave"></div>
+            <div class="rw-rec"><div class="rw-rec-side"><div class="rw-rec-timer is-live">0:09</div></div><button class="rw-rec-btn" aria-label="Stop recording"><i data-lucide="square" style="width:28px;height:28px"></i></button><div class="rw-rec-side is-end"><button class="rw-rec-link">Continue</button></div></div>
+            <div class="rw-rec"><div class="rw-rec-side"><div class="rw-rec-timer">0:00</div></div><button class="rw-rec-btn" aria-label="Start recording"><i data-lucide="mic" style="width:28px;height:28px"></i></button><div class="rw-rec-side is-end"><button class="rw-rec-link" disabled>Continue</button></div></div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">InputTile (Default, Warning)</div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <button class="rw-surface rw-tile rw-input-tile is-warning"><span class="rw-input-tile-text"><span class="rw-eyebrow">Players</span><span class="rw-input-tile-value">You, Priya Nair, Chris</span></span><span class="rw-input-tile-end"><span class="rw-flag"><i data-lucide="circle-alert" style="width:14px;height:14px;stroke-width:2.06"></i>Missing players</span><i data-lucide="chevron-right" style="width:16px;height:16px;stroke-width:3"></i></span></button>
+            <button class="rw-surface rw-tile rw-input-tile"><span class="rw-input-tile-text"><span class="rw-eyebrow">Result</span><span class="rw-input-tile-value">1 Win : 2 Loss</span></span><span class="rw-input-tile-end"><i data-lucide="chevron-right" style="width:16px;height:16px;stroke-width:3"></i></span></button>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Player row (filled: Avatar + name + role; empty: IconButton "add" + placeholder)</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="rw-surface rw-player"><span class="rw-avatar is-me">SR</span><span class="rw-name">Sam Rivera</span><span class="rw-caption">Me</span></div>
+            <div class="rw-surface rw-player"><span class="rw-avatar is-dir-1">PN</span><span class="rw-name">Priya Nair</span><span class="rw-caption">Your partner</span></div>
+            <div class="rw-surface rw-player is-empty"><span class="v2-iconbtn" style="background:var(--rw-icon-btn-add-bg);border:1px solid var(--rw-icon-btn-add-border);color:var(--rw-icon-btn-add-fg)"><i data-lucide="plus" style="width:18px;height:18px"></i></span><span class="rw-name">Select Opponent</span></div>
+            <div class="rw-surface rw-player is-empty is-warning"><span class="v2-iconbtn" style="background:var(--rw-icon-btn-add-bg);border:1px solid var(--rw-icon-btn-add-border);color:var(--rw-icon-btn-add-fg)"><i data-lucide="plus" style="width:18px;height:18px"></i></span><span class="rw-name">Select Opponent</span></div>
+            <div class="rw-surface rw-player"><span class="rw-avatar is-dir-4">CW</span><span class="rw-name">Chris Wong</span><span class="rw-caption">H2H 3–0</span></div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Toast (Figma 360:7533): Type Success / Error / Info / Warning; Secondary copy is a toggle. Success hides itself after 2.6s and its close button is optional (Match saved has none); Info, Warning and Error stay until closed and always show the close button.</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="rw-toast is-success"><span class="rw-toast-badge"><i data-lucide="check" style="width:12px;height:12px;stroke-width:3"></i></span><div class="rw-toast-text"><p class="rw-toast-title">Match successfully logged</p></div></div>
+            <div class="rw-toast is-error"><span class="rw-toast-badge"><i data-lucide="ban" style="width:12px;height:12px;stroke-width:3"></i></span><div class="rw-toast-text"><p class="rw-toast-title">Microphone access is blocked.</p><p class="rw-toast-body">Allow it in Settings, or type instead.</p></div><button class="rw-toast-close" aria-label="Close"><i data-lucide="x" style="width:18px;height:18px;stroke-width:2"></i></button></div>
+            <div class="rw-toast is-info"><span class="rw-toast-badge"><i data-lucide="circle-alert" style="width:12px;height:12px;stroke-width:3"></i></span><div class="rw-toast-text"><p class="rw-toast-title">Headline text</p><p class="rw-toast-body">Paragraph text</p></div><button class="rw-toast-close" aria-label="Close"><i data-lucide="x" style="width:18px;height:18px;stroke-width:2"></i></button></div>
+            <div class="rw-toast is-warning"><span class="rw-toast-badge"><i data-lucide="circle-alert" style="width:12px;height:12px;stroke-width:3"></i></span><div class="rw-toast-text"><p class="rw-toast-title">Couldn't save.</p><p class="rw-toast-body">Check your connection.</p></div><button class="rw-toast-close" aria-label="Close"><i data-lucide="x" style="width:18px;height:18px;stroke-width:2"></i></button></div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">InlineBanner + Button / Secondary, Medium + PlayerTags (fill follows the surface: page purplegrey-500, tile or banner Highlight Fill)</div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="rw-inline-banner"><p class="rw-inline-banner-title"><i data-lucide="circle-help" style="width:18px;height:18px;stroke-width:1.6"></i><span>Who is “Chris”?</span></p><div class="rw-tags"><button class="rw-btn rw-btn-secondary">Chris Simir</button><button class="rw-btn rw-btn-secondary">Chris L</button><button class="rw-btn rw-btn-secondary"><i data-lucide="plus" style="width:16px;height:16px;stroke-width:1.8"></i>Add “Chris”</button><button class="rw-btn rw-btn-secondary"><i data-lucide="search" style="width:16px;height:16px;stroke-width:1.8"></i>Search or add another</button></div></div>
+            <div class="rw-tags"><button class="rw-btn rw-btn-secondary">Chris Wong</button><button class="rw-btn rw-btn-secondary"><i data-lucide="plus" style="width:16px;height:16px;stroke-width:1.8"></i>Add “Chris”</button></div>
+            <div class="rw-surface rw-tile"><div class="rw-tags"><button class="rw-btn rw-btn-secondary">Chris Wong</button><button class="rw-btn rw-btn-secondary">Chris Lam</button><button class="rw-btn rw-btn-secondary"><i data-lucide="search" style="width:16px;height:16px;stroke-width:1.8"></i>Search or add another</button></div></div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Sheet body text .rw-sheet-text (Lead 16px Medium, text-body N600)</div>
+          <p class="rw-sheet-text">It looks like you played with different opponents or partners. Please log each lineup separately so we can track your results and notes accurately.</p>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Confirm sheet buttons: .rw-btn-primary.is-danger (action-destructive R350 #B95454, N800 label) + .rw-btn-quiet (tile fill, N800)</div>
+          <div class="rw-btn-stack"><button class="rw-btn rw-btn-primary is-danger">Delete</button><button class="rw-btn rw-btn-quiet">Cancel</button></div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Search bar (Unfilled, Filled Inactive, Active Typing)</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <label class="rw-search"><i data-lucide="search" style="width:20px;height:20px;stroke-width:1.6"></i><input class="rw-search-input" placeholder="Search or add a new player"></label>
+            <label class="rw-search is-filled"><i data-lucide="search" style="width:20px;height:20px;stroke-width:1.6"></i><input class="rw-search-input" value="Chris Wong"><button class="rw-search-clear" aria-label="Clear"><i data-lucide="circle-x" style="width:20px;height:20px;stroke-width:1.44"></i></button></label>
+            <label class="rw-search is-filled v2-typing"><i data-lucide="search" style="width:20px;height:20px;stroke-width:1.6"></i><input class="rw-search-input" value="Chris Won" id="v2-search-typing"><button class="rw-search-clear" aria-label="Clear"><i data-lucide="circle-x" style="width:20px;height:20px;stroke-width:1.44"></i></button></label>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Auth pages (Log In, Sign Up, Forgot Password, Check Email): inline Error toast, .rw-text-link, .rw-or, .rw-btn-social, .rw-checkbox[.is-on] (Han 2026-10-25)</div>
+          <div class="rw-auth" style="padding-top:0;">
+            <div role="alert" class="rw-toast is-error"><span class="rw-toast-badge"><i data-lucide="ban" style="width:12px;height:12px;stroke-width:3"></i></span><div class="rw-toast-text"><p class="rw-toast-title">Incorrect email or password. Try again or reset your password.</p></div></div>
+            <div class="rw-auth-end" style="margin-top:0;"><button type="button" class="rw-text-link">Forgot Password?</button></div>
+            <div class="rw-or">Or</div>
+            <div class="rw-btn-stack"><button type="button" class="rw-btn rw-btn-social">Continue with Apple</button></div>
+            <div class="rw-agree"><button type="button" class="rw-checkbox"></button><div>Unchecked</div></div>
+            <div class="rw-agree"><button type="button" class="rw-checkbox is-on"><i data-lucide="check" style="width:14px;height:14px"></i></button><div>I agree to <span class="rw-text-link">Terms</span> and <span class="rw-text-link">Privacy Policy</span>.</div></div>
+            <p class="rw-auth-foot">Don't have an account? <button type="button" class="rw-text-link">Sign Up</button></p>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Search + results .rw-search-results / .rw-player-list (Players page, Players sheet): 12px Search bar to list, 4px between rows</div>
+          <div class="rw-search-results">
+            <label class="rw-search is-filled"><i data-lucide="search" style="width:20px;height:20px;stroke-width:1.6"></i><input class="rw-search-input" value="Chr"><button class="rw-search-clear" aria-label="Clear"><i data-lucide="circle-x" style="width:20px;height:20px;stroke-width:1.44"></i></button></label>
+            <div class="rw-player-list">
+              <div class="rw-surface rw-player"><span class="rw-avatar is-dir-4">CW</span><span class="rw-name">Chris Wong</span><span class="rw-caption">H2H 3–0</span></div>
+              <div class="rw-surface rw-player"><span class="rw-avatar is-dir-2">CL</span><span class="rw-name">Christina Lee</span><span class="rw-caption">Partner 2–1</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Stepper .rw-stepper (Create Focus "How often?"; ends disabled at 40%)</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="rw-surface rw-stepper"><button class="rw-stepper-btn" aria-label="Decrease"><i data-lucide="minus" style="width:18px;height:18px;stroke-width:2"></i></button><span class="rw-stepper-value">3× / week</span><button class="rw-stepper-btn" aria-label="Increase"><i data-lucide="plus" style="width:18px;height:18px;stroke-width:2"></i></button></div>
+            <div class="rw-surface rw-stepper"><button class="rw-stepper-btn" aria-label="Decrease" disabled><i data-lucide="minus" style="width:18px;height:18px;stroke-width:2"></i></button><span class="rw-stepper-value">1× / week</span><button class="rw-stepper-btn" aria-label="Increase"><i data-lucide="plus" style="width:18px;height:18px;stroke-width:2"></i></button></div>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Focus ListRow .rw-focus-row + Dots indicator .rw-dots (B100 on, purplegrey-400 off; one dot per session or match) + optional From Grow tag (Insights icon); Disclosure .rw-disclosure (Completed · n)</div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="rw-focus-list">
+            <button class="rw-surface rw-tile rw-focus-row"><span class="rw-focus-row-text"><span class="rw-focus-tag"><i data-lucide="chart-column" style="width:14px;height:14px"></i>From Grow</span><span class="rw-focus-row-head"><span class="rw-name">Return consistency</span><span class="rw-focus-row-sub">3 of 5 sessions this week</span></span></span><span class="rw-focus-row-end"><span class="rw-dots"><i class="is-on"></i><i class="is-on"></i><i class="is-on"></i><i></i><i></i></span><i data-lucide="chevron-right" style="width:20px;height:20px"></i></span></button>
+            <button class="rw-surface rw-tile rw-focus-row"><span class="rw-focus-row-text"><span class="rw-focus-row-head"><span class="rw-name">Footwork</span><span class="rw-focus-row-sub">No schedule</span></span></span><span class="rw-focus-row-end"><i data-lucide="chevron-right" style="width:20px;height:20px"></i></span></button>
+            </div>
+            <button class="rw-disclosure"><span>Completed · 1</span><i data-lucide="chevron-down" style="width:20px;height:20px"></i></button>
+          </div>
+        </div>
+        <div class="v2-cell"><div class="v2-label">Focus Detail (Figma 203:6272): Focus frequency .rw-focus-tile + .rw-focus-markers > .rw-check[.is-done]; Focus progress .rw-focus-weeks + .rw-chip; Focus TextBlock .rw-focus-goal + .rw-bullets</div>
+          <div class="rw-focus-tiles">
+            <section class="rw-surface rw-tile rw-focus-tile"><div class="rw-tile-head"><h3 class="rw-tile-title">This Week</h3><div class="rw-subtitle">Week 1 of 2</div></div>
+              <div class="rw-focus-markers"><button class="rw-check is-done"><i data-lucide="check" style="width:16px;height:16px"></i></button><button class="rw-check is-done"><i data-lucide="check" style="width:16px;height:16px"></i></button><button class="rw-check"><span>3</span></button></div></section>
+            <section class="rw-surface rw-tile rw-focus-tile is-progress"><div class="rw-tile-head"><h3 class="rw-tile-title">Overall Progress</h3><div class="rw-subtitle">2 weeks</div></div>
+              <ul class="rw-focus-weeks"><li class="rw-focus-week is-current"><div class="rw-focus-week-label">Week 1</div><div class="rw-dots"><i class="is-on"></i><i class="is-on"></i><i></i></div><span class="rw-chip">Current</span></li><li class="rw-focus-week"><div class="rw-focus-week-label">Week 2</div><div class="rw-dots"><i></i><i></i><i></i></div></li></ul></section>
+            <section class="rw-surface rw-tile rw-focus-tile"><h3 class="rw-tile-title">What to Work On</h3><div class="rw-focus-body"><p class="rw-focus-goal">Focus on steep placement and recovering quickly after each smash.</p><ul class="rw-bullets"><li>Hit at the highest point, in front of your body</li><li>Recover to base before the reply</li></ul></div></section>
+          </div>
+        </div>
+        <div class="v2-cell v2-wide"><div class="v2-label">Bottom Sheet (scrim, grabber, title + close, divider, content slot, primary action)</div>
+          <div style="position:relative;height:420px;border-radius:24px;overflow:hidden;background:var(--rw-bg-app);">
+            <div class="rw-sheet-scrim"></div>
+            <div class="rw-sheet" role="dialog" aria-label="Players">
+              <div class="rw-sheet-head"><span class="rw-sheet-grabber"></span><div class="rw-sheet-bar"><span></span><h2 class="rw-sheet-title">Players</h2><button class="rw-glass v2-iconbtn" aria-label="Close"><i data-lucide="x" style="width:18px;height:18px"></i></button></div><span class="rw-sheet-divider"></span></div>
+              <div class="rw-sheet-body"><div class="v2-slot">Content slot</div></div>
+              <div class="rw-sheet-foot"><button class="rw-btn rw-btn-primary">Save</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="v2-cell v2-wide"><div class="v2-label">Overflow menu (⋯): scrim, app background + Glass Fill, glass rim, tile radius 15, 18px Lucide icons (optically centred) and 14px Medium labels both N800, divider N150 before the last action</div>
+          <div style="position:relative;height:330px;border-radius:24px;overflow:hidden;background:var(--rw-bg-app);">
+            <div class="rw-menu-scrim"></div>
+            <div class="rw-menu" role="menu" style="top:24px;">
+              <button class="rw-menu-item" role="menuitem"><i data-lucide="users" style="width:18px;height:18px"></i><span>Players</span></button>
+              <button class="rw-menu-item" role="menuitem"><i data-lucide="circle-user" style="width:18px;height:18px"></i><span>Profile</span></button>
+              <button class="rw-menu-item" role="menuitem"><i data-lucide="settings" style="width:18px;height:18px"></i><span>Settings</span></button>
+              <button class="rw-menu-item has-sep" role="menuitem"><i data-lucide="log-out" style="width:18px;height:18px"></i><span>Log Out</span></button>
+            </div>
+          </div>
+        </div>
+        <div class="v2-cell v2-wide"><div class="v2-label">Grouped list (Settings): rows in one tile, 18px Lucide icon N800, 14px Medium label + caption, chevron 20, row padding 16 (tile pad), divider N150 inset 16, pressed Highlight Fill; a single action gets its own tile 16px below</div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="rw-surface rw-group">
+              <button class="rw-group-row"><i data-lucide="circle-user" style="width:18px;height:18px"></i><span class="rw-group-row-text"><span class="rw-group-row-label">Profile</span><span class="rw-caption">Xu Han · Intermediate</span></span><i data-lucide="chevron-right" class="rw-group-row-end" style="width:20px;height:20px"></i></button>
+              <button class="rw-group-row"><i data-lucide="user-round" style="width:18px;height:18px"></i><span class="rw-group-row-text"><span class="rw-group-row-label">Account</span><span class="rw-caption">han@example.com</span></span><i data-lucide="chevron-right" class="rw-group-row-end" style="width:20px;height:20px"></i></button>
+              <button class="rw-group-row"><i data-lucide="languages" style="width:18px;height:18px"></i><span class="rw-group-row-text"><span class="rw-group-row-label">Language</span><span class="rw-caption">English</span></span><i data-lucide="chevron-right" class="rw-group-row-end" style="width:20px;height:20px"></i></button>
+            </div>
+            <div class="rw-surface rw-group"><button class="rw-group-row"><i data-lucide="log-out" style="width:18px;height:18px"></i><span class="rw-group-row-text"><span class="rw-group-row-label">Log Out</span></span></button></div>
+          </div>
+        </div>
+        <div class="v2-cell v2-wide"><div class="v2-label">Switch inside a Grouped list row: off = Highlight Fill track + N400 knob; on = N200 track + N800 knob. Language row: chosen option shows Check 20 N600</div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="rw-surface rw-group">
+              <button class="rw-group-row" role="switch" aria-checked="true"><span class="rw-group-row-text"><span class="rw-group-row-label">Match Reminders</span><span class="rw-caption is-wrap">A nudge to log your match after you play</span></span><span class="rw-switch is-on" aria-hidden="true"></span></button>
+              <button class="rw-group-row" role="switch" aria-checked="false"><span class="rw-group-row-text"><span class="rw-group-row-label">Insight Updates</span><span class="rw-caption is-wrap">When new insights are ready</span></span><span class="rw-switch" aria-hidden="true"></span></button>
+            </div>
+            <div class="rw-surface rw-group">
+              <button class="rw-group-row" role="radio" aria-checked="true"><span class="rw-group-row-text"><span class="rw-group-row-label">English</span></span><span class="rw-group-row-end is-selected"><i data-lucide="check" style="width:20px;height:20px"></i></span></button>
+              <button class="rw-group-row" role="radio" aria-checked="false"><span class="rw-group-row-text"><span class="rw-group-row-label">简体中文</span></span></button>
+            </div>
+          </div>
+        </div>
+        <div class="v2-cell v2-wide"><div class="v2-label">Match Detail (Figma 365:8096): Game table (caption header, per-game Match Result, game winner's score N800 / other N400, 18px) and Notes tile (label N800, tags N400 after a 16px divider, body N600); padding 20px, divider N150</div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="rw-surface rw-game-table">
+              <div class="rw-game-table-row is-head"><div>Game</div><div>You</div><div>Opp</div></div>
+              <div class="rw-game-table-row"><div class="rw-game-table-game"><span>Game 1</span><span class="rw-result is-win">Win</span></div><div class="rw-game-table-score is-high">21</div><div class="rw-game-table-score">17</div></div>
+              <div class="rw-game-table-row"><div class="rw-game-table-game"><span>Game 2</span><span class="rw-result is-loss">Loss</span></div><div class="rw-game-table-score">18</div><div class="rw-game-table-score is-high">21</div></div>
+            </div>
+            <div class="rw-surface rw-notes">
+              <div class="rw-note"><div class="rw-note-head"><h3 class="rw-note-label">What Worked</h3><span class="rw-note-tags">Net · Placement</span></div><p class="rw-note-text">Tight net shots, then deep clears to his backhand.</p></div>
+              <div class="rw-note"><div class="rw-note-head"><h3 class="rw-note-label">On Alex Chen</h3></div><p class="rw-note-text">Deep clears to Alex’s backhand gave me time.</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="v2-cell v2-wide"><div class="v2-label">Input rows: one tile per field (radius 10), 8px apart, note under its own field; label (12px N400) inside the tile over the value (14px N800); typing row = Highlight Fill; select row = ChevronDown 18 opening the menu-style list with Check N600; error = red 1px border + note under the field, inset 16</div>
+          <div class="rw-input-list" style="padding-bottom:150px;">
+            <div class="rw-input-field"><label class="rw-surface rw-input-row"><span class="rw-input-row-text"><span class="rw-input-row-label">Name</span><input class="rw-input-row-input" value="Xu Han"></span></label></div>
+            <div class="rw-input-field">
+              <button type="button" class="rw-surface rw-input-row" aria-expanded="true"><span class="rw-input-row-text"><span class="rw-input-row-label">Skill level</span><span class="rw-input-row-value">Intermediate</span></span><span class="rw-input-row-end"><i data-lucide="chevron-down" style="width:18px;height:18px"></i></span></button>
+              <div class="rw-menu rw-select-menu" role="listbox" style="animation:none;">
+                <button class="rw-menu-item rw-select-option"><span>Beginner</span></button>
+                <button class="rw-menu-item rw-select-option"><span>Intermediate</span><i data-lucide="check" style="width:18px;height:18px"></i></button>
+                <button class="rw-menu-item rw-select-option"><span>Advanced</span></button>
+              </div>
+            </div>
+            <div class="rw-input-field"><label class="rw-surface rw-input-row is-error"><span class="rw-input-row-text"><span class="rw-input-row-label">New password</span><input class="rw-input-row-input" type="password" value="abc"></span></label><span class="rw-field-note is-error">Password must be at least 8 characters.</span></div>
+          </div>
+        </div>
+        <div class="v2-cell v2-wide"><div class="v2-label">Bottom Nav (Matches active)</div>
+          <div class="v2-navwrap"><nav class="rw-nav"><div class="rw-glass rw-nav-bar">
+            <button class="rw-nav-item is-active"><i data-lucide="list"></i>Matches</button>
+            <button class="rw-nav-item"><i data-lucide="chart-no-axes-column"></i>Insights</button>
+            <button class="rw-nav-item"><i data-lucide="target"></i>Focus</button>
+          </div></nav></div>
+        </div>
+      </div>
+    </div>
+    <script>
+      // Waveform sample: the Figma bar heights, as in the app.
+      [4.5,5.7,12.4,5.6,4.3,20.6,19.1,14.8,17,4.4,11.2,22.6,8.1,10.8,32,23.3,18.8,25.3,6.3,15.7,28.9,27.4,8.2,15,34,14.2,19.7,9.5,20.8,30.5,13.6,5.6,12.5,23.8,6.7,15.8,5.5,8,13.5,4.7,4.5,9]
+        .forEach((h, i, a) => { const b = document.createElement('i'); b.style.height = h + 'px'; b.style.opacity = (.57 + .42 * (1 - Math.abs(i - a.length / 2) / (a.length / 2))).toFixed(2); b.style.animationDelay = -(i * 137 % 1100) + 'ms'; document.getElementById('v2-wave').appendChild(b); });
+    </script>
+    <script>
+      // KeyInsight sample language: swaps the primary examples' copy in place (no duplicate cards).
+      document.querySelectorAll('#v2-key-lang .rw-tab').forEach(b => b.addEventListener('click', () => {
+        const lang = b.dataset.lang;
+        document.querySelectorAll('#v2-key-lang .rw-tab').forEach(x => { const on = x === b; x.classList.toggle('is-active', on); x.setAttribute('aria-selected', on); });
+        document.querySelectorAll('[data-en][data-zh]').forEach(n => { n.textContent = n.dataset[lang]; n.lang = lang === 'zh' ? 'zh-CN' : 'en'; });
+      }));
+    </script>
+    <script>if (window.lucide) lucide.createIcons({ attrs: { width: 24, height: 24, 'stroke-width': 2 } });</script>
+    </section>
   </main>
 </body>
 </html>

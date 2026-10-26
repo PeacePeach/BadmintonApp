@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Growth Insights Patterns</title>
+<!--
+  PROTOTYPE ONLY (Han, 2026-10-24): the split KeyInsight with its three charts, on demo data.
+  The tile and charts are the V2 DS components (.rw-key.is-split, .rw-key-chart, key-chart.js); this page only
+  feeds them sample data. Not wired to the app, the Grow engine or Supabase. Delete project/prototypes/ to remove.
+-->
+<link rel="stylesheet" href="../_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/fonts.css">
+<link rel="stylesheet" href="../_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/colors.css">
+<link rel="stylesheet" href="../_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/typography.css">
+<link rel="stylesheet" href="../_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/spacing.css">
+<link rel="stylesheet" href="../_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/effects.css">
+<link rel="stylesheet" href="../_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/v2.css">
+<link rel="stylesheet" href="../_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/components-v2.css">
+<script src="../_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/key-chart.js"></script>
+<style>
+  /* Page chrome only; the tiles are DS components. */
+  *{box-sizing:border-box;}
+  html,body{margin:0;min-height:100%;background:var(--rw-bg-app);color:var(--rw-text-primary);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;}
+  .page{min-height:100vh;display:flex;justify-content:center;}
+  .phone{width:100%;max-width:390px;padding:24px 20px 48px;display:flex;flex-direction:column;gap:20px;}
+  .head{display:flex;flex-direction:column;gap:8px;}
+  .head h1{font:var(--rw-type-appbar-title);letter-spacing:var(--rw-tracking);margin:0;}
+  .demo{display:flex;align-items:center;gap:8px;font:var(--rw-type-caption);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
+  .demo i{width:6px;height:6px;border-radius:50%;background:var(--rw-loss);flex-shrink:0;}
+  .opts{display:flex;flex-wrap:wrap;gap:8px;}
+  .opts .rw-pill{background:var(--rw-surface-fill);}
+  .stack{display:flex;flex-direction:column;gap:16px;}
+  .label{font:var(--rw-type-caption);letter-spacing:var(--rw-tracking);color:var(--rw-chart-label-fg);margin:4px 0 -8px;}
+  .note{display:flex;flex-direction:column;gap:6px;font:var(--rw-type-meta);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
+  .note b{font-weight:600;color:var(--rw-text-primary);}
+</style>
+</head>
+<body>
+<div class="page rw-scroll is-v2"><div class="phone">
+  <div class="head">
+    <h1 id="h-title"></h1>
+    <div class="demo"><i></i><span id="h-demo"></span></div>
+  </div>
+  <div class="rw-surface rw-tabs is-sm" role="tablist" id="tabs"></div>
+  <div class="opts" id="opts"></div>
+  <div class="stack" id="stack"></div>
+  <div class="rw-surface rw-tile note" id="note"></div>
+</div></div>
+
+<script>
+// Demo data only, in the chart shape the Growth Insights Engine V2 will emit. Not real player analytics.
+const DEMO = {
+  trend: { pattern: 'trend', values: [42, 47, 45, 53, 58, 64], min: 30, max: 70, ticks: [30, 50, 70], unit: '%' },  // net points won %
+  compare: { pattern: 'compare', values: [3, 2, 2, 1, 1, 1], split: 3, min: 0, max: 4, ticks: [0, 2, 4] },           // defensive mistakes: 7 then 3
+  strip: { pattern: 'strip', values: [2, 0, 1, 3, 0, 2], min: 0, max: 4, ticks: [0, 2, 4] }                          // serve errors per match
+};
+
+const T = {
+  en: {
+    title: 'Growth Insights Pattern Preview', demo: 'Demo data. Sample values, not real player analytics.',
+    eyebrow: 'Key insight', tabs: { trend: 'Trend', compare: 'Compare', strip: 'Strip' },
+    all: 'Show all three', labels: 'Micro labels', lang: '中文',
+    names: { trend: 'A · Trend Line', compare: 'B · Comparison Chart', strip: 'C · Match Strip' },
+    trend: { t: 'Your net game is getting stronger.', b: 'Your share of net points won has climbed from 42% to 64% over your last 6 matches.' },
+    compare: { t: 'Your defence is improving.', b: 'You mentioned defensive mistakes 3 times in your last 3 matches, compared with 7 in the previous 3.' },
+    strip: { t: 'Serve errors keep showing up.', b: 'You made serve errors in 4 of your last 6 matches, 8 in total.' },
+    notes: {
+      trend: '<b>Trend Line</b>: net points won % per match, matches 1–6 (oldest left). The quoted values are written at their points.',
+      compare: '<b>Comparison Chart</b>: defensive mistakes mentioned per match. Previous 3 in grey (7 in total), last 3 in blue (3 in total).',
+      strip: '<b>Match Strip</b>: serve errors per match. Orange = it happened (4 of 6 matches, 8 in total), grey on the zero line = it didn\'t.'
+    }
+  },
+  zh: {
+    title: '成长洞察图形预览', demo: '演示数据，仅为示例数值，并非真实球员分析。',
+    eyebrow: '关键洞察', tabs: { trend: '趋势线', compare: '对比图', strip: '比赛条' },
+    all: '同时显示三个', labels: '小标签', lang: 'English',
+    names: { trend: 'A · 趋势线', compare: 'B · 对比图', strip: 'C · 比赛条' },
+    trend: { t: '你的网前越来越强了。', b: '最近 6 场，你的网前得分率从 42% 升到了 64%。' },
+    compare: { t: '你的防守在进步。', b: '最近 3 场你提到防守失误 3 次，之前 3 场是 7 次。' },
+    strip: { t: '发球失误反复出现。', b: '最近 6 场里有 4 场出现发球失误，一共 8 次。' },
+    notes: {
+      trend: '<b>趋势线</b>：每场网前得分占比，第 1–6 场（左边最早）。文字引用的数值直接标在对应的点上。',
+      compare: '<b>对比图</b>：每场提到的防守失误。之前 3 场灰色（共 7 次），最近 3 场蓝色（共 3 次）。',
+      strip: '<b>比赛条</b>：每场发球失误。橙色 = 出现了（6 场中 4 场，共 8 次），零线上的灰色 = 没有。'
+    }
+  }
+};
+
+const qs = new URLSearchParams(location.search);
+const S = {
+  pattern: ['trend', 'compare', 'strip'].includes(qs.get('p')) ? qs.get('p') : 'trend',
+  all: qs.get('all') === '1',
+  labels: qs.get('labels') !== '0',
+  lang: qs.get('lang') === 'zh' || (!qs.get('lang') && /^zh/i.test(navigator.language)) ? 'zh' : 'en'
+};
+
+const el = (tag, cls, html) => { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; };
+
+// DS split KeyInsight: .rw-key.is-split > .rw-key-head + .rw-key-split > text + .rw-key-chart
+function tile(kind, tx) {
+  const t = el('div', 'rw-surface rw-tile rw-key is-split');
+  t.innerHTML = `<div class="rw-key-head"><span class="rw-label">${tx.eyebrow}</span></div>
+    <div class="rw-key-split"><div class="rw-key-split-text"><p class="rw-key-title">${tx[kind].t}</p><p class="rw-key-body">${tx[kind].b}</p></div><div class="rw-key-chart"></div></div>`;
+  return t;
+}
+
+function render() {
+  const tx = T[S.lang];
+  document.documentElement.lang = S.lang === 'zh' ? 'zh-CN' : 'en';
+  document.getElementById('h-title').textContent = tx.title;
+  document.getElementById('h-demo').textContent = tx.demo;
+
+  const tabs = document.getElementById('tabs'); tabs.innerHTML = '';
+  ['trend', 'compare', 'strip'].forEach(k => {
+    const on = !S.all && S.pattern === k, b = el('button', 'rw-tab' + (on ? ' is-active' : ''), tx.tabs[k]);
+    b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', on);
+    b.onclick = () => { S.pattern = k; S.all = false; sync(); };
+    tabs.appendChild(b);
+  });
+
+  const opts = document.getElementById('opts'); opts.innerHTML = '';
+  [[tx.all, S.all, () => S.all = !S.all], [tx.labels, S.labels, () => S.labels = !S.labels], [tx.lang, false, () => S.lang = S.lang === 'zh' ? 'en' : 'zh']].forEach(([label, on, fn]) => {
+    const b = el('button', 'rw-pill rw-pill-sm' + (on ? ' is-active' : ''), label);
+    b.setAttribute('aria-pressed', on); b.onclick = () => { fn(); sync(); };
+    opts.appendChild(b);
+  });
+
+  const kinds = S.all ? ['trend', 'compare', 'strip'] : [S.pattern];
+  const stack = document.getElementById('stack'); stack.innerHTML = '';
+  kinds.forEach(k => {
+    if (S.all) stack.appendChild(el('div', 'label', tx.names[k]));
+    const t = tile(k, tx);
+    stack.appendChild(t);
+    RWKeyChart.render(t.querySelector('.rw-key-chart'), { ...DEMO[k], labels: S.labels });
+  });
+  document.getElementById('note').innerHTML = kinds.map(k => `<div>${tx.notes[k]}</div>`).join('');
+}
+
+function sync() {
+  const q = new URLSearchParams();
+  q.set('p', S.pattern); if (S.all) q.set('all', '1'); if (!S.labels) q.set('labels', '0'); q.set('lang', S.lang);
+  history.replaceState(null, '', '?' + q.toString());
+  render();
+}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "name": "Rallywise",
+  "short_name": "Rallywise",
+  "display": "standalone",
+  "background_color": "#1b1a1d",
+  "theme_color": "#1b1a1d",
+  "icons": [
+    { "src": "assets/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "assets/rallywise-icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
