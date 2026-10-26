@@ -26,6 +26,7 @@
      Insight Subtitle (change) .... .rw-trend > .rw-trend-delta.is-up|.is-down|.is-flat
      Graphs / Large bar ........... .rw-form[.is-down] > .rw-form-bars > .rw-form-bar[.is-recent] + .rw-chart-label
      Performance breakdown ........ .rw-breakdown (label, .rw-bar, .rw-row-value + .rw-row-sub); score gap row: fill .is-up|.is-down + .rw-breakdown-mid (dashed zero line)
+     EmptyState ................... .rw-empty > illustration + .rw-empty-title + .rw-empty-body + .rw-btn.rw-btn-primary (illustrations.js)
      Insight / ListRow ............ .rw-list-row (.rw-avatar, .rw-eyebrow, .rw-name, .rw-list-value, .rw-caption)
    Insights / Grow (Figma 203:5215):
      KeyInsight ................... .rw-surface.rw-tile.rw-key > .rw-key-head (dot + .rw-label) + .rw-key-title + .rw-key-body + .rw-bar.rw-key-bar
@@ -84,7 +85,7 @@
      Notes tile ................... .rw-surface.rw-notes > .rw-note (.rw-note-head: .rw-note-label + .rw-note-tags, .rw-note-text)
    ========================================================= */
 /* Screen background: app background + glow. The glow stays fixed while the content scrolls over it. */
-.rw-scroll.is-v2{background:var(--rw-bg-app-glow) no-repeat scroll,var(--rw-bg-app);--empty-body-weight:var(--rw-weight-min);}
+.rw-scroll.is-v2{background:var(--rw-bg-app-glow) no-repeat scroll,var(--rw-bg-app);}
 .rw-scroll.is-v2.is-detail{background:var(--rw-bg-app);}   /* detail pages (centred App bar): plain background, no glow (Han 2026-10-25) */
 /* Surface (in-page content) and Glass (floating controls). */
 .rw-surface{background:var(--rw-surface-fill);}
@@ -490,6 +491,11 @@ button.rw-input-row{cursor:pointer;}
 }
 /* Same Chinese ink offset as the Toast: buttons centre with flex, so 2x the shift as extra top padding moves the label down by the shift. */
 :root[lang="zh-Hans"] .rw-btn-primary,:root[lang="zh-Hans"] .rw-btn-social,:root[lang="zh-Hans"] .rw-btn-quiet{padding-top:calc(1px + 2 * var(--rw-zh-ink-shift));}
+/* EmptyState (illustrations.js): title, body and the one action, centred under the illustration. */
+.rw-empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:32px 16px;}
+.rw-empty-title{margin-top:20px;font:var(--rw-type-empty-title);letter-spacing:var(--rw-tracking);color:var(--rw-empty-title-fg);}
+.rw-empty-body{margin-top:8px;max-width:280px;font:var(--rw-type-empty-body);letter-spacing:var(--rw-tracking);color:var(--rw-empty-body-fg);}
+.rw-empty .rw-btn-primary{margin-top:24px;}
 :root[lang="zh-Hans"] :is(.rw-btn,.rw-pill,.rw-flag) :is(svg,x-import){
   flex-shrink:0;
   vertical-align:middle;

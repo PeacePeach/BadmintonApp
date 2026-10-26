@@ -214,6 +214,15 @@
   --rw-btn-primary-h: 52px;
   --rw-btn-danger-bg: var(--rw-color-action-destructive);
   --rw-btn-danger-fg: var(--rw-color-text-on-destructive);
+  /* EmptyState + illustrations (empty, error, offline states). No Figma frame; built from existing V2 tokens.
+     Illustrations keep their drawings and move from V1 blue-50/100/200 + bg-primary to the matching V2 Foundation styles. */
+  --rw-empty-title-fg: var(--rw-color-text-primary);
+  --rw-empty-body-fg: var(--rw-color-text-secondary);
+  --rw-illustration-line: var(--rw-b100);
+  --rw-illustration-fill: var(--rw-b200);
+  --rw-illustration-detail: var(--rw-b50);
+  --rw-illustration-backdrop: var(--rw-b100);
+  --rw-illustration-surface: var(--rw-color-bg-app);
   --rw-icon-btn-size: 40px;
   /* InlineBanner (Figma Foundation 333:8797): a reusable in-content prompt, e.g. "Who is “Chris”?" (Han, 2026-10-23).
      Fill is Blue Gradient 01 at 8% (unbound in Figma, same stops), border N100. */
@@ -482,6 +491,8 @@
   --rw-type-heading: 600 24px/1 var(--font-sans);  /* Figma 20px; 24px for Han to review (2026-10-22) */
   --rw-type-hint: 500 14px/1.2 var(--font-sans);        /* Figma Regular -> Medium (V2 minimum) */
   --rw-type-transcript: 500 16px/26.4px var(--font-sans); /* Figma Regular -> Medium (V2 minimum) */
+  --rw-type-empty-title: 600 16px/20px var(--font-sans);  /* EmptyState title (was V1 500 19px) */
+  --rw-type-empty-body: 500 14px/20px var(--font-sans);   /* EmptyState body (was V1 15px) */
   --rw-type-timer: 500 14px/14px var(--font-sans);
   --rw-type-flag: 500 12px/15px var(--font-sans);   /* Pills State=Warning (Figma 329:7164) */
   --rw-type-row-text: 500 14px/20px var(--font-sans);   /* InputTile value (Figma 329:7089) */

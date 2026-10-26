@@ -2,7 +2,8 @@
    Simple flat graphics for empty, error, success and connection states.
    Style: soft circular backdrop, 2px outlines, object bodies in the app
    background colour, one small filled area in brand blue. All colours come
-   from the --illustration-* tokens in tokens/colors.css.
+   from the --rw-illustration-* tokens in tokens/v2.css (V1 --illustration-* in
+   tokens/colors.css as the fallback).
 
    Exposes on window.LearningAppDesignSystem_e32a09:
      Illustration({ name, size, title })
@@ -13,11 +14,11 @@
 (() => {
   const ns = (window.LearningAppDesignSystem_e32a09 = window.LearningAppDesignSystem_e32a09 || {});
 
-  const LINE = 'var(--illustration-line, #6c9fef)';
-  const FILL = 'var(--illustration-fill, #2d75e8)';
-  const BODY = 'var(--illustration-surface, #1b1a1d)';
-  const DETAIL = 'var(--illustration-detail, #e6eefc)';
-  const TINT = 'var(--illustration-backdrop, #6c9fef)';
+  const LINE = 'var(--rw-illustration-line, var(--illustration-line, #6c9fef))';
+  const FILL = 'var(--rw-illustration-fill, var(--illustration-fill, #2d75e8))';
+  const BODY = 'var(--rw-illustration-surface, var(--illustration-surface, #1b1a1d))';
+  const DETAIL = 'var(--rw-illustration-detail, var(--illustration-detail, #e6eefc))';
+  const TINT = 'var(--rw-illustration-backdrop, var(--illustration-backdrop, #6c9fef))';
 
   const o = `fill="${BODY}" stroke="${LINE}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"`;
   const f = `fill="${FILL}" stroke="${LINE}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"`;
@@ -143,16 +144,11 @@
 
   function EmptyState({ illustration, title, body, actionLabel, onAction, size = 160, style }) {
     const h = React.createElement;
-    return h('div', {
-      style: { display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '32px 16px', ...style },
-    },
+    return h('div', { className: 'rw-empty', style },
       illustration ? h(Illustration, { name: illustration, size }) : null,
-      title ? h('div', { style: { font: '500 19px/1.35 var(--font-sans)', color: 'var(--text-primary)', marginTop: 20 } }, title) : null,
-      body ? h('div', { style: { font: 'var(--empty-body-weight, 400) 15px/1.45 var(--font-sans)', color: 'var(--text-secondary)', marginTop: 8, maxWidth: 280 } }, body) : null,
-      actionLabel ? h('button', {
-        onClick: onAction,
-        style: { marginTop: 24, height: 52, padding: '0 28px', border: '1px solid var(--ghost-button-outline)', borderRadius: 999, background: 'transparent', color: 'var(--text-primary)', font: '500 15px/1 var(--font-sans)', cursor: 'pointer' },
-      }, actionLabel) : null
+      title ? h('div', { className: 'rw-empty-title' }, title) : null,
+      body ? h('div', { className: 'rw-empty-body' }, body) : null,
+      actionLabel ? h('button', { type: 'button', className: 'rw-btn rw-btn-primary', onClick: onAction }, actionLabel) : null
     );
   }
 
