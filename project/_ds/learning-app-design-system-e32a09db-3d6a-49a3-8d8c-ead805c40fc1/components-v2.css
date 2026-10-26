@@ -575,6 +575,9 @@ button.rw-input-row{cursor:pointer;}
 .rw-key-split{display:grid;grid-template-columns:minmax(0,var(--rw-key-split-text)) minmax(0,var(--rw-key-split-chart));column-gap:var(--rw-key-split-gap);align-items:stretch;}
 .rw-key-split-text{display:flex;flex-direction:column;gap:12px;min-width:0;}
 .rw-key-split .rw-key-title{text-wrap:wrap;}  /* balanced wrapping made some titles break early and look narrower (Han) */
+/* The body fills its 60% column too. Safari/iOS WebKit evens out every line of a text-wrap:pretty paragraph, so in
+   this narrow column each line stopped 30-60px short of the chart (Han, 2026-10-26, most visible in Chinese). */
+.rw-key-split .rw-key-body{text-wrap:wrap;}
 .rw-key-chart{position:relative;min-height:var(--rw-key-chart-min-h);}
 .rw-key-chart svg{position:absolute;inset:0;display:block;width:100%;height:100%;overflow:visible;}
 .rw-key-chart text{font:var(--rw-type-key-chart-tick);fill:var(--rw-key-chart-tick);font-variant-numeric:tabular-nums;}
