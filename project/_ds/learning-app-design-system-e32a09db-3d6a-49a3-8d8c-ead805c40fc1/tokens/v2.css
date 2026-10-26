@@ -222,7 +222,7 @@
   --rw-toast-body-fg: var(--rw-n100);
   --rw-toast-close-fg: var(--rw-n75);
   --rw-toast-success-bg: var(--rw-g50);   --rw-toast-success-badge: var(--rw-g500);   --rw-toast-success-icon: var(--rw-g100);
-  --rw-toast-error-bg: var(--rw-red-50);  --rw-toast-error-badge: var(--rw-color-status-error);  --rw-toast-error-icon: var(--rw-color-text-on-action);
+  --rw-toast-error-bg: var(--rw-red-50);  --rw-toast-error-badge: var(--rw-red-800);  --rw-toast-error-icon: var(--rw-red-100);   /* Figma Toast 360:7533 (Han 2026-10-26: must match Figma; exception to the one error red) */
   --rw-toast-info-bg: var(--rw-b50);      --rw-toast-info-badge: var(--rw-b400);      --rw-toast-info-icon: var(--rw-b75);
   --rw-toast-warning-bg: var(--rw-y50);   --rw-toast-warning-badge: var(--rw-o500);   --rw-toast-warning-icon: var(--rw-y75);
   --rw-type-banner-title: 600 16px/14px var(--font-sans);
