@@ -382,6 +382,8 @@
 .rw-player-list{display:flex;flex-direction:column;gap:var(--rw-player-list-gap);}
 /* Search bar. Unfilled: 5% fill. Filled Inactive (.is-filled): purplegrey-500. Active Typing (:focus-within): purplegrey-500 + N600 ring, N800 text. */
 .rw-search{height:var(--rw-search-h);padding:0 var(--rw-search-pad-x);border-radius:999px;border:1px solid transparent;background:var(--rw-search-bg);display:flex;align-items:center;gap:8px;color:var(--rw-search-fg);}
+/* Grid, not flex, so the field's width percentages resolve against its own column (icon | field | clear). */
+.rw-search{display:grid;grid-template-columns:auto minmax(0,1fr);grid-auto-columns:auto;grid-auto-flow:column;}
 .rw-search.is-filled,.rw-search:focus-within{background:var(--rw-search-bg-filled);}
 .rw-search:focus-within{border-color:var(--rw-search-border-active);}
 /* Input row: single-line field with its label inside the tile (12px label over the 15px value). Typing or an open
@@ -398,6 +400,11 @@ button.rw-input-row{cursor:pointer;}
 .rw-input-row-label{font:var(--rw-type-caption);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
 .rw-input-row.is-error{box-shadow:inset 0 0 0 1px var(--rw-color-status-error);}   /* error = 1px border in the error red; label stays N400 (Han 2026-10-25) */
 .rw-input-row-input,.rw-input-row-value{display:block;width:100%;height:20px;margin:0;padding:0;border:none;outline:none;background:transparent;font:var(--rw-type-list-value);line-height:20px;letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);caret-color:var(--rw-search-caret);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* Editable text (Han 2026-10-26: the app keeps a 1:1 scale). iOS zooms the whole page when a focused field computes
+   under 16px, so every editable field computes to --rw-field-font. The voice transcript is 16px by design; input row, search and
+   TextArea are drawn at their 14px DS size with transform: scale(--rw-field-k), the box sized 1/k and the extra taken
+   back by negative margins. Layout and look are unchanged. A new field reuses one of these classes; tests: zoom-fix/tests. */
+.rw-input-row-input{font-size:var(--rw-field-font);line-height:calc(20px / var(--rw-field-k));letter-spacing:calc(var(--rw-tracking) / var(--rw-field-k));width:calc(100% / var(--rw-field-k));height:calc(20px / var(--rw-field-k));margin:0 calc(100% - 100% / var(--rw-field-k)) calc(20px - 20px / var(--rw-field-k)) 0;transform:scale(var(--rw-field-k));transform-origin:0 0;}
 .rw-input-row-input::placeholder{color:var(--rw-placeholder-text);opacity:1;}
 .rw-input-row-value.is-muted{color:var(--rw-placeholder-text);}
 .rw-input-row-end{display:flex;align-items:center;flex-shrink:0;color:var(--rw-text-secondary);}
@@ -441,6 +448,7 @@ button.rw-input-row{cursor:pointer;}
 .rw-checkbox.is-on{box-shadow:inset 0 0 0 1px var(--rw-color-border-selected);}
 .rw-search>:first-child{flex-shrink:0;}
 .rw-search-input{flex:1;min-width:0;height:100%;padding:0 var(--rw-search-input-pad-x);border:none;outline:none;background:transparent;font:var(--rw-type-name);letter-spacing:var(--rw-tracking);color:var(--rw-search-fg);caret-color:var(--rw-search-caret);}
+.rw-search-input{font-size:var(--rw-field-font);letter-spacing:calc(var(--rw-tracking) / var(--rw-field-k));padding:0 calc(var(--rw-search-input-pad-x) / var(--rw-field-k));width:calc(100% / var(--rw-field-k));height:calc((var(--rw-search-h) - 2px) / var(--rw-field-k));margin:0 calc(100% - 100% / var(--rw-field-k)) calc((var(--rw-search-h) - 2px) * (1 - 1 / var(--rw-field-k))) 0;align-self:center;transform:scale(var(--rw-field-k));transform-origin:0 0;}
 .rw-search-input::placeholder{color:var(--rw-placeholder-text);opacity:1;}
 .rw-search:focus-within .rw-search-input{color:var(--rw-search-fg-active);}
 .rw-search-clear{flex-shrink:0;width:20px;height:20px;padding:0;border:none;background:transparent;color:inherit;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;}
@@ -489,6 +497,8 @@ button.rw-input-row{cursor:pointer;}
 .rw-pill-xs:disabled{cursor:default;}
 /* TextArea (Figma 349:4322). Unfilled: placeholder N400. Filled Inactive: N600 text. Typing: Highlight Fill + N600 ring, N800 text. */
 .rw-textarea{display:block;width:100%;height:var(--rw-textarea-h);margin:0;padding:14px 18px;border-radius:var(--rw-textarea-radius);border:1px solid transparent;background:var(--rw-textarea-bg);color:var(--rw-textarea-fg);font:var(--rw-type-textarea);letter-spacing:var(--rw-tracking);resize:none;outline:none;caret-color:var(--rw-textarea-fg-active);transition:background var(--rw-motion-press) var(--rw-ease-enter),border-color var(--rw-motion-press) var(--rw-ease-enter);}
+/* The whole TextArea box is laid out at 16/14 size and scaled back, so text, padding, radius and ring look exactly as designed. */
+.rw-textarea{font-size:var(--rw-field-font);line-height:calc(21px / var(--rw-field-k));letter-spacing:calc(var(--rw-tracking) / var(--rw-field-k));width:calc(100% / var(--rw-field-k));height:calc(var(--rw-textarea-h) / var(--rw-field-k));padding:calc(14px / var(--rw-field-k)) calc(18px / var(--rw-field-k));border-width:calc(1px / var(--rw-field-k));border-radius:calc(var(--rw-textarea-radius) / var(--rw-field-k));margin:0 calc(100% - 100% / var(--rw-field-k)) calc(var(--rw-textarea-h) - var(--rw-textarea-h) / var(--rw-field-k)) 0;transform:scale(var(--rw-field-k));transform-origin:0 0;}
 .rw-textarea::placeholder{color:var(--rw-placeholder-text);opacity:1;}
 .rw-textarea:focus{background:var(--rw-textarea-bg-active);border-color:var(--rw-textarea-border-active);color:var(--rw-textarea-fg-active);}
 /* Stepper (Figma Create Focus 173:13319): − value +, e.g. sessions per week. Buttons go to 40% at the ends. */

@@ -431,6 +431,11 @@
   --rw-textarea-fg: var(--rw-color-text-body);
   --rw-textarea-fg-active: var(--rw-color-text-primary);
   --rw-placeholder-text: #59595b;
+  /* Editable text and iOS focus zoom (Han 2026-10-26): iOS WKWebView/Safari zooms the whole page when a focused field
+     computes under 16px. Every field computes to --rw-field-font (16px) and is drawn at its DS size by scaling the
+     text box by --rw-field-k (DS size / 16; all V2 field text is 14px). Pinch zoom stays on. See "Editable text". */
+  --rw-field-font: 16px;
+  --rw-field-k: 0.875;
   --rw-textarea-placeholder: var(--rw-placeholder-text);
   /* Stepper (Figma Create Focus 173:13319, "How often?"): Glass Fill track, 44px purplegrey-500 buttons with 18px icons, 14px value */
   --rw-stepper-pad: 6px;

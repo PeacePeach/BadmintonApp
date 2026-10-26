@@ -41,9 +41,28 @@ try {
     document.documentElement.classList.add('native-app');
   }
 } catch (e) {}
+/* The keyboard may scroll the page to reveal a field; once no field is focused, put the app back at the top so it is
+   never left shifted up. Skipped while the person has pinch-zoomed (visual viewport scale above 1). */
+(function () {
+  const editing = () => { const a = document.activeElement; return !!a && a.matches && a.matches('input,textarea,select,[contenteditable]'); };
+  const reset = () => setTimeout(() => {
+    const vv = window.visualViewport;
+    if (editing() || (vv && vv.scale > 1.01) || (!window.scrollX && !window.scrollY)) return;
+    window.scrollTo(0, 0);
+  }, 60);
+  document.addEventListener('focusout', reset, true);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', reset);
+})();
 </script>
 <style>
 body{margin:0;background:var(--bg-primary);font-family:"Poppins",system-ui,sans-serif;}
+/* One 1:1 scale on every screen (Han 2026-10-26). Pinch zoom stays on (no maximum-scale / user-scalable in the
+   viewport meta); nothing zooms or slides the app by itself: no text inflation, no double-tap zoom, no sideways
+   scroll, and a field without a DS class still computes to 16px so iOS never zooms on focus ("Editable text" in
+   components-v2.css covers the DS fields; keyboard scroll reset in the script above). */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation;}
+html,body{overflow-x:hidden;}
+:where(input:not([type=checkbox],[type=radio],[type=range],[type=hidden]),textarea,select,[contenteditable]){font-size:var(--rw-field-font,16px);}
 *{box-sizing:border-box;}
 *::-webkit-scrollbar{display:none;}
 a{color:var(--action-primary);} a:hover{color:var(--text-primary);}
@@ -110,7 +129,7 @@ button:disabled{cursor:default !important;}
 <div class="stage" style="width:100%;height:100vh;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:0;">
 <div data-screen-label="Phone" class="phone rw-vt-page" style="position:relative;width:100%;height:100vh;border-radius:0;background:var(--bg-primary);overflow:hidden;color:var(--text-primary);box-shadow:none;">
 
-  <div ref="{{ scrollRef }}" class="{{ scrollCls }}" onScroll="{{ onScroll }}" style="position:absolute;inset:0;overflow-y:auto;padding:var(--rw-appbar-top) var(--rw-appbar-inset) 120px;">
+  <div ref="{{ scrollRef }}" class="{{ scrollCls }}" onScroll="{{ onScroll }}" style="position:absolute;inset:0;overflow-x:hidden;overflow-y:auto;padding:var(--rw-appbar-top) var(--rw-appbar-inset) 120px;">
 
     <!-- LOG IN -->
     <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
