@@ -109,6 +109,9 @@
 .rw-toast-close{position:relative;width:18px;height:18px;flex-shrink:0;padding:0;border:none;background:transparent;color:var(--rw-toast-close-fg);display:flex;align-items:center;justify-content:center;cursor:pointer;}
 .rw-toast-close::after{content:"";position:absolute;inset:-13px;}   /* 44px tap target */
 :root[lang="zh-Hans"] :is(.rw-toast-title,.rw-toast-body){line-height:1.25;}   /* Chinese glyphs need a full line box */
+/* Chinese glyphs ink ~0.07em (~1px at 14px) above the centre of a Poppins line box (measured in Chromium and Han's Mac,
+   2026-10-26); move the text down by that much so it lines up with the badge and sits mid-tile. */
+:root[lang="zh-Hans"] :is(.rw-toast-title,.rw-toast-body){position:relative;top:var(--rw-zh-ink-shift);}
 
 /* InlineBanner: question or notice inside content, with a slot below (PlayerTags in Players). */
 .rw-inline-banner{display:flex;flex-direction:column;gap:16px;padding:16px;border-radius:var(--rw-banner-radius);border:1px solid var(--rw-banner-border);background:var(--rw-banner-bg);}
@@ -463,6 +466,8 @@ button.rw-input-row{cursor:pointer;}
 :root[lang="zh-Hans"] :is(.rw-btn,.rw-pill,.rw-flag,.rw-check){
   line-height:1.25;
 }
+/* Same Chinese ink offset as the Toast: buttons centre with flex, so 2x the shift as extra top padding moves the label down by the shift. */
+:root[lang="zh-Hans"] .rw-btn-primary,:root[lang="zh-Hans"] .rw-btn-social{padding-top:calc(1px + 2 * var(--rw-zh-ink-shift));}
 :root[lang="zh-Hans"] :is(.rw-btn,.rw-pill,.rw-flag) :is(svg,x-import){
   flex-shrink:0;
   vertical-align:middle;

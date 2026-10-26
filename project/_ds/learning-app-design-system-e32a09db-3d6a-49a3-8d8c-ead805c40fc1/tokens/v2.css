@@ -434,6 +434,7 @@
      N400 (secondary); Figma N100/N900 (white) text is built as N800 (Han, 2026-10-22). */
   --rw-weight-min: 500;
   --rw-tracking: -0.16px;
+  --rw-zh-ink-shift: 0.07em;   /* Chinese glyphs sit this far above a Poppins line box centre; zh text in centred components moves down by it */
   --rw-type-title: 600 24px/28.8px var(--font-sans);
   --rw-type-lead: 500 16px/1.4 var(--font-sans);
   --rw-type-eyebrow: 500 12px/13px var(--font-sans);
