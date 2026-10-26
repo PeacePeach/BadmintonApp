@@ -123,7 +123,7 @@
   // The target (no-focus) stays whole and centred (Han, 2026-10-26).
   const FRAME = {
     'no-matches': [1.3, 82, 67], 'no-players': [0.95, 80, 72], 'no-insights': [1.15, 80, 68], 'no-results': [1.3, 80, 78],
-    'error': [0.9, 88, 74], 'success': [1.35, 80, 68], 'no-focus': [1.0, 81, 79], 'connection-lost': [1.0, 80, 88],
+    'error': [0.9, 88, 74], 'success': [1.35, 80, 68], 'no-focus': [1.0, 80, 80], 'connection-lost': [1.0, 80, 88],
   };
   const illusClass = (name, compact) => 'rw-illus' + (compact ? ' is-compact' : '');
 
