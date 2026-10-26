@@ -110,6 +110,14 @@ try { (() => {
 // Every UI icon draws a 1.5px line on screen, whatever its size (Han, 2026-10-23). Lucide draws in a 24-unit box,
 // so the stroke is scaled by 24 / size. A strokeWidth prop is ignored.
 const ICON_STROKE_PX = 1.5;
+// Optical centring, in Lucide's 24-unit box. A few Lucide glyphs are centred by their outline but carry their weight
+// on one side, so they look off next to their neighbours in a list (Han saw Log Out sit left in the ⋯ menu,
+// 2026-10-26). Offsets move each glyph's ink centre of mass to the centre of the box, measured at 1.5px stroke:
+// LogOut 1.5px left at 18px, RotateCcw 0.6px left and up. Every other menu icon is within 0.1px.
+const ICON_OPTICAL = {
+  LogOut: [2, 0],
+  RotateCcw: [0.8, 0.8]
+};
 function Icon({
   name,
   size = 24,
@@ -135,10 +143,12 @@ function Icon({
       ...style
     },
     "aria-hidden": "true"
+  }, React.createElement("g", {
+    transform: ICON_OPTICAL[name] ? `translate(${ICON_OPTICAL[name].join(' ')})` : undefined
   }, (node || []).map(([tag, attrs], i) => React.createElement(tag, {
     key: i,
     ...attrs
-  })));
+  }))));
 }
 Object.assign(__ds_scope, { Icon });
 })(); } catch (e) { __ds_ns.__errors.push({ path: "components/core/Icon.jsx", error: String((e && e.message) || e) }); }

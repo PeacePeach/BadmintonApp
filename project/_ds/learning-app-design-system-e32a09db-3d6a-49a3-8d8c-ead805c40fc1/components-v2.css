@@ -46,7 +46,7 @@
      InputTile (Figma 329:7089) ... .rw-surface.rw-tile.rw-input-tile[.is-warning] > .rw-input-tile-text (.rw-eyebrow + .rw-input-tile-value) + .rw-input-tile-end (.rw-flag, chevron 16px)
    Grouped list (Settings) ...... .rw-surface.rw-group > .rw-group-row[.is-static: read-only] (Lucide 18 + .rw-group-row-text (.rw-group-row-label + .rw-caption) + .rw-group-row-end chevron 20); no Figma component, built from V2 tokens
    Switch ....................... .rw-switch[.is-on] (44x24, inside a .rw-group-row role=switch)
-   Overflow menu (⋯) ............ .rw-menu-scrim + .rw-menu > .rw-menu-item[.has-sep] (Lucide icon 24 + label); no Figma component, built from V2 tokens
+   Overflow menu (⋯) ............ .rw-menu-scrim + .rw-menu > .rw-menu-item[.has-sep] (Lucide icon 18, optically centred by Icon, + label); no Figma component, built from V2 tokens
    Player row (Figma 228:8835) ... .rw-surface.rw-player[.is-empty][.is-warning] > .rw-avatar | IconButton variant "add" + .rw-name + .rw-caption
    Input rows (form) ............ .rw-input-list > .rw-input-field > .rw-surface.rw-input-row[.is-error: red 1px border] + .rw-field-note[.is-error] (.rw-input-row-text: .rw-input-row-label + input | .rw-input-row-value, .rw-input-row-end); select row = button + .rw-select-menu > .rw-menu-item.rw-select-option
    Auth pages (Log In, Sign Up, Forgot, Check Email) .rw-auth > .rw-auth-head (.rw-icon-badge, .rw-title, .rw-hint) + .rw-toast.is-error + .rw-input-list + .rw-btn-primary + .rw-or + .rw-btn-stack > .rw-btn.rw-btn-social + .rw-auth-foot > .rw-text-link
@@ -340,6 +340,11 @@
 .rw-menu{position:absolute;top:110px;right:20px;min-width:200px;box-sizing:border-box;padding:6px;display:flex;flex-direction:column;border-radius:var(--rw-menu-radius);background:var(--rw-menu-bg);box-shadow:var(--rw-glass-rim);transform-origin:top right;animation:rw-menu-in var(--dur-base) var(--ease-out);}
 .rw-menu-item{height:48px;padding:0 12px;display:flex;align-items:center;gap:12px;border:none;border-radius:var(--rw-menu-item-radius);background:transparent;color:var(--rw-menu-item-fg);font:var(--rw-type-list-value);letter-spacing:var(--rw-tracking);text-align:left;white-space:nowrap;cursor:pointer;transition:background var(--dur-fast) var(--ease-out);}
 .rw-menu-item>:first-child{color:var(--rw-menu-item-icon);flex-shrink:0;}
+/* Trim the label to its cap height so flex centres the capitals on the icon wherever Poppins sits in its line box
+   (iOS Safari draws it ~2px higher than Chromium; same cap-trim as .rw-avatar and .rw-cue). Chinese (Noto Sans SC) already centres on the icon
+   untrimmed, within 0.4px (measured 2026-10-26), so zh keeps the normal box. */
+.rw-menu-item>span{text-box:trim-both cap alphabetic;}
+:root[lang="zh-Hans"] .rw-menu-item>span{text-box:normal;}
 .rw-menu-item:active,.rw-menu-item:focus-visible{background:var(--rw-menu-item-pressed);outline:none;}
 @media (hover:hover){.rw-menu-item:hover{background:var(--rw-menu-item-pressed);}}
 .rw-menu-item.has-sep{position:relative;margin-top:13px;}
