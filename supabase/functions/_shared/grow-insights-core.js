@@ -17,7 +17,7 @@
 //   compare  a count compared between your last 3 matches and the 3 before (games won, close games won)
 //   strip    whether a self-reported observation was noted in each match (0/1), in order
 
-export const ENGINE_VERSION = '2026-10-26-v15';
+export const ENGINE_VERSION = '2026-10-26-v16';
 export const SKILL_TAGS = ['Serve', 'Return', 'Net', 'Smash', 'Defence', 'Footwork', 'Placement'];
 const WINDOW = 10;     // latest matches the Key Insight reads
 const HISTORY = 20;    // latest matches Build Next, Strengths, opponent plans and Doubles Play read
@@ -958,6 +958,23 @@ export function opponentTemplate(o, lang) {
   const ev = o.evidence || opponentEvidence(o.notes), L = PLAN_LABEL[lang];
   if (ev.worked.length) return lang === 'zh' ? `${o.level === 'single' ? L.early : L.proven}你记下${q(ev.worked[0], 40)}。下次交手开局就再用。` : `${o.level === 'single' ? L.early : L.proven}you noted ${q(ev.worked[0], 100)}. Go back to it early next time.`;
   if (ev.weakness.length) return lang === 'zh' ? `${o.level === 'single' ? L.early : L.suggested}你记下${q(ev.weakness[0], 40)}。开局就针对这一点。` : `${o.level === 'single' ? L.early : L.suggested}you noted ${q(ev.weakness[0], 100)}. Make it your first target.`;
+  // Style-only notes still deserve an actionable, grounded card. Previously this returned null,
+  // causing independently validated ZH/EN model copy to produce different opponent rosters.
+  // Translate the SAME evidence into a cautious next-step instead of silently dropping the opponent.
+  if (ev.patterns.length) {
+    const note = ev.patterns.join(' ');
+    const fastSmash = /杀球|smash/i.test(note) && /快|fast|quick|speed/i.test(note);
+    const strongDefence = /防守|defend|defen[cs]e|挡|block/i.test(note);
+    const quickFootwork = /移动|步法|movement|moves? quickly|fast mover/i.test(note);
+    const advice = fastSmash
+      ? (lang === 'zh' ? '针对他速度快的杀球，试试提早准备挡网或反抽。' : 'Prepare early to block or counter his fast smashes.')
+      : strongDefence
+      ? (lang === 'zh' ? '针对他的防守，试试变化前后场落点。' : 'Vary front-back placement against his defence.')
+      : quickFootwork
+      ? (lang === 'zh' ? '针对他快速的移动，试试变化落点和节奏。' : 'Vary placement and tempo against his quick movement.')
+      : (lang === 'zh' ? `根据你记下的${q(ev.patterns[0], 36)}，下次尝试调整落点。` : `Given your note ${q(ev.patterns[0], 75)}, try varying placement next time.`);
+    return (o.level === 'single' ? L.early : L.suggested) + advice;
+  }
   return null;
 }
 export function finalizeOpponents(ai, opps, lang) {
