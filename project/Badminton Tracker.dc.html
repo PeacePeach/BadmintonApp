@@ -722,7 +722,7 @@ button:disabled{cursor:default !important;}
           </div>
         </sc-if>
         <sc-if value="{{ fl.empty }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;flex-direction:column;gap:8px;">
+          <div class="rw-empty-group" style="display:flex;flex-direction:column;gap:8px;">
             <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ fl.empty.illustration }}" title="{{ fl.empty.title }}" body="{{ fl.empty.body }}" hint-size="350px,280px"></x-import>
             <button type="button" class="rw-btn rw-btn-primary" onClick="{{ newFocus }}">
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Plus" size="{{ 22 }}" hint-size="22px,22px"></x-import>
