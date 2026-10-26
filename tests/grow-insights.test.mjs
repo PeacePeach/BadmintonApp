@@ -633,13 +633,13 @@ test('secondary Build Next only from 2 actual notes across wider history, never 
   const ms=[
     M(W,['Defence']),M(W,['Other']),M(L,['Defence']),M(L,['Other']),
     M(W,['Net']),M(W,['Net']),M(L,['Smash']),M(W,['Other']),
-    M(L,['Smash']),M(W,['Other'])
+    M(L,['Smash','Defence']),M(W,['Other'])
   ];
   const focus=[{topic:'tag:Net',status:'active'}];
   const items=G.buildCandidates(ms,focus,4);
   assert.deepEqual(items.map(x=>x.tag),['Smash','Defence']);
   assert.equal(items[1].k,2);
-  assert.equal(items[1].n,9);
+  assert.equal(items[1].n,10);
   const olderOnly=ms.map((m,i)=>i===2?{...m,lt:['Other']}:m);
   assert.deepEqual(G.buildCandidates(olderOnly,focus,4).map(x=>x.tag),['Smash']);
 });
