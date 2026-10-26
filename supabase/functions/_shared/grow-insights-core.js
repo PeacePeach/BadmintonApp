@@ -522,15 +522,30 @@ export function topicSides(matches) {
       const workedClauses = skillClauses(workedNotes, tag);
       const costKinds = new Set(costClauses.flatMap(conceptsIn));
       const workedKinds = new Set(workedClauses.flatMap(conceptsIn));
-      const distinct = costKinds.size && workedKinds.size &&
+      const distinct = tag === 'Smash' && costKinds.size && workedKinds.size &&
         [...costKinds].every(k => !workedKinds.has(k)) &&
-        costNotes.some(n => mentionsSkill(n, tag)) && workedNotes.some(n => mentionsSkill(n, tag));
+        costNotes.some(n => mentionsSkill(n, tag)) && workedNotes.some(n => mentionsSkill(n, tag)) &&
+        Boolean(smashContextName(costKinds, 'en')) && Boolean(smashContextName(workedKinds, 'en')) &&
+        smashContextName(costKinds, 'en') !== smashContextName(workedKinds, 'en');
       out[tag] = distinct ? 'both' : 'ambiguous';
     } else out[tag] = c > w ? 'cost' : 'worked';
   }
   return out;
 }
-const basisOf = notes => (notes.filter(specificNote).length >= 2 ? 'notes' : 'general');
+const smashContextName = (concepts, lang) => {
+  if (concepts.has('rearCourt')) return lang === 'zh' ? '后场杀球' : 'Backcourt smashes';
+  if (concepts.has('sideline')) return lang === 'zh' ? '边线杀球' : 'Sideline smashes';
+  return '';
+};
+// Advice is note-specific only when a concrete context recurs in two separate skill clauses.
+const basisOf = (notes, tag) => {
+  const seen = new Map();
+  for (const note of notes) {
+    const kinds = new Set(skillClauses([note], tag).flatMap(conceptsIn));
+    for (const k of kinds) seen.set(k, (seen.get(k) || 0) + 1);
+  }
+  return [...seen.values()].some(n => n >= 2) ? 'notes' : 'general';
+};
 export function buildCandidates(matches, focus = [], max = 4) {
   const { chron, noted, win } = noteWindow(matches);
   if (win.length < 3) return [];
@@ -551,7 +566,7 @@ export function buildCandidates(matches, focus = [], max = 4) {
     if (both * 2 >= k) continue;
     const notes = notesFor(list.filter(m => has(m, 'lt', tag)), ['lost']);
     out.push({ topic_id: topic, tag, k, n: list.length, recent: sum(values.slice(-3)), latest: values[values.length - 1], returning,
-      skipped: returning ? 0 : chron.slice(chron.indexOf(win[0])).filter(m => !hasNotes(m)).length, notes, basis: basisOf(notes) });
+      skipped: returning ? 0 : chron.slice(chron.indexOf(win[0])).filter(m => !hasNotes(m)).length, notes, basis: basisOf(notes, tag), contextName: sides[tag] === 'both' ? {en: smashContextName(new Set(skillClauses(notes,tag).flatMap(conceptsIn)), 'en'), zh: smashContextName(new Set(skillClauses(notes,tag).flatMap(conceptsIn)), 'zh')} : null });
   }
   return out.sort((a, b) => b.k / b.n - a.k / a.n || b.recent - a.recent || b.latest - a.latest || a.tag.localeCompare(b.tag)).slice(0, max);
 }
@@ -566,7 +581,7 @@ export function strengthCandidates(matches, max = 2) {
     const both = win.filter(m => has(m, 'lt', tag) && has(m, 'wt', tag)).length;
     if (both * 2 >= k) continue;
     const notes = notesFor(win.filter(m => has(m, 'wt', tag)), ['worked']);
-    out.push({ topic_id: 'tag:' + tag, tag, k, n: win.length, recent: sum(values.slice(-3)), notes, basis: basisOf(notes),
+    out.push({ topic_id: 'tag:' + tag, tag, k, n: win.length, recent: sum(values.slice(-3)), notes, basis: basisOf(notes, tag), contextName: sides[tag] === 'both' ? {en: smashContextName(new Set(skillClauses(notes,tag).flatMap(conceptsIn)), 'en'), zh: smashContextName(new Set(skillClauses(notes,tag).flatMap(conceptsIn)), 'zh')} : null,
       skipped: chron.slice(chron.indexOf(win[0])).filter(m => !hasNotes(m)).length });
   }
   return out.sort((a, b) => b.k - a.k || b.recent - a.recent || a.tag.localeCompare(b.tag)).slice(0, max);
@@ -636,7 +651,7 @@ export function finalizeItems(items, ai, kind, lang) {
     const aiAction = item.basis === 'notes' && !bad('action') && String(a.action || '').trim();
     return {
       topic_id: item.topic_id, tag: item.tag, rank: rank + 1,
-      name: bad('name') ? t.name : String(a.name).trim(),
+      name: item.contextName?.[lang] || (bad('name') ? t.name : String(a.name).trim()),
       [textKey]: bad(textKey) ? t[textKey] : String(a[textKey]).trim(),
       action: aiAction || t.action, advice_basis: aiAction ? 'notes' : 'general',
       evidence_numbers: { k: item.k, n: item.n }, returning: item.returning || false,
