@@ -261,3 +261,67 @@ test('scenario matrix: 0, 1, 3, 6, 10, 18 and 20+ matches, sparse and rich notes
     if (n) assert.deepEqual(out.en, out.zh, `${kind} ${n}: EN and ZH differ`);
   }
 });
+
+// Grow caching (Han, 2026-10-26 07:24): unchanged data never pays for a model call, and new data only sends the cards
+// whose facts changed; the rest keep their copy (through the same checks).
+const writer = sent => body => {
+  const f = JSON.parse(body.input[1].content); sent.push({ f, schema: body.text.format.schema });
+  return { keyInsight: f.key_candidates[0] ? { candidate_id: f.key_candidates[0].candidate_id, ...f.key_candidates[0].reference } : null,
+    buildNext: f.build_candidates.map(b => ({ topic_id: b.topic_id, name: b.tag, evidence: `ai ${b.topic_id}`, action: 'ai action' })),
+    strengths: f.strength_candidates.map(b => ({ topic_id: b.topic_id, name: b.tag, signal: `ai ${b.topic_id}`, action: 'ai action' })),
+    opponentPlans: [], doublesPlay: [] };
+};
+test('caching: same data is a cache hit with no model call; a Focus change only sends the cards it changed', async () => {
+  const sent = [], focus = [];
+  const a = account(H.matches, focus, H.players);
+  const first = await a.call('en', writer(sent));
+  assert.equal(first.cached, false); assert.equal(a.calls, 1);
+  assert.ok(first.timing && first.timing.total_ms >= 0 && first.timing.db_ms >= 0, 'timing is returned');
+  assert.ok(!('ai_copy' in first.insight), 'the stored copy table is not sent to the app');
+  assert.ok(a.row.insight_json.ai_copy, 'it is stored with the insight');
+  const again = await a.call('en', writer(sent));
+  assert.equal(again.cached, true); assert.equal(a.calls, 1, 'unchanged data: no model call');
+  // Defence (the first Build Next card) becomes a Focus: it leaves Build Next; the other cards' facts are unchanged.
+  focus.push({ id: 'f1', title: 'Defence', topic_id: 'tag:Defence', status: 'active' });
+  const after = await a.call('en', writer(sent));
+  assert.equal(after.cached, false);
+  const ask = sent.at(-1).f, b0 = sent[0].f;
+  const unchanged = b0.build_candidates.filter(b => after.insight.buildNext.some(x => x.topic_id === b.topic_id) && ask.build_candidates.every(x => x.topic_id !== b.topic_id));
+  assert.ok(unchanged.length >= 1, 'some Build Next cards were reused');
+  assert.equal(ask.strength_candidates.length, 0, 'Strengths unchanged: not sent again');
+  assert.equal(ask.opponents.length, 0, 'Opponent Plans unchanged: not sent again');
+  assert.equal(sent.at(-1).schema.properties.strengths.maxItems, 0);
+  assert.ok(!after.insight.buildNext.some(x => x.tag === 'Defence'), 'the Focus topic left Build Next');
+  for (const s of after.insight.strengths) assert.equal(s.signal, first.insight.strengths.find(x => x.topic_id === s.topic_id).signal, 'reused copy is the same copy');
+  assert.equal(after.timing.reused.items >= 1, true);
+});
+test('caching: when nothing a card depends on changed, there is no model call at all (ai_status reused)', async () => {
+  const focus = [];
+  const a = account(H.matches, focus, H.players);
+  const first = await a.call('zh', writer([]));
+  // A completed Focus on a skill nobody noted changes the fingerprint but no card's facts.
+  focus.push({ id: 'f9', title: 'Footwork', topic_id: 'tag:Return', status: 'completed', completed_at: '2020-01-01T00:00:00Z' });
+  const r = await a.call('zh', writer([]));
+  assert.equal(r.cached, false);
+  assert.equal(r.insight.ai_status, 'reused'); assert.equal(a.calls, 1, 'no model call');
+  assert.deepEqual(r.timing.asked, { key: false, items: 0, doubles: false });
+  // The Key Insight stays the same (the matches didn't change, so "same as last time" isn't re-applied).
+  assert.equal(r.insight.keyInsight.candidate_id, first.insight.keyInsight.candidate_id);
+  assert.equal(r.insight.keyInsight.title, first.insight.keyInsight.title);
+  // A new match is new evidence: the novelty rule applies as before.
+  const more = account([...H.matches, { ...H.matches[0], id: 'new1', date: '2026-10-26', created_at: '2026-10-26T12:00:00Z' }], focus, H.players); more.row = a.row;
+  const n = await more.call('zh', writer([]));
+  assert.equal(n.cached, false); assert.equal(more.calls, 1);
+});
+test('caching: a failed partial call keeps the reused copy and is not cached; another engine version reuses nothing', async () => {
+  const focus = [];
+  const a = account(H.matches, focus, H.players);
+  const first = await a.call('en', writer([]));
+  focus.push({ id: 'f1', title: 'Defence', topic_id: 'tag:Defence', status: 'active' });
+  const w = a.writes, r = await a.call('en', () => new Error('down'));
+  assert.equal(r.insight.ai_status, 'failed'); assert.equal(a.writes, w);
+  for (const s of r.insight.strengths) assert.equal(s.signal, first.insight.strengths.find(x => x.topic_id === s.topic_id).signal);
+  a.row.insight_json.engine_version = '2026-10-25-v13'; a.row.input_fingerprint = 'old';
+  const sent = []; await a.call('en', writer(sent));
+  assert.ok(sent[0].f.strength_candidates.length > 0, 'old-engine copy is never reused');
+});

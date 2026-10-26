@@ -31,12 +31,12 @@
     insights: {
       // Grow e2e: the real generate-grow-insights (run in Node by the test, window.__edge) on this account's rows.
       // mock.edgeFail: the call fails (network). mock.slow: it takes 2.5 s.
-      async generate(lang) { window.__gen.push(lang); put('mock.gen', window.__gen);
+      async generate(lang, sig) { window.__gen.push(lang); put('mock.gen', window.__gen);
         if (get('mock.slow')) await new Promise(r => setTimeout(r, 2500));
         if (get('mock.edgeFail')) throw fail('network');
-        const r = JSON.parse(await window.__edge(lang, JSON.stringify(get('mock.db'))));
+        const r = JSON.parse(await window.__edge(lang, JSON.stringify(get('mock.db')), sig || null));
         if (r.error) throw fail(r.error);
-        return r.insight ? { ...r.insight, _generatedAt: r.generated_at } : null; },
+        return r.insight ? { ...r.insight, _generatedAt: r.generated_at, _cached: !!r.cached, _timing: r.timing || null } : null; },
       async cached(lang) { return null; }
     }
   };

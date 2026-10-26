@@ -85,6 +85,11 @@ button:disabled{cursor:default !important;}
 .skel{background:var(--surface-muted);border-radius:99px;animation:skel-pulse 1.4s ease-in-out infinite;}
 .skel-bg{background:var(--surface-primary);}
 @media (prefers-reduced-motion:reduce){.skel{animation:none;}}
+/* Grow: "Updating insights…" / "Couldn't update · Retry" at the end of the Key Insight head, over the insight kept on screen. */
+.rw-grow-status{margin-left:auto;display:inline-flex;align-items:center;gap:4px;min-height:20px;}
+.rw-grow-status .rw-btn-tertiary{margin:-6px -4px -6px 0;}
+.rw-grow-status.is-updating{animation:skel-pulse 1.4s ease-in-out infinite;}
+@media (prefers-reduced-motion:reduce){.rw-grow-status.is-updating{animation:none;}}
 /* Toast (DS .rw-toast, Figma 360:7533): full width inside the 20px page margins; slides down in and back up out. */
 @keyframes toast-in{from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:none;}}
 @keyframes toast-out{from{opacity:1;transform:none;}to{opacity:0;transform:translateY(-12px);}}
@@ -584,7 +589,10 @@ button:disabled{cursor:default !important;}
             <!-- Engine V2: split KeyInsight with one of the three RWKeyChart patterns, from the engine's chart object. -->
             <sc-if value="{{ grow.keySplit }}" hint-placeholder-val="{{ true }}">
             <div class="rw-surface rw-tile rw-key is-split">
-              <div class="rw-key-head"><span class="rw-label">{{ tx.keyInsight }}</span></div>
+              <div class="rw-key-head"><span class="rw-label">{{ tx.keyInsight }}</span>
+                <sc-if value="{{ grow.updating }}" hint-placeholder-val="{{ false }}"><span class="rw-caption rw-grow-status is-updating" role="status">{{ tx.growUpdating }}</span></sc-if>
+                <sc-if value="{{ grow.failedNote }}" hint-placeholder-val="{{ false }}"><span class="rw-grow-status" role="status"><span class="rw-caption">{{ tx.growUpdateFailed }}</span><button type="button" class="rw-btn rw-btn-tertiary" onClick="{{ grow.retry }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="RotateCw" size="{{ 16 }}" hint-size="16px,16px"></x-import>{{ tx.retry }}</button></span></sc-if>
+              </div>
               <div class="rw-key-split">
                 <div class="rw-key-split-text">
                   <p class="rw-key-title">{{ grow.keyTitle }}</p>
@@ -597,9 +605,15 @@ button:disabled{cursor:default !important;}
             <!-- Legacy fallback (Han, 2026-10-24): insights cached before Engine V2, until they are made again. -->
             <sc-if value="{{ grow.keyLegacy }}" hint-placeholder-val="{{ false }}">
             <div class="rw-surface rw-tile rw-key">
-              <div class="rw-key-head"><span class="rw-label">{{ tx.keyInsight }}</span></div>
+              <div class="rw-key-head"><span class="rw-label">{{ tx.keyInsight }}</span>
+                <sc-if value="{{ grow.updating }}" hint-placeholder-val="{{ false }}"><span class="rw-caption rw-grow-status is-updating" role="status">{{ tx.growUpdating }}</span></sc-if>
+                <sc-if value="{{ grow.failedNote }}" hint-placeholder-val="{{ false }}"><span class="rw-grow-status" role="status"><span class="rw-caption">{{ tx.growUpdateFailed }}</span><button type="button" class="rw-btn rw-btn-tertiary" onClick="{{ grow.retry }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="RotateCw" size="{{ 16 }}" hint-size="16px,16px"></x-import>{{ tx.retry }}</button></span></sc-if>
+              </div>
               <p class="rw-key-title">{{ grow.keyTitle }}</p>
               <p class="rw-key-body">{{ grow.keyBody }}</p>
+              <sc-if value="{{ grow.retryTile }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-left:-4px;"><button type="button" class="rw-btn rw-btn-tertiary" onClick="{{ grow.retry }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="RotateCw" size="{{ 16 }}" hint-size="16px,16px"></x-import>{{ tx.retry }}</button></div>
+              </sc-if>
               <sc-if value="{{ grow.showKeyChart }}" hint-placeholder-val="{{ true }}">
               <div class="rw-bar rw-key-bar" role="img" aria-label="{{ grow.keyCurrent }}"><div><div style="width: {{ grow.keyCurrent }};"></div></div></div>
               </sc-if>
@@ -1971,6 +1985,8 @@ button:disabled{cursor:default !important;}
 // scores and anything the user typed are shown as entered, and stored values (match types, tags, skill levels)
 // stay in English; only their labels are translated.
 const LANG_KEY = 'rallywise.lang';
+// Grow cache (refreshGrow): this device's insights per account and language, and the newest engine seen.
+const GROW_CACHE_KEY = 'rallywise.grow', GROW_ENGINE_KEY = 'rallywise.grow.engine', GROW_ENGINE_MIN = '2026-10-26-v14';
 // Focus plans ask for at most 5 sessions a week or 5 matches: healthy training, not every day (Han, 2026-10-25).
 // Plans saved earlier with more are brought down to 5 when Focus syncs (reconcileFocus).
 const FOCUS_MAX = 5;
@@ -2062,7 +2078,8 @@ const I18N = {
     noTrendTitle: 'No clear change yet', noTrendBody: "Your last {n} matches don't show a clear shift. Below is what your notes keep pointing to.",
     noTrendBodyEmpty: "Your last {n} matches don't show a clear shift. Keep noting what worked and what cost points.",
     keyLoadingTitle: 'Looking at your matches…', keyLoadingBody: 'This takes a few seconds.',
-    keyErrorTitle: "Couldn't update insights", keyErrorBody: 'Check your connection, then open Grow again.',
+    keyErrorTitle: "Couldn't update insights", keyErrorBody: 'Check your connection, then try again.',
+    growUpdating: 'Updating insights…', growUpdateFailed: "Couldn't update", retry: 'Retry',
     notEnoughBody: 'Tag what worked and what cost you points when you log matches, or add notes on opponents. Grow builds from those.',
     costPoints: 'Cost you points in {n} of your last {total} tagged matches.', workingIn: 'Tagged as working in {n} of your last {total} wins.',
     // Log Match
@@ -2220,7 +2237,8 @@ const I18N = {
     noTrendTitle: '暂时没有明显变化', noTrendBody: '最近{n}场还看不出明显的变化。下面是你的笔记里反复出现的点。',
     noTrendBodyEmpty: '最近{n}场还看不出明显的变化。赛后继续记下哪里打得好、哪里丢分。',
     keyLoadingTitle: '正在分析你的比赛…', keyLoadingBody: '需要几秒钟。',
-    keyErrorTitle: '暂时无法更新', keyErrorBody: '请检查网络，然后重新打开提升页。',
+    keyErrorTitle: '暂时无法更新', keyErrorBody: '请检查网络，然后重试。',
+    growUpdating: '正在更新…', growUpdateFailed: '更新失败', retry: '重试',
     notEnoughBody: '记录比赛时标出打得好和丢分的地方，或写下对手记录，提升页就会根据这些给出建议。',
     costPoints: '最近 {total} 场有标签的比赛中，{n} 场在这里丢分。', workingIn: '最近 {total} 场胜利中，{n} 场标记为打得好。',
     editMatch: '编辑比赛', stepOf: '第 {n} 步，共 {total} 步',
@@ -2398,7 +2416,7 @@ class Component extends DCLogic {
       screen: screens[start] || 'matches', pwVisible: false, agree: false, ob: this.newOb(),
       f: this.blankForm(), errors: {}, banner: null, busy: null, resetEmail: 'sam@rallywise.app', resendIn: 0,
       ...this.authPreset(p.authError),
-      insTab: /[?&]preview=grow\b/i.test(typeof location === 'undefined' ? '' : location.search) && start === 'Insights' ? 'coach' : 'progress', aiGrow: null, growBusy: false, growError: false, back: start === 'Match Detail' ? [{ screen: 'matches' }] : start === 'Focus Detail' ? [{ screen: 'focus' }] : [], filter: 'All', menu: false, confirmDelete: null, detailId: null, playerId: null, search: '', toast: null,
+      insTab: /[?&]preview=grow\b/i.test(typeof location === 'undefined' ? '' : location.search) && start === 'Insights' ? 'coach' : 'progress', aiGrow: null, growBusy: false, growError: false, growUpdating: false, growFailed: false, back: start === 'Match Detail' ? [{ screen: 'matches' }] : start === 'Focus Detail' ? [{ screen: 'focus' }] : [], filter: 'All', menu: false, confirmDelete: null, detailId: null, playerId: null, search: '', toast: null,
       ...this.dataFor(p.dataState, players, matches, focuses, focusPeriods), log: start === 'Log Match' ? this.newLog() : null, voice: start === 'Log Match (Voice)' || start === 'Review Match (Voice)' ? this.newVoice() : null,
       focusId: start === 'Focus Detail' ? 'f0' : null, showDone: false, sheet: null, confirmDeleteFocus: null, day: null,
       email: 'sam@rallywise.app', acct: { name: '', level: null, cur: '', next: '' }, prefs: this.newPrefs(),
@@ -2433,7 +2451,8 @@ class Component extends DCLogic {
     const changed = l !== this.lang();
     this._deviceLang = l;
     try { localStorage.setItem(LANG_KEY, l); } catch (e) {}
-    this.setState(x => ({ prefs: { ...x.prefs, lang: l }, ...(changed ? { aiGrow: null } : {}) }));
+    // The new language's insight from this device's cache, at once (refreshGrow then checks it is current).
+    this.setState(x => ({ prefs: { ...x.prefs, lang: l }, ...(changed ? { aiGrow: this.growLocal(l), growUpdating: false, growFailed: false, growError: false, growNone: false } : {}) }));
     if (changed && this.state.screen === 'insights' && this.state.insTab === 'coach') setTimeout(() => this.refreshGrow(), 0);
   }
   // Insights made before languages existed carry no lang; they are English.
@@ -2489,26 +2508,84 @@ class Component extends DCLogic {
       this._handlingAppUrl = false;
     }
   }
-  // Asks generate-grow-insights for the Grow insight in the app language (served from its cache when nothing changed).
-  // stale: matches changed, so the insight on screen no longer matches them and is taken down while the new one is
-  // made (the Key Insight tile says it is being worked out). Opening Grow with nothing changed keeps it on screen.
-  // A change that lands while a call is running runs another one after it, so the result is never left stale.
-  async refreshGrow({ stale = false } = {}) {
+  // ---- Grow insight: cache, stale-while-revalidate, one request at a time (Han, 2026-10-26 07:24) ----
+  // growSig: a signature of exactly what generate-grow-insights reads (its latest 20 matches, the Focus topics, the
+  // player names). The same data always gives the same signature, on any device.
+  growSig() {
+    const s = this.state, memo = this._growSigMemo;
+    if (memo && memo.m === s.matches && memo.p === s.players && memo.f === s.focuses) return memo.sig;
+    const ms = [...(s.matches || [])].sort((a, b) => String(b.date).localeCompare(String(a.date)) || String(b.createdAt || '').localeCompare(String(a.createdAt || ''))).slice(0, 20)
+      .map(m => [m.id, m.date, m.type, m.partner || null, m.opps || [], m.games || [], m.wt || [], m.lt || [], m.worked || '', m.lost || '', m.on || '']);
+    const fs = (s.focuses || []).map(f => [f.id, f.topicId || null, f.title || '', f.status, f.status === 'completed' ? f.completedAt || null : null]).sort((a, b) => String(a[0]).localeCompare(String(b[0])));
+    const ps = (s.players || []).map(p => [p.id, p.name || '']).sort((a, b) => String(a[0]).localeCompare(String(b[0])));
+    // FNV-1a, twice with different seeds: 64 bits is plenty to tell one account's data states apart.
+    const str = JSON.stringify([ms, fs, ps]), h = seed => { let x = seed >>> 0; for (let i = 0; i < str.length; i++) { x ^= str.charCodeAt(i); x = Math.imul(x, 16777619) >>> 0; } return x.toString(16).padStart(8, '0'); };
+    const sig = h(2166136261) + h(0x9e3779b9);
+    this._growSigMemo = { m: s.matches, p: s.players, f: s.focuses, sig };
+    return sig;
+  }
+  // Engine versions: an insight from an engine older than GROW_ENGINE_MIN, or older than the engine the function last
+  // answered with on this device, is never shown as current (it is made again instead).
+  growEngineN(v) { const m = /^(\d{4})-(\d{2})-(\d{2})-v(\d+)$/.exec(v || ''); return m ? Number(m[1] + m[2] + m[3]) * 1000 + Number(m[4]) : 0; }
+  growEngineOk(i) {
+    let seen = 0; try { seen = this.growEngineN(localStorage.getItem(GROW_ENGINE_KEY)); } catch (e) {}
+    const n = this.growEngineN(i && i.engine_version);
+    return n >= this.growEngineN(GROW_ENGINE_MIN) && n >= seen;
+  }
+  // The engine the function last answered with is the one in service (also after a rollback).
+  growSeen(v) { try { if (this.growEngineN(v)) localStorage.setItem(GROW_ENGINE_KEY, v); } catch (e) {} }
+  // This device's last insight per account and language: { sig, insight }. EN and ZH are kept apart, so switching
+  // back to a language shows its insight at once.
+  growKey(lang) { return this.user && this.user.id ? `${GROW_CACHE_KEY}.${this.user.id}.${lang}` : null; }
+  growLocal(lang) {
+    try { const k = this.growKey(lang), v = k && JSON.parse(localStorage.getItem(k) || 'null');
+      return v && v.insight && this.insightLang(v.insight) === lang && this.growEngineOk(v.insight) ? { ...v.insight, _sig: v.sig } : null; } catch (e) { return null; }
+  }
+  growStore(lang, sig, insight) { try { const k = this.growKey(lang); if (k) localStorage.setItem(k, JSON.stringify({ sig, insight })); } catch (e) {} }
+  growDrop() { try { for (const l of ['en', 'zh']) { const k = this.growKey(l); if (k) localStorage.removeItem(k); } } catch (e) {} }
+  // Brings Grow up to date with the data and language on screen.
+  //   same data, insight cached     shown at once; checked with the function once per session (an engine deploy), silently
+  //   data changed                  the previous insight stays, "Updating insights…" shows, the new one replaces it
+  //   nothing yet in this language  the Key Insight tile's loading state, until the first insight arrives
+  //   call failed or timed out      the previous insight stays with "Couldn't update" and Retry; with none, the error tile
+  // One request at a time: a change while one runs queues one more, and an answer for data or a language that is no
+  // longer on screen is kept in the cache but never shown.
+  async refreshGrow({ retry = false } = {}) {
     if (!this.live() || !this.user) return;
-    if (this.state.growBusy) { if (stale) { this._growAgain = true; this.setState({ aiGrow: null }); } return; }
-    const keep = !stale && this.state.aiGrow && this.insightLang(this.state.aiGrow) === this.lang();
-    this.setState({ growBusy: true, growError: false, growNone: false, ...(keep ? {} : { aiGrow: null }) });
-    const lang = this.lang();
+    const lang = this.lang(), sig = this.growSig(), want = lang + ':' + sig;
+    let cur = this.state.aiGrow;
+    if (cur && (this.insightLang(cur) !== lang || !this.growEngineOk(cur))) cur = null;
+    if (!cur || cur._sig !== sig) { const hit = this.growLocal(lang); if (hit && (!cur || hit._sig === sig)) cur = hit; }
+    if (cur !== this.state.aiGrow) this.setState({ aiGrow: cur, growError: false, growNone: false });
+    const fresh = !!cur && cur._sig === sig;
+    this._growVerified = this._growVerified || {};
+    if (fresh && this._growVerified[want] && !retry) return this.state.growUpdating || this.state.growFailed ? this.setState({ growUpdating: false, growFailed: false }) : undefined;
+    if (this._growReq) { if (this._growReq !== want) this._growAgain = true; if (!fresh && cur) this.setState({ growUpdating: true, growFailed: false }); return; }
+    this._growReq = want;
+    this.setState({ growBusy: !cur, growUpdating: !!cur && !fresh, growFailed: false, growError: false, growNone: false });
+    const t0 = Date.now(), now = () => this.lang() === lang && this.growSig() === sig;
+    let insight, failed = false;
     try {
       const b = await this.api();
-      const insight = await b.insights.generate(lang);
-      if (insight && this.insightLang(insight) === this.lang() && !this._growAgain) this.setState({ aiGrow: insight, growBusy: false });
-      else this.setState({ growBusy: false, growNone: !insight });
-    } catch (e) {
-      this.setState({ growBusy: false, growError: !this.state.aiGrow });
+      // The function reads the saved rows: a change still being saved (a Focus just added) goes first.
+      if (this.sync && this.sync.pending) await this.sync.push(this.dataState()).catch(() => {});
+      insight = await b.insights.generate(lang, sig);
+      this._growVerified[want] = true;
+      if (insight) { insight._sig = sig; this.growSeen(insight.engine_version); if (insight.ai_status !== 'failed') this.growStore(lang, sig, insight); }
+    } catch (e) { failed = true; }
+    const ms = Date.now() - t0, prev = this.state.aiGrow && this.insightLang(this.state.aiGrow) === lang ? this.state.aiGrow : null;
+    // Measured on the device: how long Grow waited and what the function did (cache hit, model call, copy reused).
+    const log = { lang, ms, cached: insight ? insight._cached : null, ai_status: insight ? insight.ai_status : failed ? 'request_failed' : null, timing: insight ? insight._timing : null, shown: now() };
+    try { (window.__rwGrowLog = window.__rwGrowLog || []).push(log); console.info('grow', JSON.stringify(log)); } catch (e) {}
+    this._growReq = null;
+    this._growFailedWant = failed || (insight && insight.ai_status === 'failed') ? want : null;
+    if (now()) {
+      // A failed model call keeps the insight on screen (the function's own result then has template copy only).
+      if (failed || (insight && insight.ai_status === 'failed' && prev)) this.setState({ growBusy: false, growUpdating: false, growFailed: !!prev, growError: !prev });
+      else this.setState({ aiGrow: insight || null, growBusy: false, growUpdating: false, growFailed: !!insight && insight.ai_status === 'failed', growError: false, growNone: !insight });
     }
-    // The language or the matches changed while this was running: make it again now.
-    if (this._growAgain || lang !== this.lang()) { this._growAgain = false; setTimeout(() => this.refreshGrow({ stale: true }), 0); }
+    // The language or the data changed while this was running: bring it up to date now.
+    if (this._growAgain || !now()) { this._growAgain = false; setTimeout(() => this.refreshGrow(), 0); }
   }
   // On open: restore the saved session, load its data, then leave the splash.
   async restore() {
@@ -2557,7 +2634,12 @@ class Component extends DCLogic {
     this._saved = this.dataState({ ...a, focuses: a.focuses || [], focusPeriods: a.focusPeriods || [] }); this.sync = sync; this.user = { ...user, anonId }; this._retryUser = null;
     const savedLang = a.prefs && a.prefs.lang;
     if (savedLang === 'en' || savedLang === 'zh') { this._deviceLang = savedLang; try { localStorage.setItem(LANG_KEY, savedLang); } catch (e) {} }
-    if (b.insights) b.insights.cached(this.lang()).then(insight => { if (insight && /^20\d{2}-\d{2}-\d{2}-v(?:1\d|[2-9]\d+)$/.test(insight.engine_version || '') && this.user && this.user.id === user.id && this.insightLang(insight) === this.lang()) this.setState({ aiGrow: insight }); }).catch(() => {});
+    // Grow: this device's cached insight first; else the account's saved one (another device), with the signature of
+    // the data it was made for. Either is only shown if its engine is current; refreshGrow decides if it is up to date.
+    this._growVerified = {};
+    const local = this.growLocal(this.lang());
+    if (local) this.setState({ aiGrow: local });
+    else if (b.insights) b.insights.cached(this.lang()).then(insight => { if (insight && this.growEngineOk(insight) && this.user && this.user.id === user.id && this.insightLang(insight) === this.lang() && !this.state.aiGrow) this.setState({ aiGrow: { ...insight, _sig: insight.client_sig || null } }); }).catch(() => {});
     if (migrated) this.flash(this.t('tMigrated'));
     const A = window.RallywiseAnalytics, c = this.analyticsCtx(a.prefs);
     if (A) { A.setAccount(anonId); if (c && c.consent === 'no') A.clear(anonId); }
@@ -2578,7 +2660,8 @@ class Component extends DCLogic {
     if (window.RallywiseAnalytics) window.RallywiseAnalytics.setAccount(null);
     this.toAuth('login');
     this.setState({ email: '', players: [], matches: [], focuses: [], focusPeriods: [], focusId: null, sheet: null, confirmDeleteFocus: null, prefs: this.newPrefs(), onboarded: true, detailId: null, playerId: null, log: null, menu: false,
-      blocked: null, loading: false, aiGrow: null, growBusy: false, growError: false, confirmDelete: null, confirmDeleteAccount: false });
+      blocked: null, loading: false, aiGrow: null, growBusy: false, growError: false, growUpdating: false, growFailed: false, confirmDelete: null, confirmDeleteAccount: false });
+    this._growReq = null; this._growAgain = false; this._growVerified = {};
   }
   // Log Out: saves anything still unsaved if it can, ends this device's session and clears the screen.
   async signOut() {
@@ -2588,7 +2671,7 @@ class Component extends DCLogic {
       if (this.sync && this.sync.pending) await this.sync.push(this.dataState()).catch(() => this.flash(this.t('tUnsaved'), 'error'));
       const b = await this.api().catch(() => null);
       if (b) await b.auth.signOut();
-    } finally { this.clearAccount(); this._signingOut = false; }
+    } finally { this.growDrop(); this.clearAccount(); this._signingOut = false; }
   }
   // Saves the signed-in account whenever its data changes (not while a "Data state" preview is showing).
   persist() {
@@ -3378,7 +3461,7 @@ class Component extends DCLogic {
     this.commit(m, matches);
   }
   commit(m, matches) {
-    setTimeout(() => this.refreshGrow({ stale: true }), 0);
+    setTimeout(() => this.refreshGrow(), 0);
     if (this.state.log && this.state.log.editId) {
       this.setState(s => ({ matches, screen: 'detail', detailId: m.id, back: s.back.slice(0, -1), log: null }));
       return this.flash(this.t('tChangesSaved'));
@@ -3407,7 +3490,7 @@ class Component extends DCLogic {
     const gone = this.state.matches.find(m => m.id === id), at = gone && Date.parse(gone.createdAt);
     this.track('match_deleted', { match_count: matches.length, minutes_since_logged: at ? Math.max(0, Math.round((Date.now() - at) / 6e4)) : null });
     this.setState({ matches, confirmDelete: null, screen: 'matches', back: [], detailId: null, log: null });
-    setTimeout(() => this.refreshGrow({ stale: true }), 0);
+    setTimeout(() => this.refreshGrow(), 0);
     this.flash(this.t('tMatchDeleted'));
   }
   // Settings & account. Saves reuse the auth request, so the busy spinner and network banner match.
@@ -3915,7 +3998,10 @@ class Component extends DCLogic {
           keyChart: { kind: 'strip', values: '1,1,0,1,1,1', quote: '', split: '', xlabels: '' }, keySplit: true, keyLegacy: false,
           keyCurrent: '0%', keyPrevious: '0%', showKeyChart: false, showKey: true, showBuild: true, showStrengths: true, showOpps: true, showDoubles: true, empty: null };
         else if (s.aiGrow) {
-          const ai = s.aiGrow;
+          const ai = s.aiGrow, want = this.lang() + ':' + this.growSig();
+          // Data changed while Grow is on screen (a Focus added here, a name edited): bring it up to date, with the
+          // insight kept on screen. Not again for data whose last try failed (Retry does that).
+          if (ai._sig !== this.growSig() && !this._growReq && !this._growQueued && this._growFailedWant !== want) { this._growQueued = true; setTimeout(() => { this._growQueued = false; this.refreshGrow(); }, 0); }
           const opps = (ai.opponentPlans || []).map(x => {
             const id = x.player_id;
             return id && this.nm(id) ? op(id, x.plan) : null;
@@ -3947,7 +4033,8 @@ class Component extends DCLogic {
             showKeyChart: !!legacyPct,
             build, strengths, opps, doubles,
             // The Key Insight tile already says why there is nothing else, so no second empty state under it.
-            showKey: true, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: !!doubles.length, empty: null
+            showKey: true, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: !!doubles.length, empty: null,
+            updating: !!s.growUpdating, failedNote: !!s.growFailed && !s.growUpdating, retry: () => this.refreshGrow({ retry: true })
           };
         } else {
           // A live account with no insight on screen: it is being made (or the call failed). Every section comes from
@@ -3959,7 +4046,8 @@ class Component extends DCLogic {
           // growNone: the function had no matches to work from (it answers null only then).
           v.grow = { keyTitle: this.t(err ? 'keyErrorTitle' : s.growNone ? 'notEnough' : 'keyLoadingTitle'), keyBody: this.t(err ? 'keyErrorBody' : s.growNone ? 'notEnoughBody' : 'keyLoadingBody'), keyChart: { kind: '', values: '', quote: '', split: '', xlabels: '' },
             keySplit: false, keyLegacy: true, keyCurrent: '0%', keyPrevious: '0%', showKeyChart: false, build: [], strengths: [], opps: [], doubles: [],
-            showKey: true, showBuild: false, showStrengths: false, showOpps: false, showDoubles: false, empty: null };
+            showKey: true, showBuild: false, showStrengths: false, showOpps: false, showDoubles: false, empty: null,
+            retryTile: err, retry: () => { this.setState({ growError: false }); this.refreshGrow({ retry: true }); } };
         }
       }
     }

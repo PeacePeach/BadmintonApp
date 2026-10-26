@@ -311,15 +311,17 @@
 
   const insights = {
     // lang is the app language ('en' | 'zh'): insights are written, cached and returned in that language.
-    async generate(lang) {
+    // sig: the app's signature of the data it asks for (stored with the insight; see growSig in the app).
+    async generate(lang, sig) {
       // Never an endless "Looking at your matches…": after 60s the call counts as failed (the function itself gives
       // the model 40s), Grow shows its error tile and the next visit tries again.
       let timer;
       const timeout = new Promise((_, no) => { timer = setTimeout(() => no(fail('network', new Error('timeout'))), conf().growTimeoutMs || 60000); });
-      const { data, error } = await Promise.race([sb().functions.invoke('generate-grow-insights', { body: { lang: lang === 'zh' ? 'zh' : 'en' } }), timeout]).finally(() => clearTimeout(timer));
+      const { data, error } = await Promise.race([sb().functions.invoke('generate-grow-insights', { body: { lang: lang === 'zh' ? 'zh' : 'en', ...(sig ? { sig } : {}) } }), timeout]).finally(() => clearTimeout(timer));
       if (error) throw dataFail(error);
-      // _generatedAt: when the insight was made (Build Next uses it to tell new evidence from old).
-      return data && data.insight ? { ...data.insight, _generatedAt: data.generated_at || new Date().toISOString() } : null;
+      // _generatedAt: when the insight was made (Build Next uses it to tell new evidence from old). _cached and _timing:
+      // whether the function answered from its cache, and where its time went (for grow_loaded).
+      return data && data.insight ? { ...data.insight, _generatedAt: data.generated_at || new Date().toISOString(), _cached: !!data.cached, _timing: data.timing || null } : null;
     },
     // The cached insight in this language, or null. The row holds the latest insight at the top level (no lang means
     // English) and the other language's latest under other_lang.

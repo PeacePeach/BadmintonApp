@@ -17,8 +17,9 @@ fs.writeFileSync(FN, fs.readFileSync(path.join(REPO, 'supabase/functions/generat
   .replace('"../_shared/grow-insights-core.js"', JSON.stringify(CORE)));
 globalThis.Deno = { serve: h => { globalThis.__h = h; }, env: { get: k => ({ SUPABASE_URL: 'x', SUPABASE_ANON_KEY: 'x', OPENAI_API_KEY: 'sk-test' })[k] } };
 await import(pathToFileURL(FN).href);
-const server = { row: null, aiCalls: 0, aiFail: false };
-async function edge(lang, dbJson) {
+// aiMs: how long the fake model takes to answer (0 by default; the timing checks set it).
+const server = { row: null, aiCalls: 0, aiFail: false, aiMs: 0 };
+async function edge(lang, dbJson, sig) {
   const db = JSON.parse(dbJson);
   // App state -> table rows, as rallywise-backend.js stores them.
   const rows = db.matches.map(m => ({ id: m.id, date: m.date, type: m.type, partner: m.partner, opps: m.opps, games: m.games, wt: m.wt, lt: m.lt, worked: m.worked, lost: m.lost, opp_notes: m.on, created_at: m.createdAt }))
@@ -30,9 +31,10 @@ async function edge(lang, dbJson) {
       : t === 'focus_items' ? { select: () => Promise.resolve({ data: focus, error: null }) }
       : q(t === 'players' ? db.players.map(p => ({ id: p.id, name: p.name })) : rows) });
   globalThis.fetch = async () => { server.aiCalls++;
+    if (server.aiMs) await new Promise(r => setTimeout(r, server.aiMs));
     if (server.aiFail) return { ok: false, status: 500, text: async () => 'fake upstream failure' };
     return { ok: true, json: async () => ({ output: [{ content: [{ type: 'output_text', text: JSON.stringify({ keyInsight: null, buildNext: [], strengths: [], opponentPlans: [], doublesPlay: [] }) }] }] }) }; };
-  const res = await globalThis.__h(new Request('http://x', { method: 'POST', headers: { Authorization: 'Bearer t' }, body: JSON.stringify({ lang }) }));
+  const res = await globalThis.__h(new Request('http://x', { method: 'POST', headers: { Authorization: 'Bearer t' }, body: JSON.stringify({ lang, ...(sig ? { sig } : {}) }) }));
   return JSON.stringify(await res.json());
 }
 
@@ -325,6 +327,143 @@ if (!process.env.ONLY || process.env.ONLY === 'layout') for (const lang of ['en'
   ok(server.aiCalls === calls && !seen.some(t => /Looking at your matches|正在分析/.test(t)), `${tag} tab switches: ${server.aiCalls - calls} new model calls, Key on return ${JSON.stringify(seen)}`);
   ok(!pg.errs.length, `${tag} layout: no console errors ${pg.errs.join(' | ')}`);
   await shot(pg, lang, `14-grow-${vp.width}.png`); await pg.close();
+}
+
+// 11. Caching and loading (Han, 2026-10-26 07:24), on iPhone-sized screens. The fake model takes AI_MS to answer, so
+// a model call is visible as time; a cache hit is not. timeline: what the Key Insight tile showed every 30 ms.
+const LOADING = /Looking at your matches|正在分析你的比赛/, UPDATING = /Updating insights|正在更新/;
+const watch = pg => pg.evaluate(() => { window.__tl = []; clearInterval(window.__tlT); const t0 = performance.now();
+  window.__tlT = setInterval(() => { const k = document.querySelector('.rw-key'); if (!k) return window.__tl.push({ t: Math.round(performance.now() - t0), title: null });
+    const st = k.querySelector('.rw-grow-status'); window.__tl.push({ t: Math.round(performance.now() - t0), title: (k.querySelector('.rw-key-title') || {}).textContent || '', status: st ? st.textContent.trim() : '', retry: !!k.querySelector('.rw-grow-status button, .rw-btn-tertiary') }); }, 30); });
+const timeline = pg => pg.evaluate(() => { clearInterval(window.__tlT); return window.__tl; });
+const firstReal = tl => (tl.find(x => x.title && !LOADING.test(x.title)) || {}).t;
+const toGrow = async (pg, zh) => { await pg.getByText(zh ? '洞察' : 'Insights', { exact: true }).first().click(); await pg.waitForTimeout(150);
+  await pg.getByRole('tab', { name: zh ? '提升' : 'Grow', exact: true }).first().click(); };
+const glog = pg => pg.evaluate(() => window.__rwGrowLog || []);
+const gens = pg => pg.evaluate(() => window.__gen.length);
+const AI_MS = 1500, timings = [];
+if (!process.env.ONLY || process.env.ONLY === 'cache') for (const [lang, vp] of [['en', { width: 390, height: 844 }], ['zh', { width: 375, height: 667 }]]) {
+  const zh = lang === 'zh', tag = `${lang} ${vp.width} cache`;
+  server.row = null; server.aiCalls = 0; server.aiMs = AI_MS;
+  // a. First time: the loading tile until the first insight arrives.
+  let pg = await open(lang, 'han17', { __vp: vp }); await watch(pg); await pg.waitForTimeout(AI_MS + 1200);
+  let tl = await timeline(pg);
+  let lg0 = (await glog(pg)).at(-1);
+  ok(LOADING.test(tl[0].title) && firstReal(tl) && lg0 && lg0.ms >= AI_MS && server.aiCalls === 1, `${tag} first time: loading tile, then the insight ${lg0 && lg0.ms} ms after Grow asked, ${server.aiCalls} model call`);
+  timings.push({ lang, case: 'first time (no cache)', key_ms: lg0 && lg0.ms, ai_calls: server.aiCalls, server: lg0 });
+  const key1 = (await grow(pg)).keyTitle;
+  // b. Reopen the app (same device): the cached insight at once, no loading tile; one silent check, a cache hit.
+  await pg.reload({ waitUntil: 'networkidle' }); await pg.waitForTimeout(2500);
+  const nn = pg.getByText(zh ? '以后再说' : 'Not Now', { exact: true }); if (await nn.count()) { await nn.first().click(); await pg.waitForTimeout(200); }
+  let calls = server.aiCalls; await pg.evaluate(() => { window.__gen = []; });
+  await toGrow(pg, zh); await watch(pg); await pg.waitForTimeout(1200); tl = await timeline(pg);
+  ok(tl.length && !tl.some(x => LOADING.test(x.title || '')) && !tl.some(x => UPDATING.test(x.status || '')) && tl[0].title === key1 && server.aiCalls === calls,
+    `${tag} reopen: cached Key Insight at the first frame (${tl[0].t} ms, "${tl[0].title}"), no loading or Updating, ${server.aiCalls - calls} model calls, ${await gens(pg)} function check`);
+  timings.push({ lang, case: 'reopen app, data unchanged', key_ms: tl[0].t, ai_calls: server.aiCalls - calls, server: (await glog(pg)).at(-1) });
+  // c. Tab away and back in the same session: no function call at all.
+  await pg.evaluate(() => { window.__gen = []; });
+  await pg.getByRole('tab', { name: zh ? '表现' : 'Performance', exact: true }).first().click(); await pg.waitForTimeout(200);
+  await pg.getByRole('tab', { name: zh ? '提升' : 'Grow', exact: true }).first().click(); await pg.waitForTimeout(600);
+  ok(await gens(pg) === 0 && server.aiCalls === calls, `${tag} tab back: ${await gens(pg)} function calls, ${server.aiCalls - calls} model calls`);
+  // d. Repeated taps while a request runs: one request.
+  // e. Data change on Grow (Add to Focus): the insight stays with "Updating insights…", then the new one replaces it;
+  // only the cards whose facts changed go to the model.
+  calls = server.aiCalls; await pg.evaluate(() => { window.__gen = []; }); await watch(pg);
+  await pg.locator('.rw-advice.is-half').first().locator('button').click(); await pg.waitForTimeout(400);
+  await pg.locator('.rw-sheet button', { hasText: zh ? '添加训练目标' : 'Add to Focus' }).last().click();
+  for (let i = 0; i < 4; i++) { await pg.waitForTimeout(80); await pg.getByRole('tab', { name: zh ? '提升' : 'Grow', exact: true }).first().click().catch(() => {}); }
+  await pg.waitForTimeout(AI_MS + 1200); tl = await timeline(pg);
+  const upd = tl.filter(x => UPDATING.test(x.status || '')), lg = (await glog(pg)).at(-1);
+  ok(upd.length && !tl.some(x => LOADING.test(x.title || '')) && !UPDATING.test(tl.at(-1).status) && await gens(pg) === 1 && server.aiCalls - calls === 1,
+    `${tag} Add to Focus: previous insight kept with "${upd[0] && upd[0].status}" for ${upd.length ? upd.at(-1).t - upd[0].t : 0} ms, never the loading tile, ${await gens(pg)} function call for 5 taps, ${server.aiCalls - calls} model call`);
+  ok(lg && lg.timing && lg.timing.reused.items > 0 && lg.timing.asked.items < lg.timing.reused.items + lg.timing.asked.items,
+    `${tag} Add to Focus: copy reused for ${lg && lg.timing.reused.items} cards, ${lg && lg.timing.asked.items} sent to the model (key ${lg && lg.timing.asked.key})`);
+  timings.push({ lang, case: 'Add to Focus on Grow (SWR)', key_ms: 0, updated_ms: upd.length ? upd.at(-1).t - upd[0].t : null, ai_calls: server.aiCalls - calls, server: lg });
+  await shot(pg, lang, `15-cache-after-focus-${vp.width}.png`);
+  // e2. Two changes while a request runs: the answer for the first is never shown; one more request follows, and
+  // the screen ends on the insight for the latest data.
+  // (mock.slow: each request takes 2.5 s, so the second change lands while the first is running.)
+  calls = server.aiCalls; await pg.evaluate(() => { window.__gen = []; window.__rwGrowLog = []; localStorage.setItem('mock.slow', 'true'); }); await watch(pg);
+  for (let i = 0; i < 2; i++) {
+    await pg.locator('.rw-advice.is-half').first().locator('button').click(); await pg.waitForTimeout(300);
+    await pg.locator('.rw-sheet button', { hasText: zh ? '添加训练目标' : 'Add to Focus' }).last().click(); await pg.waitForTimeout(400);
+  }
+  await pg.waitForTimeout(600); await pg.screenshot({ path: path.join(OUT, lang, `15-cache-updating-${vp.width}.png`) });
+  await pg.waitForTimeout(2 * 2500 + 1500); tl = await timeline(pg); await pg.evaluate(() => localStorage.removeItem('mock.slow'));
+  const lgs = await glog(pg), titles = [...new Set(tl.map(x => x.title))], firstUpd = tl.findIndex(x => UPDATING.test(x.status || '')), lastUpd = tl.map(x => UPDATING.test(x.status || '')).lastIndexOf(true);
+  const gap = firstUpd >= 0 && tl.slice(firstUpd, lastUpd + 1).some(x => !UPDATING.test(x.status || ''));
+  ok(lgs.length === 2 && !lgs[0].shown && lgs[1].shown && !gap && titles.length <= 2 && !UPDATING.test(tl.at(-1).status),
+    `${tag} two quick changes: ${JSON.stringify(lgs.map(l => [l.ms, l.shown, l.cached]))} ${lgs.length} requests, the first answer shown: ${lgs[0] && lgs[0].shown}, Updating without a gap, Key titles ${JSON.stringify(titles)}`);
+  // f. The model fails: the previous insight stays, "Couldn't update" with Retry; Retry brings it up to date.
+  server.aiFail = true; calls = server.aiCalls;
+  await pg.getByText(zh ? '比赛' : 'Matches', { exact: true }).first().click(); await pg.waitForTimeout(500);
+  await pg.locator('.rw-match').first().click(); await pg.waitForTimeout(600);
+  await pg.locator('[data-screen-label="Match Detail"] .rw-appbar-title button').last().click(); await pg.waitForTimeout(300);
+  await pg.getByText(zh ? '删除比赛' : 'Delete Match', { exact: true }).first().click(); await pg.waitForTimeout(400);
+  await pg.getByRole('button', { name: zh ? '删除' : 'Delete', exact: true }).last().click(); await pg.waitForTimeout(500);
+  const keyBefore = (await grow(pg)).keyTitle;
+  await toGrow(pg, zh); await watch(pg); await pg.waitForTimeout(AI_MS + 1200); tl = await timeline(pg);
+  const g = await grow(pg), failNote = await pg.evaluate(() => (document.querySelector('.rw-key .rw-grow-status') || {}).textContent || '');
+  ok(/Couldn't update|更新失败/.test(failNote) && /Retry|重试/.test(failNote) && g.keyTitle && !LOADING.test(g.keyTitle) && !tl.some(x => LOADING.test(x.title || '')) && g.build.length,
+    `${tag} model fails after a delete: insight kept ("${g.keyTitle}"), note "${failNote}", never the loading tile`);
+  await shot(pg, lang, `16-cache-failed-${vp.width}.png`);
+  server.aiFail = false; calls = server.aiCalls; await watch(pg);
+  await pg.locator('.rw-key .rw-grow-status button').click(); await pg.waitForTimeout(AI_MS + 1200); tl = await timeline(pg);
+  const after = await pg.evaluate(() => (document.querySelector('.rw-key .rw-grow-status') || {}).textContent || '');
+  ok(!after && server.aiCalls - calls === 1 && tl.some(x => UPDATING.test(x.status || '')), `${tag} Retry: Updating, then up to date (${server.aiCalls - calls} model call), status now "${after}"`);
+  // g. The function can't be reached at all: same, from the app's side.
+  await pg.evaluate(() => localStorage.setItem('mock.edgeFail', 'true'));
+  await pg.locator('.rw-advice.is-half').first().locator('button').click(); await pg.waitForTimeout(400);
+  await pg.locator('.rw-sheet button', { hasText: zh ? '添加训练目标' : 'Add to Focus' }).last().click(); await pg.waitForTimeout(1200);
+  const off = await pg.evaluate(() => (document.querySelector('.rw-key .rw-grow-status') || {}).textContent || '');
+  ok(/Couldn't update|更新失败/.test(off) && (await grow(pg)).keyTitle, `${tag} offline: insight kept, note "${off}"`);
+  await pg.evaluate(() => localStorage.removeItem('mock.edgeFail'));
+  ok(!pg.errs.length, `${tag}: no console errors ${pg.errs.join(' | ')}`);
+  await pg.close();
+}
+if (!process.env.ONLY || process.env.ONLY === 'cache') {
+  // h. EN <-> ZH: each language once, then switching is instant with no model call (both directions).
+  server.row = null; server.aiCalls = 0; server.aiMs = AI_MS;
+  const pg = await open('en', 'han17', { __vp: { width: 390, height: 844 } }); await pg.waitForTimeout(AI_MS + 1000);
+  const setLang = async l => { await pg.evaluate(() => { window.__gen = []; }); await watch(pg);
+    await pg.locator('.rw-appbar-action button').click(); await pg.waitForTimeout(250);
+    await pg.getByText(l === 'zh' ? 'Settings' : '设置', { exact: true }).first().click(); await pg.waitForTimeout(400);
+    await pg.locator('[data-screen-label="Settings"] .rw-group-row').nth(2).click(); await pg.waitForTimeout(400);
+    await pg.locator('[data-screen-label="Language"] .rw-group-row', { hasText: l === 'zh' ? '简体中文' : 'English' }).first().click(); await pg.waitForTimeout(200);
+    const tab = pg.getByText(l === 'zh' ? '洞察' : 'Insights', { exact: true });
+    for (let i = 0; i < 4 && !(await tab.first().isVisible().catch(() => false)); i++) { await pg.locator('.rw-appbar-title button').first().click(); await pg.waitForTimeout(300); }
+    await watch(pg); await tab.first().click(); await pg.waitForTimeout(AI_MS + 900); const tl = await timeline(pg);
+    return { tl, gens: await gens(pg), key: (await grow(pg)).keyTitle }; };
+  let r = await setLang('zh');
+  ok(server.aiCalls === 2 && /[一-鿿]/.test(r.key), `cache lang: first ZH made once (${server.aiCalls} model calls in all)`);
+  for (const l of ['en', 'zh', 'en']) {
+    const c = server.aiCalls; r = await setLang(l);
+    ok(server.aiCalls === c && r.tl[0] && r.tl[0].title && !LOADING.test(r.tl[0].title) && !r.tl.some(x => LOADING.test(x.title || '') || UPDATING.test(x.status || '')) && (l === 'zh') === /[一-鿿]/.test(r.key),
+      `cache lang: to ${l} instant ("${r.tl[0] && r.tl[0].title}" at ${r.tl[0] && r.tl[0].t} ms), ${server.aiCalls - c} model calls, ${r.gens} function calls`);
+    timings.push({ lang: l, case: 'language switch (both cached)', key_ms: r.tl[0] && r.tl[0].t, ai_calls: server.aiCalls - c, function_calls: r.gens });
+  }
+  // i. Engine change: a cached insight from an older engine is never shown; Grow loads a current one instead.
+  await pg.evaluate(() => { for (const k of Object.keys(localStorage)) if (k.startsWith('rallywise.grow.u1.')) { const v = JSON.parse(localStorage.getItem(k)); v.insight.engine_version = '2026-10-25-v13'; v.insight.keyInsight.title = 'OLD ENGINE'; localStorage.setItem(k, JSON.stringify(v)); } });
+  await pg.reload({ waitUntil: 'networkidle' }); await pg.waitForTimeout(2500);
+  const nn = pg.getByText('Not Now', { exact: true }); if (await nn.count()) { await nn.first().click(); await pg.waitForTimeout(200); }
+  await watch(pg); await toGrow(pg, false); await pg.waitForTimeout(AI_MS + 900); const tl = await timeline(pg);
+  const fin = (await grow(pg)).keyTitle;
+  ok(!tl.some(x => /OLD ENGINE/.test(x.title || '')) && fin && !/OLD ENGINE/.test(fin) && !LOADING.test(fin), `cache engine: the v13 cached insight never shows (frames ${JSON.stringify([...new Set(tl.map(x => x.title))])})`);
+  ok(!pg.errs.length, `cache lang/engine: no console errors ${pg.errs.join(' | ')}`);
+  await pg.close();
+  // j. First time and the function can't be reached: the error tile with Retry (never endless loading); Retry works.
+  server.row = null; server.aiMs = 0;
+  const p2 = await open('en', 'han17', { __vp: { width: 375, height: 667 }, 'mock.edgeFail': true }); await p2.waitForTimeout(1200);
+  const e = await grow(p2), btn = p2.locator('.rw-key .rw-btn-tertiary');
+  ok(/Couldn't update insights/.test(e.keyTitle) && await btn.count() === 1, `cache error tile: "${e.keyTitle}" with Retry`);
+  await shot(p2, 'en', '17-cache-error-tile-375.png');
+  await p2.evaluate(() => localStorage.removeItem('mock.edgeFail')); await btn.click(); await p2.waitForTimeout(1200);
+  const e2 = await grow(p2);
+  ok(e2.keyTitle && !/Couldn't|Looking/.test(e2.keyTitle) && e2.build.length, `cache error tile: Retry loads it ("${e2.keyTitle}")`);
+  ok(!p2.errs.length, `cache error tile: no console errors ${p2.errs.join(' | ')}`); await p2.close();
+  server.aiMs = 0;
+  fs.mkdirSync(OUT, { recursive: true }); fs.writeFileSync(path.join(OUT, 'cache-timings.json'), JSON.stringify(timings, null, 2));
+  console.log('TIMINGS ' + JSON.stringify(timings.map(t => ({ lang: t.lang, case: t.case, key_ms: t.key_ms, updated_ms: t.updated_ms, ai_calls: t.ai_calls, server: t.server && t.server.timing }))));
 }
 console.log(fails ? `\n${fails} FAILED` : '\nALL PASS');
 await browser.close();

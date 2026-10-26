@@ -28,33 +28,42 @@ function readOutput(data:any){
 
 Deno.serve(async req => {
   if (req.method === "OPTIONS") return new Response("ok",{headers:CORS});
+  // Where the time goes (returned as timing and logged): auth + the 4 reads, the model call, the cache write.
+  const t0 = Date.now(), timing:any = {};
+  const done = (body:any) => { timing.total_ms = Date.now() - t0; console.log("grow timing", JSON.stringify({ ...timing, cached: !!body.cached, ai_status: body.insight?.ai_status || null })); return Response.json({ ...body, timing }, { headers: CORS }); };
   try {
     const auth = req.headers.get("Authorization") || "";
     const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
       global:{ headers:{ Authorization:auth } }
     });
-    const { data:u } = await sb.auth.getUser();
-    if (!u.user) return Response.json({error:"unauthorized"},{status:401,headers:CORS});
-    const uid = u.user.id;
     // App language. Insights are written in it, and it is part of the cache fingerprint, so a cached insight
     // is only ever returned in the language it was written in. English keeps the fingerprint it had before.
     const reqBody = await req.json().catch(() => ({}));
     const lang = reqBody && reqBody.lang === "zh" ? "zh" : "en";
+    // The app's own signature of the data it showed this insight for (stored with it, so another device can tell
+    // the row is current without asking again).
+    const clientSig = typeof reqBody?.sig === "string" ? reqBody.sig.slice(0, 64) : null;
     // The released app (main) sends no lang and draws any truthy keyInsight as a tile with its title and an
     // old-style percent bar from chart.current_percent. For it, the Key Insight is only { title, body } when there
     // is one, else null (no empty tile, no NaN bar). What is stored is always the full insight.
     const legacy = !reqBody || !("lang" in reqBody);
-    const out = (insight:any) => !legacy || !insight ? insight
-      : { ...insight, keyInsight: insight.keyInsight?.status === "ok" && insight.keyInsight.title ? { title: insight.keyInsight.title, body: insight.keyInsight.body } : null };
+    const out = (full:any) => { if (!full) return full; const { ai_copy, ...insight } = full; return !legacy ? insight
+      : { ...insight, keyInsight: insight.keyInsight?.status === "ok" && insight.keyInsight.title ? { title: insight.keyInsight.title, body: insight.keyInsight.body } : null }; };
 
     // Focus rows (select * so topic_id is read once its column exists); a missing Focus table just means no Focus.
-    const [{data:players,error:pe},{data:matches,error:me},{data:focusRows},{data:cached}] = await Promise.all([
+    // The user check runs alongside the reads (one round trip, not two): every table is owner-only under RLS, so the
+    // reads only ever return this user's rows, and nothing is used or written unless the check passes.
+    const [{data:u},{data:players,error:pe},{data:matches,error:me},{data:focusRows},{data:cached}] = await Promise.all([
+      sb.auth.getUser(),
       sb.from("players").select("id,name,level").order("created_at"),
       sb.from("matches").select("id,date,type,partner,opps,games,wt,lt,worked,lost,opp_notes,created_at")
         .order("date",{ascending:false}).order("created_at",{ascending:false}).limit(20),
       sb.from("focus_items").select("*"),
-      sb.from("ai_insights").select("input_fingerprint,insight_json,generated_at").eq("user_id",uid).maybeSingle()
+      sb.from("ai_insights").select("input_fingerprint,insight_json,generated_at").maybeSingle()
     ]);
+    timing.db_ms = Date.now() - t0;
+    if (!u?.user) return Response.json({error:"unauthorized"},{status:401,headers:CORS});
+    const uid = u.user.id;
     if (pe || me) throw pe || me;
 
     // v13: Build Next, Strengths, opponent plans and Doubles Play read all the fetched history (20 matches); the Key
@@ -77,16 +86,17 @@ Deno.serve(async req => {
     const names:any = Object.fromEntries((players || []).map((p:any)=>[p.id,p.name]));
     const focus = (focusRows || []).map((f:any) => ({ topic: G.focusTopic(f, anyPrevious), status: f.status, completed_at: f.completed_at }));
     const INSIGHT_VERSION = G.ENGINE_VERSION;
-    const fp = await hash(INSIGHT_VERSION + (lang === "zh" ? ":zh" : "") + JSON.stringify(recent.map((m:any)=>({
+    const matchJson = JSON.stringify(recent.map((m:any)=>({
       id:m.id,date:m.date,type:m.type,partner:m.partner,opps:m.opps,games:m.games,wt:m.wt,lt:m.lt,
       worked:safe(m.worked),lost:safe(m.lost),opp_notes:safe(m.opp_notes)
-    }))) + JSON.stringify(focus.map((f:any) => [f.topic, f.status, f.completed_at]).sort())
+    })));
+    const fp = await hash(INSIGHT_VERSION + (lang === "zh" ? ":zh" : "") + matchJson + JSON.stringify(focus.map((f:any) => [f.topic, f.status, f.completed_at]).sort())
       // Opponent notes are given to the player they name, so a renamed player is new input.
       + JSON.stringify((players || []).map((p:any) => [p.id, p.name]).sort()));
 
     const hit = slots.find(x => x.fp === fp);
-    if (hit) return Response.json({insight:out(hit.insight),generated_at:hit.generated_at,cached:true},{headers:CORS});
-    if (!recent.length) return Response.json({insight:null,cached:false},{headers:CORS});
+    if (hit) return done({insight:out(hit.insight),generated_at:hit.generated_at,cached:true});
+    if (!recent.length) return done({insight:null,cached:false});
 
     // Opponents the player wrote notes about, with only those notes (no record: it says nothing about how they play).
     const oppDiag = { matches_with_notes:0, unknown_opponent:0, names_no_opponent:0 };
@@ -97,7 +107,12 @@ Deno.serve(async req => {
     // Engine V2 evidence: everything numeric is decided here; the model only picks and words it.
     // Engine v14: P1 score trend -> P2 repeated pattern -> P3 early observation, from the same evidence as the sections
     // below. All are kept for finalizeKey (and the report); the model sees the best 3.
-    const keyAll = G.keyCandidates(recent, previous?.keyInsight?.candidate_id, { focus, names }), keyCands = keyAll.slice(0,3);
+    // "Same as last time" (the novelty rule) means the Key Insight shown for the previous matches: when only a Focus
+    // or a name changed, the matches are the same, so the ranking keeps the input it had and the Key Insight doesn't
+    // flip to another candidate just because a Focus was added.
+    const matchesFp = (await hash(matchJson)).slice(0, 16);
+    const prevKeyId = previous?.basis?.matches_fp === matchesFp ? previous.basis.prev_key_id : previous?.keyInsight?.candidate_id;
+    const keyAll = G.keyCandidates(recent, prevKeyId, { focus, names }), keyCands = keyAll.slice(0,3);
     const buildCands = G.buildCandidates(recent, focus, 4);
     const strengthCands = G.strengthCandidates(recent, 3);
     const facts = {
@@ -168,9 +183,37 @@ Do not mention AI. Keep every card scannable on a phone.
 
 OUTPUT LANGUAGE: write every visible string in ${lang === "zh" ? "natural Simplified Chinese" : "English"}. Keep JSON keys, candidate_id, topic_id, player_id and the doublesPlay label values ("Try Next" / "Keep Doing") exactly as specified.`
 
+    // Copy reuse: each card's model copy is stored with the facts it was written from (ai_copy). When new data leaves a
+    // card's facts unchanged (a Focus added, one match edited), its copy is reused and only the cards whose facts
+    // changed go to the model, in one smaller call; with none, there is no call. Reused copy goes through the same
+    // checks below as new copy. Same language and same engine only.
+    const ck = async (x:any) => (await hash(lang + JSON.stringify(x))).slice(0, 16);
+    const prevCopy = previous?.engine_version === G.ENGINE_VERSION && previous?.ai_copy || null;
+    const copy:any = { key:null, build:{}, strengths:{}, opps:{}, doubles:null };
+    const keyCk = await ck(facts.key_candidates), doublesCk = await ck(doubles);
+    const reuse:any = { key: keyCands.length && prevCopy?.key?.ck === keyCk ? prevCopy.key : null, build:[], strengths:[], opps:[], doubles: doubles && prevCopy?.doubles?.ck === doublesCk ? prevCopy.doubles : null };
+    const need:any = { key: !!keyCands.length && !reuse.key, build:[], strengths:[], opps:[], doubles: !!doubles && !reuse.doubles };
+    for (const [list, kind, id] of [[facts.build_candidates, "build", "topic_id"], [facts.strength_candidates, "strengths", "topic_id"], [opponents, "opps", "player_id"]] as any[])
+      for (const f of list) {
+        const c = await ck(f), p = prevCopy?.[kind]?.[f[id]];
+        copy[kind][f[id]] = { ck: c, v: null };
+        if (p?.ck === c) { reuse[kind].push(p.v); copy[kind][f[id]].v = p.v; } else need[kind].push(f);
+      }
+    copy.key = { ck: keyCk, v: reuse.key?.v || null }; copy.doubles = { ck: doublesCk, v: reuse.doubles?.v || null };
+    const asks = (need.key ? 1 : 0) + need.build.length + need.strengths.length + need.opps.length + (need.doubles ? 1 : 0);
+    if (aiStatus === "ok" && !asks) aiStatus = "reused";
+    timing.reused = { key: !!reuse.key, items: reuse.build.length + reuse.strengths.length + reuse.opps.length, doubles: !!reuse.doubles };
+    timing.asked = { key: need.key, items: need.build.length + need.strengths.length + need.opps.length, doubles: need.doubles };
+
     const empty = () => ({ keyInsight:null, buildNext:[], strengths:[], opponentPlans:[], doublesPlay:[] });
     let parsed:any = empty();
     if (aiStatus === "ok") {
+      const ask = { ...facts, key_candidates: need.key ? facts.key_candidates : [], build_candidates: need.build, strength_candidates: need.strengths, opponents: need.opps, doubles: need.doubles ? doubles : null };
+      const schema:any = G.modelSchema(need.key ? keyCands.map((c:any)=>c.id) : [], need.build.map((b:any)=>b.topic_id), need.strengths.map((b:any)=>b.topic_id), need.opps.map((o:any)=>o.player_id));
+      if (!need.key) schema.properties.keyInsight = { type:"null" };
+      schema.properties.buildNext.maxItems = need.build.length; schema.properties.strengths.maxItems = need.strengths.length;
+      if (!need.doubles) schema.properties.doublesPlay.maxItems = 0;
+      const ta = Date.now();
       try {
         // A model call that hangs must not hold Grow on "Looking at your matches…": after 40s it counts as failed
         // (engine sections with template copy, not cached, retried on the next visit).
@@ -180,9 +223,8 @@ OUTPUT LANGUAGE: write every visible string in ${lang === "zh" ? "natural Simpli
           headers:{Authorization:`Bearer ${key}`,"Content-Type":"application/json"},
           body:JSON.stringify({
             model:"gpt-5-mini",
-            input:[{role:"system",content:prompt},{role:"user",content:JSON.stringify(facts)}],
-            text:{format:{type:"json_schema",name:"rallywise_grow",strict:true,
-              schema:G.modelSchema(keyCands.map((c:any)=>c.id), buildCands.map((b:any)=>b.topic_id), strengthCands.map((b:any)=>b.topic_id), opponents.map((o:any)=>o.player_id))}}
+            input:[{role:"system",content:prompt},{role:"user",content:JSON.stringify(ask)}],
+            text:{format:{type:"json_schema",name:"rallywise_grow",strict:true, schema}}
           })
         });
         clearTimeout(timer);
@@ -195,7 +237,20 @@ OUTPUT LANGUAGE: write every visible string in ${lang === "zh" ? "natural Simpli
         console.error("OpenAI answer unusable", e);
         aiStatus = "failed"; parsed = empty();
       }
+      timing.ai_ms = Date.now() - ta;
+      // What the model wrote now is stored with the facts it was written from (null where it wrote nothing: the
+      // same facts get the same template next time instead of another call).
+      if (need.key) copy.key.v = parsed.keyInsight || null;
+      for (const [kind, arr, id] of [["build", parsed.buildNext, "topic_id"], ["strengths", parsed.strengths, "topic_id"], ["opps", parsed.opponentPlans, "player_id"]] as any[])
+        for (const x of arr || []) if (x && copy[kind][x[id]] && !copy[kind][x[id]].v) copy[kind][x[id]].v = x;
+      if (need.doubles) copy.doubles.v = parsed.doublesPlay || [];
     }
+    // Reused copy joins what the model wrote now (also when the call failed: those cards keep their copy).
+    if (reuse.key) parsed.keyInsight = reuse.key.v;
+    parsed.buildNext = [...reuse.build.filter(Boolean), ...(parsed.buildNext || [])];
+    parsed.strengths = [...reuse.strengths.filter(Boolean), ...(parsed.strengths || [])];
+    parsed.opponentPlans = [...reuse.opps.filter(Boolean), ...(parsed.opponentPlans || [])];
+    if (reuse.doubles) parsed.doublesPlay = reuse.doubles.v || [];
     parsed.lang = lang;
     parsed.ai_status = aiStatus;
 
@@ -219,16 +274,21 @@ OUTPUT LANGUAGE: write every visible string in ${lang === "zh" ? "natural Simpli
       console.error("key insight empty while sections have cards", JSON.stringify(parsed.keyInsight));
     parsed.coverage = G.coverage(recent, { build:parsed.buildNext, strengths:parsed.strengths, opps:opponents, plans, doubles, doublesPlay:parsed.doublesPlay, keyInsight:parsed.keyInsight, oppDiag });
 
+    if (aiStatus === "ok" || aiStatus === "reused") parsed.ai_copy = copy;
+    if (clientSig) parsed.client_sig = clientSig;
+    parsed.basis = { matches_fp: matchesFp, prev_key_id: prevKeyId || null };
     const generated_at = new Date().toISOString();
     if (aiStatus !== "failed") {
+      const tw = Date.now();
       const other = slots.find(x => x.lang !== lang);
       const {error:ce} = await sb.from("ai_insights").upsert({
         user_id:uid,input_fingerprint:fp,insight_json:{ ...parsed, ...(other ? { other_lang:other } : {}) },generated_at
       },{onConflict:"user_id"});
+      timing.write_ms = Date.now() - tw;
       if (ce) throw ce;
     }
 
-    return Response.json({insight:out(parsed),generated_at,cached:false},{headers:CORS});
+    return done({insight:out(parsed),generated_at,cached:false});
   } catch (e) {
     console.error(e);
     return Response.json({error:"server_error"},{status:500,headers:CORS});
