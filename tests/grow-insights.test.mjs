@@ -503,7 +503,7 @@ test('Build Next actions (Han): no tactical correction from tags or a single not
 });
 
 test('engine version is bumped so cached v7 insights regenerate', () => {
-  assert.equal(G.ENGINE_VERSION, '2026-10-26-v10');
+  assert.equal(G.ENGINE_VERSION, '2026-10-26-v11');
 });
 
 test('opponent plans: only from notes about that opponent; record-only, unsupported or generic plans are left out', () => {
@@ -626,4 +626,20 @@ test('mixed skill titles do not claim the context occurred in every tagged match
   assert.match(w.signal,/2场/);
   assert.match(w.signal,/1场提到边线/);
   assert.equal(b.advice_basis,'general');
+});
+
+test('secondary Build Next only from 2 actual notes across wider history, never active Focus', () => {
+  fresh();
+  const ms=[
+    M(W,['Defence']),M(W,['Other']),M(L,['Defence']),M(L,['Other']),
+    M(W,['Net']),M(W,['Net']),M(L,['Smash']),M(W,['Other']),
+    M(L,['Smash']),M(W,['Other'])
+  ];
+  const focus=[{topic:'tag:Net',status:'active'}];
+  const items=G.buildCandidates(ms,focus,4);
+  assert.deepEqual(items.map(x=>x.tag),['Smash','Defence']);
+  assert.equal(items[1].k,2);
+  assert.equal(items[1].n,9);
+  const olderOnly=ms.map((m,i)=>i===2?{...m,lt:['Other']}:m);
+  assert.deepEqual(G.buildCandidates(olderOnly,focus,4).map(x=>x.tag),['Smash']);
 });
