@@ -37,7 +37,7 @@
      Avatar / Fancy (icon badge) .. .rw-icon-badge (40px, gradient B100 ring, B100 icon 20px)
    Voice Log Match (Figma 207:7730 and Review 217:8404 / 248:2470):
      App bar title (Back/Close + name) .rw-appbar-title[.is-centered: detail page] > IconButton glass + .rw-appbar-name
-     Detail page .................. .rw-page > .rw-appbar-title.is-centered + content (40px under the App bar, 24px between)
+     Detail page .................. .rw-page > .rw-appbar-title.is-centered + content (40px under the App bar, 24px between, .rw-page-section 40px)
      Page heading + hint .......... .rw-page-head > .rw-heading + .rw-hint
      Voice Input (transcript card)  .rw-voice-input[.is-live] > .rw-voice-text + .rw-cues
      Pills / Recognition cue ...... .rw-pill.rw-pill-sm.rw-cue[.is-done] > .rw-cue-mark  (Figma Pills, Type=Indicator 216:8356/8357)
@@ -264,6 +264,7 @@
 /* Detail page body: App bar, then the first component 40px below it, then 24px between components. */
 .rw-page{display:flex;flex-direction:column;gap:var(--rw-page-gap);}
 .rw-page>.rw-appbar-title{margin-bottom:calc(var(--rw-page-head-gap) - var(--rw-page-gap));}
+.rw-page>.rw-page-section{margin-top:calc(var(--rw-section-gap) - var(--rw-page-gap));}  /* a new section inside .rw-page: 40px above it */
 /* Page heading: title + one-line hint */
 .rw-page-head{display:flex;flex-direction:column;gap:8px;}
 .rw-heading{font:var(--rw-type-heading);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);margin:0;}

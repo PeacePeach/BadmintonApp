@@ -272,6 +272,8 @@
   /* Detail page (centred App bar): 40px from the App bar to the first component, 24px between components (Han 2026-10-25) */
   --rw-page-head-gap: 40px;
   --rw-page-gap: 24px;
+  /* Between sections (a titled block, or a form's main button) on every screen (Han 2026-10-26: one value, 40) */
+  --rw-section-gap: 40px;
   --rw-search-h: 48px;
   --rw-search-pad-x: 18px;
   --rw-search-input-pad-x: 2px;

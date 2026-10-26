@@ -323,7 +323,7 @@ button:disabled{cursor:default !important;}
 
     <!-- MATCHES -->
     <sc-if value="{{ isMatches }}" hint-placeholder-val="{{ true }}">
-      <div data-screen-label="Matches" style="display:flex;flex-direction:column;gap:40px;">
+      <div data-screen-label="Matches" style="display:flex;flex-direction:column;gap:var(--rw-section-gap);">
         <div aria-hidden="true" style="min-height:40px;"></div>
         <div class="rw-greeting">
           <h1 class="rw-title rw-text-gradient">{{ greeting.title }}</h1>
@@ -335,7 +335,7 @@ button:disabled{cursor:default !important;}
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ blockedState.illustration }}" title="{{ blockedState.title }}" body="{{ blockedState.body }}" actionLabel="{{ blockedState.actionLabel }}" onAction="{{ blockedState.onAction }}" hint-size="350px,330px"></x-import>
         </sc-if>
         <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
-          <div aria-busy="true" style="display:flex;flex-direction:column;gap:40px;">
+          <div aria-busy="true" style="display:flex;flex-direction:column;gap:var(--rw-section-gap);">
             <span class="sr-only" role="status">{{ tx.loadingMatches }}</span>
             <div style="display:flex;flex-direction:column;gap:24px;">
               <div aria-hidden="true" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
@@ -572,7 +572,7 @@ button:disabled{cursor:default !important;}
         </sc-if>
 
         <sc-if value="{{ insCoach }}" hint-placeholder-val="{{ false }}">
-          <div data-screen-label="Grow" style="display:flex;flex-direction:column;gap:40px;">
+          <div data-screen-label="Grow" style="display:flex;flex-direction:column;gap:var(--rw-section-gap);">
             <sc-if value="{{ grow.empty }}" hint-placeholder-val="{{ false }}">
               <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ grow.empty.illustration }}" title="{{ grow.empty.title }}" body="{{ grow.empty.body }}" hint-size="350px,300px"></x-import>
             </sc-if>
@@ -703,7 +703,7 @@ button:disabled{cursor:default !important;}
 
     <!-- FOCUS (Figma 203:6012): title + floating menu, Active section of Focus ListRows, Add Focus, Completed disclosure. -->
     <sc-if value="{{ isFocus }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Focus" style="display:flex;flex-direction:column;gap:40px;">
+      <div data-screen-label="Focus" style="display:flex;flex-direction:column;gap:var(--rw-section-gap);">
         <div style="display:flex;align-items:center;min-height:40px;">
           <h1 class="rw-title rw-title-fade">{{ tx.focus }}</h1>
         </div>
@@ -1135,7 +1135,7 @@ button:disabled{cursor:default !important;}
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.matchActions }}" onClick="{{ toggleMenu }}" hint-size="44px,44px"></x-import>
         </div>
         <sc-if value="{{ detailLoading }}" hint-placeholder-val="{{ false }}">
-          <div aria-busy="true" style="display:flex;flex-direction:column;gap:32px;">
+          <div aria-busy="true" style="display:flex;flex-direction:column;gap:var(--rw-section-gap);">
             <span class="sr-only" role="status">{{ tx.loadingMatch }}</span>
             <div aria-hidden="true" style="display:flex;flex-direction:column;gap:10px;">
               <div class="skel skel-bg" style="height:12px;width:30%;"></div>
@@ -1158,7 +1158,7 @@ button:disabled{cursor:default !important;}
           <div class="rw-caption">{{ detail.dateLong }}</div>
           <h2 class="rw-title" style="text-wrap:balance;overflow-wrap:anywhere;">{{ detail.title }}</h2>
         </div>
-        <div style="display:flex;flex-direction:column;gap:32px;">
+        <div style="display:flex;flex-direction:column;gap:var(--rw-section-gap);">
           <div class="rw-surface rw-game-table" role="table" aria-label="{{ tx.gameCol }}">
             <div class="rw-game-table-row is-head" role="row">
               <div role="columnheader">{{ tx.gameCol }}</div><div role="columnheader">{{ detail.aShort }}</div><div role="columnheader">{{ tx.oppCol }}</div>
@@ -1264,7 +1264,7 @@ button:disabled{cursor:default !important;}
             </div>
           </sc-for>
         </div>
-        <section aria-labelledby="player-recent" style="display:flex;flex-direction:column;gap:12px;">
+        <section aria-labelledby="player-recent" class="rw-page-section" style="display:flex;flex-direction:column;gap:12px;">
           <h2 id="player-recent" class="rw-section-title">{{ tx.recentMatches }}</h2>
           <div style="display:flex;flex-direction:column;gap:10px;">
             <sc-for list="{{ profile.recent }}" as="m" hint-placeholder-count="3">
@@ -1359,7 +1359,7 @@ button:disabled{cursor:default !important;}
             </sc-if>
           </div>
         </div>
-        <button type="button" class="rw-btn rw-btn-primary" onClick="{{ saveProfile }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="width:100%;margin-top:8px;">
+        <button type="button" class="rw-btn rw-btn-primary rw-page-section" onClick="{{ saveProfile }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="width:100%;">
           <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">{{ tx.save }}</span></sc-if>
           <sc-if value="{{ idleSubmit }}" hint-placeholder-val="{{ true }}">{{ tx.save }}</sc-if>
         </button>
@@ -1424,7 +1424,7 @@ button:disabled{cursor:default !important;}
             <sc-if value="{{ passwordHelper }}" hint-placeholder-val="{{ true }}"><span class="rw-field-note">{{ tx.pwHelper }}</span></sc-if>
           </div>
         </div>
-        <button type="button" class="rw-btn rw-btn-primary" onClick="{{ savePassword }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="width:100%;margin-top:8px;">
+        <button type="button" class="rw-btn rw-btn-primary rw-page-section" onClick="{{ savePassword }}" aria-busy="{{ busySubmit }}" disabled="{{ busyAny }}" style="width:100%;">
           <sc-if value="{{ busySubmit }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">{{ tx.updatePw }}</span></sc-if>
           <sc-if value="{{ idleSubmit }}" hint-placeholder-val="{{ true }}">{{ tx.updatePw }}</sc-if>
         </button>
