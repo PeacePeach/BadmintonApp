@@ -395,6 +395,10 @@ button.rw-input-row{cursor:pointer;}
 .rw-auth{display:flex;flex-direction:column;gap:var(--rw-page-gap);padding-top:56px;}
 .rw-auth-head{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:0 12px;margin-bottom:calc(var(--rw-page-head-gap) - var(--rw-page-gap));}
 .rw-auth-head>.rw-icon-badge{margin-bottom:8px;}
+.rw-ob-mark{display:block;width:88px;height:auto;margin-bottom:8px;}   /* Rallywise mark on Onboarding Welcome, spaced like the icon badge */
+.rw-auth-head>.rw-auth-art{margin-bottom:12px;}   /* Illustration above a confirmation title: 20px to the title, like EmptyState */
+.rw-auth.is-centered{min-height:100%;justify-content:center;padding:0 0 calc(var(--rw-appbar-top) + 30px);}   /* confirmation screens: block centred between the screen top and the top of the two footer buttons (scroll pads top 58 / bottom 120, buttons start 150 from the bottom) */
+.rw-auth.is-centered>.rw-auth-head{margin-bottom:0;}
 .rw-auth-head>.rw-hint{line-height:1.45;}
 .rw-auth-strong{color:var(--rw-text-primary);overflow-wrap:anywhere;}
 .rw-auth-foot{margin:0;text-align:center;font:var(--rw-type-hint);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}

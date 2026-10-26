@@ -259,63 +259,67 @@ button:disabled{cursor:default !important;}
       </div>
     </sc-if>
 
-    <!-- ONBOARDING -->
+    <!-- ONBOARDING (V2): Welcome and Ready use the auth layout (centred head, 40px to the content); Ready is a confirmation,
+         so its text block sits in the middle of the screen with the DS success Illustration on top. Profile has the
+         shared App bar (glass Back only), Name + Skill level as Input rows with the Select menu, like My Profile. -->
     <sc-if value="{{ isOnboarding }}" hint-placeholder-val="{{ false }}">
       <sc-if value="{{ obWelcome }}" hint-placeholder-val="{{ false }}">
-        <div data-screen-label="Onboarding · Welcome" style="min-height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:28px;text-align:center;padding:0 12px 40px;">
-          <img src="assets/rallywise-mark.svg" alt="" width="88" height="48" style="display:block;width:88px;height:auto;">
-          <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
-            <div style="font:600 30px/1.2 var(--font-sans);">{{ tx.obWelcomeTitle }}</div>
-            <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">{{ tx.obWelcomeBody }}</div>
+        <div data-screen-label="Onboarding · Welcome" class="rw-auth">
+          <div class="rw-auth-head">
+            <img class="rw-ob-mark" src="assets/rallywise-mark.svg" alt="" width="88" height="48">
+            <h1 class="rw-title">{{ tx.obWelcomeTitle }}</h1>
+            <p class="rw-hint">{{ tx.obWelcomeBody }}</p>
           </div>
-          <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:340px;text-align:left;">
-            <div role="radiogroup" aria-label="{{ tx.language }}" style="display:flex;flex-direction:column;gap:10px;">
-              <sc-for list="{{ langOptions }}" as="o" hint-placeholder-count="2">
-                <button role="radio" aria-checked="{{ o.on }}" lang="{{ o.lang }}" onClick="{{ o.select }}" style="height:56px;border-radius:99px;background:var(--surface-primary);border:1.5px solid {{ o.border }};color:var(--text-primary);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 22px;cursor:pointer;" style-active="transform:scale(.98);">
-                  <span>{{ o.label }}</span>
-                  <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:var(--control-outline-width) solid {{ o.dotBorder }};color:var(--control-selected-fg);">
-                    <sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 14 }}" hint-size="14px,14px"></x-import></sc-if>
-                  </span>
-                </button>
-              </sc-for>
-            </div>
+          <div class="rw-surface rw-group" role="radiogroup" aria-label="{{ tx.language }}">
+            <sc-for list="{{ langOptions }}" as="o" hint-placeholder-count="2">
+              <button type="button" class="rw-group-row" role="radio" aria-checked="{{ o.on }}" lang="{{ o.lang }}" onClick="{{ o.select }}">
+                <span class="rw-group-row-text"><span class="rw-group-row-label">{{ o.label }}</span></span>
+                <sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}"><span class="rw-group-row-end is-selected"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 20 }}" hint-size="20px,20px"></x-import></span></sc-if>
+              </button>
+            </sc-for>
           </div>
         </div>
       </sc-if>
 
       <sc-if value="{{ obProfile }}" hint-placeholder-val="{{ false }}">
-        <div data-screen-label="Onboarding · Profile" style="display:flex;flex-direction:column;gap:28px;">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="{{ tx.back }}" onClick="{{ obBack }}" hint-size="48px,48px"></x-import>
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <div style="font:600 30px/1.25 var(--font-sans);">{{ tx.obProfileTitle }}</div>
-            <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">{{ tx.obProfileBody }}</div>
+        <div data-screen-label="Onboarding · Profile" class="rw-page">
+          <div class="rw-appbar-title is-centered">
+            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ArrowLeft" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.back }}" onClick="{{ obBack }}" hint-size="44px,44px"></x-import>
           </div>
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <div style="font:500 15px/1 var(--font-sans);">{{ tx.name }}</div>
-            <div class="search-field-outline" style="height:56px;border-radius:99px;background:var(--input-field-bg);display:flex;align-items:center;gap:10px;padding:0 20px 0 22px;"><input type="text" value="{{ obName }}" onChange="{{ onObName }}" placeholder="{{ tx.yourName }}" autocomplete="name" style="flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text-primary);font:400 16px/1 var(--font-sans);"></div>
+          <div class="rw-auth-head">
+            <h1 class="rw-title">{{ tx.obProfileTitle }}</h1>
+            <p class="rw-hint">{{ tx.obProfileBody }}</p>
           </div>
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <div style="font:500 15px/1 var(--font-sans);">{{ tx.skillLevel }}</div>
-            <div role="radiogroup" aria-label="{{ tx.skillLevel }}" style="display:flex;flex-direction:column;gap:10px;">
-              <sc-for list="{{ obLevels }}" as="o" hint-placeholder-count="4">
-                <button role="radio" aria-checked="{{ o.on }}" onClick="{{ o.select }}" style="height:56px;border-radius:99px;background:var(--surface-primary);border:1.5px solid {{ o.border }};color:var(--text-primary);font:500 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 22px;cursor:pointer;" style-active="transform:scale(.98);">
-                  <span>{{ o.label }}</span>
-                  <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background: {{ o.dotBg }};border:var(--control-outline-width) solid {{ o.dotBorder }};color:var(--control-selected-fg);">
-                    <sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 14 }}" hint-size="14px,14px"></x-import></sc-if>
-                  </span>
-                </button>
-              </sc-for>
+          <div class="rw-input-list">
+            <div class="rw-input-field">
+              <label class="rw-surface rw-input-row">
+                <span class="rw-input-row-text"><span class="rw-input-row-label">{{ tx.name }}</span><input class="rw-input-row-input" type="text" value="{{ obName }}" onChange="{{ onObName }}" placeholder="{{ tx.yourName }}" autocomplete="name"></span>
+              </label>
+            </div>
+            <div class="rw-input-field">
+              <button type="button" class="rw-surface rw-input-row" aria-haspopup="listbox" aria-expanded="{{ obLevelOpen }}" onClick="{{ obToggleLevel }}">
+                <span class="rw-input-row-text"><span class="rw-input-row-label">{{ tx.skillLevel }}</span><span class="rw-input-row-value {{ obLevelCls }}">{{ obLevelLabel }}</span></span>
+                <span class="rw-input-row-end"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronDown" size="{{ 18 }}" hint-size="18px,18px"></x-import></span>
+              </button>
+              <sc-if value="{{ obLevelOpen }}" hint-placeholder-val="{{ false }}">
+                <div class="rw-select-catch" onClick="{{ obToggleLevel }}"></div>
+                <div class="rw-menu rw-select-menu" role="listbox" aria-label="{{ tx.skillLevel }}">
+                  <sc-for list="{{ obLevels }}" as="o" hint-placeholder-count="4">
+                    <button type="button" role="option" aria-selected="{{ o.on }}" class="rw-menu-item rw-select-option" onClick="{{ o.select }}"><span>{{ o.label }}</span><sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 18 }}" hint-size="18px,18px"></x-import></sc-if></button>
+                  </sc-for>
+                </div>
+              </sc-if>
             </div>
           </div>
         </div>
       </sc-if>
 
       <sc-if value="{{ obReady }}" hint-placeholder-val="{{ false }}">
-        <div data-screen-label="Onboarding · Ready" style="min-height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:28px;text-align:center;padding:0 12px 100px;">
-          <div style="width:64px;height:64px;border-radius:50%;background:var(--surface-primary);color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 24 }}" hint-size="24px,24px"></x-import></div>
-          <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
-            <div style="font:600 30px/1.2 var(--font-sans);">{{ obReadyTitle }}</div>
-            <div style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);text-wrap:pretty;">{{ tx.obReadyBody }}</div>
+        <div data-screen-label="Onboarding · Ready" class="rw-auth is-centered">
+          <div class="rw-auth-head">
+            <div class="rw-auth-art"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Illustration" name="success" size="{{ 160 }}" hint-size="160px,160px"></x-import></div>
+            <h1 class="rw-title">{{ obReadyTitle }}</h1>
+            <p class="rw-hint">{{ tx.obReadyBody }}</p>
           </div>
         </div>
       </sc-if>
@@ -1718,12 +1722,12 @@ button:disabled{cursor:default !important;}
     </sc-if>
   </sc-if>
 
-  <!-- Onboarding footer -->
+  <!-- Onboarding footer: Primary button; on Ready a second full-width button on tile fill (the auth social-button style). -->
   <sc-if value="{{ isOnboarding }}" hint-placeholder-val="{{ false }}">
-    <div style="position:absolute;left:0;right:0;bottom:0;padding:14px 20px 34px;background:var(--bg-primary);display:flex;flex-direction:column;gap:12px;">
-      <button onClick="{{ obNext }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;background: {{ obCtaBg }};color: {{ obCtaFg }};" style-active="transform:scale(.97);">{{ obCtaLabel }}</button>
+    <div class="rw-btn-stack" style="position:absolute;left:0;right:0;bottom:0;padding:14px var(--rw-appbar-inset) 34px;">
+      <button type="button" class="rw-btn rw-btn-primary" onClick="{{ obNext }}" disabled="{{ obCantGo }}">{{ obCtaLabel }}</button>
       <sc-if value="{{ obReady }}" hint-placeholder-val="{{ false }}">
-        <button onClick="{{ obToMatches }}" style="height:60px;border:none;border-radius:999px;font:600 17px/1 var(--font-sans);cursor:pointer;background:var(--surface-primary);color:var(--text-primary);" style-active="transform:scale(.97);">{{ tx.goToMatches }}</button>
+        <button type="button" class="rw-btn rw-btn-social" onClick="{{ obToMatches }}">{{ tx.goToMatches }}</button>
       </sc-if>
     </div>
   </sc-if>
@@ -3515,7 +3519,7 @@ class Component extends DCLogic {
     const exists = s.players.some(p => p.name.toLowerCase() === q);
     const v = {
       scrollRef: this.scrollRef, onScroll: this.onScroll, overall, greeting: this.greeting(all),
-      scrollCls: ['matches', 'insights', 'focus', 'detail', 'voice', 'review', 'players', 'player', 'profile', 'settings', 'account', 'password', 'language', 'notifications', 'privacy', 'login', 'signup', 'forgot', 'resetSent'].includes(s.screen)
+      scrollCls: ['matches', 'insights', 'focus', 'detail', 'voice', 'review', 'players', 'player', 'profile', 'settings', 'account', 'password', 'language', 'notifications', 'privacy', 'login', 'signup', 'forgot', 'resetSent', 'onboarding'].includes(s.screen)
         ? 'rw-scroll is-v2' + (['detail', 'focusDetail', 'player', 'profile', 'settings', 'account', 'password', 'language', 'notifications', 'privacy'].includes(s.screen) ? ' is-detail' : '') : 'rw-scroll',
       isMatches: s.screen === 'matches', isInsights: s.screen === 'insights', isLog: s.screen === 'log', isVoice: s.screen === 'voice' && !!s.voice, isReview: s.screen === 'review' && !!s.log, voiceRef: this.voiceRef,
       isDetail: s.screen === 'detail', isPlayers: s.screen === 'players', isPlayer: s.screen === 'player',
@@ -3848,15 +3852,13 @@ class Component extends DCLogic {
       const finish = (exit, then) => { this.track('onboarding_completed', { level: ob.level, exit }); const extra = then && then(); this.setState(x => ({ screen: 'matches', back: [], ob: this.newOb(), onboarded: true, prefs: { ...x.prefs, lang: this.lang() }, players: x.players.map(p => p.id === 'me' ? { ...p, name: x.ob.name.trim(), level: x.ob.level } : p), ...extra })); };
       v.obWelcome = st === 1; v.obProfile = st === 2; v.obReady = st === 3;
       v.obName = ob.name; v.onObName = e => setOb({ name: e.target.value });
-      v.obBack = () => setOb({ step: 1 });
-      v.obLevels = ['Beginner', 'Intermediate', 'Advanced', 'Competitive'].map(label => {
-        const on = ob.level === label;
-        return { label: this.t('level_' + label), on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent', dotBg: on ? 'var(--control-selected-bg)' : 'transparent', dotBorder: on ? 'var(--control-selected-bg)' : 'var(--control-outline)', select: () => setOb({ level: label }) };
-      });
+      v.obBack = () => setOb({ step: 1, levelOpen: false });
+      v.obLevelOpen = !!ob.levelOpen; v.obToggleLevel = () => setOb({ levelOpen: !ob.levelOpen });
+      v.obLevelLabel = ob.level ? this.t('level_' + ob.level) : this.t('chooseLevel'); v.obLevelCls = ob.level ? '' : 'is-muted';
+      v.obLevels = ['Beginner', 'Intermediate', 'Advanced', 'Competitive'].map(label => ({ label: this.t('level_' + label), on: ob.level === label, select: () => setOb({ level: label, levelOpen: false }) }));
       v.obReadyTitle = this.t('obReadyTitle').replace('{name}', ob.name.trim().split(/\s+/)[0]);
-      v.obCtaLabel = this.t(['getStarted', 'continue', 'logFirstMatch'][st - 1]);
-      v.obCtaBg = ok ? A : 'var(--surface-muted)'; v.obCtaFg = ok ? 'var(--action-on-primary)' : 'var(--text-tertiary)';
-      v.obNext = () => { if (!ok) return; st < 3 ? setOb({ step: st + 1 }) : finish('log_first_match', () => ({ screen: 'voice', voice: { ...this.newVoice(), startedAt: this.logStart('onboarding').startedAt }, log: null })); };
+      v.obCtaLabel = this.t(['getStarted', 'continue', 'logFirstMatch'][st - 1]); v.obCantGo = !ok;
+      v.obNext = () => { if (!ok) return; st < 3 ? setOb({ step: st + 1, levelOpen: false }) : finish('log_first_match', () => ({ screen: 'voice', voice: { ...this.newVoice(), startedAt: this.logStart('onboarding').startedAt }, log: null })); };
       v.obToMatches = () => finish('skip');
     }
 
