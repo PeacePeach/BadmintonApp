@@ -539,6 +539,7 @@ const smashContextName = (concepts, lang) => {
 };
 // Advice is note-specific only when a concrete context recurs in two separate skill clauses.
 const basisOf = (notes, tag) => {
+  if (tag !== 'Smash') return notes.filter(specificNote).length >= 2 ? 'notes' : 'general';
   const seen = new Map();
   for (const note of notes) {
     const kinds = new Set(skillClauses([note], tag).flatMap(conceptsIn));
