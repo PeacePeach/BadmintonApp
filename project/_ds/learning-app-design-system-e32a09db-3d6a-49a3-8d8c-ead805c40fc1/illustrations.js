@@ -120,9 +120,10 @@
 
   // FRAME (Han's reference): the backdrop circle masks each drawing below its middle, so most drawings are scaled up
   // [scale, x, y: the drawing point put on the circle's centre] until their base runs past the rim and is cut by its arc.
+  // The target (no-focus) stays whole and centred (Han, 2026-10-26).
   const FRAME = {
-    'no-matches': [1.3, 82, 67], 'no-players': [1.15, 80, 86], 'no-insights': [1.15, 80, 68], 'no-results': [1.3, 80, 78],
-    'error': [0.9, 88, 74], 'success': [1.35, 80, 68], 'no-focus': [1.3, 80, 66], 'connection-lost': [1.0, 80, 88],
+    'no-matches': [1.3, 82, 67], 'no-players': [0.95, 80, 72], 'no-insights': [1.15, 80, 68], 'no-results': [1.3, 80, 78],
+    'error': [0.9, 88, 74], 'success': [1.35, 80, 68], 'no-focus': [1.0, 81, 79], 'connection-lost': [1.0, 80, 88],
   };
   const illusClass = (name, compact) => 'rw-illus' + (compact ? ' is-compact' : '');
 
