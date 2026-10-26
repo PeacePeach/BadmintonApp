@@ -11,12 +11,17 @@
 <meta name="theme-color" content="#1b1a1d">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
+<!-- Every script and font ships with the app (assets/vendor, assets/fonts), so the packaged iOS app opens without the
+     network. support.js uses window.React/ReactDOM when they are already loaded, instead of fetching them from unpkg. -->
+<script src="assets/vendor/react.production.min.js"></script>
+<script src="assets/vendor/react-dom.production.min.js"></script>
 <script src="./support.js"></script>
 </head>
 <body>
 <x-dc>
 <helmet>
 <link rel="stylesheet" href="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/fonts.css">
+<link rel="stylesheet" href="assets/fonts/noto-sans-sc/noto-sans-sc.css">
 <link rel="stylesheet" href="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/colors.css">
 <link rel="stylesheet" href="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/typography.css">
 <link rel="stylesheet" href="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/spacing.css">
@@ -24,11 +29,11 @@
 <link rel="stylesheet" href="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/tokens/v2.css">
 <link rel="stylesheet" href="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/components-v2.css">
 <link rel="stylesheet" href="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/styles.css">
-<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<script src="assets/vendor/lucide.min.js"></script>
 <script src="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/_ds_bundle.js"></script>
 <script src="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/illustrations.js"></script>
 <script src="_ds/learning-app-design-system-e32a09db-3d6a-49a3-8d8c-ead805c40fc1/key-chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.3/dist/umd/supabase.js"></script>
+<script src="assets/vendor/supabase.js"></script>
 <script src="rallywise-config.js"></script>
 <script src="rallywise-backend.js"></script>
 <script src="rallywise-analytics.js"></script>
@@ -116,10 +121,11 @@ button:disabled{cursor:default !important;}
 .toast.toast-out{animation:toast-out var(--rw-motion-sheet-out) var(--rw-ease-exit) both;}
 @media (prefers-reduced-motion:reduce){.toast,.toast.toast-out{animation:none;}}
 /* Simplified Chinese: Poppins stays first, so English, numbers, scores, dates and initials keep Poppins and only
-   Chinese glyphs use Noto Sans SC (loaded on demand, see ensureNoto). Also applies to a single element marked
-   lang="zh-Hans", such as the 简体中文 option shown in English. */
-:root[lang="zh-Hans"],[lang="zh-Hans"]{--font-sans:"Poppins","Noto Sans SC",sans-serif;}
-:root[lang="zh-Hans"] body{font-family:"Poppins","Noto Sans SC",sans-serif;}
+   Chinese glyphs use Noto Sans SC. Both are bundled in assets/fonts (no network); the browser fetches only the
+   Noto slices a screen uses. PingFang SC (iOS/macOS system) is the fallback if a slice can't be read. Also applies
+   to a single element marked lang="zh-Hans", such as the 简体中文 option shown in English. */
+:root[lang="zh-Hans"],[lang="zh-Hans"]{--font-sans:"Poppins","Noto Sans SC","PingFang SC","Hiragino Sans GB",sans-serif;}
+:root[lang="zh-Hans"] body{font-family:"Poppins","Noto Sans SC","PingFang SC","Hiragino Sans GB",sans-serif;}
 /* In Chinese, wide tracking reads as gaps between characters and uppercase does nothing, so tracked labels (.tl)
    tighten; text set below 12px (.zh12) comes up to 12px, where Noto keeps its stroke detail. English is unchanged. */
 :root[lang="zh-Hans"] .tl{letter-spacing:.04em !important;text-transform:none !important;}
@@ -2035,8 +2041,11 @@ button:disabled{cursor:default !important;}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0259e3&quot;,&quot;options&quot;:[&quot;#0259e3&quot;,&quot;#fee7a6&quot;,&quot;#cfdecb&quot;,&quot;#c5afe4&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;defaultFormat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;21&quot;,&quot;options&quot;:[&quot;21&quot;,&quot;15&quot;,&quot;11&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Splash&quot;,&quot;options&quot;:[&quot;Splash&quot;,&quot;Log In&quot;,&quot;Sign Up&quot;,&quot;Forgot Password&quot;,&quot;Check Email&quot;,&quot;Onboarding&quot;,&quot;Matches&quot;,&quot;Match Detail&quot;,&quot;Insights&quot;,&quot;Log Match&quot;,&quot;Log Match (Voice)&quot;,&quot;Review Match (Voice)&quot;,&quot;Settings&quot;,&quot;Focus&quot;,&quot;Focus Detail&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;authError&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Invalid email&quot;,&quot;Incorrect email or password&quot;,&quot;Email already exists&quot;,&quot;Password too short&quot;,&quot;Network error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Normal&quot;,&quot;options&quot;:[&quot;Normal&quot;,&quot;Loading&quot;,&quot;Empty&quot;,&quot;Offline&quot;,&quot;Error&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;saveMatch&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Succeeds&quot;,&quot;options&quot;:[&quot;Succeeds&quot;,&quot;Fails&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;voiceMock&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Complete&quot;,&quot;options&quot;:[&quot;Complete&quot;,&quot;Missing players&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;},&quot;toastPreview&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;None&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Success&quot;,&quot;Error&quot;,&quot;Info&quot;,&quot;Warning&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
 // Localization. The app language is prefs.lang ('en' | 'zh', saved with the account's other prefs), with a copy
-// on this device under LANG_KEY so the right language shows before the account loads. With neither, the device
-// language decides: zh* means Simplified Chinese, anything else English. t(key, vars) fills {name}-style
+// on this device under LANG_KEY so the right language shows before the account loads. With neither (a first-time
+// user), the app is in English whatever the device language (Rallywise launches in North America); the user picks
+// English or 简体中文 on the onboarding Welcome step or in Settings. Logging out keeps this device's copy, so Log In
+// stays in the last language. Accounts saved before English-by-default keep what they saw (legacyLang, enter()).
+// t(key, vars) fills {name}-style
 // placeholders and falls back to English for any key without a translation. Only product copy lives here: names,
 // scores and anything the user typed are shown as entered, and stored values (match types, tags, skill levels)
 // stay in English; only their labels are translated.
@@ -2069,7 +2078,6 @@ const I18N = {
     shareUsage: 'Share Usage Data', shareUsageSub: 'Anonymous usage data that helps improve Rallywise',
     matchReminders: 'Match Reminders', matchRemindersSub: 'A nudge to log your match after you play',
     insightUpdates: 'Insight Updates', insightUpdatesSub: 'When new insights are ready',
-    fontFailed: "Chinese font couldn't load. Check your connection.",
     // Log in, sign up, password reset
     welcomeBack: 'Welcome Back', loginBody: 'Log in to keep tracking your matches.', email: 'Email', password: 'Password',
     forgotPw: 'Forgot Password?', logIn: 'Log In', or: 'Or', withApple: 'Continue with Apple', withGoogle: 'Continue with Google',
@@ -2241,7 +2249,6 @@ const I18N = {
     shareUsage: '分享使用数据', shareUsageSub: '匿名使用数据，帮助我们改进 Rallywise',
     matchReminders: '比赛提醒', matchRemindersSub: '打完球后提醒你记录比赛',
     insightUpdates: '洞察更新', insightUpdatesSub: '有新洞察时通知你',
-    fontFailed: '中文字体未能加载，请检查网络连接。',
     welcomeBack: '欢迎回来', loginBody: '登录后继续记录你的比赛。', email: '邮箱', password: '密码',
     forgotPw: '忘记密码？', logIn: '登录', or: '或', withApple: '通过 Apple 继续', withGoogle: '通过 Google 继续',
     noAccount: '还没有账号？', signUp: '注册', createAccount: '创建账号', signupBody: '开始积累你的比赛记录。',
@@ -2387,13 +2394,19 @@ const I18N = {
     scoreBadN: '第{g}局比分不符合{n}分制，请修改比分或赛制。', listSep: '、'
   }
 };
-function deviceLang() {
+function savedDeviceLang() {
   try {
     const saved = localStorage.getItem(LANG_KEY);
     if (saved === 'en' || saved === 'zh') return saved;
   } catch (e) {}
+  return null;
+}
+function deviceLang() { return savedDeviceLang() || 'en'; }
+// What an onboarded account with no saved language was shown before English-by-default: this device's copy, else
+// the device language.
+function legacyLang() {
   const sys = (navigator.languages && navigator.languages[0]) || navigator.language || '';
-  return /^zh/i.test(sys) ? 'zh' : 'en';
+  return savedDeviceLang() || (/^zh/i.test(sys) ? 'zh' : 'en');
 }
 
 // Waveform bar heights (px) and opacities from Figma 207:7730 (Frame 49), left to right.
@@ -2525,22 +2538,10 @@ class Component extends DCLogic {
   }
   // Insights made before languages existed carry no lang; they are English.
   insightLang(i) { return (i && i.lang) || 'en'; }
-  // Sets the page language (which switches the font stack, see the :root[lang] CSS) and loads Noto Sans SC when
-  // Chinese is on screen: in Chinese, or wherever the 简体中文 option is shown.
+  // Sets the page language, which switches the font stack (see the :root[lang] CSS; the fonts are bundled).
   applyLang() {
-    const l = this.lang(), s = this.state, html = document.documentElement, want = l === 'zh' ? 'zh-Hans' : 'en';
+    const html = document.documentElement, want = this.lang() === 'zh' ? 'zh-Hans' : 'en';
     if (html.lang !== want) html.lang = want;
-    if (l === 'zh' || s.screen === 'language' || (s.screen === 'onboarding' && s.ob && s.ob.step === 1)) this.ensureNoto();
-  }
-  ensureNoto() {
-    if (this._noto) return;
-    const link = this._noto = document.createElement('link');
-    link.rel = 'stylesheet'; link.href = 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&display=swap';
-    // No silent fallback: if Noto Sans SC can't load, say so.
-    const failed = () => { console.error('[rallywise] Noto Sans SC failed to load'); if (this.lang() === 'zh') this.flash(this.t('fontFailed'), 'error'); };
-    link.onload = () => document.fonts.load('400 16px "Noto Sans SC"', '比赛洞察').then(f => { if (!f.length) failed(); }).catch(failed);
-    link.onerror = failed;
-    document.head.appendChild(link);
   }
   // A "Data state" preview (anything but Normal) never saves.
   previewData() { const d = (this.props || {}).dataState; return !!(d && d !== 'Normal'); }
@@ -2719,6 +2720,8 @@ class Component extends DCLogic {
     this._saved = this.dataState({ ...a, focuses: a.focuses || [], focusPeriods: a.focusPeriods || [] }); this.sync = sync; this.user = { ...user, anonId }; this._retryUser = null;
     const savedLang = a.prefs && a.prefs.lang;
     if (savedLang === 'en' || savedLang === 'zh') { this._deviceLang = savedLang; try { localStorage.setItem(LANG_KEY, savedLang); } catch (e) {} }
+    // An account onboarded before its language was saved keeps the language it was using, now saved with it.
+    else if (a.onboarded) this.setLang(legacyLang());
     // Grow: this device's cached insight first; else the account's saved one (another device), with the signature of
     // the data it was made for. Either is only shown if its engine is current; refreshGrow decides if it is up to date.
     this._growVerified = {};

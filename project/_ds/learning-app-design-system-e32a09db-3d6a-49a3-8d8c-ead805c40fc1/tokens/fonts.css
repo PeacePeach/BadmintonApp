@@ -1,2 +1,3 @@
-/* Poppins — matched by eye from the reference mock; loaded from Google Fonts (no binaries supplied). */
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+/* Poppins — matched by eye from the reference mock. Bundled from Google Fonts (scripts/vendor-assets.sh) so the
+   iOS app never needs the network for type. */
+@import url("../../../assets/fonts/poppins/poppins.css");
