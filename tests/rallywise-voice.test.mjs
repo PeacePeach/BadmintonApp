@@ -191,6 +191,40 @@ test('scoring: voice keeps a heard score that fits another format, flagged until
   assert.deepEqual(V.savedGames(d11.games, null, 11), [[11, 9], [7, 11]]);
 });
 
+test('scoring: voice infers the format from finished heard scores, asks when they leave it open (Han 2026-10-26 P0)', () => {
+  const R = (...gs) => { const r = V.mockParse('x', 'zh'); return Object.assign(r, { match_type: 'singles', game_count: gs.length,
+    games: gs.map(([a, b, cut], i) => ({ number: i + 1, result: cut ? null : a > b ? 'win' : 'loss', my_score: a, their_score: b, interrupted: !!cut })) }); };
+  const F = (text, r) => { const o = V.formatOf(r, text); return [o.format, o.how, o.ask]; };
+  // Said out loud wins, in either language, even over the scores.
+  assert.deepEqual(F('15分制，第一局15比7赢了', R([15, 7])), [15, 'said', []]);
+  assert.deepEqual(F('11-point games, won 11-5', R([11, 5])), [11, 'said', []]);
+  assert.deepEqual(F('21分制 15比7', R([15, 7])), [21, 'said', []]);
+  // A finished game only 15 holds: 15, no error.
+  for (const t of ['第一局15比7赢了', '我15比7赢了', 'I won 15-7', 'first game 15-7']) assert.deepEqual(F(t, R([15, 7])), [15, 'scores', []], t);
+  assert.deepEqual(F('15比7，15比10', R([15, 7], [15, 10])), [15, 'scores', []]);
+  assert.deepEqual(F('赢了11比5', R([11, 5])), [11, 'scores', []]);
+  // Deuce and extended scores keep their format: 17-15 and 21-20 are 15-point, 13-11 is 11-point, 22-20 / 30-29 are 21.
+  assert.deepEqual(F('赢了17比15', R([17, 15])), [15, 'scores', []]);
+  assert.deepEqual(F('赢了21比20', R([21, 20])), [15, 'scores', []]);
+  assert.deepEqual(F('won 13-11', R([13, 11])), [11, 'scores', []]);
+  assert.deepEqual(F('won 22-20 and 30-29', R([22, 20], [30, 29])), [21, 'default', []]);
+  // 15-13 fits 15 and an 11-point deuce: it ends on 15's target, so 15.
+  assert.deepEqual(F('赢了15比13', R([15, 13])), [15, 'scores', []]);
+  // "15比7" alone, or said as a lead, could be a 21-point game in progress: asked, 15 offered first, then 21.
+  assert.deepEqual(F('15比7', R([15, 7])), [15, 'ask', [15, 21]]);
+  assert.deepEqual(F('我们15比7领先', R([15, 7])), [15, 'ask', [15, 21]]);
+  // 21-point scores, no scores, or an interrupted game: the 21 default as before.
+  assert.deepEqual(F('赢了21比15', R([21, 15])), [21, 'default', []]);
+  assert.deepEqual(F('赢了两局', R()), [21, 'default', []]);
+  assert.deepEqual(F('15比7的时候没打完', R([15, 7, 1])), [21, 'default', []]);
+  // Scores no single format holds (21-15 and 15-7): 21 stays, the existing "Check scores" flag explains.
+  assert.deepEqual(F('赢了21比15，15比7', R([21, 15], [15, 7])), [21, 'default', []]);
+  // The inferred format gives a clean draft: scores exactly as heard, nothing flagged, saved as heard.
+  const r = R([15, 7], [12, 15]), o = V.formatOf(r, '第一局15比7赢了，第二局12比15输了'), d = V.toDraft(r, players, o.format);
+  assert.equal(o.format, 15); assert.deepEqual(d.games, [{ w: 'us', l: 7 }, { w: 'them', l: 12 }]); assert.equal(d.flags.result, null);
+  assert.deepEqual(V.badScores(d.games, 15), []); assert.deepEqual(V.savedGames(d.games, null, 15), [[15, 7], [12, 15]]);
+});
+
 test('scoring: Edit restores saved scores exactly under their format', () => {
   assert.deepEqual(V.fromSaved([[11, 9], [12, 14], { r: 'W' }], 11).games, [{ w: 'us', l: 9 }, { w: 'them', l: 12 }, { w: 'us', l: null }]);
   // A historical score that its format would show differently keeps its points.

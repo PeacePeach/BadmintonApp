@@ -78,12 +78,84 @@
     return best;
   }
 
+
+  // English given names as Chinese speech recognition writes them (Han, 2026-10-26: 迈克 is the saved "Mike").
+  // Each listed form is a standard Mainland transliteration, so it counts like a standard reading (strong).
+  const TRANS = {
+    mike: '迈克 麦克 迈可 麦可', michael: '迈克尔 麦克尔 迈可尔 米高', tom: '汤姆', tommy: '汤米', thomas: '托马斯', jack: '杰克', john: '约翰',
+    david: '大卫 戴维', chris: '克里斯', christopher: '克里斯托弗', james: '詹姆斯 占士', peter: '彼得', paul: '保罗', mark: '马克',
+    kevin: '凯文', jason: '杰森 杰生', eric: '埃里克 艾瑞克 艾力克 艾里克', alex: '亚历克斯 艾利克斯 阿历克斯 艾力克斯', alexander: '亚历山大',
+    andy: '安迪', andrew: '安德鲁', tony: '托尼 汤尼', anthony: '安东尼', ben: '本', benjamin: '本杰明', sam: '萨姆 山姆 森姆', samuel: '塞缪尔',
+    daniel: '丹尼尔', danny: '丹尼', dan: '丹', ryan: '瑞恩 莱恩 雷恩', leo: '里奥 利奥 李奥', max: '马克斯 麦克斯', nick: '尼克', nicholas: '尼古拉斯',
+    steve: '史蒂夫', steven: '史蒂文 史蒂芬', stephen: '史蒂芬 史蒂文', william: '威廉', will: '威尔', bill: '比尔', bob: '鲍勃 鲍伯',
+    robert: '罗伯特', richard: '理查德 理查', henry: '亨利', george: '乔治', frank: '弗兰克', joe: '乔', joseph: '约瑟夫', justin: '贾斯汀',
+    brian: '布莱恩 布赖恩', adam: '亚当', matt: '马特', matthew: '马修', luke: '卢克', lucas: '卢卡斯', jim: '吉姆', jimmy: '吉米',
+    eddie: '艾迪 埃迪', edward: '爱德华', alan: '艾伦', allen: '艾伦', harry: '哈利 哈里', jerry: '杰瑞 杰里', terry: '特里', gary: '加里',
+    larry: '拉里', leon: '里昂 莱昂', dennis: '丹尼斯', sean: '肖恩', shawn: '肖恩', ian: '伊恩', neil: '尼尔', carl: '卡尔', karl: '卡尔',
+    simon: '西蒙', martin: '马丁', louis: '路易斯', philip: '菲利普', ray: '雷', roy: '罗伊', ted: '泰德', tim: '蒂姆', ivan: '伊万',
+    ken: '肯', kenny: '肯尼', vincent: '文森特', victor: '维克多', oscar: '奥斯卡', marcus: '马库斯', ravi: '拉维', ali: '阿里', jay: '杰',
+    amy: '艾米 埃米', anna: '安娜', emma: '艾玛 埃玛', lucy: '露西', lily: '莉莉 丽丽', mary: '玛丽', linda: '琳达', lisa: '丽莎 莉莎',
+    sarah: '莎拉 萨拉', grace: '格蕾丝 格雷丝', jenny: '珍妮', jessica: '杰西卡', kate: '凯特', helen: '海伦', nancy: '南希', sophia: '索菲亚',
+    sophie: '索菲', emily: '艾米丽 艾米莉', alice: '爱丽丝 艾丽斯', cathy: '凯茜 凯西', vivian: '薇薇安', jane: '简', rose: '罗丝 露丝', olivia: '奥利维亚'
+  };
+  // Short and long forms of one name (Mike / Michael): the same person is possible, never certain, so only weak.
+  const ALIAS = ['mike michael', 'tom tommy thomas', 'chris christopher', 'alex alexander', 'sam samuel', 'ben benjamin', 'nick nicholas',
+    'will bill william', 'bob robert', 'jim jimmy james', 'matt matthew', 'dan danny daniel', 'steve steven stephen', 'tony anthony',
+    'andy andrew', 'joe joseph', 'ed eddie edward', 'ken kenny'].map(s => s.split(' '));
+  let trans = null;
+  const transOf = c => { if (!trans) { trans = {}; for (const k in TRANS) for (const f of TRANS[k].split(' ')) (trans[f] = trans[f] || []).push(k); } return trans[c] || []; };
+  const aliases = w => ALIAS.filter(a => a.includes(w)).flat().filter(x => x !== w);
+  // A Chinese spelling of an English name, as recognized: 迈克, 小迈克, 迈克哥 (address forms stripped only when the
+  // remainder is still a known spelling, so 阿里 stays Ali).
+  const transNames = h => { const t = h.replace(/[\s·・.]/g, ''); return [...new Set(transOf(t).concat(transOf(strip(t))))]; };
+  // Rough sound skeleton for an unlisted transliteration: consonants by place of articulation, so 汤姆 and "Tom" are
+  // both t-m. Only ever a weak candidate.
+  const CLASS = { b: 'p', p: 'p', d: 't', t: 't', g: 'k', k: 'k', j: 'j', q: 'j', zh: 'j', ch: 'j', z: 'j', c: 'j', x: 's', s: 's', sh: 's',
+    f: 'f', h: 'h', l: 'l', r: 'l', m: 'm', n: 'n', w: 'w', y: '' };
+  function hanSkeletons(chars) {
+    load();
+    let out = [''];
+    for (const c of chars) {
+      const rs = read[c]; if (!rs) return [];
+      const opts = new Set();
+      for (const r of rs) {
+        if (r === 'er') { opts.add('l'); opts.add(''); continue; }
+        const ini = (r.match(/^(zh|ch|sh|[bpmfdtnlgkhjqxrzcsyw])/) || [''])[0], base = CLASS[ini] || '';
+        opts.add(base); if (/ng?$/.test(r)) opts.add(base + 'n');
+      }
+      const next = []; for (const a of out) for (const o of opts) if (next.length < 64) next.push(a + o);
+      out = next;
+    }
+    return out.map(s => s.replace(/(.)\1+/g, '$1')).filter(s => s.length >= 2);
+  }
+  function latinSkeletons(word) {
+    let w = word.replace(/gh/g, '').replace(/ph/g, 'f').replace(/ck/g, 'k').replace(/qu/g, 'kw').replace(/x/g, 'ks').replace(/th/g, 't')
+      .replace(/sh/g, 's').replace(/ch/g, 'j').replace(/c(?=[eiy])/g, 's').replace(/c/g, 'k').replace(/ng/g, 'n').replace(/v/g, 'w')
+      .replace(/r(?![aeiouy])/g, '').replace(/(?!^)h/g, '').replace(/(?!^)y/g, '');
+    const k = [...w].filter(c => !/[aeiou]/.test(c)).map(c => c === 'y' ? '' : ({ b: 'p', d: 't', g: 'k', z: 's', r: 'l' })[c] || c).join('').replace(/(.)\1+/g, '$1');
+    return [k, k.slice(0, -1)].filter(s => s.length >= 2);
+  }
+  // Heard Chinese against a saved English name (or the other way round): 'strong' for a listed spelling of the whole
+  // name or its first word (迈克 -> "Mike", "Mike Chen"), 'weak' for a later word, a short/long form (迈克尔 -> "Mike")
+  // or an unlisted spelling that sounds alike. Needs two or more characters for the sound check (one is too loose).
+  function transMatch(han, latin) {
+    const w = words(latin); if (!w.length) return null;
+    const ks = transNames(han);
+    if (ks.includes(w[0]) || ks.includes(w.join(''))) return 'strong';
+    if (ks.some(k => w.slice(1).includes(k) || aliases(k).includes(w[0]))) return 'weak';
+    const t = strip(han);
+    if (t.length < 2 || w[0].length < 3) return null;
+    const hs = hanSkeletons(t), ls = latinSkeletons(w[0]);
+    return hs.some(s => ls.includes(s)) ? 'weak' : null;
+  }
+
   // How well a heard name matches a saved player's name across scripts: 'strong', 'weak' or null.
   // Strong mirrors the same-language rule: the whole name, or the heard name is the saved name's first part
   // (杨 -> "Yang", 王伟 -> "Wang Wei" / "Wei Wang", "Wang" -> 王伟). Anything else that sounds alike is weak: another part
   // of the name (伟 -> "Wang Wei"), a full heard name against a saved family name (王伟 -> "Wang"), a non-standard reading,
   // another romanization (王 -> "Wong"), or a different character with the same sound (阳 -> saved 杨).
-  // Two Latin names never match here: same-script names are the exact rule's job.
+  // English names spelled in Chinese count too (迈克 -> "Mike", transMatch). Two Latin names never match here: same-script
+  // names are the exact rule's job.
   function match(heard, name) {
     const h = (heard || '').trim(), n = (name || '').trim();
     if (!h || !n || (!isHan(h) && !isHan(n))) return null;
@@ -91,7 +163,9 @@
     const H = parts(h), N = parts(n), sameScript = isHan(h) && isHan(n);
     const strong = agree(H.full, N.full) || agree(H.full, N.first);
     if (strong === 'strong' && !sameScript) return 'strong';
-    return strong || agree(H.full, N.other) || agree(H.first, N.full) ? 'weak' : null;
+    const t = sameScript ? null : isHan(h) ? transMatch(h, n) : transMatch(n, h);
+    if (t === 'strong') return 'strong';
+    return strong || t || agree(H.full, N.other) || agree(H.first, N.full) ? 'weak' : null;
   }
 
   const api = { match, readings, isHan };

@@ -57,11 +57,10 @@ test('other romanizations and polyphonic readings are candidates, never auto-con
   assert.equal(N.match('黄', 'Wong'), 'weak');
   assert.equal(N.match('李', 'Lee'), 'weak');
   assert.deepEqual(r1('王', [me, { id: 'w', name: 'Wong' }]), ['ambiguous', null, ['w']]);
-  // A strong match plus a weak one: both shown, the strong one first, nothing picked.
-  assert.deepEqual(r1('王', [me, { id: 'w', name: 'Wong' }, { id: 'wa', name: 'Wang' }]), ['ambiguous', null, ['wa', 'w']]);
+  // A unique strong match outranks weak candidates (Han's rule, ce34d88): 王 is the saved Wang, not Wong.
+  assert.deepEqual(r1('王', [me, { id: 'w', name: 'Wong' }, { id: 'wa', name: 'Wang' }]), ['confirmed', 'wa', []]);
   assert.deepEqual(r1('曾', [me, { id: 'c', name: 'Ceng' }]), ['ambiguous', null, ['c']]);
-  // Western order: Chris Wong may be the 王 the speaker means, so a saved Wang is not picked silently.
-  assert.deepEqual(r1('王', [me, { id: 'wa', name: 'Wang' }, { id: 'cw', name: 'Chris Wong' }]), ['ambiguous', null, ['wa', 'cw']]);
+  assert.deepEqual(r1('王', [me, { id: 'wa', name: 'Wang' }, { id: 'cw', name: 'Chris Wong' }]), ['confirmed', 'wa', []]);
   assert.deepEqual(r1('杨', [me, { id: 'jy', name: 'Jason Yang' }]), ['ambiguous', null, ['jy']]);
 });
 
@@ -124,4 +123,50 @@ test('unclear doubles roles still ask "Who is your partner?" with resolved peopl
   const d = draft('zh', 'doubles', [['杨', 'unknown'], ['王', 'unknown'], ['张伟', 'unknown']]);
   assert.equal(d.pool.length, 3);
   assert.deepEqual(d.pool.map(p => p.id), ['yang', 'wang', 'zw']);
+});
+
+// English names heard in Chinese (Han, 2026-10-26 P0): iOS may write a saved "Mike" as 迈克 or 麦克.
+const intl = [me, { id: 'mike', name: 'Mike' }, { id: 'yang', name: 'Yang' }, { id: 'tom', name: 'Tom Lee' }, { id: 'kevin', name: 'Kevin' }, { id: 'wang', name: 'Wang' }];
+
+test('迈克 / 麦克 resolve to the saved Mike, keeping his id and the heard name', () => {
+  for (const h of ['迈克', '麦克', '迈可', '小迈克', 'Mike', 'mike']) assert.deepEqual(r1(h, intl), ['confirmed', 'mike', []], h);
+  assert.equal(V.resolve('迈克', intl).heard, '迈克');
+  assert.deepEqual(r1('汤姆', intl), ['confirmed', 'tom', []]);
+  assert.deepEqual(r1('凯文', intl), ['confirmed', 'kevin', []]);
+  // The other way round: a player saved in Chinese, heard in English.
+  assert.deepEqual(r1('Mike', [me, { id: 'm', name: '迈克' }]), ['confirmed', 'm', []]);
+});
+
+test('a looser spelling or another form of the name is asked about, never merged', () => {
+  // Michael is maybe Mike: candidate only.
+  assert.deepEqual(r1('迈克尔', intl), ['ambiguous', null, ['mike']]);
+  // 马克 is Mark; a saved Mike only sounds alike.
+  assert.deepEqual(r1('马克', intl), ['ambiguous', null, ['mike']]);
+  // Unlisted spelling that sounds like the saved name.
+  assert.deepEqual(r1('布鲁诺', [me, { id: 'b', name: 'Bruno' }]), ['ambiguous', null, ['b']]);
+  // Two players a spelling fits equally: both asked.
+  assert.deepEqual(r1('迈克', [me, { id: 'm1', name: 'Mike' }, { id: 'm2', name: 'Mike Chen' }]), ['ambiguous', null, ['m1', 'm2']]);
+  // Strong beats weak: Mike is confirmed over Mark's sound-alike.
+  assert.deepEqual(r1('迈克', [me, { id: 'mk', name: 'Mark' }, { id: 'mike', name: 'Mike' }]), ['confirmed', 'mike', []]);
+});
+
+test('names that are not a saved player stay new (no duplicate player, no wrong merge)', () => {
+  assert.deepEqual(r1('大卫', intl), ['new', null, []]);
+  assert.deepEqual(r1('迈克', [me]), ['new', null, []]);
+  assert.deepEqual(r1('刘', intl), ['new', null, []]);
+  assert.deepEqual(r1('杨', intl), ['confirmed', 'yang', []]);
+  // Two different Latin names are never matched by sound.
+  assert.deepEqual(r1('Mick', intl), ['new', null, []]);
+});
+
+test('mixed Chinese / English speech: Mike, Yang and others in one match, EN and ZH', () => {
+  for (const lang of ['en', 'zh']) {
+    const d = draft(lang, 'doubles', [['迈克', 'partner'], ['杨', 'opponent'], ['Kevin', 'opponent']], intl);
+    assert.deepEqual([d.partner, d.opp1, d.opp2], ['mike', 'yang', 'kevin']); assert.equal(d.flags.players, null);
+    const s = draft(lang, 'singles', [['麦克', 'opponent']], intl);
+    assert.equal(s.opp1, 'mike'); assert.equal(s.slots.opp1.heard, '麦克');
+  }
+  // Mike heard twice (迈克 and Mike): placed once, the other is asked about.
+  const t = draft('zh', 'doubles', [['Mike', 'partner'], ['迈克', 'opponent'], ['王', 'opponent']], intl);
+  assert.equal(t.partner, 'mike'); assert.equal(t.opp1, null); assert.deepEqual(t.slots.opp1.cands, ['mike']); assert.equal(t.opp2, 'wang');
 });

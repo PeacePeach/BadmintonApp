@@ -283,6 +283,30 @@
     }
     return found.size === 1 ? [...found][0] : null;
   }
+  // Scoring format for a voice draft (Han 2026-10-26 P0: "15比7" must not raise a 21-point error).
+  // 1. A format said out loud wins (scoringOf). 2. Otherwise the heard final scores decide it when 21 can't hold them,
+  // exactly one format can hold all of them, and the words say the games were finished (a result, "game"/"局", or
+  // several such scores). "15比7" alone could be a 21-point game in progress, so it is asked, as are scores two formats
+  // fit equally (15-13 is a 15-point game or an 11-point deuce; a format whose target a score ends on wins that tie).
+  // 3. Otherwise 21, the default. Scores are never changed here. Returns { format, how: 'said' | 'scores' | 'default' |
+  // 'ask', ask: formats to offer }.
+  const DONE_WORDS = /\b(?:won|win|wins|winning|lost|lose|loses|losing|beat|beaten|game|games|set|sets)\b|赢|输|胜|负|拿下|丢了|局|盘/i;
+  const RUNNING_WORDS = /\b(?:up|down|leading|trailing|ahead|behind|at the time|when it was|stopped|unfinished)\b|领先|落后|追到|追平|的时候|没打完|中断|暂停|还没/i;
+  function formatOf(r, text) {
+    const said = scoringOf(text);
+    if (said) return { format: said, how: 'said', ask: [] };
+    const sc = ((r && r.games) || []).filter(g => !g.interrupted && g.my_score != null && g.their_score != null && g.my_score !== g.their_score)
+      .map(g => [Math.max(g.my_score, g.their_score), Math.min(g.my_score, g.their_score)]);
+    const fit = t => sc.every(([a, b]) => validScore(a, b, t));
+    if (!sc.length || fit(DEFAULT_FORMAT)) return { format: DEFAULT_FORMAT, how: 'default', ask: [] };
+    let cands = FORMATS.filter(t => t !== DEFAULT_FORMAT && fit(t));
+    if (cands.length > 1) { const onTarget = cands.filter(t => sc.some(([a]) => a === t)); if (onTarget.length) cands = onTarget; }
+    if (!cands.length) return { format: DEFAULT_FORMAT, how: 'default', ask: [] };
+    const t = String(text || ''), done = !RUNNING_WORDS.test(t) && (DONE_WORDS.test(t) || sc.length > 1);
+    if (cands.length === 1 && done) return { format: cands[0], how: 'scores', ask: [] };
+    // Undecided: the heard scores' formats first, then 21 (a game still in progress), so the choice is one tap.
+    return { format: cands[0], how: 'ask', ask: cands.concat(DEFAULT_FORMAT) };
+  }
   const MAX_GAMES = 9;
 
   // ---------- Result (Result sheet, Figma 349:3528; Han 2026-10-23) ----------
@@ -410,7 +434,7 @@
 
   const api = { SAMPLES, SCENARIOS, sample, chunks, cues, mockParse, resolve, resolveAll, inferType, lineup, choosePartner, unresolved, slotKeys,
     toDraft, fits, tally, savedGames, gameResult, hasScore, matchOutcome, matchRecord, detailRows, fromSaved, winnerScore, MAX_GAMES,
-    FORMATS, DEFAULT_FORMAT, isFormat, cap, validScore, winnerOf, badScores, reformat, scoringOf, UNKNOWN, isUnknown, unknownId, heardOf, isParticipant, participantId, sidesOf, savedPlayers };
+    FORMATS, DEFAULT_FORMAT, isFormat, cap, validScore, winnerOf, badScores, reformat, scoringOf, formatOf, UNKNOWN, isUnknown, unknownId, heardOf, isParticipant, participantId, sidesOf, savedPlayers };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.RallywiseVoice = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -1716,6 +1716,7 @@ button:disabled{cursor:default !important;}
               </div>
             </sc-for>
             <sc-if value="{{ rs.hasBad }}" hint-placeholder-val="{{ false }}"><p class="rw-field-note is-error" role="alert">{{ rs.badText }}</p></sc-if>
+            <sc-if value="{{ rs.asking }}" hint-placeholder-val="{{ false }}"><p class="rw-field-note" role="status">{{ rs.askText }}</p></sc-if>
           </div>
           <div style="display:flex;justify-content:space-between;padding:0 4px;">
             <span style="display:flex;opacity: {{ rs.removeOp }};pointer-events: {{ rs.removePe }};" aria-disabled="{{ rs.removeOff }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Minus" variant="add" size="{{ 40 }}" iconSize="{{ 18 }}" label="{{ tx.removeGame }}" onClick="{{ rs.remove }}" hint-size="40px,40px"></x-import></span>
@@ -2235,11 +2236,11 @@ const I18N = {
     vErrSetup: 'Reading descriptions isn’t set up yet. Fill in the details yourself.', vErrFailed: 'Couldn’t read your description. Try again, or fill in the details yourself.',
     rvWL: '{w} Win : {l} Loss', notMentioned: 'Not mentioned', noNotes: 'No notes', doneEdit: 'Done',
     flagMissing: 'Missing players', flagNew: 'New player', flagCheck: 'Check players', flagLineup: 'More than one lineup',
-    flagResult: 'Missing result', flagScores: 'Check scores', flagNotes: 'Check notes', flagConflict: 'Check result',
+    flagResult: 'Missing result', flagScores: 'Check scores', flagFormat: 'Choose scoring', flagNotes: 'Check notes', flagConflict: 'Check result',
     rvWLOpen: '{w} Win : {l} Loss · {n} not set', wlShort: '{w}W : {l}L',
     matchResults: 'Match Results', matchNotes: 'Match Notes', addScore: 'Add score', removeGame: 'Remove last game', yourOpponents: 'your opponents',
     gameNoScore: '{game} · {r}', gamesUnordered: 'Order not known: {r}', notRecorded: 'Not recorded', gamesWonN: '{n} Won', gamesLostN: '{n} Lost',
-    scoringFmt: '{n} points', scoringLabel: 'Scoring', scoreBad1: "Game {g} score doesn't fit {n}-point scoring. Change the score or the scoring.",
+    scoringFmt: '{n} points', scoringLabel: 'Scoring', scoringAsk: 'Choose scoring', scoringAskNote: 'These scores fit {n}-point games. Pick 21 points if a game was still in progress.', scoreBad1: "Game {g} score doesn't fit {n}-point scoring. Change the score or the scoring.",
     scoreBadN: "Scores in games {g} don't fit {n}-point scoring. Change the scores or the scoring.", listSep: ', '
   },
   zh: {
@@ -2393,11 +2394,11 @@ const I18N = {
     vErrSetup: '读取描述的功能还没设置好，请手动填写。', vErrFailed: '没能读懂你的描述。请再试一次，或手动填写。',
     rvWL: '{w}胜 : {l}负', notMentioned: '没有提到', noNotes: '没有笔记', doneEdit: '完成',
     flagMissing: '缺少球员', flagNew: '新球员', flagCheck: '确认球员', flagLineup: '不止一组对阵',
-    flagResult: '缺少结果', flagScores: '确认比分', flagNotes: '确认笔记', flagConflict: '确认结果',
+    flagResult: '缺少结果', flagScores: '确认比分', flagFormat: '选择赛制', flagNotes: '确认笔记', flagConflict: '确认结果',
     rvWLOpen: '{w}胜 : {l}负 · {n}局未填', wlShort: '{w}胜 : {l}负',
     matchResults: '比赛结果', matchNotes: '比赛笔记', addScore: '添加比分', removeGame: '删除最后一局', yourOpponents: '对手',
     gameNoScore: '{game} · {r}', gamesUnordered: '顺序未知：{r}', notRecorded: '未录入', gamesWonN: '{n}胜', gamesLostN: '{n}负',
-    scoringFmt: '{n}分制', scoringLabel: '赛制', scoreBad1: '第{g}局比分不符合{n}分制，请修改比分或赛制。',
+    scoringFmt: '{n}分制', scoringLabel: '赛制', scoringAsk: '选择赛制', scoringAskNote: '比分符合{n}分制。如果当时比赛还没打完，请选21分制。', scoreBad1: '第{g}局比分不符合{n}分制，请修改比分或赛制。',
     scoreBadN: '第{g}局比分不符合{n}分制，请修改比分或赛制。', listSep: '、'
   }
 };
@@ -3091,11 +3092,14 @@ class Component extends DCLogic {
     const r = res.result;
     if (r.multiple_lineups) return this.setVoice({ parsing: false, lineup: true });
     const V = window.RallywiseVoice, base = this.newLog();
-    // A scoring format said out loud ("11-point games", "21分制") preselects it; otherwise 21 (Han 2026-10-26).
-    base.format = V.scoringOf(text) || V.DEFAULT_FORMAT;
+    // Scoring format (Han 2026-10-26): said out loud ("21分制") wins; else finished heard scores only one format holds
+    // ("第一局15比7赢了" is 15); else 21. When the scores leave it open ("15比7" alone), Review asks (fmtAsk) instead of
+    // showing a 21-point error. Scores are never changed.
+    const fo = V.formatOf(r, text);
+    base.format = fo.format;
     const { flags, slots, pool, people, totals, ...fields } = V.toDraft(r, this.state.players, base.format);
     let log = { ...base, ...fields, step: 'review', startedAt: v.startedAt || Date.now(), active: null,
-      voice: { flags, slots, pool, people: people || [], totals, dirty: {}, from: text } };
+      voice: { flags, slots, pool, people: people || [], totals, dirty: {}, from: text, fmtAsk: fo.ask } };
     // A changed transcript must be parsed as a fresh match. Reusing manually edited
     // players/results/notes from the previous draft can overwrite the new AI result.
     // An unchanged transcript is already handled above by returning v.prev directly.
@@ -3107,7 +3111,7 @@ class Component extends DCLogic {
     const d = old.voice.dirty || {}, f = { ...log.voice.flags }, vo = { ...log.voice, dirty: d };
     const take = keys => keys.forEach(k => { log[k] = old[k]; });
     if (d.players) { take(['type', 'partner', 'opp1', 'opp2']); Object.assign(vo, { slots: old.voice.slots, pool: old.voice.pool, people: old.voice.people }); f.players = old.voice.flags.players; }
-    if (d.result) { take(['games', 'format']); vo.totals = old.voice.totals; f.result = old.voice.flags.result; }
+    if (d.result) { take(['games', 'format']); vo.totals = old.voice.totals; vo.fmtAsk = old.voice.fmtAsk; f.result = old.voice.flags.result; }
     if (d.notes) { take(['wt', 'lt', 'worked', 'lost', 'on']); f.notes = old.voice.flags.notes; }
     return { ...log, voice: { ...vo, flags: f } };
   }
@@ -3116,7 +3120,7 @@ class Component extends DCLogic {
   // Review can save once the match type is known and every game has a Win or Loss, or a heard aggregate covers the open
   // ones. A tie is valid; missing or contradicting results block (Han, 2026-10-23). Players may stay unknown, scores and notes are optional.
   reviewReady(log) {
-    if (!log.type || log.voice.flags.result === 'conflict') return false;
+    if (!log.type || log.voice.flags.result === 'conflict' || (log.voice.fmtAsk || []).length) return false;
     if (window.RallywiseVoice.badScores(log.games, log.format).length) return false;
     return window.RallywiseVoice.tally(log.games, log.voice.totals).ok;
   }
@@ -3204,7 +3208,9 @@ class Component extends DCLogic {
         g.u = 1;
       }
     }
-    this.setState({ rs: { games, totals: l.voice.totals || null, format: l.format, max: window.RallywiseVoice.MAX_GAMES } });
+    // An undecided scoring format opens with the format menu showing, so the choice is the first tap.
+    const ask = l.voice.fmtAsk || [];
+    this.setState({ rs: { games, totals: l.voice.totals || null, format: l.format, ask, fmtOpen: ask.length > 0, max: window.RallywiseVoice.MAX_GAMES } });
   }
   setRs(fn) { this.setState(s => s.rs ? { rs: { ...s.rs, ...fn(s.rs) } } : null); }
   rsGame(i, fn) { this.setRs(r => ({ games: r.games.map((g, j) => j === i ? fn(g) : g) })); }
@@ -3215,13 +3221,13 @@ class Component extends DCLogic {
   rsStep(i, d) { const cap = this.cap(this.state.rs.format); this.rsGame(i, ({ ws, ...g }) => ({ ...g, l: Math.max(0, Math.min(cap - 1, g.l + d)) })); }
   // Scoring format (Han 2026-10-26): one format for every game. Switching it never changes an entered score; a score that
   // doesn't fit the new format is outlined and explained under the games, and the sheet can't be saved until it fits.
-  rsFormat(f) { this.setRs(r => ({ fmtOpen: false, format: f, games: window.RallywiseVoice.reformat(r.games, r.format, f) })); }
+  rsFormat(f) { this.setRs(r => ({ fmtOpen: false, ask: [], format: f, games: window.RallywiseVoice.reformat(r.games, r.format, f) })); }
   rsAdd() { this.setRs(r => r.games.length < r.max ? { games: r.games.concat([{ w: null, l: null }]) } : {}); }
   rsRemove() { this.setRs(r => r.games.length > 1 ? { games: r.games.slice(0, -1) } : {}); }
   rsSave() {
     const r = this.state.rs;
-    if (window.RallywiseVoice.badScores(r.games, r.format).length) return;
-    this.setState(s => ({ rs: null, log: { ...s.log, games: r.games, format: r.format, voice: { ...s.log.voice, totals: r.totals,
+    if (window.RallywiseVoice.badScores(r.games, r.format).length || r.ask.length) return;
+    this.setState(s => ({ rs: null, log: { ...s.log, games: r.games, format: r.format, voice: { ...s.log.voice, totals: r.totals, fmtAsk: [],
       dirty: { ...s.log.voice.dirty, result: true }, flags: { ...s.log.voice.flags, result: null } } } }));
   }
   // Notes sheet (Figma 349:3793): tags (up to 3 a side) and three notes, edited as a copy like the other sheets.
@@ -4425,17 +4431,20 @@ class Component extends DCLogic {
       v.rv = { back: () => ed ? this.goBack() : this.voiceBack(), title: this.t(ed ? 'editMatch' : 'logMatch'), hint: this.t(ed ? 'editHint' : 'reviewHint'),
         rows: [row('players', 'rvPlayers', log.type ? names.join(sep) : this.t('selectType'), !log.type, f.players === 'unknown' && 'flagUnknown', !log.type, () => this.psOpen()),
           row('result', 'rvResult', wl.state === 'missing' ? this.t('notMentioned') : this.t(wl.open ? 'rvWLOpen' : 'rvWL', { w: wl.w, l: wl.l, n: wl.open }), wl.state === 'missing',
-            f.result === 'conflict' ? 'flagConflict' : !wl.ok ? 'flagResult' : (f.result === 'scores' || window.RallywiseVoice.badScores(log.games, log.format).length > 0) && 'flagScores'),
+            f.result === 'conflict' ? 'flagConflict' : !wl.ok ? 'flagResult' : (vo.fmtAsk || []).length ? 'flagFormat' : (f.result === 'scores' || window.RallywiseVoice.badScores(log.games, log.format).length > 0) && 'flagScores'),
           row('notes', 'rvNotes', notes || log.wt.concat(log.lt).map(t => this.tagLabel(t)).join(sep) || this.t('noNotes'), !notes && !log.wt.length && !log.lt.length, f.notes && 'flagNotes')],
         saving: !!log.saving, idle: !log.saving, saveErr: !!log.saveErr, ctaLabel: this.t(log.saveErr ? 'saveAgain' : ed ? 'saveChanges' : 'logMatch'), cantSave: !ready || !!log.saving,
         next: () => { if (this.reviewReady(this.state.log)) this.save(); } };
       v.hasRs = !!s.rs;
       if (s.rs) {
-        const r = s.rs, cap = this.cap(r.format), bad = window.RallywiseVoice.badScores(r.games, r.format);
+        const r = s.rs, cap = this.cap(r.format), bad = window.RallywiseVoice.badScores(r.games, r.format), asking = r.ask.length > 0;
         v.rs = { close: () => this.setState({ rs: null }), save: () => this.rsSave(),
-          fmtLabel: this.t('scoringFmt', { n: r.format }), fmtOpen: !!r.fmtOpen, toggleFmt: () => this.setRs(x => ({ fmtOpen: !x.fmtOpen })),
-          fmts: [21, 15, 11].map(f => ({ label: this.t('scoringFmt', { n: f }), on: f === r.format, select: () => this.rsFormat(f) })),
-          hasBad: bad.length > 0, cantSave: bad.length > 0,
+          fmtLabel: asking ? this.t('scoringAsk') : this.t('scoringFmt', { n: r.format }), fmtOpen: !!r.fmtOpen, toggleFmt: () => this.setRs(x => ({ fmtOpen: !x.fmtOpen })),
+          // Undecided (voice heard "15比7" with nothing saying the game was over): the formats the scores fit come first,
+          // nothing is ticked, and a plain note says why, instead of a 21-point error.
+          fmts: (asking ? r.ask.concat([21, 15, 11].filter(f => !r.ask.includes(f))) : [21, 15, 11]).map(f => ({ label: this.t('scoringFmt', { n: f }), on: !asking && f === r.format, select: () => this.rsFormat(f) })),
+          asking, askText: asking ? this.t('scoringAskNote', { n: r.ask[0] }) : '',
+          hasBad: bad.length > 0 && !asking, cantSave: bad.length > 0 || asking,
           badText: bad.length ? this.t(bad.length > 1 ? 'scoreBadN' : 'scoreBad1', { g: bad.map(i => i + 1).join(this.t('listSep')), n: r.format }) : '',
           rows: r.games.map((g, i) => {
             const label = this.t('game', { n: i + 1 }), sg = g.w && g.l != null ? this.scoreOf(g, r.format) : null;
