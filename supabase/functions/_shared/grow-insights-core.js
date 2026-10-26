@@ -17,7 +17,7 @@
 //   compare  a count compared between your last 3 matches and the 3 before (games won, close games won)
 //   strip    whether a self-reported observation was noted in each match (0/1), in order
 
-export const ENGINE_VERSION = '2026-10-26-v9';
+export const ENGINE_VERSION = '2026-10-26-v10';
 export const SKILL_TAGS = ['Serve', 'Return', 'Net', 'Smash', 'Defence', 'Footwork', 'Placement'];
 const WINDOW = 10;     // latest matches the engine reads
 const NOTE_N = 6;      // matches with notes in a Skill Tag window
@@ -496,7 +496,17 @@ export function topicSides(matches) {
     const c = win.filter(m => has(m, 'lt', tag)).length, w = win.filter(m => has(m, 'wt', tag)).length;
     if (c < 2 || w < 2) continue;
     const l3 = win.slice(-3), rc = l3.filter(m => has(m, 'lt', tag)).length, rw = l3.filter(m => has(m, 'wt', tag)).length;
-    out[tag] = c !== w ? (c > w ? 'cost' : 'worked') : rc !== rw ? (rc > rw ? 'cost' : 'worked') : 'cost';
+    if (c === w) {
+      // Tied mixed evidence is not a weakness by default. Two different, explicitly
+      // documented situations may legitimately coexist, otherwise suppress both.
+      const costNotes = notesFor(win.filter(m => has(m, 'lt', tag)), ['lost']);
+      const workedNotes = notesFor(win.filter(m => has(m, 'wt', tag)), ['worked']);
+      const costKinds = new Set(costNotes.flatMap(conceptsIn));
+      const workedKinds = new Set(workedNotes.flatMap(conceptsIn));
+      const distinct = costKinds.size && workedKinds.size &&
+        [...costKinds].every(k => !workedKinds.has(k));
+      out[tag] = distinct ? 'both' : 'ambiguous';
+    } else out[tag] = c > w ? 'cost' : 'worked';
   }
   return out;
 }
@@ -507,7 +517,7 @@ export function buildCandidates(matches, focus = [], max = 4) {
   const sides = topicSides(matches), out = [];
   for (const tag of SKILL_TAGS) {
     const topic = 'tag:' + tag, fs = focus.filter(f => f.topic === topic);
-    if (fs.some(f => f.status === 'active') || sides[tag] === 'worked') continue;
+    if (fs.some(f => f.status === 'active') || (sides[tag] === 'worked' || sides[tag] === 'ambiguous')) continue;
     const done = fs.filter(f => f.status === 'completed').map(f => String(f.completed_at || '')).sort().pop();
     let list = win, returning = false;
     if (done) {
@@ -530,7 +540,7 @@ export function strengthCandidates(matches, max = 2) {
   if (win.length < 3) return [];
   const sides = topicSides(matches), out = [];
   for (const tag of SKILL_TAGS) {
-    if (sides[tag] === 'cost') continue;
+    if (sides[tag] === 'cost' || sides[tag] === 'ambiguous') continue;
     const values = win.map(m => (has(m, 'wt', tag) ? 1 : 0)), k = sum(values);
     if (k < 2) continue;
     const both = win.filter(m => has(m, 'lt', tag) && has(m, 'wt', tag)).length;
