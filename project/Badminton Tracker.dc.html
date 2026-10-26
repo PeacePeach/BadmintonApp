@@ -3999,7 +3999,7 @@ class Component extends DCLogic {
           return { h: Math.max(10, Math.round(w * 100)) + '%', cls: i >= arr.length - 5 ? 'is-recent' : '' }; });
         const row = (label, r, sub) => ({ label, value: r.pctStr, sub, l: '0%', w: pct(r.pct) + '%', mid: false, fillCls: '' });
         const gap = this.gapBar(Number(mg.toFixed(1)));
-        const partners = [...new Set(all.map(m => m.partner).filter(id => id && !this.unknown(id)))].map(id => ({ id, r: this.with(id) })).filter(o => o.r.n >= 2).sort((a, b) => b.r.pct - a.r.pct || b.r.n - a.r.n);
+        const partners = [...new Set(all.map(m => m.partner).filter(id => id && !this.unknown(id)))].map(id => ({ id, r: this.with(id) })).filter(o => o.r.n >= 2 && o.r.w > 0).sort((a, b) => b.r.pct - a.r.pct || b.r.n - a.r.n);
         // Han 2026-10-26: the three tiles are worked out independently (one person may lead more than one).
         // Toughest Opponent: 3+ decided matches against them and a win rate strictly under 50%, lowest first; else no tile.
         // Most Played With: every match with them, as opponent or partner.
