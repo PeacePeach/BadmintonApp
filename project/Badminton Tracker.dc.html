@@ -332,7 +332,7 @@ button:disabled{cursor:default !important;}
           </sc-if>
         </div>
         <sc-if value="{{ blocked }}" hint-placeholder-val="{{ false }}">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ blockedState.illustration }}" title="{{ blockedState.title }}" body="{{ blockedState.body }}" actionLabel="{{ blockedState.actionLabel }}" onAction="{{ blockedState.onAction }}" hint-size="350px,330px"></x-import>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ blockedState.illustration }}" title="{{ blockedState.title }}" body="{{ blockedState.body }}" actionLabel="{{ blockedState.actionLabel }}" onAction="{{ blockedState.onAction }}" page="{{ true }}" hint-size="350px,330px"></x-import>
         </sc-if>
         <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
           <div aria-busy="true" style="display:flex;flex-direction:column;gap:var(--rw-section-gap);">
@@ -491,7 +491,7 @@ button:disabled{cursor:default !important;}
         </sc-if>
 
         <sc-if value="{{ insState }}" hint-placeholder-val="{{ false }}">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ insState.illustration }}" title="{{ insState.title }}" body="{{ insState.body }}" actionLabel="{{ insState.actionLabel }}" onAction="{{ insState.onAction }}" compact="{{ true }}" hint-size="350px,330px"></x-import>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ insState.illustration }}" title="{{ insState.title }}" body="{{ insState.body }}" actionLabel="{{ insState.actionLabel }}" onAction="{{ insState.onAction }}" compact="{{ true }}" page="{{ insState.page }}" hint-size="350px,330px"></x-import>
         </sc-if>
 
         <sc-if value="{{ insProgress }}" hint-placeholder-val="{{ true }}">
@@ -708,7 +708,7 @@ button:disabled{cursor:default !important;}
           <h1 class="rw-title rw-title-fade">{{ tx.focus }}</h1>
         </div>
         <sc-if value="{{ blocked }}" hint-placeholder-val="{{ false }}">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ blockedState.illustration }}" title="{{ blockedState.title }}" body="{{ blockedState.body }}" actionLabel="{{ blockedState.actionLabel }}" onAction="{{ blockedState.onAction }}" hint-size="350px,330px"></x-import>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ blockedState.illustration }}" title="{{ blockedState.title }}" body="{{ blockedState.body }}" actionLabel="{{ blockedState.actionLabel }}" onAction="{{ blockedState.onAction }}" page="{{ true }}" hint-size="350px,330px"></x-import>
         </sc-if>
         <sc-if value="{{ fl.loading }}" hint-placeholder-val="{{ false }}">
           <div aria-busy="true" style="display:flex;flex-direction:column;gap:16px;">
@@ -1200,7 +1200,7 @@ button:disabled{cursor:default !important;}
           <h1 class="rw-appbar-name">{{ tx.players }}</h1>
         </div>
         <sc-if value="{{ blocked }}" hint-placeholder-val="{{ false }}">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ blockedState.illustration }}" title="{{ blockedState.title }}" body="{{ blockedState.body }}" actionLabel="{{ blockedState.actionLabel }}" onAction="{{ blockedState.onAction }}" hint-size="350px,330px"></x-import>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ blockedState.illustration }}" title="{{ blockedState.title }}" body="{{ blockedState.body }}" actionLabel="{{ blockedState.actionLabel }}" onAction="{{ blockedState.onAction }}" page="{{ true }}" hint-size="350px,330px"></x-import>
         </sc-if>
         <sc-if value="{{ notBlocked }}" hint-placeholder-val="{{ true }}">
         <div class="rw-search-results">
@@ -3622,6 +3622,7 @@ class Component extends DCLogic {
     v.blockedState = s.blocked === 'offline'
       ? empty('connection-lost', this.t('connLost'), this.t('connLostBody'), this.t('tryAgain'), retry)
       : empty('error', this.t('cantLoad', { what }), this.t('cantLoadBody'), this.t('tryAgain'), retry);
+    v.blockedState.page = true;
     v.matchesEmpty = !v.matchCards.length && (all.length
       ? empty('no-matches', this.t('noTypeMatches', { type: this.typeLabel(s.filter) }), this.t('noTypeMatchesBody', { type: this.typeLabel(s.filter) }))
       : empty('no-matches', this.t('noMatches'), this.t('noMatchesBody')));

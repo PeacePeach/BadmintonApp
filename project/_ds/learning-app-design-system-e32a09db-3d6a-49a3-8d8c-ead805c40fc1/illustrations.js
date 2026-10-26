@@ -8,8 +8,9 @@
 
    Exposes on window.LearningAppDesignSystem_e32a09:
      Illustration({ name, compact, title })    drawing on its Soft Glow
-     EmptyState({ illustration, title, body, actionLabel, onAction, compact, style })
+     EmptyState({ illustration, title, body, actionLabel, onAction, compact, page, style })
                                   compact: smaller graphic for dense screens (Insights, Player profile)
+                                  page: full-page state (offline, load error), centred in the free space
      illustrationNames            list of available names
      illustrationMarkup(name)     raw SVG string, for plain HTML pages
 */
@@ -137,9 +138,9 @@
     });
   }
 
-  function EmptyState({ illustration, title, body, actionLabel, onAction, compact, style }) {
+  function EmptyState({ illustration, title, body, actionLabel, onAction, compact, page, style }) {
     const h = React.createElement;
-    return h('div', { className: 'rw-empty', style },
+    return h('div', { className: 'rw-empty' + (page ? ' is-page' : ''), style },
       illustration ? h(Illustration, { name: illustration, compact }) : null,
       title ? h('div', { className: 'rw-empty-title' }, title) : null,
       body ? h('div', { className: 'rw-empty-body' }, body) : null,

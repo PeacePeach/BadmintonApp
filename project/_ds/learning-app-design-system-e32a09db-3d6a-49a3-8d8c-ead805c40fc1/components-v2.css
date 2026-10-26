@@ -27,7 +27,7 @@
      Graphs / Large bar ........... .rw-form[.is-down] > .rw-form-bars > .rw-form-bar[.is-recent] + .rw-chart-label
      Performance breakdown ........ .rw-breakdown (label, .rw-bar, .rw-row-value + .rw-row-sub); score gap row: fill .is-up|.is-down + .rw-breakdown-mid (dashed zero line)
      Illustration (Soft Glow) ..... .rw-illus[.is-compact] > svg (illustrations.js)
-     EmptyState ................... .rw-empty > .rw-illus + .rw-empty-title + .rw-empty-body + .rw-btn.rw-btn-primary (illustrations.js)
+     EmptyState ................... .rw-empty[.is-page: full-page error, centred in the free space] > .rw-illus + .rw-empty-title + .rw-empty-body + .rw-btn.rw-btn-primary (illustrations.js)
      Insight / ListRow ............ .rw-list-row (.rw-avatar, .rw-eyebrow, .rw-name, .rw-list-value, .rw-caption)
    Insights / Grow (Figma 203:5215):
      KeyInsight ................... .rw-surface.rw-tile.rw-key > .rw-key-head (dot + .rw-label) + .rw-key-title + .rw-key-body + .rw-bar.rw-key-bar
@@ -502,6 +502,9 @@ button.rw-input-row{cursor:pointer;}
 .rw-empty-title{margin-top:20px;font:var(--rw-type-empty-title);letter-spacing:var(--rw-tracking);color:var(--rw-empty-title-fg);}
 .rw-empty-body{margin-top:8px;max-width:280px;font:var(--rw-type-empty-body);letter-spacing:var(--rw-tracking);color:var(--rw-empty-body-fg);}
 .rw-empty .rw-btn-primary{margin-top:24px;}
+/* Full-page states (offline, load error) centre vertically between the header and the bottom nav; in-content empty states stay in the flow (Han, 2026-10-26). */
+.rw-scroll.is-v2 div:has(> * > .rw-empty.is-page){min-height:100%;}
+.rw-empty.is-page{flex:1 0 auto;justify-content:center;}
 :root[lang="zh-Hans"] :is(.rw-btn,.rw-pill,.rw-flag) :is(svg,x-import){
   flex-shrink:0;
   vertical-align:middle;
