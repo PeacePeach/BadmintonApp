@@ -413,10 +413,10 @@ test('Build Next / Strengths copy: AI kept when clean, template when it invents 
   const [z] = G.finalizeItems([d], [{ ...good, name: '反手防守', evidence: '最近6场有5场你记下防守丢分。', action: '反手防守时拍子举高一点。' }], 'build', 'zh');
   assert.equal(z.copy_source, 'ai');
   const [zbad] = G.finalizeItems([d], [good], 'build', 'zh');
-  assert.equal(zbad.name, '防守'); assert.equal(zbad.evidence, '最近6场有5场你记下这里丢分。'); assert.equal(zbad.action, '通用练法：让搭档连续进攻，你专心把每一拍接回去。');
+  assert.equal(zbad.name, '防守'); assert.equal(zbad.evidence, '最近6场比赛中，有5场你提到防守的问题。'); assert.equal(zbad.action, '通用练法：让搭档连续进攻，你专心把每一拍接回去。');
   const s = G.strengthCandidates(ms);
   assert.deepEqual(s.map(x => x.topic_id), ['tag:Placement']);
-  assert.equal(G.finalizeItems(s, null, 'strength', 'zh')[0].signal, '最近6场有6场你记下这里帮你得分。');
+  assert.equal(G.finalizeItems(s, null, 'strength', 'zh')[0].signal, '最近6场比赛中，有6场你觉得落点发挥不错。');
 });
 
 test('generic notes: general advice, clearly labelled, and no invented cause or technique', () => {
@@ -465,8 +465,8 @@ test('regression (Han, v7 screenshot): a 4/6 strength is not wiped out by a more
   assert.equal(G.buildCandidates(ms).find(x => x.tag === 'Smash'), undefined, 'no contradictory Build Next');
   assert.ok(G.keyCandidates(ms, null, { all: true }).every(c => c.tag !== 'Smash' || c.side === 'worked'));
   const s = G.strengthCandidates(ms);
-  assert.equal(G.finalizeItems(s, null, 'strength', 'en')[0].signal, 'You noted it winning you points in 4 of your last 6 matches.');
-  assert.equal(G.finalizeItems(s, null, 'strength', 'zh')[0].signal, '最近6场有4场你记下这里帮你得分。');
+  assert.equal(G.finalizeItems(s, null, 'strength', 'en')[0].signal, 'You noted smash working well in 4 of your last 6 matches.');
+  assert.equal(G.finalizeItems(s, null, 'strength', 'zh')[0].signal, '最近6场比赛中，有4场你觉得杀球发挥不错。');
 });
 
 test('Build Next actions (Han): no tactical correction from tags or a single note; only from a pattern in the notes', () => {
@@ -501,7 +501,7 @@ test('Build Next actions (Han): no tactical correction from tags or a single not
 });
 
 test('engine version is bumped so cached v7 insights regenerate', () => {
-  assert.equal(G.ENGINE_VERSION, '2026-10-26-v8');
+  assert.equal(G.ENGINE_VERSION, '2026-10-26-v9');
 });
 
 test('opponent plans: only from notes about that opponent; record-only, unsupported or generic plans are left out', () => {
