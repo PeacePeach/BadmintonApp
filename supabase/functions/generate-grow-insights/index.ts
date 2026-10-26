@@ -40,6 +40,12 @@ Deno.serve(async req => {
     // is only ever returned in the language it was written in. English keeps the fingerprint it had before.
     const reqBody = await req.json().catch(() => ({}));
     const lang = reqBody && reqBody.lang === "zh" ? "zh" : "en";
+    // The released app (main) sends no lang and draws any truthy keyInsight as a tile with its title and an
+    // old-style percent bar from chart.current_percent. For it, the Key Insight is only { title, body } when there
+    // is one, else null (no empty tile, no NaN bar). What is stored is always the full insight.
+    const legacy = !reqBody || !("lang" in reqBody);
+    const out = (insight:any) => !legacy || !insight ? insight
+      : { ...insight, keyInsight: insight.keyInsight?.status === "ok" && insight.keyInsight.title ? { title: insight.keyInsight.title, body: insight.keyInsight.body } : null };
 
     // Focus rows (select * so topic_id is read once its column exists); a missing Focus table just means no Focus.
     const [{data:players,error:pe},{data:matches,error:me},{data:focusRows},{data:cached}] = await Promise.all([
@@ -74,7 +80,7 @@ Deno.serve(async req => {
     }))) + JSON.stringify(focus.map((f:any) => [f.topic, f.status, f.completed_at]).sort()));
 
     const hit = slots.find(x => x.fp === fp);
-    if (hit) return Response.json({insight:hit.insight,generated_at:hit.generated_at,cached:true},{headers:CORS});
+    if (hit) return Response.json({insight:out(hit.insight),generated_at:hit.generated_at,cached:true},{headers:CORS});
     if (!recent.length) return Response.json({insight:null,cached:false},{headers:CORS});
 
     const names:any = Object.fromEntries((players || []).map((p:any)=>[p.id,p.name]));
@@ -206,7 +212,7 @@ OUTPUT LANGUAGE: write every visible string in ${lang === "zh" ? "natural Simpli
       if (ce) throw ce;
     }
 
-    return Response.json({insight:parsed,generated_at,cached:false},{headers:CORS});
+    return Response.json({insight:out(parsed),generated_at,cached:false},{headers:CORS});
   } catch (e) {
     console.error(e);
     return Response.json({error:"server_error"},{status:500,headers:CORS});

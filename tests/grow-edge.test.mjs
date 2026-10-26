@@ -107,3 +107,20 @@ test('the model only sees and may only name the engine candidates; mixed items c
   assert.equal(r.insight.buildNext[0].evidence, 'You noted it costing points in 2 of your last 6 matches, and working in 2.');
   assert.equal(r.insight.engine_version, G.ENGINE_VERSION);
 });
+
+test('released app (no lang in the request): Key Insight is { title, body } or null, never an empty tile or a NaN bar', async () => {
+  const a = account(han());
+  const legacy = async () => {
+    globalThis.__lastBody = undefined;
+    const res = await globalThis.__growHandler(new Request('http://x', { method: 'POST', headers: { Authorization: 'Bearer t' }, body: JSON.stringify({}) }));
+    return res.json();
+  };
+  await a.call('en'); // the new app stores the full insight
+  const r = await legacy();
+  assert.equal(r.cached, true);
+  assert.deepEqual(Object.keys(r.insight.keyInsight), ['title', 'body']);
+  assert.equal(a.row.insight_json.keyInsight.status, 'ok', 'the stored row keeps the full Key Insight');
+  const steady = account(Array.from({ length: 10 }, (_, i) => M(i, i % 2 ? L : W, ['Other'], [])));
+  await steady.call('en');
+  assert.equal((await legacy()).insight.keyInsight, null);
+});
