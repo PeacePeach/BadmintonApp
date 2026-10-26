@@ -601,6 +601,21 @@ export const generalAction = (tag, kind, lang) => GENERAL[lang][kind === 'streng
 export function itemTemplate(item, kind, lang) {
   const name = APP_TAG_LABELS[lang][item.tag]; // the app's own tag name, as on the Skill Tag chips
   const action = generalAction(item.tag, kind, lang);
+  if (item.contextName && item.tag === 'Smash') {
+    const backcourt = item.contextName.en === 'Backcourt smashes';
+    const kindKey = backcourt ? 'rearCourt' : 'sideline';
+    const specific = item.notes.filter(n => skillClauses([n], item.tag).some(c => conceptsIn(c).includes(kindKey))).length;
+    const window = lang === 'zh' ? `最近${item.skipped ? '有记录的' : ''}${item.n}场比赛` : `${item.n} recent ${item.skipped ? 'noted ' : ''}matches`;
+    if (lang === 'zh') {
+      const part = backcourt ? '后场' : '边线';
+      const copy = kind === 'strength'
+        ? `${window}中，有${item.k}场你提到杀球发挥不错，其中${specific}场提到${part}。`
+        : `${window}中，有${item.k}场你提到杀球问题，其中${specific}场涉及${part}。`;
+      return { name: item.contextName[lang], [kind === 'strength' ? 'signal' : 'evidence']: copy, action };
+    }
+    const copy = `You noted ${kind === 'strength' ? 'effective smashes' : 'smash problems'} in ${item.k} of ${window}; ${specific} mentioned the ${backcourt ? 'backcourt' : 'sideline'}.`;
+    return { name: item.contextName[lang], [kind === 'strength' ? 'signal' : 'evidence']: copy, action };
+  }
   if (lang === 'zh') {
     const lastN = `最近${item.skipped ? '有记录的' : ''}${item.n}场`;
     if (kind === 'strength') return { name, signal: `${lastN}比赛中，有${item.k}场你觉得${name}发挥不错。`, action };
@@ -653,10 +668,10 @@ export function finalizeItems(items, ai, kind, lang) {
     return {
       topic_id: item.topic_id, tag: item.tag, rank: rank + 1,
       name: item.contextName?.[lang] || (bad('name') ? t.name : String(a.name).trim()),
-      [textKey]: bad(textKey) ? t[textKey] : String(a[textKey]).trim(),
+      [textKey]: item.contextName ? t[textKey] : (bad(textKey) ? t[textKey] : String(a[textKey]).trim()),
       action: aiAction || t.action, advice_basis: aiAction ? 'notes' : 'general',
       evidence_numbers: { k: item.k, n: item.n }, returning: item.returning || false,
-      copy_source: issues.length ? (a ? 'mixed' : 'template') : 'ai', issues
+      copy_source: item.contextName ? 'template' : (issues.length ? (a ? 'mixed' : 'template') : 'ai'), issues
     };
   });
 }
