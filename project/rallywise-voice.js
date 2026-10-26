@@ -153,8 +153,13 @@
     if (!c.length && N) {
       const m = others.map(p => ({ p, k: N.match(heard, p.name) })).filter(x => x.k);
       const strong = m.filter(x => x.k === 'strong');
-      c = strong.concat(m.filter(x => x.k === 'weak')).map(x => x.p);
-      cross = strong.length === 1 && m.length === 1;
+      // Strong readings outrank weak/transliteration candidates. A single exact
+      // Pinyin reading (杨 -> Yang) must not become ambiguous merely because a
+      // different player has a weak phonetic resemblance (e.g. An Sei Young).
+      // Multiple strong matches remain ambiguous; weak matches are considered
+      // only when no strong candidate exists.
+      c = (strong.length ? strong : m.filter(x => x.k === 'weak')).map(x => x.p);
+      cross = strong.length === 1;
       if (c.length === 1 && !cross) return { heard: heard.trim(), id: null, cands: [c[0].id], state: 'ambiguous', cross: true };
     }
     return { heard: heard.trim(), id: c.length === 1 ? c[0].id : null, cands: c.length > 1 ? c.map(p => p.id) : [],
