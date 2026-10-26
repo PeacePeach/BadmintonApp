@@ -570,3 +570,17 @@ test('print representative outputs', () => {
   if (process.env.SHOW) console.log(out.join('\n'));
   assert.equal(out.length, 12);
 });
+
+test('regression: AI evidence must state both occurrences and window, EN/ZH', () => {
+  const item = {topic_id:'tag:Smash',tag:'Smash',k:2,n:6,basis:'general',notes:[]};
+  for (const lang of BOTH) {
+    const name = lang === 'zh' ? '杀球' : 'Smash';
+    const evidence = lang === 'zh' ? '你在6场比赛中提到杀球问题。' : 'You noted smashes in 6 matches.';
+    const bad = G.checkItem({name,evidence,action:''},item,'build',lang);
+    assert(bad.includes('evidence:missing_evidence_count'),lang + ': ' + bad);
+    const result = G.finalizeItems([item],[{topic_id:item.topic_id,name,evidence,action:''}],'build',lang);
+    assert.match(result[0].evidence,/2/);
+    assert.match(result[0].evidence,/6/);
+    assert.notEqual(result[0].evidence,evidence);
+  }
+});
