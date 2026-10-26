@@ -3788,18 +3788,22 @@ class Component extends DCLogic {
           // An Engine V2 Key Insight has status ok | insufficient and a chart from the engine's evidence; one cached
           // before V2 has no status and may carry the old { current_percent } (shown as the legacy bar).
           const key = ai.keyInsight && ai.keyInsight.status !== 'insufficient' && ai.keyInsight.title ? ai.keyInsight : null;
+          // Never silently remove the Key Insight section. Insufficient evidence must be visible
+          // as a truthful, localized empty state rather than an absent tile.
+          const keyFallbackTitle = this.t('notEnough');
+          const keyFallbackBody = this.t('notEnoughAiBody');
           const kc = key && key.chart && ['trend', 'compare', 'strip'].includes(key.chart.pattern) && Array.isArray(key.chart.values) && key.chart.values.length ? key.chart : null;
           const legacyPct = key && !kc && key.chart && typeof key.chart.current_percent === 'number';
           v.grow = {
-            keyTitle: key ? key.title : '', keyBody: key ? key.body : '',
+            keyTitle: key ? key.title : keyFallbackTitle, keyBody: key ? key.body : keyFallbackBody,
             // xLabels: a strip linked to results writes W/L (胜/负) under each match instead of 1..6.
             keyChart: kc ? { kind: kc.pattern, values: kc.values.join(','), quote: (kc.quote || []).join(','), split: kc.split != null ? String(kc.split) : '', xlabels: Array.isArray(kc.xLabels) ? kc.xLabels.join('|') : '' } : { kind: '', values: '', quote: '', split: '', xlabels: '' },
-            keySplit: !!kc, keyLegacy: !!key && !kc,
+            keySplit: !!kc, keyLegacy: !kc,
             keyCurrent: legacyPct ? Math.max(0, Math.min(100, key.chart.current_percent)) + '%' : '0%',
             keyPrevious: legacyPct ? Math.max(0, Math.min(100, key.chart.previous_percent)) + '%' : '0%',
             showKeyChart: !!legacyPct,
             build, strengths, opps, doubles,
-            showKey: !!key, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: !!doubles.length,
+            showKey: true, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: !!doubles.length,
             empty: !key && !build.length && !strengths.length && !opps.length && !doubles.length &&
               empty('no-insights', this.t('notEnough'), this.t('notEnoughAiBody'))
           };
@@ -3812,7 +3816,7 @@ class Component extends DCLogic {
           const strengths = top(wins, 'wt').map(([t, n]) => ({ name: this.tagLabel(t), tag: t, signal: this.t('workingIn', { n, total: wins.length }), action: '' }));
           const opps = [...new Set(all.flatMap(m => m.opps).filter(id => !this.unknown(id)))].map(id => ({ id, r: this.vs(id), note: all.find(m => m.on && m.opps.includes(id)) }))
             .filter(o => o.note && this.nm(o.id)).sort((a, b) => a.r.pct - b.r.pct || b.r.n - a.r.n).slice(0, 2).map(o => op(o.id, o.note.on));
-          v.grow = { keyTitle: '', keyBody: '', keyChart: { kind: '', values: '', quote: '', split: '', xlabels: '' }, keySplit: false, keyLegacy: false, keyCurrent: '0%', keyPrevious: '0%', showKeyChart: false, build, strengths, opps, doubles: [], showKey: false, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: false,
+          v.grow = { keyTitle: this.t('notEnough'), keyBody: this.t('notEnoughAiBody'), keyChart: { kind: '', values: '', quote: '', split: '', xlabels: '' }, keySplit: false, keyLegacy: false, keyCurrent: '0%', keyPrevious: '0%', showKeyChart: false, build, strengths, opps, doubles: [], showKey: true, keyLegacy: true, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: false,
             empty: !build.length && !strengths.length && !opps.length && empty('no-insights', this.t('notEnough'), this.t('notEnoughBody')) };
         }
       }
