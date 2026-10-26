@@ -64,6 +64,7 @@
   --rw-r150:              #f28c85;   /* Error red, between R100 and R200 in brightness (Han 2026-10-25) */
   --rw-r200:              #ff7878;
   --rw-r300:              #ff5c5c;
+  --rw-r350:              #b95454;   /* Destructive red, between R300 and R400 (Han 2026-10-26): destructive button fill */
   --rw-r400:              #b34040;
   --rw-r500:              #9c3838;
   /* Red (second red family in the Foundation styles, "red-50/100/800"; used by the Toast, Figma 360:7533) */
@@ -181,6 +182,8 @@
   /* Insights / Grow (Figma 203:5215; pending Han's review, 2026-10-24) */
   --rw-color-divider: var(--rw-n150);                 /* line inside a tile (Figma Tile full wide / half width) */
   --rw-color-status-error: var(--rw-r150);            /* the ONE error red: error text, borders and icons everywhere, 100% opacity (Han 2026-10-25) */
+  --rw-color-action-destructive: var(--rw-r350);      /* destructive button fill: Delete Match / Account / Focus (Han 2026-10-26) */
+  --rw-color-text-on-destructive: var(--rw-n800);     /* label on the destructive fill (3.95:1; N75 was 3.46:1) */
   --rw-color-text-accent: var(--rw-b100);             /* TRY NEXT label in Build Next (Figma #6BA6FF) */
   --rw-color-icon-accent: var(--rw-b100);             /* icon in the Avatar "Fancy" badge */
   --rw-color-border-icon-badge: linear-gradient(120deg, color-mix(in srgb, var(--rw-b100) 60%, transparent) 0%, color-mix(in srgb, var(--rw-b100) 5%, transparent) 100%); /* Figma shows B 5% at the faded end */
@@ -209,7 +212,8 @@
   --rw-btn-primary-bg: var(--rw-color-action-primary);
   --rw-btn-primary-fg: var(--rw-color-text-on-action);
   --rw-btn-primary-h: 52px;
-  --rw-btn-danger-bg: var(--rw-color-status-error);   /* destructive confirm (Delete Match / Account / Focus): the one error red, N75 label */
+  --rw-btn-danger-bg: var(--rw-color-action-destructive);
+  --rw-btn-danger-fg: var(--rw-color-text-on-destructive);
   --rw-icon-btn-size: 40px;
   /* InlineBanner (Figma Foundation 333:8797): a reusable in-content prompt, e.g. "Who is “Chris”?" (Han, 2026-10-23).
      Fill is Blue Gradient 01 at 8% (unbound in Figma, same stops), border N100. */

@@ -92,7 +92,7 @@
 /* Button / Primary, Large */
 .rw-btn{border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform var(--dur-fast) var(--ease-out),opacity var(--dur-fast);}
 .rw-btn-primary{height:var(--rw-btn-primary-h);border-radius:999px;padding:1px 24px;background:var(--rw-btn-primary-bg);color:var(--rw-btn-primary-fg);font:var(--rw-type-button);}
-.rw-btn-primary.is-danger{background:var(--rw-btn-danger-bg);}
+.rw-btn-primary.is-danger{background:var(--rw-btn-danger-bg);color:var(--rw-btn-danger-fg);}
 /* Button / Secondary, Medium: text, or a 16px icon + text. On a tile or banner it takes the on-surface fill. */
 .rw-btn-secondary{position:relative;height:var(--rw-btn-secondary-h);border-radius:999px;padding:0 12px;gap:4px;background:var(--rw-btn-secondary-bg);color:var(--rw-btn-secondary-fg);font:var(--rw-type-btn-secondary);letter-spacing:var(--rw-tracking);white-space:nowrap;}
 .rw-btn-secondary:has(svg){padding-left:10px;}
