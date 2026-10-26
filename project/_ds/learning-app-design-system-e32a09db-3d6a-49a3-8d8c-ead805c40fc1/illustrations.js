@@ -50,13 +50,13 @@
     // Two players, the front one filled
     'no-players': () => `
       <circle cx="99" cy="62" r="11" ${o}/>
-      <path d="M80 106c0-11 8.5-20 19-20s19 9 19 20Z" ${o}/>
+      <path d="M80 145V106c0-11 8.5-20 19-20s19 9 19 20V145Z" ${o}/>
       <circle cx="70" cy="70" r="14" ${o}/>
-      <path d="M46 120c0-14 10.7-25 24-25s24 11 24 25Z" ${f}/>`,
+      <path d="M46 145V120c0-14 10.7-25 24-25s24 11 24 25V145Z" ${f}/>`,
 
     // Chart card with bars still to grow
     'no-insights': () => `
-      <rect x="46" y="40" width="68" height="82" rx="10" ${o}/>
+      <rect x="46" y="40" width="68" height="100" rx="10" ${o}/>
       <path d="M57 54h22M57 62h14" ${l} opacity=".55"/>
       <rect x="57" y="92" width="10" height="18" rx="3" ${o}/>
       <rect x="75" y="82" width="10" height="28" rx="3" ${o}/>
@@ -73,7 +73,7 @@
 
     // Note card with an alert badge
     'error': () => `
-      <rect x="40" y="52" width="62" height="70" rx="10" ${o}/>
+      <rect x="40" y="52" width="62" height="90" rx="10" ${o}/>
       <rect x="49" y="62" width="44" height="14" rx="5" ${f}/>
       <path d="M55 69h20" ${d}/>
       <path d="M50 90h38M50 100h26" ${l} opacity=".55"/>
@@ -115,13 +115,17 @@
       <path d="M54 48l54 60" fill="none" stroke="${FILL}" stroke-width="3.5" stroke-linecap="round"/>`,
   };
 
+  // Masked drawings (Han's reference): the body runs past the bottom and is cut by a straight line, as if rising
+  // from behind it. The cut sits at y 131, near the base of the backdrop circle.
+  const CUT = { 'no-players': true, 'no-insights': true, 'error': true };
+
   let seq = 0;
   function illustrationMarkup(name, uid) {
     const draw = drawings[name];
     if (!draw) return '';
     const id = uid || 'rwi' + (++seq);
     return `<svg viewBox="25 25 110 110" overflow="visible" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-      ${draw(id)}
+      ${CUT[name] ? `<clipPath id="${id}-cut"><rect x="-100" y="-100" width="400" height="231"/></clipPath><g clip-path="url(#${id}-cut)">${draw(id)}</g>` : draw(id)}
     </svg>`;
   }
 
