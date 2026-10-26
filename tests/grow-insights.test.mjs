@@ -450,10 +450,12 @@ test('one side per skill: Build Next and Strengths never share a topic; the stro
   assert.ok(str.every(x => !ids.has(x.topic_id)));
   // The Key Insight follows the same side.
   assert.ok(G.keyCandidates(ms, null, { all: true }).filter(c => c.tag === 'Net').every(c => c.side === 'cost'));
-  // A tie (3 and 3) goes to the side noted more in the last 3.
+  // A tie with no differentiated evidence is ambiguous, not automatically a weakness.
   fresh();
   const tie = [[], [], [], ['Net'], ['Net'], ['Net']].map((lt, i) => M(W, lt.length ? lt : ['Other'], i < 3 ? ['Net'] : []));
-  assert.equal(G.topicSides(tie).Net, 'cost');
+  assert.equal(G.topicSides(tie).Net, 'ambiguous');
+  assert.equal(G.buildCandidates(tie).some(x => x.tag === 'Net'), false);
+  assert.equal(G.strengthCandidates(tie).some(x => x.tag === 'Net'), false);
 });
 
 test('regression (Han, v7 screenshot): a 4/6 strength is not wiped out by a more recent 2/6 cost, in both languages', () => {
@@ -501,7 +503,7 @@ test('Build Next actions (Han): no tactical correction from tags or a single not
 });
 
 test('engine version is bumped so cached v7 insights regenerate', () => {
-  assert.equal(G.ENGINE_VERSION, '2026-10-26-v9');
+  assert.equal(G.ENGINE_VERSION, '2026-10-26-v10');
 });
 
 test('opponent plans: only from notes about that opponent; record-only, unsupported or generic plans are left out', () => {
@@ -583,4 +585,19 @@ test('regression: AI evidence must state both occurrences and window, EN/ZH', ()
     assert.match(result[0].evidence,/6/);
     assert.notEqual(result[0].evidence,evidence);
   }
+});
+
+test('mixed Smash evidence: distinct situations may be shown on both sides without inferring causes', () => {
+  fresh();
+  const ms = [
+    M(W,['Other'],['Smash'],{worked:'劈吊得分比较多，打到反手区效果好'}),
+    M(W,['Other'],['Smash'],{worked:'我的吊球在反手区有用'}),
+    M(L,['Smash'],[],{lost:'后场杀球失误比较多'}),
+    M(L,['Other'],['Return']),
+    M(L,['Smash'],[],{lost:'后场杀球容易失误'}),
+    M(W,['Placement'],[])
+  ];
+  assert.equal(G.topicSides(ms).Smash,'both');
+  assert.equal(G.buildCandidates(ms).filter(x=>x.tag==='Smash').length,1);
+  assert.equal(G.strengthCandidates(ms).filter(x=>x.tag==='Smash').length,1);
 });
