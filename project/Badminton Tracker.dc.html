@@ -1754,8 +1754,8 @@ button:disabled{cursor:default !important;}
 
   <!-- App bar: status time (previews only; a phone shows its own) and the screen's floating glass action. Content
        scrolls underneath, so the glass shows it through the frost, like the Bottom Nav. -->
-  <sc-if value="{{ floatMenu }}" hint-placeholder-val="{{ true }}">
-    <div class="rw-appbar-scrim" aria-hidden="true"><i></i><i></i><i></i><b></b></div>
+  <sc-if value="{{ appbarScrim }}" hint-placeholder-val="{{ true }}">
+    <div class="{{ appbarScrim }}" aria-hidden="true"><i></i><i></i><i></i><b></b></div>
   </sc-if>
   <div class="fake-status rw-status" aria-hidden="true">9:41</div>
   <sc-if value="{{ floatMenu }}" hint-placeholder-val="{{ true }}">
@@ -3735,10 +3735,13 @@ class Component extends DCLogic {
     const overall = this.rec(all);
     const q = s.search.trim().toLowerCase();
     const exists = s.players.some(p => p.name.toLowerCase() === q);
+    const scrollCls = ['matches', 'insights', 'focus', 'focusDetail', 'detail', 'voice', 'review', 'players', 'player', 'profile', 'settings', 'account', 'password', 'language', 'notifications', 'privacy', 'login', 'signup', 'forgot', 'resetSent', 'onboarding'].includes(s.screen)
+      ? 'rw-scroll is-v2' + (['detail', 'focusDetail', 'player', 'profile', 'settings', 'account', 'password', 'language', 'notifications', 'privacy'].includes(s.screen) ? ' is-detail' : '') : 'rw-scroll';
     const v = {
       scrollRef: this.scrollRef, onScroll: this.onScroll, overall, greeting: this.greeting(all),
-      scrollCls: ['matches', 'insights', 'focus', 'focusDetail', 'detail', 'voice', 'review', 'players', 'player', 'profile', 'settings', 'account', 'password', 'language', 'notifications', 'privacy', 'login', 'signup', 'forgot', 'resetSent', 'onboarding'].includes(s.screen)
-        ? 'rw-scroll is-v2' + (['detail', 'focusDetail', 'player', 'profile', 'settings', 'account', 'password', 'language', 'notifications', 'privacy'].includes(s.screen) ? ' is-detail' : '') : 'rw-scroll',
+      scrollCls,
+      // Scrim under the App bar on every V2 screen, so scrolled content never shows through the bar or the status bar.
+      appbarScrim: scrollCls.includes('is-v2') ? 'rw-appbar-scrim' + (scrollCls.includes('is-detail') ? ' is-detail' : '') : '',
       isMatches: s.screen === 'matches', isInsights: s.screen === 'insights', isLog: s.screen === 'log', isVoice: s.screen === 'voice' && !!s.voice, isReview: s.screen === 'review' && !!s.log, voiceRef: this.voiceRef,
       isDetail: s.screen === 'detail', isPlayers: s.screen === 'players', isPlayer: s.screen === 'player',
       isLogin: s.screen === 'login', isSignup: s.screen === 'signup', isSplash: s.screen === 'splash', skipSplash: () => this.leaveSplash(),

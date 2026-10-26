@@ -218,6 +218,8 @@
   -webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.85) 40%,rgba(0,0,0,.4) 75%,transparent 100%);
   mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.85) 40%,rgba(0,0,0,.4) 75%,transparent 100%);}
 .rw-appbar-scrim>i{position:absolute;inset:0;}
+/* Detail pages have no glow, so their scrim tints with the plain background. */
+.rw-appbar-scrim.is-detail>b{background:var(--rw-bg-app);}
 .rw-appbar-scrim>i:nth-child(1){-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);-webkit-mask-image:linear-gradient(180deg,#000 50%,transparent 100%);mask-image:linear-gradient(180deg,#000 50%,transparent 100%);}
 .rw-appbar-scrim>i:nth-child(2){-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);-webkit-mask-image:linear-gradient(180deg,#000 30%,transparent 75%);mask-image:linear-gradient(180deg,#000 30%,transparent 75%);}
 .rw-appbar-scrim>i:nth-child(3){-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask-image:linear-gradient(180deg,#000 10%,transparent 50%);mask-image:linear-gradient(180deg,#000 10%,transparent 50%);}
@@ -270,6 +272,10 @@
 .rw-appbar-name{font:var(--rw-type-appbar-title);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);margin:0;}
 /* Detail page (Figma Focus Details 203:6377): the name sits in the middle of the screen, Back on the left, an
    optional action on the right. The empty third column keeps the name centred when there is no action. */
+/* On V2 screens the in-page App bar stays at its row while the page scrolls, above the scrim (same as the floating ⋯).
+   Sheets and the ⋯ menu sit above it. */
+.rw-scroll.is-v2 .rw-appbar-title{position:sticky;top:0;z-index:1;}   /* top 0 = the scroll padding edge, i.e. --rw-appbar-top */
+.rw-sheet-scrim,.rw-sheet,.rw-menu-scrim,.rw-menu{z-index:2;}
 .rw-appbar-title.is-centered{display:grid;grid-template-columns:var(--rw-appbar-btn) 1fr var(--rw-appbar-btn);}  /* columns = the 40px visible button (its 44px hit area overhangs 2px each side), so ⋯ lands where the floating one is */
 .rw-appbar-title.is-centered>.rw-appbar-name{grid-column:2;text-align:center;}
 /* Detail page body: App bar, then the first component 40px below it, then 24px between components. */
