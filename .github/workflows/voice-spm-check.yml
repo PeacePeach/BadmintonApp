@@ -1,0 +1,65 @@
+# Temporary check (branch ci/voice-spm-check only): does the voice plugin install and build in a
+# Capacitor 8 Swift Package Manager iOS project, through the real prepare-ios-release.sh?
+name: Voice SPM install check
+on:
+  push:
+    branches: [ci/voice-spm-check]
+  workflow_dispatch: {}
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: feature/voice-g3-integration, fetch-depth: 0, path: BadmintonApp }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Fresh Capacitor 8 project with SPM (no Podfile)
+        run: |
+          set -euo pipefail
+          mkdir -p cap/www && cd cap
+          echo '<html><body>placeholder</body></html>' > www/index.html
+          npm init -y >/dev/null
+          npm i @capacitor/core@8 @capacitor/cli@8 @capacitor/ios@8
+          echo '{"appId":"com.rallywise.spmcheck","appName":"Rallywise","webDir":"www"}' > capacitor.config.json
+          npx cap add ios
+          test ! -f ios/App/Podfile && echo "No Podfile: SPM project"
+          ls ios/App
+      - name: Run prepare-ios-release.sh (the real script, real PlistBuddy)
+        run: bash BadmintonApp/scripts/prepare-ios-release.sh --cap "$PWD/cap" --repo "$PWD/BadmintonApp" --branch feature/voice-g3-integration
+      - name: Run it again (must be a no-op for voice)
+        run: bash BadmintonApp/scripts/prepare-ios-release.sh --cap "$PWD/cap" --repo "$PWD/BadmintonApp" --branch feature/voice-g3-integration
+      - name: What changed
+        run: |
+          cd cap
+          grep -n speech package.json
+          cat ios/App/CapApp-SPM/Package.swift
+          /usr/libexec/PlistBuddy -c 'Print :NSMicrophoneUsageDescription' -c 'Print :NSSpeechRecognitionUsageDescription' ios/App/App/Info.plist
+          grep -c "nativeSpeech()" "ios/App/App/public/Badminton Tracker.dc.html"
+      - name: Build for iOS Simulator (unsigned)
+        run: |
+          set -o pipefail
+          cd cap/ios/App
+          xcodebuild -project App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath "$RUNNER_TEMP/dd-sim" CODE_SIGNING_ALLOWED=NO build | tail -40
+      - name: Build for iPhone (arm64, unsigned)
+        run: |
+          set -o pipefail
+          cd cap/ios/App
+          xcodebuild -project App.xcodeproj -scheme App -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath "$RUNNER_TEMP/dd-dev" CODE_SIGNING_ALLOWED=NO build | tail -40
+      - name: Plugin is linked and permission texts are in the built app
+        run: |
+          set -euo pipefail
+          APP="$(find "$RUNNER_TEMP/dd-dev" -name 'App.app' -path '*Release-iphoneos*' | head -1)"
+          echo "$APP"
+          nm -gU "$APP/App" 2>/dev/null | grep -i -m5 SpeechRecognitionPlugin || strings "$APP/App" | grep -m5 SpeechRecognitionPlugin
+          strings "$APP/App" | grep -m3 'SpeechRecognition' || true
+          /usr/libexec/PlistBuddy -c 'Print :NSMicrophoneUsageDescription' -c 'Print :NSSpeechRecognitionUsageDescription' "$APP/Info.plist"
+      - name: Launch in the iOS Simulator and check the plugin registers
+        run: |
+          set -euo pipefail
+          APP="$(find "$RUNNER_TEMP/dd-sim" -name 'App.app' -path '*Debug-iphonesimulator*' | head -1)"
+          DEV="$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin)["devices"]; print(next(x["udid"] for k,v in d.items() if "iOS" in k for x in v if "iPhone" in x["name"]))')"
+          xcrun simctl boot "$DEV"; xcrun simctl bootstatus "$DEV" -b
+          xcrun simctl install "$DEV" "$APP"
+          xcrun simctl launch --console-pty "$DEV" com.rallywise.spmcheck > launch.log 2>&1 & sleep 25; kill %1 || true
+          cat launch.log | head -60
