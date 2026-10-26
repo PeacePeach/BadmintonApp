@@ -32,6 +32,7 @@
      KeyInsight, split ............ .rw-key.is-split > .rw-key-head + .rw-key-split > .rw-key-split-text (.rw-key-title + .rw-key-body) + .rw-key-chart[data-kind=trend|compare|strip] (drawn by key-chart.js)
      Section header ............... .rw-section-head > .rw-section-title + .rw-hint
      Tile full wide ............... .rw-surface.rw-tile.rw-advice > .rw-advice-head (.rw-icon-badge | .rw-avatar + .rw-advice-text: .rw-name + .rw-meta) + .rw-advice-divider + .rw-advice-tip (.rw-label[.is-accent] + .rw-advice-tip-text)
+     Build Next grid .............. .rw-advice-grid (+ .is-single for one card) holding .rw-advice.is-half tiles
      Tile half width .............. .rw-surface.rw-tile.rw-advice.is-half > .rw-advice-body (.rw-advice-text: .rw-name + .rw-advice-desc, divider, tip) + .rw-btn-secondary (Add to Focus; there is no In Focus state, Han 2026-10-24)
      Tile label (no tracking) ..... .rw-label[.is-accent: B100]  (Grow labels; Performance keeps the tracked .rw-eyebrow)
      Avatar / Fancy (icon badge) .. .rw-icon-badge (40px, gradient B100 ring, B100 icon 20px)
@@ -538,6 +539,9 @@ button.rw-input-row{cursor:pointer;}
 .rw-label.is-accent{color:var(--rw-advice-label-accent);}
 .rw-advice-tip-text{font:var(--rw-type-tile-text);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);text-wrap:pretty;}
 .rw-advice .rw-btn{width:100%;}
+/* Build Next grid (Han 2026-10-26): 1 card full width, 2 side by side, 3-4 two per row; 10px gap. */
+.rw-advice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+.rw-advice-grid.is-single{grid-template-columns:minmax(0,1fr);}
 .rw-icon-badge{position:relative;width:var(--rw-icon-badge-size);height:var(--rw-icon-badge-size);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--rw-icon-badge-fg);}
 .rw-icon-badge::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;background:var(--rw-icon-badge-ring);pointer-events:none;
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);}

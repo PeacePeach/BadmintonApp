@@ -606,7 +606,7 @@ button:disabled{cursor:default !important;}
             <sc-if value="{{ grow.showBuild }}" hint-placeholder-val="{{ true }}">
             <section style="display:flex;flex-direction:column;gap:16px;">
               <div class="rw-section-head"><h2 class="rw-section-title">{{ tx.buildNext }}</h2><p class="rw-hint">{{ tx.buildNextSub }}</p></div>
-              <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;">
+              <div class="rw-advice-grid {{ grow.buildGridCls }}">
                 <sc-for list="{{ grow.build }}" as="b" hint-placeholder-count="2">
                   <div class="rw-surface rw-tile rw-advice is-half">
                     <div class="rw-advice-body">
@@ -4136,10 +4136,12 @@ class Component extends DCLogic {
     const doneIn = r => r ? r.marks.filter(Boolean).length : 0;
     // Build Next only offers what isn't in Focus; once added, the tile leaves (the next candidate, if any, moves up).
     if (v.grow && v.grow.build) {
-      v.grow.build = this.openRecs(v.grow.build, { generatedAt: s.aiGrow && this.live() ? s.aiGrow._generatedAt : null }).map(b => ({ ...b,
+      // Up to 4 (the engine sends at most 4): 1 full width, 2 side by side, 3-4 two per row (.rw-advice-grid).
+      v.grow.build = this.openRecs(v.grow.build, { generatedAt: s.aiGrow && this.live() ? s.aiGrow._generatedAt : null, max: 4 }).map(b => ({ ...b,
         fLabel: this.t('addToFocus'), fIcon: 'Plus', fCls: 'rw-btn-secondary',
         focus: () => this.openFocusSheet({ mode: 'grow', title: b.name, goal: b.action || '', topicId: b.topicId || this.topicKey(b.name, b.tag) || null }) }));
       v.grow.showBuild = !!v.grow.build.length;
+      v.grow.buildGridCls = v.grow.build.length === 1 ? 'is-single' : '';
     }
     if (v.grow && v.grow.strengths) v.grow.strengths = v.grow.strengths.map(k => ({ ...k, icon: this.skillIcon(k.name, k.tag) }));
     v.isFocus = s.screen === 'focus'; v.isFocusDetail = s.screen === 'focusDetail';
