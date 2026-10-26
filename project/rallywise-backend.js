@@ -317,10 +317,14 @@
       // _generatedAt: when the insight was made (Build Next uses it to tell new evidence from old).
       return data && data.insight ? { ...data.insight, _generatedAt: data.generated_at || new Date().toISOString() } : null;
     },
-    // The one cached insight, in whichever language it was last made: check .lang (none means English).
-    async cached() {
+    // The cached insight in this language, or null. The row holds the latest insight at the top level (no lang means
+    // English) and the other language's latest under other_lang.
+    async cached(lang) {
       const row = await run(sb().from('ai_insights').select('insight_json,generated_at').maybeSingle());
-      return row ? { ...row.insight_json, _generatedAt: row.generated_at } : null;
+      if (!row || !row.insight_json) return null;
+      const { other_lang, ...top } = row.insight_json, want = lang === 'zh' ? 'zh' : 'en';
+      if ((top.lang || 'en') === want) return { ...top, _generatedAt: row.generated_at };
+      return other_lang && other_lang.insight && (other_lang.insight.lang || 'en') === want ? { ...other_lang.insight, _generatedAt: other_lang.generated_at } : null;
     }
   };
 

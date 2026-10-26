@@ -2039,6 +2039,12 @@ const I18N = {
     doublesPlay: 'Doubles Play', doublesPlaySub: 'Patterns from your doubles matches',
     oppRecord: "You're {w}–{l} against {name}.", notEnough: 'Not Enough Data Yet',
     notEnoughAiBody: 'Log a few more matches and add notes about what worked, what cost points, or what you noticed.',
+    // Key Insight states (Engine v12): not enough matches for any comparison, enough but nothing changed, making one, failed.
+    notEnoughKeyBody: 'Grow needs 6 matches to spot a change. Log {n} more.',
+    noTrendTitle: 'No clear change yet', noTrendBody: "Your last {n} matches don't show a clear shift. Below is what your notes keep pointing to.",
+    noTrendBodyEmpty: "Your last {n} matches don't show a clear shift. Keep noting what worked and what cost points.",
+    keyLoadingTitle: 'Looking at your matches…', keyLoadingBody: 'This takes a few seconds.',
+    keyErrorTitle: "Couldn't update insights", keyErrorBody: 'Check your connection, then open Grow again.',
     notEnoughBody: 'Tag what worked and what cost you points when you log matches, or add notes on opponents. Grow builds from those.',
     costPoints: 'Cost you points in {n} of your last {total} tagged matches.', workingIn: 'Tagged as working in {n} of your last {total} wins.',
     // Log Match
@@ -2192,6 +2198,11 @@ const I18N = {
     doublesPlay: '双打配合', doublesPlaySub: '从你的双打比赛里发现的规律',
     oppRecord: '对 {name} {w}胜 {l}负', notEnough: '数据还不够',
     notEnoughAiBody: '再记录几场比赛，写下哪里打得好、哪里丢分，或者你注意到的细节。',
+    notEnoughKeyBody: '至少需要6场比赛才能看出变化，再记录{n}场吧。',
+    noTrendTitle: '暂时没有明显变化', noTrendBody: '最近{n}场还看不出明显的变化。下面是你的笔记里反复出现的点。',
+    noTrendBodyEmpty: '最近{n}场还看不出明显的变化。赛后继续记下哪里打得好、哪里丢分。',
+    keyLoadingTitle: '正在分析你的比赛…', keyLoadingBody: '需要几秒钟。',
+    keyErrorTitle: '暂时无法更新', keyErrorBody: '请检查网络，然后重新打开提升页。',
     notEnoughBody: '记录比赛时标出打得好和丢分的地方，或写下对手记录，提升页就会根据这些给出建议。',
     costPoints: '最近 {total} 场有标签的比赛中，{n} 场在这里丢分。', workingIn: '最近 {total} 场胜利中，{n} 场标记为打得好。',
     editMatch: '编辑比赛', stepOf: '第 {n} 步，共 {total} 步',
@@ -2369,7 +2380,7 @@ class Component extends DCLogic {
       screen: screens[start] || 'matches', pwVisible: false, agree: false, ob: this.newOb(),
       f: this.blankForm(), errors: {}, banner: null, busy: null, resetEmail: 'sam@rallywise.app', resendIn: 0,
       ...this.authPreset(p.authError),
-      insTab: /[?&]preview=grow\b/i.test(typeof location === 'undefined' ? '' : location.search) && start === 'Insights' ? 'coach' : 'progress', aiGrow: null, growBusy: false, back: start === 'Match Detail' ? [{ screen: 'matches' }] : start === 'Focus Detail' ? [{ screen: 'focus' }] : [], filter: 'All', menu: false, confirmDelete: null, detailId: null, playerId: null, search: '', toast: null,
+      insTab: /[?&]preview=grow\b/i.test(typeof location === 'undefined' ? '' : location.search) && start === 'Insights' ? 'coach' : 'progress', aiGrow: null, growBusy: false, growError: false, back: start === 'Match Detail' ? [{ screen: 'matches' }] : start === 'Focus Detail' ? [{ screen: 'focus' }] : [], filter: 'All', menu: false, confirmDelete: null, detailId: null, playerId: null, search: '', toast: null,
       ...this.dataFor(p.dataState, players, matches, focuses, focusPeriods), log: start === 'Log Match' ? this.newLog() : null, voice: start === 'Log Match (Voice)' || start === 'Review Match (Voice)' ? this.newVoice() : null,
       focusId: start === 'Focus Detail' ? 'f0' : null, showDone: false, sheet: null, confirmDeleteFocus: null, day: null,
       email: 'sam@rallywise.app', acct: { name: '', level: null, cur: '', next: '' }, prefs: this.newPrefs(),
@@ -2460,20 +2471,26 @@ class Component extends DCLogic {
       this._handlingAppUrl = false;
     }
   }
-  async refreshGrow() {
-    if (!this.live() || !this.user || this.state.growBusy) return;
-    this.setState({ growBusy: true, aiGrow: null });
+  // Asks generate-grow-insights for the Grow insight in the app language (served from its cache when nothing changed).
+  // stale: matches changed, so the insight on screen no longer matches them and is taken down while the new one is
+  // made (the Key Insight tile says it is being worked out). Opening Grow with nothing changed keeps it on screen.
+  // A change that lands while a call is running runs another one after it, so the result is never left stale.
+  async refreshGrow({ stale = false } = {}) {
+    if (!this.live() || !this.user) return;
+    if (this.state.growBusy) { if (stale) { this._growAgain = true; this.setState({ aiGrow: null }); } return; }
+    const keep = !stale && this.state.aiGrow && this.insightLang(this.state.aiGrow) === this.lang();
+    this.setState({ growBusy: true, growError: false, growNone: false, ...(keep ? {} : { aiGrow: null }) });
+    const lang = this.lang();
     try {
       const b = await this.api();
-      const lang = this.lang();
       const insight = await b.insights.generate(lang);
-      if (insight && this.insightLang(insight) === this.lang()) this.setState({ aiGrow: insight, growBusy: false });
-      else this.setState({ growBusy: false });
-      // The language changed while this was generating: make the other one now.
-      if (lang !== this.lang()) setTimeout(() => this.refreshGrow(), 0);
+      if (insight && this.insightLang(insight) === this.lang() && !this._growAgain) this.setState({ aiGrow: insight, growBusy: false });
+      else this.setState({ growBusy: false, growNone: !insight });
     } catch (e) {
-      this.setState({ growBusy: false });
+      this.setState({ growBusy: false, growError: !this.state.aiGrow });
     }
+    // The language or the matches changed while this was running: make it again now.
+    if (this._growAgain || lang !== this.lang()) { this._growAgain = false; setTimeout(() => this.refreshGrow({ stale: true }), 0); }
   }
   // On open: restore the saved session, load its data, then leave the splash.
   async restore() {
@@ -2522,7 +2539,7 @@ class Component extends DCLogic {
     this._saved = this.dataState({ ...a, focuses: a.focuses || [], focusPeriods: a.focusPeriods || [] }); this.sync = sync; this.user = { ...user, anonId }; this._retryUser = null;
     const savedLang = a.prefs && a.prefs.lang;
     if (savedLang === 'en' || savedLang === 'zh') { this._deviceLang = savedLang; try { localStorage.setItem(LANG_KEY, savedLang); } catch (e) {} }
-    if (b.insights) b.insights.cached().then(insight => { if (insight && /^20\d{2}-\d{2}-\d{2}-v(?:1\d|[2-9]\d+)$/.test(insight.engine_version || '') && this.user && this.user.id === user.id && this.insightLang(insight) === this.lang()) this.setState({ aiGrow: insight }); }).catch(() => {});
+    if (b.insights) b.insights.cached(this.lang()).then(insight => { if (insight && /^20\d{2}-\d{2}-\d{2}-v(?:1\d|[2-9]\d+)$/.test(insight.engine_version || '') && this.user && this.user.id === user.id && this.insightLang(insight) === this.lang()) this.setState({ aiGrow: insight }); }).catch(() => {});
     if (migrated) this.flash(this.t('tMigrated'));
     const A = window.RallywiseAnalytics, c = this.analyticsCtx(a.prefs);
     if (A) { A.setAccount(anonId); if (c && c.consent === 'no') A.clear(anonId); }
@@ -2543,7 +2560,7 @@ class Component extends DCLogic {
     if (window.RallywiseAnalytics) window.RallywiseAnalytics.setAccount(null);
     this.toAuth('login');
     this.setState({ email: '', players: [], matches: [], focuses: [], focusPeriods: [], focusId: null, sheet: null, confirmDeleteFocus: null, prefs: this.newPrefs(), onboarded: true, detailId: null, playerId: null, log: null, menu: false,
-      blocked: null, loading: false, aiGrow: null, growBusy: false, confirmDelete: null, confirmDeleteAccount: false });
+      blocked: null, loading: false, aiGrow: null, growBusy: false, growError: false, confirmDelete: null, confirmDeleteAccount: false });
   }
   // Log Out: saves anything still unsaved if it can, ends this device's session and clears the screen.
   async signOut() {
@@ -3247,7 +3264,7 @@ class Component extends DCLogic {
     this.commit(m, matches);
   }
   commit(m, matches) {
-    setTimeout(() => this.refreshGrow(), 0);
+    setTimeout(() => this.refreshGrow({ stale: true }), 0);
     if (this.state.log && this.state.log.editId) {
       this.setState(s => ({ matches, screen: 'detail', detailId: m.id, back: s.back.slice(0, -1), log: null }));
       return this.flash(this.t('tChangesSaved'));
@@ -3273,7 +3290,7 @@ class Component extends DCLogic {
     const gone = this.state.matches.find(m => m.id === id), at = gone && Date.parse(gone.createdAt);
     this.track('match_deleted', { match_count: matches.length, minutes_since_logged: at ? Math.max(0, Math.round((Date.now() - at) / 6e4)) : null });
     this.setState({ matches, confirmDelete: null, screen: 'matches', back: [], detailId: null, log: null });
-    setTimeout(() => this.refreshGrow(), 0);
+    setTimeout(() => this.refreshGrow({ stale: true }), 0);
     this.flash(this.t('tMatchDeleted'));
   }
   // Settings & account. Saves reuse the auth request, so the busy spinner and network banner match.
@@ -3785,13 +3802,15 @@ class Component extends DCLogic {
           const tagOf = x => x.tag || (String(x.topic_id || '').startsWith('tag:') ? x.topic_id.slice(4) : undefined);
           const build = (ai.buildNext || []).map(x => ({ ...x, tag: tagOf(x), topicId: x.topic_id || null })),
             strengths = (ai.strengths || []).map(x => ({ ...x, tag: tagOf(x), topicId: x.topic_id || null }));
-          // An Engine V2 Key Insight has status ok | insufficient and a chart from the engine's evidence; one cached
-          // before V2 has no status and may carry the old { current_percent } (shown as the legacy bar).
-          const key = ai.keyInsight && ai.keyInsight.status !== 'insufficient' && ai.keyInsight.title ? ai.keyInsight : null;
-          // Never silently remove the Key Insight section. Insufficient evidence must be visible
-          // as a truthful, localized empty state rather than an absent tile.
-          const keyFallbackTitle = this.t('notEnough');
-          const keyFallbackBody = this.t('notEnoughAiBody');
+          // An Engine V2 Key Insight has status ok | no_trend | insufficient and a chart from the engine's evidence; one
+          // cached before V2 has no status and may carry the old { current_percent } (shown as the legacy bar).
+          const ki = ai.keyInsight || {}, key = ki.status !== 'insufficient' && ki.status !== 'no_trend' && ki.title ? ki : null;
+          // Never silently remove the Key Insight section, and never say one thing for the other (Engine v12):
+          //   no_trend      enough matches to compare, nothing changed clearly: says so, and points at the lists below
+          //   insufficient  too few matches for any comparison: says how many more (more); older rows have no count
+          const keyFallbackTitle = this.t(ki.status === 'no_trend' ? 'noTrendTitle' : 'notEnough');
+          const keyFallbackBody = ki.status === 'no_trend' ? this.t(build.length || strengths.length ? 'noTrendBody' : 'noTrendBodyEmpty', { n: (ki.counts && ki.counts.matches) || all.length })
+            : ki.more ? this.t('notEnoughKeyBody', { n: ki.more }) : this.t('notEnoughAiBody');
           const kc = key && key.chart && ['trend', 'compare', 'strip'].includes(key.chart.pattern) && Array.isArray(key.chart.values) && key.chart.values.length ? key.chart : null;
           const legacyPct = key && !kc && key.chart && typeof key.chart.current_percent === 'number';
           v.grow = {
@@ -3803,21 +3822,20 @@ class Component extends DCLogic {
             keyPrevious: legacyPct ? Math.max(0, Math.min(100, key.chart.previous_percent)) + '%' : '0%',
             showKeyChart: !!legacyPct,
             build, strengths, opps, doubles,
-            showKey: true, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: !!doubles.length,
-            empty: !key && !build.length && !strengths.length && !opps.length && !doubles.length &&
-              empty('no-insights', this.t('notEnough'), this.t('notEnoughAiBody'))
+            // The Key Insight tile already says why there is nothing else, so no second empty state under it.
+            showKey: true, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: !!doubles.length, empty: null
           };
         } else {
-          const tagged = chron.filter(m => m.wt.length || m.lt.length).slice(-6), wins = chron.filter(m => m.wt.length && this.res(m.games).win).slice(-6);
-          const top = (list, k, max = 2) => Object.entries(list.flatMap(m => m[k]).filter(t => t !== 'Other').reduce((c, t) => ({ ...c, [t]: (c[t] || 0) + 1 }), {}))
-            .filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]).slice(0, max);
-          // Every qualifying tag is a candidate; Build Next shows the first two not already in Focus.
-          const build = top(tagged, 'lt', Infinity).map(([t, n]) => ({ name: this.tagLabel(t), tag: t, evidence: this.t('costPoints', { n, total: tagged.length }), action: '' }));
-          const strengths = top(wins, 'wt').map(([t, n]) => ({ name: this.tagLabel(t), tag: t, signal: this.t('workingIn', { n, total: wins.length }), action: '' }));
-          const opps = [...new Set(all.flatMap(m => m.opps).filter(id => !this.unknown(id)))].map(id => ({ id, r: this.vs(id), note: all.find(m => m.on && m.opps.includes(id)) }))
-            .filter(o => o.note && this.nm(o.id)).sort((a, b) => a.r.pct - b.r.pct || b.r.n - a.r.n).slice(0, 2).map(o => op(o.id, o.note.on));
-          v.grow = { keyTitle: this.t('notEnough'), keyBody: this.t('notEnoughAiBody'), keyChart: { kind: '', values: '', quote: '', split: '', xlabels: '' }, keySplit: false, keyLegacy: true, keyCurrent: '0%', keyPrevious: '0%', showKeyChart: false, build, strengths, opps, doubles: [], showKey: true, showBuild: !!build.length, showStrengths: !!strengths.length, showOpps: !!opps.length, showDoubles: false,
-            empty: !build.length && !strengths.length && !opps.length && empty('no-insights', this.t('notEnough'), this.t('notEnoughBody')) };
+          // A live account with no insight on screen: it is being made (or the call failed). Every section comes from
+          // the engine only, so nothing is worked out here: no second classifier that could sort a skill differently,
+          // and no "Not Enough Data" for an account that has matches (only the engine can say that).
+          const err = s.growError && !s.growBusy;
+          // However Grow came on screen (a tab, Back from Settings after a language change...), an insight is asked for.
+          if (!s.growBusy && !s.growError && !s.growNone && all.length && !this._growQueued) { this._growQueued = true; setTimeout(() => { this._growQueued = false; this.refreshGrow(); }, 0); }
+          // growNone: the function had no matches to work from (it answers null only then).
+          v.grow = { keyTitle: this.t(err ? 'keyErrorTitle' : s.growNone ? 'notEnough' : 'keyLoadingTitle'), keyBody: this.t(err ? 'keyErrorBody' : s.growNone ? 'notEnoughBody' : 'keyLoadingBody'), keyChart: { kind: '', values: '', quote: '', split: '', xlabels: '' },
+            keySplit: false, keyLegacy: true, keyCurrent: '0%', keyPrevious: '0%', showKeyChart: false, build: [], strengths: [], opps: [], doubles: [],
+            showKey: true, showBuild: false, showStrengths: false, showOpps: false, showDoubles: false, empty: null };
         }
       }
     }

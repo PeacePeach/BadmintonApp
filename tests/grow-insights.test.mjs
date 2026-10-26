@@ -450,12 +450,19 @@ test('one side per skill: Build Next and Strengths never share a topic; the stro
   assert.ok(str.every(x => !ids.has(x.topic_id)));
   // The Key Insight follows the same side.
   assert.ok(G.keyCandidates(ms, null, { all: true }).filter(c => c.tag === 'Net').every(c => c.side === 'cost'));
-  // A tie with no differentiated evidence is ambiguous, not automatically a weakness.
+  // A tie is mixed: never a strength, never hidden. It is in Build Next and its evidence gives both counts.
   fresh();
   const tie = [[], [], [], ['Net'], ['Net'], ['Net']].map((lt, i) => M(W, lt.length ? lt : ['Other'], i < 3 ? ['Net'] : []));
-  assert.equal(G.topicSides(tie).Net, 'ambiguous');
-  assert.equal(G.buildCandidates(tie).some(x => x.tag === 'Net'), false);
+  assert.equal(G.topicSides(tie).Net, 'mixed');
   assert.equal(G.strengthCandidates(tie).some(x => x.tag === 'Net'), false);
+  const [net] = G.buildCandidates(tie);
+  assert.deepEqual([net.tag, net.k, net.w, net.n, net.mixed], ['Net', 3, 3, 6, true]);
+  assert.ok(G.keyCandidates(tie, null, { all: true }).every(c => c.tag !== 'Net'), 'no strip for a mixed skill');
+  const en = G.finalizeItems([net], [{ topic_id: 'tag:Net', name: 'Net play', evidence: 'You noted net play costing you points in 3 of your last 6 matches.', action: '' }], 'build', 'en')[0];
+  assert.equal(en.evidence, 'You noted it costing points in 3 of your last 6 matches, and working in 3.');
+  assert.equal(en.name, 'Net play'); assert.equal(en.mixed, true);
+  assert.equal(G.finalizeItems([net], null, 'build', 'zh')[0].evidence, '最近6场里，3场你记下它丢分，3场记下它打得好。');
+  for (const lang of BOTH) assert.deepEqual(G.checkItem(G.itemTemplate(net, 'build', lang), net, 'build', lang), [], lang);
 });
 
 test('regression (Han, v7 screenshot): a 4/6 strength is not wiped out by a more recent 2/6 cost, in both languages', () => {
@@ -503,7 +510,7 @@ test('Build Next actions (Han): no tactical correction from tags or a single not
 });
 
 test('engine version is bumped so cached v7 insights regenerate', () => {
-  assert.equal(G.ENGINE_VERSION, '2026-10-26-v11');
+  assert.equal(G.ENGINE_VERSION, '2026-10-26-v12');
 });
 
 test('opponent plans: only from notes about that opponent; record-only, unsupported or generic plans are left out', () => {
@@ -587,79 +594,77 @@ test('regression: AI evidence must state both occurrences and window, EN/ZH', ()
   }
 });
 
-test('mixed Smash evidence: distinct situations may be shown on both sides without inferring causes', () => {
-  fresh();
-  const ms = [
-    M(W,['Other'],['Smash'],{worked:'杀球靠边线打效果好'}),
-    M(W,['Other'],['Smash'],{worked:'杀球打边线很有效'}),
-    M(L,['Smash'],[],{lost:'后场杀球失误比较多'}),
-    M(L,['Other'],['Return']),
-    M(L,['Smash'],[],{lost:'后场杀球容易失误'}),
-    M(W,['Placement'],[])
-  ];
-  assert.equal(G.topicSides(ms).Smash,'both');
-  assert.equal(G.buildCandidates(ms).filter(x=>x.tag==='Smash').length,1);
-  assert.equal(G.strengthCandidates(ms).filter(x=>x.tag==='Smash').length,1);
-  const [b] = G.finalizeItems(G.buildCandidates(ms), null, 'build', 'zh');
-  const [w] = G.finalizeItems(G.strengthCandidates(ms), null, 'strength', 'zh');
-  assert.equal(b.name,'后场杀球'); assert.equal(w.name,'边线杀球');
-  assert.equal(b.advice_basis,'general');
-});
+// Han's own records (the Chinese notes from his account, as in the v10/v11 fixtures): Net is an active Focus,
+// Smash was noted working in the first 2 matches and costing points in 2 later ones.
+const hanRecords = () => { fresh(); return [
+  M(W, ['Net'], ['Smash'], { worked: '杀球靠边线效果很好' }), M(W, ['Net'], ['Smash']),
+  M(L, ['Smash'], [], { lost: '后场杀球失误比较多' }),
+  M(L, ['Return'], ['Serve'], { lost: '接发比较被动' }),
+  M(L, ['Smash', 'Defence'], [], { lost: '杀球太多。反手防守比较弱。' }),
+  M(L, ['Placement'], [], { lost: '网前吊球不好' })
+]; };
 
-test('mixed skill titles do not claim the context occurred in every tagged match', () => {
-  fresh();
-  const ms = [
-    M(W,['Net'],['Smash'],{worked:'杀球如果靠边线，对手不太接得到'}),
-    M(W,['Net'],['Smash']),
-    M(L,['Smash'],['Footwork'],{lost:'杀球似乎有点多，反手防守也弱'}),
-    M(W,['Return'],['Serve']),
-    M(L,['Smash'],['Return'],{lost:'后场杀球失误比较多'}),
-    M(L,['Placement'],[])
-  ];
-  assert.equal(G.topicSides(ms).Smash, 'both');
-  const b = G.finalizeItems(G.buildCandidates(ms),null,'build','zh').find(x=>x.tag==='Smash');
-  const w = G.finalizeItems(G.strengthCandidates(ms),null,'strength','zh').find(x=>x.tag==='Smash');
-  assert.equal(b.name,'后场杀球');
-  assert.equal(w.name,'边线杀球');
-  assert.match(b.evidence,/2场/);
-  assert.match(b.evidence,/1场涉及后场/);
-  assert.match(w.signal,/2场/);
-  assert.match(w.signal,/1场提到边线/);
-  assert.equal(b.advice_basis,'general');
-});
-
-test('secondary Build Next only from 2 actual notes across wider history, never active Focus', () => {
-  fresh();
-  const ms=[
-    M(W,['Other']),M(W,['Other']),M(L,['Defence']),M(L,['Other']),
-    M(W,['Net']),M(W,['Net']),M(L,['Smash']),M(W,['Other']),
-    M(L,['Smash','Defence']),M(W,['Other'])
-  ];
-  const focus=[{topic:'tag:Net',status:'active'}];
-  const items=G.buildCandidates(ms,focus,4);
-  assert.deepEqual(items.map(x=>x.tag),['Smash','Defence']);
-  assert.equal(items[1].k,2);
-  assert.equal(items[1].n,10);
-  const olderOnly=ms.map((m,i)=>i===2?{...m,lt:['Other']}:m);
-  assert.deepEqual(G.buildCandidates(olderOnly,focus,4).map(x=>x.tag),['Smash']);
-});
-
-test('tentative second suggestion needs a real skill-specific note and stays clearly one-off', () => {
-  fresh();
-  const ms=[
-    M(W,['Net'],['Smash'],{worked:'杀球靠边线效果很好'}),M(W,['Net'],['Smash']),
-    M(L,['Smash'],[],{lost:'后场杀球失误比较多'}),
-    M(L,['Return'],['Serve'],{lost:'接发比较被动'}),
-    M(L,['Smash','Defence'],[],{lost:'杀球太多。反手防守比较弱。'}),
-    M(L,['Placement'],[],{lost:'网前吊球不好'})
-  ];
-  const focus=[{topic:'tag:Net',status:'active'}];
-  const items=G.buildCandidates(ms,focus,4);
-  assert.deepEqual(items.map(x=>x.tag),['Smash','Defence']);
-  assert.equal(items[1].exploratory,true);
-  for(const lang of BOTH) {
-    const out=G.finalizeItems(items,null,'build',lang);
-    assert.match(out[1].evidence,lang==='zh'?/1场/:/1 of 6/);
-    assert.equal(out[1].advice_basis,'general');
+test("Han's records: one Smash item (mixed, both counts), no one-note suggestions, Key Insight from the results", () => {
+  const ms = hanRecords(), focus = [{ topic: 'tag:Net', status: 'active' }];
+  assert.equal(G.topicSides(ms).Smash, 'mixed');
+  const build = G.buildCandidates(ms, focus, 4);
+  assert.deepEqual(build.map(x => `${x.tag} ${x.k}/${x.n} w${x.w}`), ['Smash 2/6 w2'], 'Return, Defence and Placement were noted once each: not recommendations');
+  assert.deepEqual(G.strengthCandidates(ms), [], 'Serve was noted working once; Smash is mixed, not a strength');
+  // Only Smash's own words: the Defence half of "杀球太多。反手防守比较弱。" is not Smash evidence.
+  assert.deepEqual(build[0].notes, ['后场杀球失误比较多', '杀球太多']);
+  for (const lang of BOTH) {
+    const [b] = G.finalizeItems(build, null, 'build', lang);
+    assert.equal(b.name, lang === 'zh' ? '杀球' : 'Smash');
+    assert.match(b.evidence, lang === 'zh' ? /2场你记下它丢分，2场记下它打得好/ : /costing points in 2 of your last 6 matches, and working in 2/);
   }
+  // "Backcourt smashes" as the item's name needs the back court in 2+ notes; here it is in 1.
+  const [bad] = G.finalizeItems(build, [{ topic_id: 'tag:Smash', name: '后场杀球', evidence: 'x', action: '' }], 'build', 'zh');
+  assert.equal(bad.name, '杀球'); assert.ok(bad.issues.includes('name:detail_not_repeated'), String(bad.issues));
+  // Key Insight: games won fell from 4 of 6 to 0 of 6 (objective), so there is a real insight, not "not enough data".
+  const key = G.finalizeKey(G.keyCandidates(ms), null, 'en', ms);
+  assert.equal(key.status, 'ok'); assert.equal(key.pattern, key.candidate_id === 'trend:margin' ? 'trend' : 'compare');
+  assert.equal(key.evidence.source, 'scores'); assert.deepEqual(key.validation.issues, []);
+});
+
+test('two notes about the same situation make a specific item; the name may say it', () => {
+  fresh();
+  const ms = [M(W, ['Other'], ['Net']), M(L, ['Smash'], [], { lost: '后场杀球失误比较多' }), M(W, ['Other'], ['Net']),
+    M(L, ['Smash'], [], { lost: '后场杀球容易失误' }), M(W, ['Other']), M(L, ['Other'])];
+  const [b] = G.buildCandidates(ms);
+  assert.equal(b.basis, 'notes');
+  const [zh] = G.finalizeItems([b], [{ topic_id: 'tag:Smash', name: '后场杀球', evidence: '最近6场有2场你记下后场杀球丢分。', action: '后场杀球前先调整好位置。' }], 'build', 'zh');
+  assert.deepEqual(zh.issues, []); assert.equal(zh.name, '后场杀球'); assert.equal(zh.advice_basis, 'notes');
+});
+
+test('Build Next and Strengths use the same latest 6 noted matches; older evidence does not fill a slot', () => {
+  fresh();
+  const ms = [
+    M(W, ['Other']), M(W, ['Other']), M(L, ['Defence']), M(L, ['Other']),
+    M(W, ['Net']), M(W, ['Net']), M(L, ['Smash']), M(W, ['Other']),
+    M(L, ['Smash', 'Defence']), M(W, ['Other'])
+  ];
+  // Defence: 2 in all 10, but once in the latest 6. Net: active Focus.
+  assert.deepEqual(G.buildCandidates(ms, [{ topic: 'tag:Net', status: 'active' }], 4).map(x => `${x.tag} ${x.k}/${x.n}`), ['Smash 2/6']);
+  assert.deepEqual(G.buildCandidates(ms, [], 4).map(x => `${x.tag} ${x.k}/${x.n}`), ['Smash 2/6', 'Net 2/6'], 'Smash was noted in the last 3, Net was not');
+});
+
+test('Key Insight: "insufficient" only when no detector could run; "no_trend" when the evidence is there but nothing changed', () => {
+  // 4 matches: not enough for any detector. The tile says how many more it needs.
+  fresh();
+  const few = [M(W, ['Net']), M(L, ['Net']), M(W, ['Other']), M(L, ['Smash'])];
+  assert.deepEqual(G.finalizeKey(G.keyCandidates(few), null, 'en', few), { status: 'insufficient', counts: { matches: 4, scored: 4, results: 4, noted: 4 }, more: 2, reason: 'no_candidate' });
+  // Voice-only results ({ r }), 5 matches: still insufficient, 1 more.
+  fresh();
+  const voice = [W, L, W, L, W].map(() => M([{ r: 'W' }, { r: 'L' }, { r: 'W' }]));
+  assert.equal(G.finalizeKey([], null, 'en', voice).more, 1);
+  // 10 steady matches with notes, nothing changing: enough evidence, no clear change. Not "not enough data".
+  fresh();
+  const steady = Array.from({ length: 10 }, (_, i) => M(i % 2 ? L : W, i % 3 ? ['Other'] : ['Serve'], i % 4 ? [] : ['Net']));
+  assert.deepEqual(G.keyCandidates(steady), []);
+  const k = G.finalizeKey(G.keyCandidates(steady), null, 'zh', steady);
+  assert.equal(k.status, 'no_trend'); assert.equal(k.counts.matches, 10); assert.equal(k.title, undefined, 'no made-up copy');
+  // Han's v7 screenshot: a 4/6 strength under the quality bar. Enough evidence, no clear change.
+  fresh();
+  const han = [M(W, ['Other'], ['Smash']), M(W, ['Other'], ['Smash']), M(L, ['Other'], ['Smash']), M(L, ['Smash'], []), M(W, ['Other'], ['Smash']), M(L, ['Smash'], [])];
+  assert.equal(G.finalizeKey(G.keyCandidates(han), null, 'en', han).status, 'no_trend');
 });

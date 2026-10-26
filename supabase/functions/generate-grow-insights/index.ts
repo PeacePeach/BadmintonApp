@@ -52,17 +52,29 @@ Deno.serve(async req => {
     if (pe || me) throw pe || me;
 
     const recent = (matches || []).slice(0,10);
-    const previous:any = cached?.insight_json || null;
+    // One ai_insights row per user holds the latest insight at the top level (what older app versions read) and the
+    // other language's latest under other_lang, so switching EN <-> ZH and back is served from cache instead of
+    // overwriting the other language and paying for it again.
+    const slots:any[] = [];
+    if (cached?.insight_json) {
+      const { other_lang, ...top } = cached.insight_json;
+      slots.push({ lang: top.lang || "en", fp: cached.input_fingerprint, insight: top, generated_at: cached.generated_at });
+      if (other_lang?.insight) slots.push(other_lang);
+    }
+    // previous: the last insight in this language (its Key Insight is ranked down as "same as last time"; never the
+    // other language's, or EN and ZH could lead with different insights for the same matches). Focus topics may come
+    // from either.
+    const previous:any = slots.find(x => x.lang === lang)?.insight || null, anyPrevious:any = previous || slots[0]?.insight || null;
     // Every Focus as a topic, so Build Next can leave out active topics and bring back completed ones on new evidence.
-    const focus = (focusRows || []).map((f:any) => ({ topic: G.focusTopic(f, previous), status: f.status, completed_at: f.completed_at }));
+    const focus = (focusRows || []).map((f:any) => ({ topic: G.focusTopic(f, anyPrevious), status: f.status, completed_at: f.completed_at }));
     const INSIGHT_VERSION = G.ENGINE_VERSION;
     const fp = await hash(INSIGHT_VERSION + (lang === "zh" ? ":zh" : "") + JSON.stringify(recent.map((m:any)=>({
       id:m.id,date:m.date,type:m.type,partner:m.partner,opps:m.opps,games:m.games,wt:m.wt,lt:m.lt,
       worked:safe(m.worked),lost:safe(m.lost),opp_notes:safe(m.opp_notes)
     }))) + JSON.stringify(focus.map((f:any) => [f.topic, f.status, f.completed_at]).sort()));
 
-    if (cached?.input_fingerprint === fp)
-      return Response.json({insight:cached.insight_json,generated_at:cached.generated_at,cached:true},{headers:CORS});
+    const hit = slots.find(x => x.fp === fp);
+    if (hit) return Response.json({insight:hit.insight,generated_at:hit.generated_at,cached:true},{headers:CORS});
     if (!recent.length) return Response.json({insight:null,cached:false},{headers:CORS});
 
     const names:any = Object.fromEntries((players || []).map((p:any)=>[p.id,p.name]));
@@ -85,14 +97,18 @@ Deno.serve(async req => {
       },
       patterns:{ cost_points:counts(six,"lt"), worked:counts(six,"wt") },
       key_candidates:keyCands.map((c:any)=>G.candidateFacts(c, lang)),
-      build_candidates:buildCands.map((b:any)=>({topic_id:b.topic_id,tag:b.tag,k:b.k,n:b.n,returning:b.returning,notes:b.notes,advice_basis:b.basis})),
+      build_candidates:buildCands.map((b:any)=>({topic_id:b.topic_id,tag:b.tag,k:b.k,n:b.n,mixed:b.mixed,...(b.mixed?{w:b.w}:{}),returning:b.returning,notes:b.notes,advice_basis:b.basis})),
       strength_candidates:strengthCands.map((b:any)=>({topic_id:b.topic_id,tag:b.tag,k:b.k,n:b.n,notes:b.notes,advice_basis:b.basis})),
       opponents,
       doubles
     };
 
+    // The model only words what the engine found. With nothing to word, there is no call; when the call fails (or no
+    // key is set) every section still comes back from the engine with its template copy, and opponent plans and
+    // Doubles Play, which only the model writes, stay empty. A failed call is not cached, so the next visit retries.
     const key = Deno.env.get("OPENAI_API_KEY");
-    if (!key) return Response.json({error:"ai_not_configured"},{status:503,headers:CORS});
+    const needsAI = keyCands.length || buildCands.length || strengthCands.length || opponents.length || doubles;
+    let aiStatus = needsAI ? (key ? "ok" : "not_configured") : "skipped";
 
     const prompt = `You are Rallywise's badminton insight writer.
 Use only supplied verified facts and player notes. Never invent scores, counts, trends, opponents, or events.
@@ -139,27 +155,36 @@ Do not mention AI. Keep every card scannable on a phone.
 
 OUTPUT LANGUAGE: write every visible string in ${lang === "zh" ? "natural Simplified Chinese" : "English"}. Keep JSON keys, candidate_id, topic_id, player_id and the doublesPlay label values ("Try Next" / "Keep Doing") exactly as specified.`
 
-    const ai = await fetch("https://api.openai.com/v1/responses",{
-      method:"POST",
-      headers:{Authorization:`Bearer ${key}`,"Content-Type":"application/json"},
-      body:JSON.stringify({
-        model:"gpt-5-mini",
-        input:[{role:"system",content:prompt},{role:"user",content:JSON.stringify(facts)}],
-        text:{format:{type:"json_schema",name:"rallywise_grow",strict:true,
-          schema:G.modelSchema(keyCands.map((c:any)=>c.id), buildCands.map((b:any)=>b.topic_id), strengthCands.map((b:any)=>b.topic_id), opponents.map((o:any)=>o.player_id))}}
-      })
-    });
-    if (!ai.ok) {
-      const detail = await ai.text();
-      console.error("OpenAI request failed", ai.status, detail.slice(0, 2000));
-      return Response.json({error:"ai_failed",upstream_status:ai.status},{status:502,headers:CORS});
+    const empty = () => ({ keyInsight:null, buildNext:[], strengths:[], opponentPlans:[], doublesPlay:[] });
+    let parsed:any = empty();
+    if (aiStatus === "ok") {
+      try {
+        const ai = await fetch("https://api.openai.com/v1/responses",{
+          method:"POST",
+          headers:{Authorization:`Bearer ${key}`,"Content-Type":"application/json"},
+          body:JSON.stringify({
+            model:"gpt-5-mini",
+            input:[{role:"system",content:prompt},{role:"user",content:JSON.stringify(facts)}],
+            text:{format:{type:"json_schema",name:"rallywise_grow",strict:true,
+              schema:G.modelSchema(keyCands.map((c:any)=>c.id), buildCands.map((b:any)=>b.topic_id), strengthCands.map((b:any)=>b.topic_id), opponents.map((o:any)=>o.player_id))}}
+          })
+        });
+        if (!ai.ok) {
+          const detail = await ai.text();
+          console.error("OpenAI request failed", ai.status, detail.slice(0, 2000));
+          aiStatus = "failed";
+        } else parsed = JSON.parse(readOutput(await ai.json()));
+      } catch (e) {
+        console.error("OpenAI answer unusable", e);
+        aiStatus = "failed"; parsed = empty();
+      }
     }
-    const parsed = JSON.parse(readOutput(await ai.json()));
     parsed.lang = lang;
+    parsed.ai_status = aiStatus;
 
     parsed.engine_version = G.ENGINE_VERSION;
     // The engine's evidence decides the chart; the AI copy is kept only if it passes the checks, else the template.
-    parsed.keyInsight = G.finalizeKey(keyCands, parsed.keyInsight, lang);
+    parsed.keyInsight = G.finalizeKey(keyCands, parsed.keyInsight, lang, recent);
     parsed.buildNext = G.finalizeItems(buildCands, parsed.buildNext, "build", lang);
     parsed.strengths = G.finalizeItems(strengthCands, parsed.strengths, "strength", lang);
     const failed = [parsed.keyInsight, ...parsed.buildNext, ...parsed.strengths].filter((x:any) => x.copy_source && x.copy_source !== "ai");
@@ -172,12 +197,16 @@ OUTPUT LANGUAGE: write every visible string in ${lang === "zh" ? "natural Simpli
     parsed.opponentPlans = plans.filter((p:any) => !p.dropped);
     parsed.doublesPlay = G.finalizeDoubles(parsed.doublesPlay, doubles, lang);
 
-    const {error:ce} = await sb.from("ai_insights").upsert({
-      user_id:uid,input_fingerprint:fp,insight_json:parsed,generated_at:new Date().toISOString()
-    },{onConflict:"user_id"});
-    if (ce) throw ce;
+    const generated_at = new Date().toISOString();
+    if (aiStatus !== "failed") {
+      const other = slots.find(x => x.lang !== lang);
+      const {error:ce} = await sb.from("ai_insights").upsert({
+        user_id:uid,input_fingerprint:fp,insight_json:{ ...parsed, ...(other ? { other_lang:other } : {}) },generated_at
+      },{onConflict:"user_id"});
+      if (ce) throw ce;
+    }
 
-    return Response.json({insight:parsed,cached:false},{headers:CORS});
+    return Response.json({insight:parsed,generated_at,cached:false},{headers:CORS});
   } catch (e) {
     console.error(e);
     return Response.json({error:"server_error"},{status:500,headers:CORS});

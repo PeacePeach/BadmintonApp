@@ -17,7 +17,7 @@
 //   compare  a count compared between your last 3 matches and the 3 before (games won, close games won)
 //   strip    whether a self-reported observation was noted in each match (0/1), in order
 
-export const ENGINE_VERSION = '2026-10-26-v11';
+export const ENGINE_VERSION = '2026-10-26-v12';
 export const SKILL_TAGS = ['Serve', 'Return', 'Net', 'Smash', 'Defence', 'Footwork', 'Placement'];
 const WINDOW = 10;     // latest matches the engine reads
 const NOTE_N = 6;      // matches with notes in a Skill Tag window
@@ -255,9 +255,11 @@ export function rankCandidates(cands, previousId) {
 // The Key Insight candidates worth showing, best first. all: true keeps the ones under the quality bar (tests, reports).
 export function keyCandidates(matches, previousId, { all = false } = {}) {
   const chron = normalize(matches);
-  const sides = topicSides(matches); // a tag that belongs on the other side (see Build Next) is not a Key Insight either
+  // A strip only on the side the skill is sorted to (see Build Next and Strengths), so the Key Insight never says the
+  // opposite of the lists under it. Mixed skills have no strip.
+  const sides = topicSides(matches);
   const found = [trendCandidate(chron), compareCandidate(chron, 'games'), compareCandidate(chron, 'close'),
-    ...tagCandidates(chron).filter(c => !sides[c.tag] || sides[c.tag] === c.side || sides[c.tag] === 'both')].filter(Boolean);
+    ...tagCandidates(chron).filter(c => sides[c.tag] === c.side)].filter(Boolean);
   const ranked = rankCandidates(found, previousId);
   return all ? ranked : ranked.filter(c => c.quality >= KEY_MIN_QUALITY);
 }
@@ -456,9 +458,29 @@ export function checkCopy({ title, body }, c, lang) {
   return issues;
 }
 
+// ---- No Key Insight: not enough evidence, or no clear change ----
+// Each detector needs enough matches to run at all: 5 scored matches (margin trend), 6 with a result (games won),
+// 6 with notes (Skill Tag strips). When none of them could run, there is not enough evidence yet: "insufficient",
+// and the tile says how many more matches it takes. When at least one ran and nothing cleared the quality bar, the
+// evidence is there and simply shows no clear change: "no_trend". The two are never shown as each other, and
+// neither ever becomes a made-up insight.
+export const KEY_NEED = { scored: TREND_N - 1, results: 6, noted: NOTE_N };
+export function keyCounts(matches) {
+  const chron = normalize(matches);
+  return { matches: chron.length, scored: chron.filter(m => scored(m).length).length,
+    results: chron.filter(m => (m.games || []).some(g => gameResult(g))).length, noted: chron.filter(hasNotes).length };
+}
+export function keyStatus(matches) {
+  const c = keyCounts(matches), N = KEY_NEED;
+  const ready = c.scored >= N.scored || c.results >= N.results || c.noted >= N.noted;
+  // Matches still to log before any detector can run (every match has a result once logged, so the games-won one is nearest).
+  return ready ? { status: 'no_trend', counts: c } : { status: 'insufficient', counts: c, more: N.results - c.results };
+}
+
 // The model's keyInsight answer -> the stored Key Insight. ai: { candidate_id, title, body } or null.
-export function finalizeKey(cands, ai, lang) {
-  if (!cands.length) return { status: 'insufficient', reason: 'no_candidate' };
+// matches: the records the candidates came from, to tell "insufficient" from "no_trend" when there is no candidate.
+export function finalizeKey(cands, ai, lang, matches) {
+  if (!cands.length) return matches ? { ...keyStatus(matches), reason: 'no_candidate' } : { status: 'insufficient', reason: 'no_candidate' };
   const c = (ai && cands.find(x => x.id === ai.candidate_id)) || cands[0];
   let copy = ai && ai.candidate_id === c.id ? { title: String(ai.title || '').trim(), body: String(ai.body || '').trim() } : null;
   let issues = copy ? checkCopy(copy, c, lang) : ['no_ai_copy'], source = 'ai';
@@ -476,18 +498,24 @@ export function finalizeKey(cands, ai, lang) {
 }
 
 // ---- Build Next and Strengths ----
-// Build Next: Skill Tags noted as costing points in 2+ of the latest 6 matches with notes (3+ needed), ranked by
-// how often, then by the last 3, then by the latest match. Active Focus topics are left out. A completed Focus
-// topic comes back only with new evidence: 3+ matches with notes logged since it was completed, and the tag
+// One classifier for both lists, and for which Skill Tag strips may be a Key Insight, so a skill is never sorted two
+// ways on the same page. The window is the latest 6 matches with notes (3+ needed), as for the strips. For each tag,
+// cost = matches where it was noted under What Cost Points, worked = under What Worked. A tag noted on both sides of
+// the same match in half or more of its matches says nothing either way and is left out.
+// The side (Han, 2026-10-26: one side per skill; the stronger finding over the whole window wins):
+//   cost    noted as costing points in 2+ matches, more often than working   -> Build Next
+//   worked  noted as working in 2+ matches, more often than costing points   -> Strengths
+//   mixed   2+ on each side, equally often                                   -> Build Next only, and its evidence says
+//           both counts ("costing points in 2 of 6, working in 2"): something to make consistent, never a strength,
+//           never hidden, never split into situations the notes don't repeat.
+// One mention is not a pattern, so a tag noted once is never a recommendation or a strength.
+// Build Next ranks by how often it cost points, then plain cost before mixed, then the last 3, then the latest match;
+// Strengths by how often it worked, then the last 3. Active Focus topics are left out of Build Next. A completed
+// Focus topic comes back only with new evidence: 3+ matches with notes logged since it was completed and the tag
 // noted as costing points in 2+ of them; its evidence is then counted over those matches only.
-// Strengths: Skill Tags noted as working in 2+ of the same window.
-// One side per skill (Han, 2026-10-26): a tag noted 2+ times on both sides (in different matches) would show up as a
-// strength and a weakness at once, and a Skill Tag can't tell two subskills apart, so it keeps only the side with the
-// stronger evidence over the whole window: noted in more of the 6 matches (Han, 2026-10-26: a 4/6 strength is not
-// wiped out by a more recent 2/6 cost), then in more of the last 3 on a tie, then cost points.
-// Each item carries the player's free-text notes from the matches behind it. advice_basis is "notes" when 2+ of
-// them say something specific (one note is not a pattern), else "general": the advice is then a plainly general
-// drill, and the name and evidence may not name a specific shot, side or situation either.
+// Each item carries the player's own words about that skill (skillNotes). advice_basis is "notes" when 2+ of them
+// say something specific, else "general": the advice is then a plainly general drill, and the name and evidence may
+// not name a specific shot, side or situation either.
 // focus: [{ topic, status: 'active' | 'completed', completed_at }]
 const noteWindow = matches => { const chron = normalize(matches), noted = chron.filter(hasNotes); return { chron, noted, win: noted.slice(-NOTE_N) }; };
 const has = (m, f, tag) => (m[f] || []).includes(tag);
@@ -501,129 +529,72 @@ const SKILL_MENTION = {
   Placement: /\bplacement\b|落点|线路/i
 };
 const mentionsSkill = (note, tag) => SKILL_MENTION[tag]?.test(note) || false;
-// Count only concepts in the clauses about this skill. A note can also discuss
-// an unrelated skill (e.g. Smash + backhand Defence); those are not Smash evidence.
-const skillClauses = (notes, tag) => notes.flatMap(note =>
-  String(note).split(/[。！？；;，,.!?]/).map(s => s.trim())
-    .filter(s => mentionsSkill(s, tag)));
-
-export function topicSides(matches) {
-  const { win } = noteWindow(matches), out = {};
-  for (const tag of SKILL_TAGS) {
-    const c = win.filter(m => has(m, 'lt', tag)).length, w = win.filter(m => has(m, 'wt', tag)).length;
-    if (c < 2 || w < 2) continue;
-    const l3 = win.slice(-3), rc = l3.filter(m => has(m, 'lt', tag)).length, rw = l3.filter(m => has(m, 'wt', tag)).length;
-    if (c === w) {
-      // Tied mixed evidence is not a weakness by default. Two different, explicitly
-      // documented situations may legitimately coexist, otherwise suppress both.
-      const costNotes = notesFor(win.filter(m => has(m, 'lt', tag)), ['lost']);
-      const workedNotes = notesFor(win.filter(m => has(m, 'wt', tag)), ['worked']);
-      const costClauses = skillClauses(costNotes, tag);
-      const workedClauses = skillClauses(workedNotes, tag);
-      const costKinds = new Set(costClauses.flatMap(conceptsIn));
-      const workedKinds = new Set(workedClauses.flatMap(conceptsIn));
-      const distinct = tag === 'Smash' && costKinds.size && workedKinds.size &&
-        [...costKinds].every(k => !workedKinds.has(k)) &&
-        costNotes.some(n => mentionsSkill(n, tag)) && workedNotes.some(n => mentionsSkill(n, tag)) &&
-        Boolean(smashContextName(costKinds, 'en')) && Boolean(smashContextName(workedKinds, 'en')) &&
-        smashContextName(costKinds, 'en') !== smashContextName(workedKinds, 'en');
-      out[tag] = distinct ? 'both' : 'ambiguous';
-    } else out[tag] = c > w ? 'cost' : 'worked';
-  }
-  return out;
-}
-const smashContextName = (concepts, lang) => {
-  if (concepts.has('rearCourt')) return lang === 'zh' ? '后场杀球' : 'Backcourt smashes';
-  if (concepts.has('sideline')) return lang === 'zh' ? '边线杀球' : 'Sideline smashes';
-  return '';
-};
-// Advice is note-specific only when a concrete context recurs in two separate skill clauses.
-const basisOf = (notes, tag) => {
-  if (tag !== 'Smash') return notes.filter(specificNote).length >= 2 ? 'notes' : 'general';
-  const seen = new Map();
+// The player's words about one skill. A note can cover several skills ("杀球太多。反手防守比较弱。"): only the part
+// about this skill counts, from the clause that names it up to the next clause that names another skill. A note that
+// names no skill at all was written under a match tagged with it, so all of it counts.
+export function skillNotes(notes, tag) {
+  const out = [];
   for (const note of notes) {
-    const kinds = new Set(skillClauses([note], tag).flatMap(conceptsIn));
-    for (const k of kinds) seen.set(k, (seen.get(k) || 0) + 1);
+    const parts = String(note || '').split(/[。！？；;，,.!?\n]/).map(s => s.trim()).filter(Boolean);
+    if (!parts.some(p => SKILL_TAGS.some(t => mentionsSkill(p, t)))) { if (parts.length) out.push(String(note).trim()); continue; }
+    let cur = null;
+    for (const p of parts) {
+      if (mentionsSkill(p, tag)) { if (cur) out.push(cur.join(CJK.test(p) ? '，' : ', ')); cur = [p]; }
+      else if (SKILL_TAGS.some(t => t !== tag && mentionsSkill(p, t))) { if (cur) out.push(cur.join(CJK.test(p) ? '，' : ', ')); cur = null; }
+      else if (cur) cur.push(p);
+    }
+    if (cur) out.push(cur.join(CJK.test(cur[0]) ? '，' : ', '));
   }
-  return [...seen.values()].some(n => n >= 2) ? 'notes' : 'general';
-};
+  return out.slice(-4);
+}
+const basisOf = notes => (notes.filter(specificNote).length >= 2 ? 'notes' : 'general');
+
+export function skillTable(matches) {
+  const { chron, noted, win } = noteWindow(matches), rows = {};
+  if (win.length >= 3) for (const tag of SKILL_TAGS) {
+    const cost = win.filter(m => has(m, 'lt', tag)).length, worked = win.filter(m => has(m, 'wt', tag)).length;
+    if (!cost && !worked) continue;
+    const same = win.filter(m => has(m, 'lt', tag) && has(m, 'wt', tag)).length, l3 = win.slice(-3);
+    const side = same * 2 >= Math.max(cost, worked) ? null
+      : cost >= 2 && cost > worked ? 'cost' : worked >= 2 && worked > cost ? 'worked' : cost >= 2 && cost === worked ? 'mixed' : null;
+    rows[tag] = { tag, cost, worked, same, side, recentCost: l3.filter(m => has(m, 'lt', tag)).length, recentWorked: l3.filter(m => has(m, 'wt', tag)).length,
+      latestCost: has(win[win.length - 1], 'lt', tag) ? 1 : 0 };
+  }
+  return { chron, noted, win, rows, skipped: win.length ? chron.slice(chron.indexOf(win[0])).filter(m => !hasNotes(m)).length : 0 };
+}
+// Tag -> 'cost' | 'worked' | 'mixed', for the tags that have a side.
+export function topicSides(matches) {
+  const { rows } = skillTable(matches);
+  return Object.fromEntries(Object.values(rows).filter(r => r.side).map(r => [r.tag, r.side]));
+}
+const notesOf = (ms, f, tag) => skillNotes(ms.filter(m => has(m, f === 'lost' ? 'lt' : 'wt', tag)).map(m => m[f]).filter(Boolean), tag);
 export function buildCandidates(matches, focus = [], max = 4) {
-  const { chron, noted, win } = noteWindow(matches);
-  if (win.length < 3) return [];
-  const sides = topicSides(matches), out = [];
-  for (const tag of SKILL_TAGS) {
-    const topic = 'tag:' + tag, fs = focus.filter(f => f.topic === topic);
-    if (fs.some(f => f.status === 'active') || (sides[tag] === 'worked' || sides[tag] === 'ambiguous')) continue;
+  const { noted, win, rows, skipped } = skillTable(matches), out = [];
+  for (const row of Object.values(rows)) {
+    if (row.side !== 'cost' && row.side !== 'mixed') continue;
+    const tag = row.tag, topic = 'tag:' + tag, fs = focus.filter(f => f.topic === topic);
+    if (fs.some(f => f.status === 'active')) continue;
     const done = fs.filter(f => f.status === 'completed').map(f => String(f.completed_at || '')).sort().pop();
-    let list = win, returning = false;
     if (done) {
-      const after = noted.filter(m => String(m.created_at || `${m.date}T23:59:59`) > done);
-      if (after.length < 3) continue;
-      list = after.slice(-NOTE_N); returning = true;
+      const after = noted.filter(m => String(m.created_at || `${m.date}T23:59:59`) > done).slice(-NOTE_N);
+      const values = after.map(m => (has(m, 'lt', tag) ? 1 : 0)), k = sum(values);
+      if (after.length < 3 || k < 2) continue;
+      const notes = notesOf(after, 'lost', tag);
+      out.push({ topic_id: topic, tag, k, w: 0, n: after.length, mixed: false, recent: sum(values.slice(-3)), latest: values[values.length - 1], returning: true, skipped: 0, notes, basis: basisOf(notes) });
+      continue;
     }
-    const values = list.map(m => (has(m, 'lt', tag) ? 1 : 0)), k = sum(values);
-    if (k < 2) continue;
-    const both = list.filter(m => has(m, 'lt', tag) && has(m, 'wt', tag)).length;
-    if (both * 2 >= k) continue;
-    const notes = notesFor(list.filter(m => has(m, 'lt', tag)), ['lost']);
-    out.push({ topic_id: topic, tag, k, n: list.length, recent: sum(values.slice(-3)), latest: values[values.length - 1], returning,
-      skipped: returning ? 0 : chron.slice(chron.indexOf(win[0])).filter(m => !hasNotes(m)).length, notes, basis: basisOf(notes, tag), contextName: sides[tag] === 'both' ? {en: smashContextName(new Set(skillClauses(notes,tag).flatMap(conceptsIn)), 'en'), zh: smashContextName(new Set(skillClauses(notes,tag).flatMap(conceptsIn)), 'zh')} : null });
+    const mixed = row.side === 'mixed', notes = notesOf(win, 'lost', tag);
+    out.push({ topic_id: topic, tag, k: row.cost, w: mixed ? row.worked : 0, n: win.length, mixed, recent: row.recentCost, latest: row.latestCost, returning: false, skipped,
+      notes, basis: basisOf(notes) });
   }
-  // Fill a second slot only from independently repeated negative observations in the
-  // wider 10-match evidence window. Never lower the minimum from 2 or use active Focus.
-  // This expands coverage; it does not manufacture another recommendation.
-  if (out.length < 2) {
-    const extended = chron.filter(hasNotes);
-    for (const tag of SKILL_TAGS) {
-      if (out.some(x => x.tag === tag) || sides[tag] === 'worked' || sides[tag] === 'ambiguous') continue;
-      const topic = 'tag:' + tag, fs = focus.filter(f => f.topic === topic);
-      if (fs.some(f => f.status === 'active' || f.status === 'completed')) continue;
-      const values = extended.map(m => has(m, 'lt', tag) ? 1 : 0), k = sum(values);
-      if (k < 2 || values.slice(-NOTE_N).reduce((a,b)=>a+b,0) < 1) continue;
-      const w = sum(extended.map(m => has(m,'wt',tag) ? 1 : 0));
-      if (w >= k) continue;
-      const list = extended.filter(m => has(m,'lt',tag));
-      const notes = notesFor(list,['lost']);
-      out.push({topic_id:topic,tag,k,n:extended.length,recent:sum(values.slice(-3)),
-        latest:values[values.length-1],returning:false,skipped:0,notes,basis:basisOf(notes,tag),
-        contextName:null,secondary:true});
-      if (out.length >= 2) break;
-    }
-  }
-  // If only one recurring problem exists, offer one clearly labelled exploratory
-  // suggestion based on a *real* single observation, never pretend it recurred.
-  if (out.length < 2) {
-    const exploratory = [];
-    for (const tag of SKILL_TAGS) {
-      if (out.some(x => x.tag === tag) || sides[tag] === 'worked' || sides[tag] === 'ambiguous') continue;
-      const topic='tag:'+tag, fs=focus.filter(f=>f.topic===topic);
-      if (fs.some(f=>f.status==='active' || f.status==='completed')) continue;
-      const observed=win.filter(m=>has(m,'lt',tag));
-      if (observed.length !== 1) continue;
-      const notes=notesFor(observed,['lost']);
-      if (!notes.some(note => skillClauses([note],tag).length)) continue; // require a real note about this specific skill
-      exploratory.push({topic_id:topic,tag,k:1,n:win.length,recent:win.slice(-3).filter(m=>has(m,'lt',tag)).length,
-        latest:has(win[win.length-1],'lt',tag)?1:0,returning:false,skipped:0,notes,basis:'general',
-        contextName:null,exploratory:true});
-    }
-    exploratory.sort((a,b)=>b.recent-a.recent||b.latest-a.latest||a.tag.localeCompare(b.tag));
-    if (exploratory.length) out.push(exploratory[0]);
-  }
-  return out.sort((a, b) => b.k / b.n - a.k / a.n || b.recent - a.recent || b.latest - a.latest || a.tag.localeCompare(b.tag)).slice(0, max);
+  return out.sort((a, b) => b.k / b.n - a.k / a.n || a.mixed - b.mixed || b.recent - a.recent || b.latest - a.latest || a.tag.localeCompare(b.tag)).slice(0, max);
 }
 export function strengthCandidates(matches, max = 2) {
-  const { chron, win } = noteWindow(matches);
-  if (win.length < 3) return [];
-  const sides = topicSides(matches), out = [];
-  for (const tag of SKILL_TAGS) {
-    if (sides[tag] === 'cost' || sides[tag] === 'ambiguous') continue;
-    const values = win.map(m => (has(m, 'wt', tag) ? 1 : 0)), k = sum(values);
-    if (k < 2) continue;
-    const both = win.filter(m => has(m, 'lt', tag) && has(m, 'wt', tag)).length;
-    if (both * 2 >= k) continue;
-    const notes = notesFor(win.filter(m => has(m, 'wt', tag)), ['worked']);
-    out.push({ topic_id: 'tag:' + tag, tag, k, n: win.length, recent: sum(values.slice(-3)), notes, basis: basisOf(notes, tag), contextName: sides[tag] === 'both' ? {en: smashContextName(new Set(skillClauses(notes,tag).flatMap(conceptsIn)), 'en'), zh: smashContextName(new Set(skillClauses(notes,tag).flatMap(conceptsIn)), 'zh')} : null,
-      skipped: chron.slice(chron.indexOf(win[0])).filter(m => !hasNotes(m)).length });
+  const { win, rows, skipped } = skillTable(matches), out = [];
+  for (const row of Object.values(rows)) {
+    if (row.side !== 'worked') continue;
+    const notes = notesOf(win, 'worked', row.tag);
+    out.push({ topic_id: 'tag:' + row.tag, tag: row.tag, k: row.worked, n: win.length, recent: row.recentWorked, notes, basis: basisOf(notes), skipped });
   }
   return out.sort((a, b) => b.k - a.k || b.recent - a.recent || a.tag.localeCompare(b.tag)).slice(0, max);
 }
@@ -641,33 +612,18 @@ export const generalAction = (tag, kind, lang) => GENERAL[lang][kind === 'streng
 export function itemTemplate(item, kind, lang) {
   const name = APP_TAG_LABELS[lang][item.tag]; // the app's own tag name, as on the Skill Tag chips
   const action = generalAction(item.tag, kind, lang);
-  if (item.exploratory) {
-    if (lang==='zh') return {name,evidence:`最近${item.n}场有1场你提到${name}的问题；可以先试着练练。`,action};
-    return {name,evidence:`You mentioned a ${name.toLowerCase()} issue in 1 of ${item.n} matches. Worth a try.`,action};
-  }
-  if (item.contextName && item.tag === 'Smash') {
-    const backcourt = item.contextName.en === 'Backcourt smashes';
-    const kindKey = backcourt ? 'rearCourt' : 'sideline';
-    const specific = item.notes.filter(n => skillClauses([n], item.tag).some(c => conceptsIn(c).includes(kindKey))).length;
-    const window = lang === 'zh' ? `最近${item.skipped ? '有记录的' : ''}${item.n}场比赛` : `${item.n} recent ${item.skipped ? 'noted ' : ''}matches`;
-    if (lang === 'zh') {
-      const part = backcourt ? '后场' : '边线';
-      const copy = kind === 'strength'
-        ? `${window}中，有${item.k}场你提到杀球发挥不错，其中${specific}场提到${part}。`
-        : `${window}中，有${item.k}场你提到杀球问题，其中${specific}场涉及${part}。`;
-      return { name: item.contextName[lang], [kind === 'strength' ? 'signal' : 'evidence']: copy, action };
-    }
-    const copy = `You noted ${kind === 'strength' ? 'effective smashes' : 'smash problems'} in ${item.k} of ${window}; ${specific} mentioned the ${backcourt ? 'backcourt' : 'sideline'}.`;
-    return { name: item.contextName[lang], [kind === 'strength' ? 'signal' : 'evidence']: copy, action };
-  }
   if (lang === 'zh') {
     const lastN = `最近${item.skipped ? '有记录的' : ''}${item.n}场`;
     if (kind === 'strength') return { name, signal: `${lastN}比赛中，有${item.k}场你觉得${name}发挥不错。`, action };
-    return { name, evidence: item.returning ? `完成这个训练目标后的${item.n}场里，又有${item.k}场你记下这里丢分。` : `${lastN}比赛中，有${item.k}场你提到${name}的问题。`, action };
+    if (item.returning) return { name, evidence: `完成这个训练目标后的${item.n}场里，又有${item.k}场你记下这里丢分。`, action };
+    if (item.mixed) return { name, evidence: `${lastN}里，${item.k}场你记下它丢分，${item.w}场记下它打得好。`, action };
+    return { name, evidence: `${lastN}比赛中，有${item.k}场你提到${name}的问题。`, action };
   }
   const lastN = `your last ${item.n} ${item.skipped ? 'noted ' : ''}matches`;
   if (kind === 'strength') return { name, signal: `You noted ${name.toLowerCase()} working well in ${item.k} of ${lastN}.`, action };
-  return { name, evidence: item.returning ? `You noted it costing points again in ${item.k} of ${item.n} matches since you completed it.` : `You noted it costing you points in ${item.k} of ${lastN}.`, action };
+  if (item.returning) return { name, evidence: `You noted it costing points again in ${item.k} of ${item.n} matches since you completed it.`, action };
+  if (item.mixed) return { name, evidence: `You noted it costing points in ${item.k} of ${lastN}, and working in ${item.w}.`, action };
+  return { name, evidence: `You noted it costing you points in ${item.k} of ${lastN}.`, action };
 }
 // A cause or diagnosis the notes would have to support.
 const CAUSE = { en: /\b(because|due to|caused by|the reason|that's why)\b/i, zh: /因为|导致|原因是|由于|所以才/ };
@@ -675,7 +631,7 @@ const CAUSE = { en: /\b(because|due to|caused by|the reason|that's why)\b/i, zh:
 export function checkItem(ai, item, kind, lang) {
   const issues = [], textKey = kind === 'strength' ? 'signal' : 'evidence';
   const name = String(ai.name || '').trim(), ev = String(ai[textKey] || '').trim(), act = String(ai.action || '').trim();
-  const allowed = [item.k, item.n, 3], ground = item.basis === 'notes' ? item.notes : [];
+  const allowed = [item.k, item.n, 3, ...(item.mixed ? [item.w] : [])], ground = item.basis === 'notes' ? item.notes : [];
   for (const [f, s] of [['name', name], [textKey, ev], ['action', act]]) {
     if (!s) { if (f !== 'action') issues.push(f + ':empty'); continue; }
     if (lang === 'zh' ? !CJK.test(s) : CJK.test(s)) issues.push(f + ':language');
@@ -687,6 +643,9 @@ export function checkItem(ai, item, kind, lang) {
     if (ungrounded(s, ground).length) issues.push(f + ':detail_not_in_notes');
     if (item.basis !== 'notes' && f !== 'action' && CAUSE[lang].test(s)) issues.push(f + ':invented_cause');
     if (f === 'action' && item.basis === 'notes' && !anchored(s, item.notes)) issues.push('action:not_from_notes');
+    // A name or evidence that names a situation ("Backcourt smashes") describes the whole item, so that detail must
+    // recur in 2+ of the notes; one note mentioning the back court is not what the skill is about.
+    if (f !== 'action' && conceptsIn(s).some(k => item.notes.filter(n => conceptsIn(n).includes(k)).length < 2)) issues.push(f + ':detail_not_repeated');
   }
   if (lang === 'zh' ? zhLen(name) > 8 : words(name) > 4) issues.push('name:length');
   if (numbersIn(name).length) issues.push('name:number');
@@ -708,14 +667,15 @@ export function finalizeItems(items, ai, kind, lang) {
     const a = (ai || []).find(x => x && x.topic_id === item.topic_id), t = itemTemplate(item, kind, lang);
     const issues = a ? checkItem(a, item, kind, lang) : ['no_ai_copy'];
     const bad = f => issues.some(i => i.startsWith(f + ':')) || !a;
-    const aiAction = !item.exploratory && item.basis === 'notes' && !bad('action') && String(a.action || '').trim();
+    const aiAction = item.basis === 'notes' && !bad('action') && String(a.action || '').trim();
     return {
       topic_id: item.topic_id, tag: item.tag, rank: rank + 1,
-      name: item.exploratory ? t.name : (item.contextName?.[lang] || (bad('name') ? t.name : String(a.name).trim())),
-      [textKey]: (item.contextName || item.exploratory) ? t[textKey] : (bad(textKey) ? t[textKey] : String(a[textKey]).trim()),
+      name: bad('name') ? t.name : String(a.name).trim(),
+      // A mixed item's evidence is always the engine's: it has to give both counts exactly.
+      [textKey]: item.mixed || bad(textKey) ? t[textKey] : String(a[textKey]).trim(),
       action: aiAction || t.action, advice_basis: aiAction ? 'notes' : 'general',
-      evidence_numbers: { k: item.k, n: item.n }, returning: item.returning || false,
-      copy_source: (item.contextName || item.exploratory) ? 'template' : (issues.length ? (a ? 'mixed' : 'template') : 'ai'), issues
+      evidence_numbers: { k: item.k, n: item.n, ...(item.mixed ? { w: item.w } : {}) }, mixed: !!item.mixed, returning: item.returning || false,
+      copy_source: issues.length || item.mixed ? (a ? 'mixed' : 'template') : 'ai', issues
     };
   });
 }
@@ -834,7 +794,8 @@ export const KEY_RULES = `KEY INSIGHT (Engine V2):
 - A concrete detail (a shot, a side, a situation) only if it is in that candidate's notes. Otherwise use reference, which is a correct wording.`;
 
 export const ITEM_RULES = `BUILD NEXT / STRENGTHS (Engine V2):
-- Write one item for each of build_candidates / strength_candidates, in the same order, with its topic_id. Do not add others. A skill can appear in BOTH lists only when distinct, independently grounded situations exist in positive and negative notes. In that case, make each name describe its own situation, not the same generic skill name; never imply either side cancels the other.
+- Write one item for each of build_candidates / strength_candidates, in the same order, with its topic_id. Do not add others. A skill is in one list only; never mention the same skill as the other kind.
+- mixed: true means the player noted this skill costing points (k) and working (w) equally often. The engine writes its evidence; give a plain name and, with advice_basis "notes", an action about making it consistent. Never call it a strength or a weakness.
 - name: the skill in 1–4 words (Chinese max 8 characters). Make it more specific ("Backhand defence") only when its notes say so. No numbers.
 - evidence / signal: why it is here, conversationally, using only k and n if you use numbers. These are the player's own notes: "you noted", 「你记下」.
 - advice_basis "notes": the action may build on what the notes say, one concrete thing to try, using only shots and situations the notes name. Don't add a correction of your own (no "use fewer X, try Y" unless the notes say so). advice_basis "general": the notes don't show a pattern, so don't name a specific shot, side, cause or situation anywhere in the item (name the skill plainly); the engine shows a general drill as the action.
