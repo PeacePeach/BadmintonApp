@@ -649,6 +649,23 @@
       </tbody>
     </table>
 
+    <h3>V2 motion (Han, 2026-10-26)</h3>
+    <p>Curves: enter <code>--rw-ease-enter</code> cubic-bezier(.2,.7,.2,1), exit <code>--rw-ease-exit</code> cubic-bezier(.4,0,1,1). Navigation runs as a View Transition (html[data-nav="push|pop|tab|update"], components-v2.css "Motion"); browsers without View Transitions switch instantly with a 150ms content fade. Reduced motion turns every slide into a 150ms cross-fade.</p>
+    <table class="v2-table">
+      <thead><tr><th>Token</th><th>Value</th><th>Curve</th><th>Used for</th></tr></thead>
+      <tbody>
+        <tr><td>--rw-motion-push</td><td>250ms</td><td>enter</td><td>Push: new page slides in from the right; covered page moves --rw-push-shift (-30%)</td></tr>
+        <tr><td>--rw-motion-pop</td><td>250ms</td><td>enter</td><td>Pop (Back): exact reverse of push; the page returns at its old scroll position</td></tr>
+        <tr><td>--rw-motion-sheet-in</td><td>250ms</td><td>enter</td><td>Bottom Sheet slides up, scrim fades in</td></tr>
+        <tr><td>--rw-motion-sheet-out</td><td>200ms</td><td>exit</td><td>Bottom Sheet slides down, scrim fades out (also toast out)</td></tr>
+        <tr><td>--rw-motion-menu</td><td>150ms</td><td>enter / exit</td><td>⋯ menu fade + scale from --rw-menu-scale (.96), in and out</td></tr>
+        <tr><td>--rw-motion-fade</td><td>180ms</td><td>enter</td><td>Main tab and Performance / Grow switch: content cross-fade, no slide</td></tr>
+        <tr><td>--rw-motion-fade-fast</td><td>150ms</td><td>enter</td><td>Content updates (data arriving, steps inside a sheet); every slide under reduced motion</td></tr>
+        <tr><td>--rw-motion-state</td><td>220ms</td><td>enter</td><td>Small state changes inside a component: app bar scrim, cue, waveform, bars, toast in</td></tr>
+        <tr><td>--rw-motion-press</td><td>140ms</td><td>enter</td><td>Press feedback and selected-state colour changes</td></tr>
+      </tbody>
+    </table>
+
     <h3>V2 components</h3>
     <div class="v2-stage rw-scroll is-v2">
       <div class="v2-grid">

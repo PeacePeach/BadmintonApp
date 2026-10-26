@@ -516,4 +516,23 @@
   --rw-type-tile-text: 500 12px/18.2px var(--font-sans);  /* advice under a tile label: TRY NEXT, KEEP GOING, GAME PLAN */
   --rw-type-tile-title: 500 14px/19.2px var(--font-sans);  /* tile heading: This Week, Overall Progress, What to Work On (Figma 173:14114) */
   --rw-type-chip: 500 11px/11px var(--font-sans);          /* week tag chip (Figma 173:14247) */
+
+  /* ---------- 4. Motion (Han, 2026-10-26) ----------
+     One timing set for the whole app. Navigation (View Transitions, components-v2.css "Motion"), sheets, the ⋯ menu
+     and in-page fades all read these; nothing else uses literal ms. Enter = things arriving (fast start, soft stop);
+     exit = things leaving with nothing arriving (sheet close, menu close, toast out). Push and pop both use enter,
+     so Back responds the moment it is tapped. */
+  --rw-motion-push: 250ms;        /* new page slides in from the right */
+  --rw-motion-pop: 250ms;         /* reverse of push */
+  --rw-motion-sheet-in: 250ms;    /* Bottom Sheet slides up */
+  --rw-motion-sheet-out: 200ms;   /* Bottom Sheet slides down */
+  --rw-motion-menu: 150ms;        /* ⋯ menu fade + subtle scale, in and out */
+  --rw-motion-fade: 180ms;        /* main tab and segment switch: content fade, no slide */
+  --rw-motion-fade-fast: 150ms;   /* content updates (data arriving, steps inside a sheet); reduced-motion fallback for every slide */
+  --rw-motion-state: 220ms;       /* small state changes inside a component (app bar scrim, cue, waveform, bars, toast in) */
+  --rw-motion-press: 140ms;       /* press feedback and selected-state colour changes */
+  --rw-ease-enter: cubic-bezier(.2,.7,.2,1);
+  --rw-ease-exit: cubic-bezier(.4,0,1,1);
+  --rw-push-shift: -30%;          /* how far the covered page moves left under a push */
+  --rw-menu-scale: .96;           /* ⋯ menu starts / ends at this scale */
 }

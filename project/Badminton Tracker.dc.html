@@ -60,15 +60,18 @@ html,body,#dc-root,#dc-root>.sc-host{width:100%;height:100%;min-height:100%;back
 /* Keep the old framed phone preview only on larger desktop browser windows. */
 @media (min-width:501px){
 .stage{min-height:100vh !important;height:auto !important;padding:32px 16px !important;}
-.phone{width:390px !important;height:844px !important;border-radius:48px !important;box-shadow:0 0 0 10px #232226 !important;}
+.phone{width:390px !important;height:844px !important;border-radius:48px !important;box-shadow:none !important;}
+/* The frame ring is drawn by the stage, not the phone, so it stays put while pages slide (View Transitions snapshot the phone). */
+.stage{position:relative;}
+.stage::after{content:"";position:absolute;left:50%;top:50%;width:390px;height:844px;transform:translate(-50%,-50%);border-radius:48px;box-shadow:0 0 0 10px #232226;pointer-events:none;}
 .fake-status{display:block !important;}
 }
 /* Splash: one gentle fade-in, nothing else. */
 @keyframes splash-in{from{opacity:0;transform:translateY(6px) scale(.97);}to{opacity:1;transform:none;}}
 @keyframes splash-fade{from{opacity:0;}to{opacity:1;}}
-.splash-mark{animation:splash-in .7s var(--ease-out) both;}
-.splash-text{animation:splash-fade .6s var(--ease-out) .25s both;}
-.splash-line{animation:splash-fade .6s var(--ease-out) .5s both;}
+.splash-mark{animation:splash-in .7s var(--rw-ease-enter) both;}
+.splash-text{animation:splash-fade .6s var(--rw-ease-enter) .25s both;}
+.splash-line{animation:splash-fade .6s var(--rw-ease-enter) .5s both;}
 @media (prefers-reduced-motion:reduce){.splash-mark,.splash-text,.splash-line{animation:none;}}
 /* Auth: field errors, helper text and busy spinner. */
 .search-field-outline.field-error,.search-field-outline.field-error:focus-within{border-color:var(--rw-color-status-error);}
@@ -85,8 +88,8 @@ button:disabled{cursor:default !important;}
 /* Toast (DS .rw-toast, Figma 360:7533): full width inside the 20px page margins; slides down in and back up out. */
 @keyframes toast-in{from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:none;}}
 @keyframes toast-out{from{opacity:1;transform:none;}to{opacity:0;transform:translateY(-12px);}}
-.toast{animation:toast-in .22s var(--ease-out) both;}
-.toast.toast-out{animation:toast-out .2s ease-in both;}
+.toast{animation:toast-in var(--rw-motion-state) var(--rw-ease-enter) both;}
+.toast.toast-out{animation:toast-out var(--rw-motion-sheet-out) var(--rw-ease-exit) both;}
 @media (prefers-reduced-motion:reduce){.toast,.toast.toast-out{animation:none;}}
 /* Simplified Chinese: Poppins stays first, so English, numbers, scores, dates and initials keep Poppins and only
    Chinese glyphs use Noto Sans SC (loaded on demand, see ensureNoto). Also applies to a single element marked
@@ -100,7 +103,7 @@ button:disabled{cursor:default !important;}
 </style>
 </helmet>
 <div class="stage" style="width:100%;height:100vh;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:0;">
-<div data-screen-label="Phone" class="phone" style="position:relative;width:100%;height:100vh;border-radius:0;background:var(--bg-primary);overflow:hidden;color:var(--text-primary);box-shadow:none;">
+<div data-screen-label="Phone" class="phone rw-vt-page" style="position:relative;width:100%;height:100vh;border-radius:0;background:var(--bg-primary);overflow:hidden;color:var(--text-primary);box-shadow:none;">
 
   <div ref="{{ scrollRef }}" class="{{ scrollCls }}" onScroll="{{ onScroll }}" style="position:absolute;inset:0;overflow-y:auto;padding:var(--rw-appbar-top) var(--rw-appbar-inset) 120px;">
 
@@ -1944,7 +1947,7 @@ button:disabled{cursor:default !important;}
 
   <!-- Toast: the one global feedback message. Call flash(text, 'success' | 'error' | 'info') from anywhere. -->
   <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
-    <div role="{{ toast.role }}" aria-live="{{ toast.live }}" style="position:absolute;left:20px;right:20px;top:calc(48px + env(safe-area-inset-top, 0px));display:flex;justify-content:center;pointer-events:none;z-index:60;">
+    <div class="rw-vt-toast" role="{{ toast.role }}" aria-live="{{ toast.live }}" style="position:absolute;left:20px;right:20px;top:calc(48px + env(safe-area-inset-top, 0px));display:flex;justify-content:center;pointer-events:none;z-index:60;">
       <div class="toast rw-toast {{ toast.typeCls }} {{ toast.cls }}">
         <span class="rw-toast-badge" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ toast.icon }}" size="{{ 12 }}" hint-size="12px,12px"></x-import></span>
         <div class="rw-toast-text">
@@ -2973,7 +2976,90 @@ class Component extends DCLogic {
 
   newOb() { return { step: 1, name: '', level: null }; }
 
+  // ---------- Motion (Han, 2026-10-26) ----------
+  // Every state change passes through this gate, so one place decides how the screen moves (motionKind). Screen changes
+  // and the few in-page updates that deserve it run inside a View Transition: the old screen is snapshotted, the state is
+  // applied and drawn synchronously (flushSync), and the CSS in components-v2.css "Motion" animates between the two by
+  // html[data-nav]. While a transition waits for its first frame, further updates merge into it, so nothing draws twice.
+  // Without View Transitions (iOS 17 and older) the change is instant with a short content fade.
+  setState(update, cb) {
+    const prev = this.state, patch = typeof update === 'function' ? update(prev) : update;
+    if (!patch) return;
+    if (this._pend) { this._forward = this._top = false; this.state = { ...prev, ...patch }; if (cb) this._pend.push(cb); return; }
+    if (this._inVT) return super.setState(patch, cb);
+    const kind = this.motionKind(prev, patch);
+    if (!kind) return super.setState(patch, cb);
+    const nav = kind === 'push' || kind === 'pop', field = document.activeElement && document.activeElement.matches && document.activeElement.matches('input,textarea');
+    // Leaving a page closes its keyboard first; an in-page fade never runs under someone typing.
+    if (field && nav) document.activeElement.blur();
+    if (field && !nav) return super.setState(patch, cb);
+    if (!document.startViewTransition || document.hidden || !window.ReactDOM || !window.ReactDOM.flushSync) {
+      super.setState(patch, cb);
+      if (kind !== 'update') this.fadeIn();
+      // The new page's Back button lands where the tap was: hold navigation for the fade so a double tap pops once.
+      if (nav) { this._navLock = true; setTimeout(() => { this._navLock = false; }, this.motionMs('--rw-motion-fade-fast')); }
+      return;
+    }
+    const root = document.documentElement;
+    this.state = { ...prev, ...patch };
+    this._pend = cb ? [cb] : [];
+    if (nav) this._navLock = true;
+    root.dataset.nav = kind;
+    const t = document.startViewTransition(() => {
+      const cbs = this._pend; this._pend = null; this._inVT = true;
+      try { window.ReactDOM.flushSync(() => super.setState({}, () => cbs.forEach(f => f()))); } finally { this._inVT = false; }
+    });
+    this._vt = t;
+    t.ready.catch(() => {});   // a newer transition (a quick second tap) skips this one; that is expected, not an error
+    t.finished.finally(() => { if (this._vt === t) { this._vt = null; this._navLock = false; delete root.dataset.nav; } });
+  }
+  // push | pop (page slides), tab (cross-fade), update (short cross-fade) or null (no motion). A pop also picks the
+  // scroll position to return to: the Back-stack entry that is being left behind, when it is the screen we land on.
+  motionKind(p, n) {
+    const to = { ...p, ...n }, key = s => [s.screen, s.detailId, s.playerId, s.focusId].join('|');
+    if (key(to) === key(p)) {
+      if (n.insTab && n.insTab !== p.insTab) return 'tab';
+      const shown = s => s.ps && (s.ps.picking || null);
+      if ((n.filter && n.filter !== p.filter) || (p.loading && n.loading === false) || (p.ps && n.ps && shown(p) !== shown(n))
+        || (n.aiGrow && !p.aiGrow && to.screen === 'insights' && to.insTab === 'coach')) return 'update';
+      return null;
+    }
+    const ENTRY = ['splash', 'login', 'signup', 'forgot', 'resetSent', 'onboarding'], TABS = ['matches', 'insights', 'focus'];
+    const pb = (p.back || []).length, nb = (to.back || []).length;
+    let kind;
+    if (ENTRY.includes(p.screen) || ENTRY.includes(to.screen)) kind = 'tab';
+    else if (TABS.includes(p.screen) && TABS.includes(to.screen) && !pb && !nb) kind = 'tab';
+    else kind = this._forward ? 'push' : nb > pb ? 'push' : nb < pb ? 'pop' : TABS.includes(to.screen) ? 'pop' : 'push';
+    const left = kind === 'pop' && !this._top && p.back[nb];
+    this._restoreScroll = left && left.screen === to.screen ? left.scroll || 0 : null;
+    this._forward = this._top = false;
+    return kind;
+  }
+  motionMs(token) { return parseFloat(getComputedStyle(document.documentElement).getPropertyValue(token)) || 150; }
+  fadeIn() {
+    const el = this.scrollRef.current;
+    if (el && el.animate) el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: this.motionMs('--rw-motion-fade-fast'), easing: 'ease-out' });
+  }
+  // Sheets and the ⋯ menu leave with motion however they were closed (×, Cancel, scrim, Save, a menu item): one that
+  // React just removed is put back for its exit animation (.is-leaving in components-v2.css), then dropped. Inside a
+  // View Transition the transition animates it instead. A sheet re-drawn with the same title is the same sheet.
+  trackOverlays() {
+    const phone = this.scrollRef.current && this.scrollRef.current.closest('.phone');
+    if (!phone) return;
+    const sig = e => e.className + '|' + (e.dataset.screenLabel || '');
+    const live = [...phone.querySelectorAll('.rw-sheet-scrim,.rw-sheet,.rw-menu-scrim,.rw-menu')].filter(e => !e.classList.contains('is-leaving'));
+    if (!this._inVT) for (const o of this._overlays || []) {
+      if (o.el.isConnected || live.some(e => sig(e) === o.sig)) continue;
+      const g = o.el, done = () => g.remove();
+      g.classList.add('is-leaving'); g.setAttribute('inert', ''); g.setAttribute('aria-hidden', 'true');
+      phone.appendChild(g);
+      g.addEventListener('animationend', done, { once: true }); setTimeout(done, 500);
+    }
+    this._overlays = live.map(el => ({ el, sig: sig(el) }));
+  }
+
   componentDidMount() {
+    this.trackOverlays();
     if (this.state.screen === 'splash') this._splash = setTimeout(() => this.leaveSplash(), 2200);
     if (this._restoring) this.restore();
     this.applyLang();
@@ -3090,9 +3176,12 @@ class Component extends DCLogic {
     else if (!this._insSeen && !cs.loading && !cs.blocked) { this._insSeen = true; this.track('insights_viewed', { has_data: cs.matches.length > 0, match_count: cs.matches.length }); }
     // The runtime passes only prevProps here, so the last scroll key is kept on the instance.
     const k = this.state.screen + (this.state.log ? this.state.log.step : '') + this.state.detailId + this.state.playerId + this.state.focusId;
-    if (k !== this._scrollKey && this.scrollRef.current) this.scrollRef.current.scrollTop = 0;
+    // A new screen starts at the top; going back (pop) returns to where that screen was left.
+    if (k !== this._scrollKey && this.scrollRef.current) this.scrollRef.current.scrollTop = this._restoreScroll || 0;
+    this._restoreScroll = null;
     this._scrollKey = k;
     this.onScroll();
+    this.trackOverlays();
   }
 
   // An unknown player (placeholder id "unknown:<heard name>") shows the name that was heard, or "Unknown player".
@@ -3192,10 +3281,16 @@ class Component extends DCLogic {
   vs(pid, type) { return this.rec(this.state.matches.filter(m => m.opps.includes(pid) && (!type || m.type === type))); }
   with(pid) { return this.rec(this.state.matches.filter(m => m.partner === pid)); }
 
+  // Every Back-stack entry keeps the page's scroll position, so Back returns to the same place (see motionKind).
+  // A second tap while a push or pop is still running is ignored, so a double tap never opens a page twice or pops
+  // two levels. Only taps: navigation started by code (a callback, a timer) always goes through.
+  tapDuringNav() { const e = typeof window !== 'undefined' && window.event; return !!(this._navLock && e && e.isTrusted); }
   go(screen, extra) {
-    this.setState(s => ({ back: [...s.back, { screen: s.screen, detailId: s.detailId, playerId: s.playerId, focusId: s.focusId }], screen, menu: false, search: '', ...(extra || {}) }));
+    if (this.tapDuringNav()) return;
+    const scroll = this.scrollRef.current ? this.scrollRef.current.scrollTop : 0;
+    this.setState(s => ({ back: [...s.back, { screen: s.screen, detailId: s.detailId, playerId: s.playerId, focusId: s.focusId, scroll }], screen, menu: false, search: '', ...(extra || {}) }));
   }
-  goBack = () => this.setState(s => {
+  goBack = () => !this.tapDuringNav() && this.setState(s => {
     const b = s.back.slice(); const prev = b.pop() || { screen: 'matches' };
     return { back: b, search: '', screen: prev.screen === 'log' ? 'matches' : prev.screen, detailId: prev.detailId, playerId: prev.playerId, focusId: prev.focusId };
   });
@@ -3288,9 +3383,12 @@ class Component extends DCLogic {
     }
     if (this.state.log && this.state.log.voice) {
       // Voice Review is the final confirmation. Return to the home (Matches) tab, not a duplicate detail view.
+      // It slides back like Back, but Matches opens at the top, where the new match is.
+      this._top = true;
       this.setState({ matches, screen: 'matches', detailId: null, back: [], log: null, voice: null, filter: 'All' });
       return this.flash(this.t('tMatchSaved'), 'success', { dismissible: false });
     }
+    this._forward = true;
     this.setState({ matches, screen: 'detail', detailId: m.id, back: [{ screen: 'matches' }], log: null, filter: 'All' });
     this.flash(this.t('tMatchSaved'), 'success', { dismissible: false });
   }
