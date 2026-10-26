@@ -480,6 +480,41 @@ if (!process.env.ONLY || process.env.ONLY === 'cache') {
   fs.mkdirSync(OUT, { recursive: true }); fs.writeFileSync(path.join(OUT, 'cache-timings.json'), JSON.stringify(timings, null, 2));
   console.log('TIMINGS ' + JSON.stringify(timings.map(t => ({ lang: t.lang, case: t.case, key_ms: t.key_ms, updated_ms: t.updated_ms, ai_calls: t.ai_calls, server: t.server && t.server.timing }))));
 }
+
+// 12. Performance player tiles (Han, 2026-10-26 17:37): worked out independently. Yang: 8 matches (4 with, 4 against,
+// 3–1 against them); Chris: 1–4 against; Dan: 0–2 (too few); Eve: 2–0 together; Fay/Gus: the doubles opponents.
+if (!process.env.ONLY || process.env.ONLY === 'people') {
+  const S = (i, games, opp) => M(i, games, [], [], { opps: [opp] });
+  const D = (i, games, partner) => M(i, games, [], [], { type: 'Doubles', partner, opps: ['fay', 'gus'] });
+  const ppl = [{ id: 'me', name: 'Han Li', level: 'Intermediate' }, { id: 'yang', name: 'Yang' }, { id: 'chris', name: 'Chris' }, { id: 'dan', name: 'Dan' }, { id: 'eve', name: 'Eve' }, { id: 'fay', name: 'Fay' }, { id: 'gus', name: 'Gus' }];
+  ACCOUNTS.people = { players: ppl, focuses: [], matches: [D(0, W, 'yang'), D(1, W, 'yang'), D(2, W, 'yang'), D(3, L, 'yang'), S(4, W, 'yang'), S(5, W, 'yang'), S(6, W, 'yang'), S(7, L, 'yang'),
+    S(8, W, 'chris'), S(9, L, 'chris'), S(10, L, 'chris'), S(11, L, 'chris'), S(12, L, 'chris'), S(13, L, 'dan'), S(14, L, 'dan'), D(15, W, 'eve'), D(16, W, 'eve')] };
+  // Nobody beats you more than half the time (Chris 2–2 is exactly 50%): no Toughest Opponent tile.
+  ACCOUNTS.peopleNone = { players: ppl, focuses: [], matches: [S(0, W, 'chris'), S(1, W, 'chris'), S(2, L, 'chris'), S(3, L, 'chris'), S(4, W, 'yang'), S(5, W, 'yang'), S(6, L, 'yang'), S(7, L, 'dan'), S(8, L, 'dan'), D(9, W, 'eve'), D(10, L, 'eve')] };
+  const tiles = pg => pg.evaluate(() => [...document.querySelectorAll('[data-screen-label="Performance"] .rw-list-row')].map(r => [r.querySelector('.rw-eyebrow').textContent.trim(), r.querySelector('.rw-name').textContent.trim(), r.querySelector('.rw-list-value').textContent.trim(), r.querySelector('.rw-caption').textContent.trim()]));
+  for (const lang of ['en', 'zh']) {
+    const zh = lang === 'zh';
+    let pg = await open(lang, 'people');
+    await pg.getByRole('tab', { name: zh ? '表现' : 'Performance', exact: true }).first().click(); await pg.waitForTimeout(600);
+    let t = await tiles(pg);
+    const want = zh ? [['最佳搭档', 'Eve', '100%', '搭档胜率'], ['最难应对', 'Chris', '20%', '交手胜率'], ['最常同场', 'Yang', '8', '同场场次']]
+      : [['Best Partner', 'Eve', '100%', 'Win rate together'], ['Toughest Opponent', 'Chris', '20%', 'Win rate vs them'], ['Most Played With', 'Yang', '8', 'Matches together']];
+    ok(JSON.stringify(t.map(x => [x[0].toLowerCase(), x[1], x[2], x[3]])) === JSON.stringify(want.map(x => [x[0].toLowerCase(), x[1], x[2], x[3]])), `${lang} people: ${JSON.stringify(t)}`);
+    await shot(pg, lang, '18-performance-people.png'); ok(!pg.errs.length, `${lang} people: no console errors ${pg.errs.join(' | ')}`); await pg.close();
+    pg = await open(lang, 'peopleNone');
+    await pg.getByRole('tab', { name: zh ? '表现' : 'Performance', exact: true }).first().click(); await pg.waitForTimeout(600);
+    t = await tiles(pg);
+    ok(t.length === 2 && !t.some(x => /Toughest|最难应对/i.test(x[0])) && t[1][1] === 'Chris' && t[1][2] === '4', `${lang} people, nobody under 50%: no Toughest tile; Most Played Chris 4: ${JSON.stringify(t)}`);
+    await pg.close();
+    // One person can lead two tiles: Yang is Best Partner and Most Played With (8), Chris (3) is not promoted.
+    ACCOUNTS.peopleSame = { players: ppl, focuses: [], matches: [D(0, W, 'yang'), D(1, W, 'yang'), D(2, L, 'yang'), S(3, W, 'yang'), S(4, W, 'yang'), S(5, L, 'yang'), S(6, W, 'yang'), S(7, W, 'yang'), S(8, W, 'chris'), S(9, L, 'chris'), S(10, W, 'chris')].map(m => m.type === 'Doubles' ? { ...m, opps: ['fay', 'dan'] } : m) };
+    pg = await open(lang, 'peopleSame');
+    await pg.getByRole('tab', { name: zh ? '表现' : 'Performance', exact: true }).first().click(); await pg.waitForTimeout(600);
+    t = await tiles(pg);
+    ok(t.length === 2 && t[0][1] === 'Yang' && t[1][1] === 'Yang' && t[1][2] === '8', `${lang} people, Yang leads two tiles: ${JSON.stringify(t)}`);
+    await pg.close();
+  }
+}
 console.log(fails ? `\n${fails} FAILED` : '\nALL PASS');
 await browser.close();
 process.exit(fails ? 1 : 0);
