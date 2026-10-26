@@ -295,9 +295,10 @@ else
   printf '%s\n' "$AFTER" | sed 's/^/  /'
 fi
 
+XCODE_OPEN="$IOS/App.xcworkspace"; [ -d "$XCODE_OPEN" ] || XCODE_OPEN="$IOS/App.xcodeproj" # SPM projects have no workspace
 bold "Done. Web code $HEAD_SHA is in the iOS project. Nothing was uploaded."
 cat <<EOF
-Next, in Xcode (open $IOS/App.xcworkspace):
+Next, in Xcode (open $XCODE_OPEN):
   1. App target › General › Build: raise it by one (keep Version as is).
   2. Choose "Any iOS Device (arm64)", then Product › Archive.
   3. In the Organizer: Distribute App › App Store Connect › Upload, when you're ready.
