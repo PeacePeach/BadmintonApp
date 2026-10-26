@@ -605,3 +605,25 @@ test('mixed Smash evidence: distinct situations may be shown on both sides witho
   assert.equal(b.name,'后场杀球'); assert.equal(w.name,'边线杀球');
   assert.equal(b.advice_basis,'general');
 });
+
+test('mixed skill titles do not claim the context occurred in every tagged match', () => {
+  fresh();
+  const ms = [
+    M(W,['Net'],['Smash'],{worked:'杀球如果靠边线，对手不太接得到'}),
+    M(W,['Net'],['Smash']),
+    M(L,['Smash'],['Footwork'],{lost:'杀球似乎有点多，反手防守也弱'}),
+    M(W,['Return'],['Serve']),
+    M(L,['Smash'],['Return'],{lost:'后场杀球失误比较多'}),
+    M(L,['Placement'],[])
+  ];
+  assert.equal(G.topicSides(ms).Smash, 'both');
+  const b = G.finalizeItems(G.buildCandidates(ms),null,'build','zh').find(x=>x.tag==='Smash');
+  const w = G.finalizeItems(G.strengthCandidates(ms),null,'strength','zh').find(x=>x.tag==='Smash');
+  assert.equal(b.name,'后场杀球');
+  assert.equal(w.name,'边线杀球');
+  assert.match(b.evidence,/2场/);
+  assert.match(b.evidence,/1场涉及后场/);
+  assert.match(w.signal,/2场/);
+  assert.match(w.signal,/1场提到边线/);
+  assert.equal(b.advice_basis,'general');
+});
