@@ -647,7 +647,7 @@ test('secondary Build Next only from 2 actual notes across wider history, never 
 test('tentative second suggestion needs a real skill-specific note and stays clearly one-off', () => {
   fresh();
   const ms=[
-    M(W,['Net'],['Smash']),M(W,['Net'],['Smash']),
+    M(W,['Net'],['Smash'],{worked:'杀球靠边线效果很好'}),M(W,['Net'],['Smash']),
     M(L,['Smash'],[],{lost:'后场杀球失误比较多'}),
     M(L,['Return'],['Serve'],{lost:'接发比较被动'}),
     M(L,['Smash','Defence'],[],{lost:'杀球太多。反手防守比较弱。'}),
