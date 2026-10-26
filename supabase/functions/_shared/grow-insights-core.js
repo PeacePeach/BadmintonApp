@@ -490,6 +490,16 @@ export function finalizeKey(cands, ai, lang) {
 // focus: [{ topic, status: 'active' | 'completed', completed_at }]
 const noteWindow = matches => { const chron = normalize(matches), noted = chron.filter(hasNotes); return { chron, noted, win: noted.slice(-NOTE_N) }; };
 const has = (m, f, tag) => (m[f] || []).includes(tag);
+const SKILL_MENTION = {
+  Serve: /\\bserv(e|es|ing|ice)\\b|发球/i,
+  Return: /\\breturn(s|ing)?\\b|接发/i,
+  Net: /\\bnet\\b|网前|放网/i,
+  Smash: /\\bsmash(es|ing|ed)?\\b|杀球|扣杀/i,
+  Defence: /\\bdefen[cs]e\\b|防守|接杀/i,
+  Footwork: /\\bfootwork\\b|步法|步伐|移动/i,
+  Placement: /\\bplacement\\b|落点|线路/i
+};
+const mentionsSkill = (note, tag) => SKILL_MENTION[tag]?.test(note) || false;
 export function topicSides(matches) {
   const { win } = noteWindow(matches), out = {};
   for (const tag of SKILL_TAGS) {
@@ -504,7 +514,8 @@ export function topicSides(matches) {
       const costKinds = new Set(costNotes.flatMap(conceptsIn));
       const workedKinds = new Set(workedNotes.flatMap(conceptsIn));
       const distinct = costKinds.size && workedKinds.size &&
-        [...costKinds].every(k => !workedKinds.has(k));
+        [...costKinds].every(k => !workedKinds.has(k)) &&
+        costNotes.some(n => mentionsSkill(n, tag)) && workedNotes.some(n => mentionsSkill(n, tag));
       out[tag] = distinct ? 'both' : 'ambiguous';
     } else out[tag] = c > w ? 'cost' : 'worked';
   }
@@ -739,7 +750,7 @@ export const KEY_RULES = `KEY INSIGHT (Engine V2):
 - A concrete detail (a shot, a side, a situation) only if it is in that candidate's notes. Otherwise use reference, which is a correct wording.`;
 
 export const ITEM_RULES = `BUILD NEXT / STRENGTHS (Engine V2):
-- Write one item for each of build_candidates / strength_candidates, in the same order, with its topic_id. Do not add others. The engine already removed any skill that would be both a strength and a weakness.
+- Write one item for each of build_candidates / strength_candidates, in the same order, with its topic_id. Do not add others. A skill can appear in BOTH lists only when distinct, independently grounded situations exist in positive and negative notes. In that case, make each name describe its own situation, not the same generic skill name; never imply either side cancels the other.
 - name: the skill in 1–4 words (Chinese max 8 characters). Make it more specific ("Backhand defence") only when its notes say so. No numbers.
 - evidence / signal: why it is here, conversationally, using only k and n if you use numbers. These are the player's own notes: "you noted", 「你记下」.
 - advice_basis "notes": the action may build on what the notes say, one concrete thing to try, using only shots and situations the notes name. Don't add a correction of your own (no "use fewer X, try Y" unless the notes say so). advice_basis "general": the notes don't show a pattern, so don't name a specific shot, side, cause or situation anywhere in the item (name the skill plainly); the engine shows a general drill as the action.
