@@ -631,7 +631,7 @@ test('mixed skill titles do not claim the context occurred in every tagged match
 test('secondary Build Next only from 2 actual notes across wider history, never active Focus', () => {
   fresh();
   const ms=[
-    M(W,['Defence']),M(W,['Other']),M(L,['Defence']),M(L,['Other']),
+    M(W,['Other']),M(W,['Other']),M(L,['Defence']),M(L,['Other']),
     M(W,['Net']),M(W,['Net']),M(L,['Smash']),M(W,['Other']),
     M(L,['Smash','Defence']),M(W,['Other'])
   ];
