@@ -9,13 +9,16 @@
 #   5. Runs `npx cap sync ios` and checks the iOS project is still there with the same
 #      Bundle ID, version, build number and signing team.
 #   6. Checks Simplified Chinese (zh-Hans) is declared, and adds it to Info.plist only if missing.
+#   7. Voice input: installs @capacitor-community/speech-recognition in the Capacitor project if missing
+#      (the version that matches its Capacitor), and adds the microphone and speech recognition
+#      permission texts to Info.plist if missing. WKWebView has no working Web Speech API.
 #
 # It never creates a Capacitor or Xcode project, never changes signing, Bundle ID, version or
 # build number, never deletes files, and never uploads anything.
 #
 # Usage:
 #   prepare-ios-release.sh [--cap <capacitor project>] [--repo <BadmintonApp checkout>]
-#                          [--require <commit>] [--branch develop] [--no-zh-fix]
+#                          [--require <commit>] [--branch develop] [--no-zh-fix] [--no-speech]
 set -euo pipefail
 
 REPO_URL="https://github.com/PeacePeach/BadmintonApp.git"
@@ -24,6 +27,10 @@ CAP=""
 REPO=""
 REQUIRE=""
 ZH_FIX=1
+SPEECH=1
+SPEECH_PKG="@capacitor-community/speech-recognition"
+MIC_TEXT="Rallywise uses the microphone so you can describe a match by voice."
+SPEECH_TEXT="Rallywise turns what you say about a match into text, so it can fill in the match for you to review."
 BACKUP_ROOT="$HOME/Rallywise-release/backups"
 
 bold() { printf '\n\033[1m%s\033[0m\n' "$*"; }
@@ -38,6 +45,7 @@ while [ $# -gt 0 ]; do
     --require) REQUIRE="${2:-}"; shift 2 ;;
     --branch) BRANCH="${2:-}"; shift 2 ;;
     --no-zh-fix) ZH_FIX=0; shift ;;
+    --no-speech) SPEECH=0; shift ;;
     -h|--help) sed -n '2,20p' "$0" 2>/dev/null || true; exit 0 ;;
     *) die "Unknown option: $1 (see --help)" ;;
   esac
@@ -179,6 +187,35 @@ if [ ! -d node_modules/@capacitor/cli ]; then
   warn "Capacitor packages are not installed; installing them."
   if [ -f package-lock.json ]; then npm ci; else npm install; fi
 fi
+if [ "$SPEECH" = 1 ]; then
+  bold "Voice input plugin ($SPEECH_PKG)"
+  CAP_MAJOR="$(node -e 'try { process.stdout.write(String(require(process.argv[1] + "/node_modules/@capacitor/core/package.json").version.split(".")[0])); } catch (e) {}' "$CAP")"
+  [ -n "$CAP_MAJOR" ] || die "Could not read the @capacitor/core version in $CAP/node_modules."
+  [ "$CAP_MAJOR" -ge 5 ] || die "Capacitor $CAP_MAJOR is too old for $SPEECH_PKG (needs 5 or later)."
+  [ -f "$IOS/Podfile" ] || die "$IOS has no Podfile (Swift Package Manager project). $SPEECH_PKG needs CocoaPods; nothing was changed for voice."
+  if [ -d "node_modules/$SPEECH_PKG" ]; then
+    ok "$SPEECH_PKG $(node -p "require('./node_modules/$SPEECH_PKG/package.json').version") already installed"
+  else
+    PLUGIN_MAJOR="$CAP_MAJOR"; [ "$CAP_MAJOR" -gt 7 ] && PLUGIN_MAJOR=7
+    STAMP2="$(date +%Y%m%d-%H%M%S)"
+    cp package.json "$BACKUP_ROOT/package.json-$STAMP2"; [ -f package-lock.json ] && cp package-lock.json "$BACKUP_ROOT/package-lock.json-$STAMP2"
+    npm install --save "$SPEECH_PKG@^$PLUGIN_MAJOR" || die "Could not install $SPEECH_PKG@^$PLUGIN_MAJOR (Capacitor $CAP_MAJOR)."
+    ok "Installed $SPEECH_PKG@^$PLUGIN_MAJOR for Capacitor $CAP_MAJOR (package.json backup in $BACKUP_ROOT)"
+  fi
+  # iOS kills an app that uses the mic or speech recognition without these texts.
+  plist_added=0
+  for kv in "NSMicrophoneUsageDescription|$MIC_TEXT" "NSSpeechRecognitionUsageDescription|$SPEECH_TEXT"; do
+    k="${kv%%|*}"; v="${kv#*|}"
+    if /usr/libexec/PlistBuddy -c "Print :$k" "$PLIST" >/dev/null 2>&1; then
+      ok "Info.plist already has $k"
+    else
+      [ "$plist_added" = 1 ] || cp "$PLIST" "$BACKUP_ROOT/Info.plist-$(date +%Y%m%d-%H%M%S)"
+      /usr/libexec/PlistBuddy -c "Add :$k string $v" "$PLIST"; plist_added=1
+      ok "Added $k to Info.plist"
+    fi
+  done
+fi
+
 npx cap sync ios || die "npx cap sync ios failed (output above). The web folder backup is in $BACKUP_ROOT."
 ok "cap sync finished"
 
@@ -201,6 +238,10 @@ if [ "$BEFORE" != "$AFTER" ]; then
   die "Signing, Bundle ID, version or build settings changed during sync (above). Check the project in Xcode before archiving."
 fi
 ok "Bundle ID, version, build number and signing unchanged"
+if [ "$SPEECH" = 1 ]; then
+  if grep -q 'CapacitorCommunitySpeechRecognition' "$IOS/Podfile"; then ok "Podfile includes the speech recognition plugin"
+  else die "The speech recognition plugin is not in $IOS/Podfile after sync; voice input would not work in the app."; fi
+fi
 
 # ---------------------------------------------------------------- Chinese localization
 bold "Checking Simplified Chinese"
