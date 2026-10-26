@@ -30,7 +30,7 @@
      EmptyState ................... [.rw-empty-group >] .rw-empty (centred in the free space) > .rw-illus + .rw-empty-title + .rw-empty-body + .rw-btn.rw-btn-primary (full width) (illustrations.js)
      Insight / ListRow ............ .rw-list-row (.rw-avatar, .rw-eyebrow, .rw-name, .rw-list-value, .rw-caption)
    Insights / Grow (Figma 203:5215):
-     KeyInsight ................... .rw-surface.rw-tile.rw-key > .rw-key-head (dot + .rw-label) + .rw-key-title + .rw-key-body + .rw-bar.rw-key-bar
+     KeyInsight ................... .rw-surface.rw-tile.rw-key > .rw-key-head (Sparkles 14 + .rw-label) + .rw-key-title + .rw-key-body + .rw-bar.rw-key-bar
      KeyInsight, split ............ .rw-key.is-split > .rw-key-head + .rw-key-split > .rw-key-split-text (.rw-key-title + .rw-key-body) + .rw-key-chart[data-kind=trend|compare|strip] (drawn by key-chart.js)
      Section header ............... .rw-section-head > .rw-section-title + .rw-hint
      Tile full wide ............... .rw-surface.rw-tile.rw-advice > .rw-advice-head (.rw-icon-badge | .rw-avatar + .rw-advice-text: .rw-name + .rw-meta) + .rw-advice-divider + .rw-advice-tip (.rw-label[.is-accent] + .rw-advice-tip-text)
@@ -548,8 +548,9 @@ button.rw-input-row{cursor:pointer;}
 
 /* Insights / Grow (Figma 203:5215) */
 .rw-key{display:flex;flex-direction:column;gap:12px;}
-.rw-key-head{display:flex;align-items:center;gap:8px;}
-.rw-key-head::before{content:"";width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--rw-key-dot);}
+/* Head: Lucide Sparkles 14 (AI) + eyebrow, same size, gap and B100 as the From Grow tag (Han, 2026-10-26). */
+.rw-key-head{display:flex;align-items:center;gap:4px;}
+.rw-key-head>:first-child:not(.rw-label){flex-shrink:0;color:var(--rw-key-icon);}
 .rw-key-title{margin:0;font:var(--rw-type-key-title);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);text-wrap:balance;}
 .rw-key-body{margin:0;font:var(--rw-type-body);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);text-wrap:pretty;}
 .rw-bar.rw-key-bar{height:8px;width:100%;max-width:var(--rw-key-bar-w);}

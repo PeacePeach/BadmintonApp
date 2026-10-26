@@ -589,7 +589,7 @@ button:disabled{cursor:default !important;}
             <!-- Engine V2: split KeyInsight with one of the three RWKeyChart patterns, from the engine's chart object. -->
             <sc-if value="{{ grow.keySplit }}" hint-placeholder-val="{{ true }}">
             <div class="rw-surface rw-tile rw-key is-split">
-              <div class="rw-key-head"><span class="rw-label">{{ tx.keyInsight }}</span>
+              <div class="rw-key-head"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Sparkles" size="{{ 14 }}" hint-size="14px,14px"></x-import><span class="rw-label">{{ tx.keyInsight }}</span>
                 <sc-if value="{{ grow.updating }}" hint-placeholder-val="{{ false }}"><span class="rw-caption rw-grow-status is-updating" role="status">{{ tx.growUpdating }}</span></sc-if>
                 <sc-if value="{{ grow.failedNote }}" hint-placeholder-val="{{ false }}"><span class="rw-grow-status" role="status"><span class="rw-caption">{{ tx.growUpdateFailed }}</span><button type="button" class="rw-btn rw-btn-tertiary" onClick="{{ grow.retry }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="RotateCw" size="{{ 16 }}" hint-size="16px,16px"></x-import>{{ tx.retry }}</button></span></sc-if>
               </div>
@@ -605,7 +605,7 @@ button:disabled{cursor:default !important;}
             <!-- Legacy fallback (Han, 2026-10-24): insights cached before Engine V2, until they are made again. -->
             <sc-if value="{{ grow.keyLegacy }}" hint-placeholder-val="{{ false }}">
             <div class="rw-surface rw-tile rw-key">
-              <div class="rw-key-head"><span class="rw-label">{{ tx.keyInsight }}</span>
+              <div class="rw-key-head"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Sparkles" size="{{ 14 }}" hint-size="14px,14px"></x-import><span class="rw-label">{{ tx.keyInsight }}</span>
                 <sc-if value="{{ grow.updating }}" hint-placeholder-val="{{ false }}"><span class="rw-caption rw-grow-status is-updating" role="status">{{ tx.growUpdating }}</span></sc-if>
                 <sc-if value="{{ grow.failedNote }}" hint-placeholder-val="{{ false }}"><span class="rw-grow-status" role="status"><span class="rw-caption">{{ tx.growUpdateFailed }}</span><button type="button" class="rw-btn rw-btn-tertiary" onClick="{{ grow.retry }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="RotateCw" size="{{ 16 }}" hint-size="16px,16px"></x-import>{{ tx.retry }}</button></span></sc-if>
               </div>
