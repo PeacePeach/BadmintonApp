@@ -209,6 +209,7 @@
   --rw-btn-primary-bg: var(--rw-color-action-primary);
   --rw-btn-primary-fg: var(--rw-color-text-on-action);
   --rw-btn-primary-h: 52px;
+  --rw-btn-danger-bg: var(--rw-color-status-error);   /* destructive confirm (Delete Match / Account / Focus): the one error red, N75 label */
   --rw-icon-btn-size: 40px;
   /* InlineBanner (Figma Foundation 333:8797): a reusable in-content prompt, e.g. "Who is “Chris”?" (Han, 2026-10-23).
      Fill is Blue Gradient 01 at 8% (unbound in Figma, same stops), border N100. */

@@ -81,10 +81,6 @@ button:disabled{cursor:default !important;}
 .skel{background:var(--surface-muted);border-radius:99px;animation:skel-pulse 1.4s ease-in-out infinite;}
 .skel-bg{background:var(--surface-primary);}
 @media (prefers-reduced-motion:reduce){.skel{animation:none;}}
-/* Delete confirmation sheet. */
-@keyframes sheet-up{from{transform:translateY(100%);}to{transform:none;}}
-.sheet{animation:sheet-up .22s var(--ease-out) both;}
-@media (prefers-reduced-motion:reduce){.sheet{animation:none;}}
 /* Toast (DS .rw-toast, Figma 360:7533): full width inside the 20px page margins; slides down in and back up out. */
 @keyframes toast-in{from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:none;}}
 @keyframes toast-out{from{opacity:1;transform:none;}to{opacity:0;transform:translateY(-12px);}}
@@ -1785,51 +1781,69 @@ button:disabled{cursor:default !important;}
 
   <!-- Delete confirmation -->
   <sc-if value="{{ confirmDelete }}" hint-placeholder-val="{{ false }}">
-    <div onClick="{{ cancelDelete }}" style="position:absolute;inset:0;background:rgba(0,0,0,.45);"></div>
-    <div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="del-title" aria-describedby="del-body" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface-primary);border-radius:34px 34px 0 0;padding:28px 20px 34px;display:flex;flex-direction:column;gap:24px;">
-      <div style="display:flex;flex-direction:column;gap:8px;text-align:center;padding:0 12px;">
-        <div id="del-title" style="font:500 19px/1.35 var(--font-sans);">{{ tx.deleteMatchQ }}</div>
-        <div id="del-body" style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">{{ tx.deleteMatchBody }}</div>
+    <div class="rw-sheet-scrim" onClick="{{ cancelDelete }}"></div>
+    <div class="rw-sheet" role="alertdialog" aria-modal="true" aria-labelledby="del-title" aria-describedby="del-body" data-screen-label="Delete Match">
+      <div class="rw-sheet-head">
+        <span class="rw-sheet-grabber" aria-hidden="true"></span>
+        <div class="rw-sheet-bar">
+          <span></span>
+          <h2 id="del-title" class="rw-sheet-title">{{ tx.deleteMatchQ }}</h2>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="X" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.close }}" onClick="{{ cancelDelete }}" hint-size="44px,44px"></x-import>
+        </div>
+        <span class="rw-sheet-divider"></span>
       </div>
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <button onClick="{{ doDelete }}" style="height:56px;border:none;border-radius:99px;background:var(--rw-color-status-error);color:var(--rw-color-text-on-action);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">{{ tx.delete }}</button>
-        <button onClick="{{ cancelDelete }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-muted);color:var(--text-primary);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">{{ tx.cancel }}</button>
+      <p id="del-body" class="rw-sheet-text">{{ tx.deleteMatchBody }}</p>
+      <div class="rw-sheet-foot rw-btn-stack">
+        <button type="button" class="rw-btn rw-btn-primary is-danger" onClick="{{ doDelete }}">{{ tx.delete }}</button>
+        <button type="button" class="rw-btn rw-btn-quiet" onClick="{{ cancelDelete }}">{{ tx.cancel }}</button>
       </div>
     </div>
   </sc-if>
 
   <!-- Delete account confirmation -->
   <sc-if value="{{ confirmDeleteAccount }}" hint-placeholder-val="{{ false }}">
-    <div onClick="{{ cancelDeleteAccount }}" style="position:absolute;inset:0;background:rgba(0,0,0,.45);"></div>
-    <div class="sheet" data-screen-label="Delete Account" role="alertdialog" aria-modal="true" aria-labelledby="del-acct-title" aria-describedby="del-acct-body" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface-primary);border-radius:34px 34px 0 0;padding:28px 20px 34px;display:flex;flex-direction:column;gap:24px;">
-      <div style="display:flex;flex-direction:column;gap:8px;text-align:center;padding:0 12px;">
-        <div id="del-acct-title" style="font:500 19px/1.35 var(--font-sans);">{{ tx.deleteAccountQ }}</div>
-        <div id="del-acct-body" style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">{{ tx.deleteAccountBody }}</div>
+    <div class="rw-sheet-scrim" onClick="{{ cancelDeleteAccount }}"></div>
+    <div class="rw-sheet" data-screen-label="Delete Account" role="alertdialog" aria-modal="true" aria-labelledby="del-acct-title" aria-describedby="del-acct-body">
+      <div class="rw-sheet-head">
+        <span class="rw-sheet-grabber" aria-hidden="true"></span>
+        <div class="rw-sheet-bar">
+          <span></span>
+          <h2 id="del-acct-title" class="rw-sheet-title">{{ tx.deleteAccountQ }}</h2>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="X" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.close }}" onClick="{{ cancelDeleteAccount }}" hint-size="44px,44px"></x-import>
+        </div>
+        <span class="rw-sheet-divider"></span>
       </div>
+      <p id="del-acct-body" class="rw-sheet-text">{{ tx.deleteAccountBody }}</p>
       <sc-if value="{{ banner }}" hint-placeholder-val="{{ false }}">
         <div role="alert" class="rw-toast is-error"><span class="rw-toast-badge" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Ban" size="{{ 12 }}" hint-size="12px,12px"></x-import></span><div class="rw-toast-text"><p class="rw-toast-title">{{ banner }}</p></div></div>
       </sc-if>
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <button onClick="{{ deleteAccount }}" aria-busy="{{ busyDelete }}" disabled="{{ busyAny }}" style="height:56px;border:none;border-radius:99px;background:var(--rw-color-status-error);color:var(--rw-color-text-on-action);font:600 15px/1 var(--font-sans);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-active="transform:scale(.98);">
-          <sc-if value="{{ busyDelete }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 24 }}" hint-size="24px,24px"></x-import></span><span class="sr-only">{{ tx.deleteAccount }}</span></sc-if>
+      <div class="rw-sheet-foot rw-btn-stack">
+        <button type="button" class="rw-btn rw-btn-primary is-danger" onClick="{{ deleteAccount }}" aria-busy="{{ busyDelete }}" disabled="{{ busyAny }}">
+          <sc-if value="{{ busyDelete }}" hint-placeholder-val="{{ false }}"><span class="auth-spin" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="LoaderCircle" size="{{ 22 }}" hint-size="22px,22px"></x-import></span><span class="sr-only">{{ tx.deleteAccount }}</span></sc-if>
           <sc-if value="{{ idleDelete }}" hint-placeholder-val="{{ true }}">{{ tx.deleteAccount }}</sc-if>
         </button>
-        <button onClick="{{ cancelDeleteAccount }}" disabled="{{ busyAny }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-muted);color:var(--text-primary);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">{{ tx.cancel }}</button>
+        <button type="button" class="rw-btn rw-btn-quiet" onClick="{{ cancelDeleteAccount }}" disabled="{{ busyAny }}">{{ tx.cancel }}</button>
       </div>
     </div>
   </sc-if>
 
   <!-- Share Usage Data: asked once, right after onboarding (or on the next open for accounts that finished it earlier). -->
   <sc-if value="{{ askConsent }}" hint-placeholder-val="{{ false }}">
-    <div onClick="{{ consentNo }}" style="position:absolute;inset:0;background:rgba(0,0,0,.45);"></div>
-    <div class="sheet" data-screen-label="Share Usage Data" role="dialog" aria-modal="true" aria-labelledby="consent-title" aria-describedby="consent-body" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface-primary);border-radius:34px 34px 0 0;padding:28px 20px 34px;display:flex;flex-direction:column;gap:24px;">
-      <div style="display:flex;flex-direction:column;gap:8px;text-align:center;padding:0 12px;">
-        <div id="consent-title" style="font:500 19px/1.35 var(--font-sans);">{{ tx.shareUsageQ }}</div>
-        <div id="consent-body" style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">{{ tx.consentBody }}</div>
+    <div class="rw-sheet-scrim" onClick="{{ consentNo }}"></div>
+    <div class="rw-sheet" data-screen-label="Share Usage Data" role="dialog" aria-modal="true" aria-labelledby="consent-title" aria-describedby="consent-body">
+      <div class="rw-sheet-head">
+        <span class="rw-sheet-grabber" aria-hidden="true"></span>
+        <div class="rw-sheet-bar">
+          <span></span>
+          <h2 id="consent-title" class="rw-sheet-title">{{ tx.shareUsageQ }}</h2>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="X" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.close }}" onClick="{{ consentNo }}" hint-size="44px,44px"></x-import>
+        </div>
+        <span class="rw-sheet-divider"></span>
       </div>
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <button onClick="{{ consentYes }}" style="height:56px;border:none;border-radius:99px;background:var(--action-primary);color:var(--action-on-primary);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">{{ tx.shareUsage }}</button>
-        <button onClick="{{ consentNo }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-muted);color:var(--text-primary);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">{{ tx.notNow }}</button>
+      <p id="consent-body" class="rw-sheet-text">{{ tx.consentBody }}</p>
+      <div class="rw-sheet-foot rw-btn-stack">
+        <button type="button" class="rw-btn rw-btn-primary" onClick="{{ consentYes }}">{{ tx.shareUsage }}</button>
+        <button type="button" class="rw-btn rw-btn-quiet" onClick="{{ consentNo }}">{{ tx.notNow }}</button>
       </div>
     </div>
   </sc-if>
@@ -1918,15 +1932,21 @@ button:disabled{cursor:default !important;}
 
   <!-- Delete Focus confirmation -->
   <sc-if value="{{ confirmDeleteFocus }}" hint-placeholder-val="{{ false }}">
-    <div onClick="{{ cancelDeleteFocus }}" style="position:absolute;inset:0;background:rgba(0,0,0,.45);"></div>
-    <div class="sheet" data-screen-label="Delete Focus" role="alertdialog" aria-modal="true" aria-labelledby="del-focus-title" aria-describedby="del-focus-body" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface-primary);border-radius:34px 34px 0 0;padding:28px 20px 34px;display:flex;flex-direction:column;gap:24px;">
-      <div style="display:flex;flex-direction:column;gap:8px;text-align:center;padding:0 12px;">
-        <div id="del-focus-title" style="font:500 19px/1.35 var(--font-sans);">{{ tx.deleteFocusQ }}</div>
-        <div id="del-focus-body" style="font:400 15px/1.45 var(--font-sans);color:var(--text-secondary);">{{ delFocusBody }}</div>
+    <div class="rw-sheet-scrim" onClick="{{ cancelDeleteFocus }}"></div>
+    <div class="rw-sheet" data-screen-label="Delete Focus" role="alertdialog" aria-modal="true" aria-labelledby="del-focus-title" aria-describedby="del-focus-body">
+      <div class="rw-sheet-head">
+        <span class="rw-sheet-grabber" aria-hidden="true"></span>
+        <div class="rw-sheet-bar">
+          <span></span>
+          <h2 id="del-focus-title" class="rw-sheet-title">{{ tx.deleteFocusQ }}</h2>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="X" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.close }}" onClick="{{ cancelDeleteFocus }}" hint-size="44px,44px"></x-import>
+        </div>
+        <span class="rw-sheet-divider"></span>
       </div>
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <button onClick="{{ doDeleteFocus }}" style="height:56px;border:none;border-radius:99px;background:var(--rw-color-status-error);color:var(--rw-color-text-on-action);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">{{ tx.delete }}</button>
-        <button onClick="{{ cancelDeleteFocus }}" style="height:56px;border:none;border-radius:99px;background:var(--surface-muted);color:var(--text-primary);font:600 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.98);">{{ tx.cancel }}</button>
+      <p id="del-focus-body" class="rw-sheet-text">{{ delFocusBody }}</p>
+      <div class="rw-sheet-foot rw-btn-stack">
+        <button type="button" class="rw-btn rw-btn-primary is-danger" onClick="{{ doDeleteFocus }}">{{ tx.delete }}</button>
+        <button type="button" class="rw-btn rw-btn-quiet" onClick="{{ cancelDeleteFocus }}">{{ tx.cancel }}</button>
       </div>
     </div>
   </sc-if>

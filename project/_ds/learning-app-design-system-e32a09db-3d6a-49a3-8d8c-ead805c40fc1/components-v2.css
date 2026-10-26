@@ -54,6 +54,7 @@
    Form error (inline) .......... .rw-toast.is-error in the page flow (Ban badge + .rw-toast-title, no close), same Toast component (Han 2026-10-25)
    Search bar (Figma 329:7330) ... .rw-search[.is-filled] > Search icon + .rw-search-input + .rw-search-clear (states: Unfilled, Filled Inactive, Active Typing = :focus-within)
    Bottom Sheet (Figma 319:6349) ... .rw-sheet-scrim + .rw-sheet > .rw-sheet-head (.rw-sheet-grabber, .rw-sheet-bar > spacer + .rw-sheet-title + IconButton glass, .rw-sheet-divider) + .rw-sheet-body (body copy .rw-sheet-text) + .rw-sheet-foot
+     Confirm sheet ................ same head + .rw-sheet-text + .rw-sheet-foot.rw-btn-stack > .rw-btn-primary[.is-danger] + .rw-btn-quiet (Delete Match / Account / Focus, Share Usage Data)
    Result and Notes sheets (Figma 349:3528, 349:3793; Han approved 2026-10-23):
      W / L check (CheckBoxes) ..... .rw-check[.is-win|.is-loss]  (no class = unselected, dashed ring)
      Game row ..................... .rw-surface.rw-game > .rw-game-label + .rw-game-checks (.rw-check x2) + .rw-game-score
@@ -91,6 +92,7 @@
 /* Button / Primary, Large */
 .rw-btn{border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform var(--dur-fast) var(--ease-out),opacity var(--dur-fast);}
 .rw-btn-primary{height:var(--rw-btn-primary-h);border-radius:999px;padding:1px 24px;background:var(--rw-btn-primary-bg);color:var(--rw-btn-primary-fg);font:var(--rw-type-button);}
+.rw-btn-primary.is-danger{background:var(--rw-btn-danger-bg);}
 /* Button / Secondary, Medium: text, or a 16px icon + text. On a tile or banner it takes the on-surface fill. */
 .rw-btn-secondary{position:relative;height:var(--rw-btn-secondary-h);border-radius:999px;padding:0 12px;gap:4px;background:var(--rw-btn-secondary-bg);color:var(--rw-btn-secondary-fg);font:var(--rw-type-btn-secondary);letter-spacing:var(--rw-tracking);white-space:nowrap;}
 .rw-btn-secondary:has(svg){padding-left:10px;}
@@ -410,9 +412,10 @@ button.rw-input-row{cursor:pointer;}
 /* "or" divider: two N150 lines (the tile divider) around a 12px N400 caption */
 .rw-or{display:flex;align-items:center;gap:16px;font:var(--rw-type-caption);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
 .rw-or::before,.rw-or::after{content:"";flex:1;height:1px;background:var(--rw-color-divider);}
-/* Social sign-in: the primary button's size and shape on the tile fill; brand logo 18px + N800 label */
-.rw-btn-social{width:100%;height:var(--rw-btn-primary-h);border-radius:999px;padding:1px 24px;background:var(--rw-surface-fill);color:var(--rw-text-primary);font:var(--rw-type-button);letter-spacing:var(--rw-tracking);}
-.rw-btn-social:active{background:var(--rw-color-surface-highlight);}
+/* Social sign-in: the primary button's size and shape on the tile fill; brand logo 18px + N800 label.
+   .rw-btn-quiet is the same button without a logo: the second, dismissive action under a primary (Cancel, Not Now). */
+.rw-btn-social,.rw-btn-quiet{width:100%;height:var(--rw-btn-primary-h);border-radius:999px;padding:1px 24px;background:var(--rw-surface-fill);color:var(--rw-text-primary);font:var(--rw-type-button);letter-spacing:var(--rw-tracking);}
+.rw-btn-social:active,.rw-btn-quiet:active{background:var(--rw-color-surface-highlight);}
 .rw-btn-stack{display:flex;flex-direction:column;gap:12px;}
 /* Checkbox: Highlight Fill square; checked adds the selected outline + Check, both N600 */
 .rw-agree{display:flex;align-items:flex-start;gap:12px;font:var(--rw-type-body);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
@@ -479,7 +482,7 @@ button.rw-input-row{cursor:pointer;}
   line-height:1.25;
 }
 /* Same Chinese ink offset as the Toast: buttons centre with flex, so 2x the shift as extra top padding moves the label down by the shift. */
-:root[lang="zh-Hans"] .rw-btn-primary,:root[lang="zh-Hans"] .rw-btn-social{padding-top:calc(1px + 2 * var(--rw-zh-ink-shift));}
+:root[lang="zh-Hans"] .rw-btn-primary,:root[lang="zh-Hans"] .rw-btn-social,:root[lang="zh-Hans"] .rw-btn-quiet{padding-top:calc(1px + 2 * var(--rw-zh-ink-shift));}
 :root[lang="zh-Hans"] :is(.rw-btn,.rw-pill,.rw-flag) :is(svg,x-import){
   flex-shrink:0;
   vertical-align:middle;
