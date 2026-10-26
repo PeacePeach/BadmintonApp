@@ -17,7 +17,7 @@
 //   compare  a count compared between your last 3 matches and the 3 before (games won, close games won)
 //   strip    whether a self-reported observation was noted in each match (0/1), in order
 
-export const ENGINE_VERSION = '2026-10-26-v10';
+export const ENGINE_VERSION = '2026-10-26-v11';
 export const SKILL_TAGS = ['Serve', 'Return', 'Net', 'Smash', 'Defence', 'Footwork', 'Placement'];
 const WINDOW = 10;     // latest matches the engine reads
 const NOTE_N = 6;      // matches with notes in a Skill Tag window
@@ -257,7 +257,7 @@ export function keyCandidates(matches, previousId, { all = false } = {}) {
   const chron = normalize(matches);
   const sides = topicSides(matches); // a tag that belongs on the other side (see Build Next) is not a Key Insight either
   const found = [trendCandidate(chron), compareCandidate(chron, 'games'), compareCandidate(chron, 'close'),
-    ...tagCandidates(chron).filter(c => !sides[c.tag] || sides[c.tag] === c.side)].filter(Boolean);
+    ...tagCandidates(chron).filter(c => !sides[c.tag] || sides[c.tag] === c.side || sides[c.tag] === 'both')].filter(Boolean);
   const ranked = rankCandidates(found, previousId);
   return all ? ranked : ranked.filter(c => c.quality >= KEY_MIN_QUALITY);
 }
@@ -568,6 +568,27 @@ export function buildCandidates(matches, focus = [], max = 4) {
     const notes = notesFor(list.filter(m => has(m, 'lt', tag)), ['lost']);
     out.push({ topic_id: topic, tag, k, n: list.length, recent: sum(values.slice(-3)), latest: values[values.length - 1], returning,
       skipped: returning ? 0 : chron.slice(chron.indexOf(win[0])).filter(m => !hasNotes(m)).length, notes, basis: basisOf(notes, tag), contextName: sides[tag] === 'both' ? {en: smashContextName(new Set(skillClauses(notes,tag).flatMap(conceptsIn)), 'en'), zh: smashContextName(new Set(skillClauses(notes,tag).flatMap(conceptsIn)), 'zh')} : null });
+  }
+  // Fill a second slot only from independently repeated negative observations in the
+  // wider 10-match evidence window. Never lower the minimum from 2 or use active Focus.
+  // This expands coverage; it does not manufacture another recommendation.
+  if (out.length < 2) {
+    const extended = chron.filter(hasNotes);
+    for (const tag of SKILL_TAGS) {
+      if (out.some(x => x.tag === tag) || sides[tag] === 'worked' || sides[tag] === 'ambiguous') continue;
+      const topic = 'tag:' + tag, fs = focus.filter(f => f.topic === topic);
+      if (fs.some(f => f.status === 'active' || f.status === 'completed')) continue;
+      const values = extended.map(m => has(m, 'lt', tag) ? 1 : 0), k = sum(values);
+      if (k < 2 || values.slice(-NOTE_N).reduce((a,b)=>a+b,0) < 1) continue;
+      const w = sum(extended.map(m => has(m,'wt',tag) ? 1 : 0));
+      if (w >= k) continue;
+      const list = extended.filter(m => has(m,'lt',tag));
+      const notes = notesFor(list,['lost']);
+      out.push({topic_id:topic,tag,k,n:extended.length,recent:sum(values.slice(-3)),
+        latest:values[values.length-1],returning:false,skipped:0,notes,basis:basisOf(notes,tag),
+        contextName:null,secondary:true});
+      if (out.length >= 2) break;
+    }
   }
   return out.sort((a, b) => b.k / b.n - a.k / a.n || b.recent - a.recent || b.latest - a.latest || a.tag.localeCompare(b.tag)).slice(0, max);
 }
