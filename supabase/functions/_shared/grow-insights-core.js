@@ -601,7 +601,7 @@ export function buildCandidates(matches, focus = [], max = 4) {
       const observed=win.filter(m=>has(m,'lt',tag));
       if (observed.length !== 1) continue;
       const notes=notesFor(observed,['lost']);
-      if (!notes.length) continue; // a bare tag isn't enough for a tentative recommendation
+      if (!notes.some(note => skillClauses([note],tag).length)) continue; // require a real note about this specific skill
       exploratory.push({topic_id:topic,tag,k:1,n:win.length,recent:win.slice(-3).filter(m=>has(m,'lt',tag)).length,
         latest:has(win[win.length-1],'lt',tag)?1:0,returning:false,skipped:0,notes,basis:'general',
         contextName:null,exploratory:true});
