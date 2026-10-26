@@ -491,7 +491,7 @@ button:disabled{cursor:default !important;}
         </sc-if>
 
         <sc-if value="{{ insState }}" hint-placeholder-val="{{ false }}">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ insState.illustration }}" title="{{ insState.title }}" body="{{ insState.body }}" actionLabel="{{ insState.actionLabel }}" onAction="{{ insState.onAction }}" hint-size="350px,330px"></x-import>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ insState.illustration }}" title="{{ insState.title }}" body="{{ insState.body }}" actionLabel="{{ insState.actionLabel }}" onAction="{{ insState.onAction }}" compact="{{ true }}" hint-size="350px,330px"></x-import>
         </sc-if>
 
         <sc-if value="{{ insProgress }}" hint-placeholder-val="{{ true }}">
@@ -574,7 +574,7 @@ button:disabled{cursor:default !important;}
         <sc-if value="{{ insCoach }}" hint-placeholder-val="{{ false }}">
           <div data-screen-label="Grow" style="display:flex;flex-direction:column;gap:var(--rw-section-gap);">
             <sc-if value="{{ grow.empty }}" hint-placeholder-val="{{ false }}">
-              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ grow.empty.illustration }}" title="{{ grow.empty.title }}" body="{{ grow.empty.body }}" hint-size="350px,300px"></x-import>
+              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ grow.empty.illustration }}" title="{{ grow.empty.title }}" body="{{ grow.empty.body }}" compact="{{ true }}" hint-size="350px,300px"></x-import>
             </sc-if>
             <sc-if value="{{ grow.showKey }}" hint-placeholder-val="{{ true }}">
             <!-- Engine V2: split KeyInsight with one of the three RWKeyChart patterns, from the engine's chart object. -->
@@ -993,7 +993,7 @@ button:disabled{cursor:default !important;}
                     </div>
                   </sc-for>
                   <sc-if value="{{ pickEmpty }}" hint-placeholder-val="{{ false }}">
-                    <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ pickEmpty.illustration }}" title="{{ pickEmpty.title }}" body="{{ pickEmpty.body }}" size="{{ 120 }}" style="{{ pickEmpty.style }}" hint-size="350px,260px"></x-import>
+                    <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ pickEmpty.illustration }}" title="{{ pickEmpty.title }}" body="{{ pickEmpty.body }}" compact="{{ true }}" style="{{ pickEmpty.style }}" hint-size="350px,260px"></x-import>
                   </sc-if>
                 </div>
               </div>
@@ -1278,7 +1278,7 @@ button:disabled{cursor:default !important;}
               </div>
             </sc-for>
             <sc-if value="{{ profile.recentEmpty }}" hint-placeholder-val="{{ false }}">
-              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ profile.recentEmpty.illustration }}" title="{{ profile.recentEmpty.title }}" body="{{ profile.recentEmpty.body }}" size="{{ 120 }}" style="{{ profile.recentEmpty.style }}" hint-size="350px,260px"></x-import>
+              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ profile.recentEmpty.illustration }}" title="{{ profile.recentEmpty.title }}" body="{{ profile.recentEmpty.body }}" compact="{{ true }}" style="{{ profile.recentEmpty.style }}" hint-size="350px,260px"></x-import>
             </sc-if>
           </div>
         </section>

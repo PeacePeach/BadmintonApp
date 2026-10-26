@@ -1,13 +1,15 @@
 /* Rallywise illustrations
    Simple flat graphics for empty, error, success and connection states.
-   Style: soft circular backdrop, 2px outlines, object bodies in the app
-   background colour, one small filled area in brand blue. All colours come
+   Style: Soft Glow (a faint B100 radial glow behind the drawing, .rw-illus in
+   components-v2.css), 2px outlines, object bodies in the app background colour,
+   one small filled area in brand blue. All colours come
    from the --rw-illustration-* tokens in tokens/v2.css (V1 --illustration-* in
    tokens/colors.css as the fallback).
 
    Exposes on window.LearningAppDesignSystem_e32a09:
-     Illustration({ name, size, title })
-     EmptyState({ illustration, title, body, actionLabel, onAction, style })
+     Illustration({ name, compact, title })    drawing on its Soft Glow
+     EmptyState({ illustration, title, body, actionLabel, onAction, compact, style })
+                                  compact: smaller graphic for dense screens (Insights, Player profile)
      illustrationNames            list of available names
      illustrationMarkup(name)     raw SVG string, for plain HTML pages
 */
@@ -18,14 +20,13 @@
   const FILL = 'var(--rw-illustration-fill, var(--illustration-fill, #2d75e8))';
   const BODY = 'var(--rw-illustration-surface, var(--illustration-surface, #1b1a1d))';
   const DETAIL = 'var(--rw-illustration-detail, var(--illustration-detail, #e6eefc))';
-  const TINT = 'var(--rw-illustration-backdrop, var(--illustration-backdrop, #6c9fef))';
 
   const o = `fill="${BODY}" stroke="${LINE}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"`;
   const f = `fill="${FILL}" stroke="${LINE}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"`;
   const l = `fill="none" stroke="${LINE}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"`;
   const d = `fill="none" stroke="${DETAIL}" stroke-width="2" stroke-linecap="round"`;
 
-  // Each drawing sits on a 160 x 160 canvas around the backdrop circle (r 60).
+  // Each drawing is centred on (80, 80) of a 160 canvas and stays inside the 110 x 110 view box below.
   const drawings = {
     // Racket and shuttlecock at rest
     'no-matches': (id) => `
@@ -118,34 +119,28 @@
     const draw = drawings[name];
     if (!draw) return '';
     const id = uid || 'rwi' + (++seq);
-    return `<svg viewBox="0 0 160 160" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-      <defs>
-        <linearGradient id="${id}-bg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="${TINT}" stop-opacity=".09"/>
-          <stop offset="1" stop-color="${TINT}" stop-opacity="0"/>
-        </linearGradient>
-      </defs>
-      <circle cx="80" cy="80" r="60" fill="url(#${id}-bg)"/>
+    return `<svg viewBox="25 25 110 110" overflow="visible" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
       ${draw(id)}
     </svg>`;
   }
 
-  function Illustration({ name, size = 160, title, style }) {
+  function Illustration({ name, compact, title, style }) {
     const ref = React.useRef(null);
     if (!ref.current) ref.current = 'rwi' + (++seq);
     return React.createElement('div', {
       role: title ? 'img' : undefined,
       'aria-label': title,
       'aria-hidden': title ? undefined : true,
-      style: { width: size, height: size, flexShrink: 0, ...style },
+      className: 'rw-illus' + (compact ? ' is-compact' : ''),
+      style,
       dangerouslySetInnerHTML: { __html: illustrationMarkup(name, ref.current) },
     });
   }
 
-  function EmptyState({ illustration, title, body, actionLabel, onAction, size = 160, style }) {
+  function EmptyState({ illustration, title, body, actionLabel, onAction, compact, style }) {
     const h = React.createElement;
     return h('div', { className: 'rw-empty', style },
-      illustration ? h(Illustration, { name: illustration, size }) : null,
+      illustration ? h(Illustration, { name: illustration, compact }) : null,
       title ? h('div', { className: 'rw-empty-title' }, title) : null,
       body ? h('div', { className: 'rw-empty-body' }, body) : null,
       actionLabel ? h('button', { type: 'button', className: 'rw-btn rw-btn-primary', onClick: onAction }, actionLabel) : null

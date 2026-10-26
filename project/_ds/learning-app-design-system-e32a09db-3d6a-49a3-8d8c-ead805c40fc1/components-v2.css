@@ -26,7 +26,8 @@
      Insight Subtitle (change) .... .rw-trend > .rw-trend-delta.is-up|.is-down|.is-flat
      Graphs / Large bar ........... .rw-form[.is-down] > .rw-form-bars > .rw-form-bar[.is-recent] + .rw-chart-label
      Performance breakdown ........ .rw-breakdown (label, .rw-bar, .rw-row-value + .rw-row-sub); score gap row: fill .is-up|.is-down + .rw-breakdown-mid (dashed zero line)
-     EmptyState ................... .rw-empty > illustration + .rw-empty-title + .rw-empty-body + .rw-btn.rw-btn-primary (illustrations.js)
+     Illustration (Soft Glow) ..... .rw-illus[.is-compact] > svg (illustrations.js)
+     EmptyState ................... .rw-empty > .rw-illus + .rw-empty-title + .rw-empty-body + .rw-btn.rw-btn-primary (illustrations.js)
      Insight / ListRow ............ .rw-list-row (.rw-avatar, .rw-eyebrow, .rw-name, .rw-list-value, .rw-caption)
    Insights / Grow (Figma 203:5215):
      KeyInsight ................... .rw-surface.rw-tile.rw-key > .rw-key-head (dot + .rw-label) + .rw-key-title + .rw-key-body + .rw-bar.rw-key-bar
@@ -491,6 +492,11 @@ button.rw-input-row{cursor:pointer;}
 }
 /* Same Chinese ink offset as the Toast: buttons centre with flex, so 2x the shift as extra top padding moves the label down by the shift. */
 :root[lang="zh-Hans"] .rw-btn-primary,:root[lang="zh-Hans"] .rw-btn-social,:root[lang="zh-Hans"] .rw-btn-quiet{padding-top:calc(1px + 2 * var(--rw-zh-ink-shift));}
+/* Illustration, Soft Glow: the drawing centred on a faint radial glow (no container shape). */
+.rw-illus{position:relative;display:grid;place-items:center;flex-shrink:0;width:var(--rw-illus-glow-size);height:var(--rw-illus-glow-size);}
+.rw-illus::before{content:"";position:absolute;inset:0;border-radius:50%;background:var(--rw-illustration-glow);pointer-events:none;}
+.rw-illus>svg{position:relative;width:var(--rw-illus-size);height:var(--rw-illus-size);}
+.rw-illus.is-compact{--rw-illus-size:var(--rw-illus-size-compact);--rw-illus-glow-size:var(--rw-illus-glow-size-compact);}
 /* EmptyState (illustrations.js): title, body and the one action, centred under the illustration. */
 .rw-empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:32px 16px;}
 .rw-empty-title{margin-top:20px;font:var(--rw-type-empty-title);letter-spacing:var(--rw-tracking);color:var(--rw-empty-title-fg);}

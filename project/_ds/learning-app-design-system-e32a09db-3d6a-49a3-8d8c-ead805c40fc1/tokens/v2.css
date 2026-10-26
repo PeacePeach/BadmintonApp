@@ -221,7 +221,13 @@
   --rw-illustration-line: var(--rw-b100);
   --rw-illustration-fill: var(--rw-b200);
   --rw-illustration-detail: var(--rw-b50);
-  --rw-illustration-backdrop: var(--rw-b100);
+  /* Soft Glow (Han, 2026-10-26): no solid circle; B100 fading from 16% at the centre into the page. Drawing box /
+     glow diameter: 110 / 120px, compact (dense screens) 96 / 104px. The drawings themselves are 60-90px inside the box. */
+  --rw-illustration-glow: radial-gradient(circle closest-side, color-mix(in srgb, var(--rw-b100) 16%, transparent) 0%, color-mix(in srgb, var(--rw-b100) 6%, transparent) 50%, transparent 100%);
+  --rw-illus-size: 110px;
+  --rw-illus-glow-size: 120px;
+  --rw-illus-size-compact: 96px;
+  --rw-illus-glow-size-compact: 104px;
   --rw-illustration-surface: var(--rw-color-bg-app);
   --rw-icon-btn-size: 40px;
   /* InlineBanner (Figma Foundation 333:8797): a reusable in-content prompt, e.g. "Who is “Chris”?" (Han, 2026-10-23).
