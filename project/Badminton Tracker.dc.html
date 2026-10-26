@@ -873,7 +873,7 @@ button:disabled{cursor:default !important;}
     <!-- VOICE LOG MATCH (Figma 207:7730): describe the session, then Review. Phase 1 uses mock speech and parsing. -->
     <sc-if value="{{ isVoice }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Log Match · Voice" style="display:flex;flex-direction:column;gap:40px;">
-        <div class="rw-appbar-title">
+        <div class="rw-appbar-title is-centered">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="X" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.close }}" onClick="{{ vc.close }}" hint-size="44px,44px"></x-import>
           <h1 class="rw-appbar-name">{{ tx.logMatch }}</h1>
         </div>
@@ -897,7 +897,7 @@ button:disabled{cursor:default !important;}
     <!-- REVIEW MATCH DETAILS (Figma 217:8404; flagged row 248:2470). Each row opens the matching Log Match step. -->
     <sc-if value="{{ isReview }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Log Match · Review" style="display:flex;flex-direction:column;gap:40px;">
-        <div class="rw-appbar-title">
+        <div class="rw-appbar-title is-centered">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ArrowLeft" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.back }}" onClick="{{ rv.back }}" hint-size="44px,44px"></x-import>
           <h1 class="rw-appbar-name">{{ rv.title }}</h1>
         </div>
@@ -1205,7 +1205,7 @@ button:disabled{cursor:default !important;}
     <!-- PLAYERS (V2): App bar title with the glass Back button, Search bar, then Player rows (same as the Players sheet). -->
     <sc-if value="{{ isPlayers }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Players" style="display:flex;flex-direction:column;gap:24px;">
-        <div class="rw-appbar-title">
+        <div class="rw-appbar-title is-centered">
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ArrowLeft" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="44px,44px"></x-import>
           <h1 class="rw-appbar-name">{{ tx.players }}</h1>
         </div>
