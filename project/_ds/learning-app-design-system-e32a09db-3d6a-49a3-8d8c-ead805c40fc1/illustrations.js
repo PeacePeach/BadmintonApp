@@ -12,7 +12,8 @@
                                   compact: smaller graphic for dense screens (Insights, Player profile)
                                   page: full-page state (offline, load error), centred in the free space
      illustrationNames            list of available names
-     illustrationMarkup(name)     raw SVG string, for plain HTML pages
+     illustrationMarkup(name)     raw SVG string
+     illustrationHTML(name)       SVG on its backdrop circle (.rw-illus), for plain HTML pages
 */
 (() => {
   const ns = (window.LearningAppDesignSystem_e32a09 = window.LearningAppDesignSystem_e32a09 || {});
@@ -115,9 +116,10 @@
       <path d="M54 48l54 60" fill="none" stroke="${FILL}" stroke-width="3.5" stroke-linecap="round"/>`,
   };
 
-  // Masked drawings (Han's reference): the body runs past the bottom and is cut by a straight line, as if rising
-  // from behind it. The cut sits at y 131, near the base of the backdrop circle.
-  const CUT = { 'no-players': true, 'no-insights': true, 'error': true };
+  // Masked drawings (Han's reference): drawn larger, their bodies run past the backdrop circle and are cut by its arc
+  // (.rw-illus.is-masked in components-v2.css). Their shapes extend below y 135 so there is always something to cut.
+  const MASKED = { 'no-players': true, 'no-insights': true, 'error': true };
+  const illusClass = (name, compact) => 'rw-illus' + (compact ? ' is-compact' : '') + (MASKED[name] ? ' is-masked' : '');
 
   let seq = 0;
   function illustrationMarkup(name, uid) {
@@ -125,7 +127,7 @@
     if (!draw) return '';
     const id = uid || 'rwi' + (++seq);
     return `<svg viewBox="25 25 110 110" overflow="visible" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-      ${CUT[name] ? `<clipPath id="${id}-cut"><rect x="-100" y="-100" width="400" height="231"/></clipPath><g clip-path="url(#${id}-cut)">${draw(id)}</g>` : draw(id)}
+      ${draw(id)}
     </svg>`;
   }
 
@@ -136,9 +138,9 @@
       role: title ? 'img' : undefined,
       'aria-label': title,
       'aria-hidden': title ? undefined : true,
-      className: 'rw-illus' + (compact ? ' is-compact' : ''),
+      className: illusClass(name, compact),
       style,
-      dangerouslySetInnerHTML: { __html: illustrationMarkup(name, ref.current) },
+      dangerouslySetInnerHTML: { __html: '<div class="rw-illus-art">' + illustrationMarkup(name, ref.current) + '</div>' },
     });
   }
 
@@ -156,4 +158,5 @@
   ns.EmptyState = EmptyState;
   ns.illustrationNames = Object.keys(drawings);
   ns.illustrationMarkup = (name) => illustrationMarkup(name);
+  ns.illustrationHTML = (name, compact) => `<div class="${illusClass(name, compact)}"><div class="rw-illus-art">${illustrationMarkup(name)}</div></div>`;
 })();

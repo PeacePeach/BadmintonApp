@@ -425,14 +425,14 @@
 
     <h3>Style rules</h3>
     <ul class="rules">
-      <li>Translucent backdrop circle (<code>--rw-illustration-backdrop</code>, B100 14% at the top fading out by 88%) behind the whole drawing: drawing ~54% of the circle, sitting low inside it, title 25% of the circle below. 128px circle / 100px drawing box; <code>compact</code> 112 / 88px on dense screens.</li>
+      <li>Translucent backdrop circle (<code>--rw-illustration-backdrop</code>, B75 12% at the top fading out) that is also the mask for the lower half: some drawings (<code>is-masked</code>) are drawn larger so their base is cut along the circle's arc. 128px circle; <code>compact</code> 112px on dense screens.</li>
       <li>2px outlines in <code>--rw-illustration-line</code>, object bodies in <code>--rw-illustration-surface</code> (the app background).</li>
       <li>One small filled area per drawing in <code>--rw-illustration-fill</code>, with <code>--rw-illustration-detail</code> for lines on top of it.</li>
       <li>Flat 2D only: no 3D, shading, scenes, heavy gradients or decoration. Not used in auth or onboarding.</li>
     </ul>
 
     <h3>Tokens</h3>
-    <div class="semantic-row"><div class="semantic-name">--rw-illustration-backdrop</div><div class="semantic-preview" style="background: var(--rw-illustration-backdrop);"></div><span class="usage">→ B100, 14% at the top fading to 0 by 88% (backdrop circle)</span></div>
+    <div class="semantic-row"><div class="semantic-name">--rw-illustration-backdrop</div><div class="semantic-preview" style="background: var(--rw-illustration-backdrop);"></div><span class="usage">→ B75, 12% at the top fading to 0 (backdrop circle)</span></div>
     <div class="semantic-row"><div class="semantic-name">--rw-illustration-line</div><div class="semantic-preview" style="background: var(--rw-illustration-line);"></div><span class="usage">→ B100 (V2; V1 --illustration-line is the fallback)</span></div>
     <div class="semantic-row"><div class="semantic-name">--rw-illustration-fill</div><div class="semantic-preview" style="background: var(--rw-illustration-fill);"></div><span class="usage">→ B200 (V2; V1 --illustration-fill is the fallback)</span></div>
     <div class="semantic-row"><div class="semantic-name">--rw-illustration-surface</div><div class="semantic-preview" style="background: var(--rw-illustration-surface);"></div><span class="usage">→ --rw-color-bg-app (Purplegrey 900) (V2; V1 --illustration-surface is the fallback)</span></div>
@@ -457,7 +457,7 @@
         items.forEach(function (it) {
           var card = document.createElement('div');
           card.className = 'illus-card';
-          card.innerHTML = '<div class="illus-art"><div class="rw-illus">' + ns.illustrationMarkup(it[0]) + '</div></div>' +
+          card.innerHTML = '<div class="illus-art">' + ns.illustrationHTML(it[0]) + '</div>' +
             '<div class="illus-title">' + it[1] + '</div><div class="illus-name">' + it[0] + '</div><div class="illus-use">' + it[2] + '</div>';
           grid.appendChild(card);
         });

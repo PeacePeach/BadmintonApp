@@ -224,7 +224,7 @@
   /* Backdrop circle (Han, 2026-10-26, after trying Soft Glow), proportions measured from Han's reference set:
      drawing ~54% of the circle, sitting a little low, some drawings cut flat near the base (CUT in illustrations.js), title 25% of the
      circle below it. The B100 tint is strongest at the top and is gone by ~88%, so the circle's base melts into the page. */
-  --rw-illustration-backdrop: linear-gradient(180deg, color-mix(in srgb, var(--rw-b75) 18%, transparent) 0%, color-mix(in srgb, var(--rw-b75) 11%, transparent) 35%, color-mix(in srgb, var(--rw-b75) 4%, transparent) 65%, transparent 88%); /* B75: B100 read too dark (Han 05:20) */
+  --rw-illustration-backdrop: linear-gradient(180deg, color-mix(in srgb, var(--rw-b75) 12%, transparent) 0%, color-mix(in srgb, var(--rw-b75) 7%, transparent) 40%, color-mix(in srgb, var(--rw-b75) 2%, transparent) 75%, transparent 100%); /* B75, kept faint (Han 05:20, 05:26) */
   --rw-illus-box-size: 128px;       /* circle */
   --rw-illus-size: 100px;           /* drawing box (drawings are 57-83px inside it) */
   --rw-illus-offset: 10px;          /* drawing moved down inside the circle (19px left too much air on top, Han 05:20) */
@@ -232,6 +232,10 @@
   --rw-illus-box-size-compact: 112px;   /* dense screens: Matches, Insights, Player profile */
   --rw-illus-size-compact: 88px;
   --rw-illus-offset-compact: 9px;
+  --rw-illus-size-masked: 116px;            /* masked drawings: larger and lower, base cut by the circle's arc */
+  --rw-illus-offset-masked: 8px;
+  --rw-illus-size-masked-compact: 102px;
+  --rw-illus-offset-masked-compact: 7px;
   --rw-illus-title-gap-compact: 28px;
   --rw-illustration-surface: var(--rw-color-bg-app);
   --rw-icon-btn-size: 40px;
