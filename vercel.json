@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "buildCommand": "",
+  "buildCommand": "bash scripts/check-no-diagnostics.sh project",
   "installCommand": "",
   "outputDirectory": "project",
   "rewrites": [

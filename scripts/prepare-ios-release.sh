@@ -239,6 +239,13 @@ if [ -d "$PUB" ]; then
 else
   die "ios/App/App/public is missing after sync."
 fi
+# No diagnostic UI ships (e.g. the device-test build marker from sync-ios-web.sh --marker): remove it, then check.
+if [ -f "$REPO/scripts/check-no-diagnostics.sh" ]; then
+  bash "$REPO/scripts/check-no-diagnostics.sh" --strip "$WEB_REAL" "$PUB" || die "Diagnostic UI is still in the iOS web files (above); do not archive."
+  ok "No diagnostic UI in webDir or ios/App/App/public"
+else
+  warn "scripts/check-no-diagnostics.sh is not on $BRANCH yet; diagnostic UI was not checked."
+fi
 AFTER="$(settings)"
 if [ "$BEFORE" != "$AFTER" ]; then
   printf '%s\n--- after ---\n%s\n' "$BEFORE" "$AFTER"
