@@ -465,10 +465,13 @@ button.rw-input-row{cursor:pointer;}
 .rw-sheet-title-group{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;}
 .rw-select-anchor{position:relative;display:flex;flex-shrink:0;}
 /* Padding measured on the ink (Han 2026-10-26): the 14px ChevronDown has ~2px of empty box past its stroke and the label ~1.5px of side bearing, so 10 left / 8 right
-   gives the same 11.5px from the pill edge to the label and to the chevron. The label's ink centre sits 0.5px under the box
-   centre (Poppins digits and Chinese alike), so it moves up 0.5px: label, chevron and pill then share one centre. */
+   gives the same 11.5px from the pill edge to the label and to the chevron. Vertical centring is by ink weight, the way the
+   eye reads it: EN trims the label to cap height (same in Safari and Chrome, like .rw-menu-item) and lifts it 0.5px so the
+   lowercase word, not just the digits, sits on the chevron's centre; ZH lifts its full line box 0.5px. Measured: label and
+   chevron ink centres within 0.1px of each other and of the pill centre (tests/pill.js). */
 .rw-pill.rw-select-pill{gap:4px;padding:0 8px 0 10px;}
-.rw-select-pill>span{transform:translateY(-.5px);}
+.rw-select-pill>span{text-box:trim-both cap alphabetic;transform:translateY(-.5px);}
+:root[lang="zh-Hans"] .rw-select-pill>span{text-box:normal;transform:translateY(-.5px);}
 .rw-select-menu.is-pill{top:calc(100% + 8px);min-width:160px;}
 .rw-game-score{width:100px;display:flex;align-items:center;justify-content:flex-end;gap:8px;font:var(--rw-type-row-value);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);white-space:nowrap;font-variant-numeric:tabular-nums;}
 .rw-score-placeholder{color:var(--rw-placeholder-text);font:inherit;letter-spacing:inherit;white-space:nowrap;}
