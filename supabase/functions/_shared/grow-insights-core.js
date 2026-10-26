@@ -17,7 +17,7 @@
 //   compare  a count compared between your last 3 matches and the 3 before (games won, close games won)
 //   strip    whether a self-reported observation was noted in each match (0/1), in order
 
-export const ENGINE_VERSION = '2026-10-26-v8';
+export const ENGINE_VERSION = '2026-10-26-v9';
 export const SKILL_TAGS = ['Serve', 'Return', 'Net', 'Smash', 'Defence', 'Footwork', 'Placement'];
 const WINDOW = 10;     // latest matches the engine reads
 const NOTE_N = 6;      // matches with notes in a Skill Tag window
@@ -557,11 +557,11 @@ export function itemTemplate(item, kind, lang) {
   const action = generalAction(item.tag, kind, lang);
   if (lang === 'zh') {
     const lastN = `最近${item.skipped ? '有记录的' : ''}${item.n}场`;
-    if (kind === 'strength') return { name, signal: `${lastN}有${item.k}场你记下这里帮你得分。`, action };
-    return { name, evidence: item.returning ? `完成这个训练目标后的${item.n}场里，又有${item.k}场你记下这里丢分。` : `${lastN}有${item.k}场你记下这里丢分。`, action };
+    if (kind === 'strength') return { name, signal: `${lastN}比赛中，有${item.k}场你觉得${name}发挥不错。`, action };
+    return { name, evidence: item.returning ? `完成这个训练目标后的${item.n}场里，又有${item.k}场你记下这里丢分。` : `${lastN}比赛中，有${item.k}场你提到${name}的问题。`, action };
   }
   const lastN = `your last ${item.n} ${item.skipped ? 'noted ' : ''}matches`;
-  if (kind === 'strength') return { name, signal: `You noted it winning you points in ${item.k} of ${lastN}.`, action };
+  if (kind === 'strength') return { name, signal: `You noted ${name.toLowerCase()} working well in ${item.k} of ${lastN}.`, action };
   return { name, evidence: item.returning ? `You noted it costing points again in ${item.k} of ${item.n} matches since you completed it.` : `You noted it costing you points in ${item.k} of ${lastN}.`, action };
 }
 // A cause or diagnosis the notes would have to support.
@@ -588,6 +588,10 @@ export function checkItem(ai, item, kind, lang) {
   if (lang === 'zh' ? zhLen(ev) > 26 : words(ev) > 16) issues.push(textKey + ':length');
   if (lang === 'zh' ? zhLen(act) > 26 : words(act) > 16) issues.push('action:length');
   if (ev && !NOTE_WORDS[lang].test(ev)) issues.push(textKey + ':not_marked_self_reported');
+  // A valid evidence sentence must report BOTH the numerator and denominator in order.
+  // Merely permitting k and n independently let 'in 6 matches' pass for a 2/6 signal.
+  if (ev && item.k !== item.n && !numbersIn(ev).includes(item.k)) issues.push(textKey + ':missing_evidence_count');
+  if (ev && !numbersIn(ev).includes(item.n)) issues.push(textKey + ':missing_window_count');
   return issues;
 }
 // ai: the model's array (each item names its topic_id). Returns the stored items in engine order.
