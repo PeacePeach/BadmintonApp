@@ -2649,6 +2649,8 @@ class Component extends DCLogic {
   // (so a signed-in preview can be tried without a paid parse).
   voiceMock() {
     if (this.realVoice()) return false;
+    // Only explicitly requested voice fixtures may use canned parsing on deployed previews.
+    if (this.previewHost() && !new URLSearchParams(location.search).has('voice')) return false;
     if ((this.props || {}).voiceMock || !this.live() || this.previewData()) return true;
     return typeof location !== 'undefined' && this.previewHost() && new URLSearchParams(location.search).has('voice');
   }
@@ -2751,7 +2753,7 @@ class Component extends DCLogic {
   async parseVoice(text) {
     if (this.voiceMock()) return { result: window.RallywiseVoice.mockParse(text, this.lang(), this.voiceScenario()) };
     const b = await this.api();
-    if (!b.voice) { if (this.realVoice()) throw { code: 'ai_not_configured' }; return { result: window.RallywiseVoice.mockParse(text, this.lang(), this.voiceScenario()) }; }
+    if (!b.voice) throw { code: 'ai_not_configured' };
     const res = await b.voice.parse(text);
     // Real Voice test: say so when the server isn't running the expected parser.
     if (this.realVoice() && res && res.prompt_version !== REAL_VOICE_ENGINE) { const short = v => String(v || '?').split('-').pop(); this.flash(this.t('vEngineOld', { v: short(res.prompt_version), want: short(REAL_VOICE_ENGINE) }), 'info'); }
