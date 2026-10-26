@@ -590,8 +590,8 @@ test('regression: AI evidence must state both occurrences and window, EN/ZH', ()
 test('mixed Smash evidence: distinct situations may be shown on both sides without inferring causes', () => {
   fresh();
   const ms = [
-    M(W,['Other'],['Smash'],{worked:'劈吊得分比较多，打到反手区效果好'}),
-    M(W,['Other'],['Smash'],{worked:'我的吊球在反手区有用'}),
+    M(W,['Other'],['Smash'],{worked:'杀球配合劈吊，打到反手区效果好'}),
+    M(W,['Other'],['Smash'],{worked:'我的杀球吊球在反手区有用'}),
     M(L,['Smash'],[],{lost:'后场杀球失误比较多'}),
     M(L,['Other'],['Return']),
     M(L,['Smash'],[],{lost:'后场杀球容易失误'}),
