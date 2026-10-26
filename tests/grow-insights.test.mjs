@@ -21,6 +21,62 @@ const copyOk = (k, lang) => { assert.equal(k.status, 'ok'); assert.deepEqual(k.v
 
 // ---- Chart selection follows the evidence ----
 
+// Han, 2026-10-26 (real Supabase row): "Footwork keeps costing you points", 3 of 12, was served with pattern "text"
+// and chart null, so the tile was text only. v17: a repeated pattern carries the evidence itself as a frequency strip.
+const FOOTWORK_3_OF_12 = [0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0];
+test('regression: Footwork noted in 3 of 12 matches gets a frequency strip of exactly those matches, in EN and ZH', () => {
+  fresh();
+  const ms = tagRow('Footwork', FOOTWORK_3_OF_12);
+  for (const lang of BOTH) {
+    const k = G.finalizeKey(G.keyCandidates(ms), null, lang, ms);
+    assert.deepEqual([k.status, k.tier, k.candidate_id, k.pattern], ['ok', 2, 'pattern:cost:Footwork', 'frequency']);
+    assert.deepEqual(k.evidence.numbers, { k: 3, n: 12 });
+    // The chart is the evidence, not a drawing: one pill per match in the window, raised where Footwork was noted.
+    assert.deepEqual(k.chart, { pattern: 'strip', values: FOOTWORK_3_OF_12, unit: '', frequency: true });
+    assert.equal(k.chart.values.length, k.evidence.numbers.n);
+    assert.equal(k.chart.values.reduce((a, b) => a + b, 0), k.evidence.numbers.k);
+    assert.ok(!('split' in k.chart) && !('xLabels' in k.chart) && !('results' in k.chart), 'no trend split, axis or W/L');
+    assert.deepEqual(G.numbersIn(k.body).sort((a, b) => a - b), [3, 12], k.body);
+    assert.deepEqual(k.validation.issues, []);
+  }
+  assert.equal(G.finalizeKey(G.keyCandidates(ms), null, 'en', ms).title, 'Footwork keeps costing you points');
+  assert.equal(G.finalizeKey(G.keyCandidates(ms), null, 'zh', ms).title, '步法还在反复丢分');
+});
+
+test('frequency strips: model copy that reads a trend into 3 of 12 is rejected; the evidence copy passes', () => {
+  fresh();
+  const ms = tagRow('Footwork', FOOTWORK_3_OF_12);
+  const c = G.keyCandidates(ms).find(x => x.id === 'pattern:cost:Footwork');
+  for (const [lang, title, body] of [
+    ['en', 'Footwork is getting worse', 'You noted it in 3 of your last 12 matches.'],
+    ['en', 'Footwork keeps costing you points', 'You noted it more often lately: 3 of your last 12 matches.'],
+    ['zh', '步法问题越来越多', '最近12场里有3场你记下步法丢分。'],
+    ['zh', '步法还在反复丢分', '最近12场里有3场你记下步法丢分，比之前多了。']
+  ]) assert.ok(G.checkCopy({ title, body }, c, lang).includes('trend_from_frequency'), `${title} / ${body}`);
+  assert.deepEqual(G.checkCopy({ title: 'Footwork keeps costing you points', body: 'You noted it in 3 of your last 12 matches.' }, c, 'en'), []);
+  assert.deepEqual(G.checkCopy({ title: '步法还在反复丢分', body: '最近12场里有3场你记下步法丢分。' }, c, 'zh'), []);
+  const ai = G.finalizeKey([c], { candidate_id: c.id, title: 'Footwork is getting worse', body: 'You noted it in 3 of your last 12 matches.' }, 'en');
+  assert.equal(ai.copy_source, 'template');
+  assert.deepEqual(ai.chart.values, FOOTWORK_3_OF_12, 'the chart never depends on the copy');
+});
+
+test('frequency strips: every repeated-pattern window gets one, its templates pass, and nothing else invents a chart', () => {
+  for (const side of ['cost', 'worked']) for (let n = 6; n <= 12; n++) for (let k = 2; k <= n; k++) {
+    fresh();
+    const row = Array.from({ length: n }, (_, i) => (i % Math.ceil(n / k) === 0 && i / Math.ceil(n / k) < k ? 1 : 0));
+    const ms = row.map(v => M(W, side === 'cost' && v ? ['Footwork'] : ['Other'], side === 'worked' && v ? ['Footwork'] : []));
+    const c = G.keyCandidates(ms, null, { all: true }).find(x => x.id === `pattern:${side}:Footwork`);
+    if (!c) continue;
+    assert.equal(c.chart.values.length, c.numbers.n);
+    assert.equal(c.chart.values.reduce((a, b) => a + b, 0), c.numbers.k);
+    for (const lang of BOTH) assert.deepEqual(G.checkCopy(G.keyTemplate(c, lang), c, lang), [], `${side} ${k}/${n} ${lang}`);
+  }
+  // One note is an early read: no denominator worth drawing, so no chart.
+  fresh();
+  const one = [M(W, ['Footwork']), ...Array.from({ length: 5 }, () => M(W, ['Other']))];
+  for (const x of G.keyCandidates(one, null, { all: true }).filter(x => x.family === 'early' || x.family === 'opponent')) assert.equal(x.chart ?? null, null, x.id);
+});
+
 test('regression: "fewer net errors lately" [1,1,1,0,1,0] is never a Comparison, and fewer cost notes alone are not an improvement', () => {
   // Han, 2026-10-25: self-reported tag occurrence is a Match Strip, never a Comparison Chart.
   // Han, 2026-10-26: a cost tag the player stopped picking is an absence of notes, not proof the problem went away,
@@ -33,7 +89,8 @@ test('regression: "fewer net errors lately" [1,1,1,0,1,0] is never a Comparison,
   // Engine v14: what it does show is the repeated cost (noted in 4 of 6), never an improvement.
   for (const lang of BOTH) {
     const k = G.finalizeKey(G.keyCandidates(ms), null, lang, ms);
-    assert.deepEqual([k.status, k.tier, k.candidate_id, k.chart], ['ok', 2, 'pattern:cost:Net', null]);
+    // v17: its chart is the frequency strip of the window (4 of 6 raised), not a comparison or a trend.
+    assert.deepEqual([k.status, k.tier, k.candidate_id, k.pattern, k.chart], ['ok', 2, 'pattern:cost:Net', 'frequency', { pattern: 'strip', values: [1, 1, 1, 0, 1, 0], unit: '', frequency: true }]);
     assert.doesNotMatch(k.title + k.body, /less|fewer|improv|better|lately|少了|进步|改善|减少/, k.title);
     assert.deepEqual(k.validation.issues, []);
   }
@@ -525,7 +582,7 @@ test('Build Next actions (Han): no tactical correction from tags or a single not
 });
 
 test('engine version is bumped so cached v12 insights regenerate', () => {
-  assert.equal(G.ENGINE_VERSION, '2026-10-26-v15');
+  assert.equal(G.ENGINE_VERSION, '2026-10-26-v17');
 });
 
 test('opponent plans: only from notes about that opponent; record-only, unsupported or generic plans are left out', () => {

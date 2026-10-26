@@ -36,8 +36,12 @@
     const ticks = o.ticks;
     // No y-axis numbers by default (Han, 2026-10-25): the quoted values are written on the chart, so the frame starts
     // at the first match. yLabels: true (data-ylabels="true") brings the tick numbers back.
-    const yl = labels && o.yLabels, L = yl ? 18 : 4, R = 4, T = 5, B = labels ? 16 : 4, P = 9; // P: inner padding so the 14px pill stays inside
+    // Pills are 14px wide; with more matches than fit (a frequency strip over 12 noted matches) they narrow to the gap
+    // between matches minus 3px (never under 4px), and only the first and last match are numbered.
+    const yl = labels && o.yLabels, L = yl ? 18 : 4, R = 4, T = 5, B = labels ? 16 : 4;
+    const gap0 = n > 1 ? (W - L - R - 18) / (n - 1) : 14, PW = o.kind === 'strip' ? Math.max(4, Math.min(14, gap0 - 3)) : 14, P = PW / 2 + 2; // P: inner padding so the pill stays inside
     const X = i => L + P + (n > 1 ? i * (W - L - R - 2 * P) / (n - 1) : (W - L - R - 2 * P) / 2), PH = H - T - B;
+    const sparse = n > 1 && (W - L - R - 2 * P) / (n - 1) < 14;
     // Strip levels sit STEP px apart in a band centred in the frame, instead of at its top and bottom edges
     // (Han, 2026-10-25: the two levels were too far apart). Trend and compare use the full height.
     const STEP = 16, span = o.kind === 'strip' ? Math.min(PH, (o.max - o.min) * STEP) : PH, T0 = T + (PH - span) / 2;
@@ -50,7 +54,7 @@
     });
     for (let i = 0; i < n; i++) {
       g += `<line class="rw-key-chart-grid-v" x1="${X(i)}" x2="${X(i)}" y1="${T}" y2="${H - B + (labels ? 3 : 0)}"/>`;
-      if (labels) g += `<text x="${X(i)}" y="${H - 2}" text-anchor="middle">${o.xLabels[i] != null ? o.xLabels[i] : i + 1}</text>`;
+      if (labels && (!sparse || i === 0 || i === n - 1)) g += `<text x="${X(i)}" y="${H - 2}" text-anchor="middle">${o.xLabels[i] != null ? o.xLabels[i] : i + 1}</text>`;
     }
     // Gradient stops come from tokens (--rw-key-chart-line-* = Blue Gradient 01 reversed, --rw-key-chart-bar-* = Blue Gradient 02).
     const defs = `<linearGradient id="${id}h" x1="0" x2="1" y1="0" y2="0"><stop offset="0" style="stop-color:var(--rw-key-chart-line-from)"/><stop offset="1" style="stop-color:var(--rw-key-chart-line-to)"/></linearGradient>
@@ -79,11 +83,11 @@
     const pc = v => `var(--rw-key-chart-${v ? 'on' : 'none'})`;
     if (o.kind === 'strip') vals.forEach((v, i) => {
       if (i === n - 1 || vals[i + 1] === v) return;
-      const x1 = X(i) + 7, y1 = Y(v), x2 = X(i + 1) - 7, y2 = Y(vals[i + 1]), gid = `${id}c${i}`;
+      const x1 = X(i) + PW / 2, y1 = Y(v), x2 = X(i + 1) - PW / 2, y2 = Y(vals[i + 1]), gid = `${id}c${i}`;
       m += `<linearGradient id="${gid}" gradientUnits="userSpaceOnUse" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"><stop offset="0" style="stop-color:${pc(v)}"/><stop offset="1" style="stop-color:${pc(vals[i + 1])}"/></linearGradient>`
         + `<line class="rw-key-chart-connector" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="url(#${gid})"/>`;
     });
-    if (o.kind === 'strip') vals.forEach((v, i) => { m += `<rect class="${v ? 'rw-key-chart-on' : 'rw-key-chart-none'}" x="${X(i) - 7}" y="${Y(v) - 3}" width="14" height="6" rx="3"/>`; });
+    if (o.kind === 'strip') vals.forEach((v, i) => { m += `<rect class="${v ? 'rw-key-chart-on' : 'rw-key-chart-none'}" x="${X(i) - PW / 2}" y="${Y(v) - 3}" width="${PW}" height="6" rx="3"/>`; });
     return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true"><defs>${defs}</defs>${g}${m}</svg>`;
   }
 

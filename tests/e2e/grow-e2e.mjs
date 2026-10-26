@@ -37,7 +37,8 @@ async function edge(lang, dbJson, sig) {
     if (server.aiFail) return { ok: false, status: 500, text: async () => 'fake upstream failure' };
     return { ok: true, json: async () => ({ output: [{ content: [{ type: 'output_text', text: JSON.stringify({ keyInsight: null, buildNext: [], strengths: [], opponentPlans: [], doublesPlay: [] }) }] }] }) }; };
   const res = await globalThis.__h(new Request('http://x', { method: 'POST', headers: { Authorization: 'Bearer t' }, body: JSON.stringify({ lang, ...(sig ? { sig } : {}) }) }));
-  return JSON.stringify(await res.json());
+  // server.post(body): rewrite the function's answer (the keychart check plays an older deploy with it).
+  const out = await res.json(); return JSON.stringify(server.post ? server.post(out) : out);
 }
 
 // ---- Accounts (app shape) ----
@@ -128,7 +129,7 @@ for (const lang of process.env.ONLY ? [] : ['en', 'zh']) {
   server.row = null;
   pg = await open(lang, 'hanV7'); await pg.waitForTimeout(1500); g = await grow(pg);
   // Engine v14: the 4/6 strength is the Key Insight (P2), never "No clear change yet" next to it.
-  ok(/Smash keeps working|杀球一直在帮你得分/.test(g.keyTitle) && !NO_CHANGE.test(g.keyTitle) && !g.chart, `${lang} v7 data: "${g.keyTitle}" / "${g.keyBody}" (no chart: ${!g.chart})`);
+  ok(/Smash keeps working|杀球一直在帮你得分/.test(g.keyTitle) && !NO_CHANGE.test(g.keyTitle) && g.chart === 'strip', `${lang} v7 data: "${g.keyTitle}" / "${g.keyBody}" (v17 frequency chart: ${g.chart})`);
   ok(g.strengths.length === 1 && /4/.test(g.strengths[0][1]) && !g.build.length, `${lang} v7 data: Strengths ${JSON.stringify(g.strengths)}, Build Next ${g.build.length}`);
   await shot(pg, lang, '3-v7-no-change.png'); await pg.close();
 
@@ -185,7 +186,7 @@ for (const lang of process.env.ONLY ? [] : ['en', 'zh']) {
   // as a text tile (its 12-match window has no 6-pill chart), never "No clear change yet" above 11 cards.
   server.row = null;
   pg = await open(lang, 'han17flat'); await pg.waitForTimeout(1800); g = await grow(pg);
-  ok(/Defence keeps costing you points|防守还在反复丢分/.test(g.keyTitle) && !g.chart && !g.keyNaN && g.build.length === 2, `${lang} han17flat: "${g.keyTitle}" / "${g.keyBody}", chart ${g.chart}, cards ${JSON.stringify(g.counts)}`);
+  ok(/Defence keeps costing you points|防守还在反复丢分/.test(g.keyTitle) && g.chart === 'strip' && !g.keyNaN && g.build.length === 2, `${lang} han17flat: "${g.keyTitle}" / "${g.keyBody}", chart ${g.chart}, cards ${JSON.stringify(g.counts)}`);
   ok(!pg.errs.length, `${lang} han17flat: no console errors ${pg.errs.join(' | ')}`);
   await shot(pg, lang, '11-han17-no-trend.png'); await pg.close();
 }
@@ -570,6 +571,47 @@ if (!process.env.ONLY || process.env.ONLY === 'opp') {
     ok(sent && JSON.stringify(sent.map(o => [o.player_id, o.notes.length, o.plan_type])) === JSON.stringify([['yang', 3, 'proven'], ['stefan', 2, 'suggested'], ['yorick', 2, 'suggested'], ['kai', 1, 'early']]),
       `${lang} opp: identities, match counts and plan types sent to the model ${JSON.stringify(sent && sent.map(o => [o.player_id, o.notes.length, o.plan_type]))}`);
     await shot(pg, lang, '20-opponent-plans.png'); ok(!pg.errs.length, `${lang} opp: no console errors ${pg.errs.join(' | ')}`); await pg.close();
+  }
+}
+// 15. Key Insight frequency strip (Han, 2026-10-26 21:24): the real "Footwork keeps costing you points", 3 of 12, was a
+// text-only tile. Now the strip of those 12 matches, 3 raised, at both phone widths and in both languages. A cached
+// insight from before v17 (chart null) still shows as the text tile, without errors, until the current one arrives.
+if (!process.env.ONLY || process.env.ONLY === 'keychart') {
+  const FW = [0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0];
+  ACCOUNTS.footwork12 = { matches: FW.map((v, i) => M(i, i % 2 ? L : W, v ? ['Footwork'] : ['Other'], [])), focuses: [] };
+  const pills = pg => pg.evaluate(() => { const c = document.querySelector('.rw-key .rw-key-chart'), svg = c && c.querySelector('svg'), r = c && c.getBoundingClientRect();
+    const tile = document.querySelector('.rw-key').getBoundingClientRect(), box = el => el.getBoundingClientRect();
+    const rects = svg ? [...svg.querySelectorAll('rect.rw-key-chart-on, rect.rw-key-chart-none')] : [];
+    return { kind: c && c.dataset.kind, values: c && c.dataset.values, on: svg ? svg.querySelectorAll('rect.rw-key-chart-on').length : 0, all: rects.length,
+      inside: !!r && rects.every(x => box(x).left >= r.left - 0.5 && box(x).right <= r.right + 0.5) && r.right <= tile.right + 0.5,
+      overlap: rects.some((x, i) => i && box(x).left < box(rects[i - 1]).right - 0.1),
+      labels: svg ? [...svg.querySelectorAll('text')].map(x => x.textContent) : [], minW: rects.length ? Math.min(...rects.map(x => box(x).width)) : 0 }; });
+  for (const lang of ['en', 'zh']) for (const vp of [{ width: 375, height: 667 }, { width: 390, height: 844 }]) {
+    const zh = lang === 'zh'; server.row = null; server.aiCalls = 0;
+    const pg = await open(lang, 'footwork12', { __vp: vp }); await pg.waitForTimeout(1500);
+    const g = await grow(pg), c = await pills(pg);
+    ok(g.keyTitle === (zh ? '步法还在反复丢分' : 'Footwork keeps costing you points') && /3/.test(g.keyBody) && /12/.test(g.keyBody), `${lang} ${vp.width} keychart: "${g.keyTitle}" / "${g.keyBody}"`);
+    ok(c.kind === 'strip' && c.values === FW.join(',') && c.all === 12 && c.on === 3, `${lang} ${vp.width} keychart: frequency strip, ${c.on} of ${c.all} raised (${c.values})`);
+    ok(c.inside && !c.overlap && c.minW >= 4, `${lang} ${vp.width} keychart: 12 pills fit the tile, no overlap (pill ${c.minW.toFixed(1)}px)`);
+    ok(!c.labels.some(x => /%|NaN/.test(x)), `${lang} ${vp.width} keychart: labels ${JSON.stringify(c.labels)}`);
+    await shot(pg, lang, `21-keychart-frequency-${vp.width}.png`);
+    if (vp.width === 390) {
+      // Legacy: the same insight as cached before v17, text only. It must render as the text tile, then update.
+      await pg.evaluate(() => { for (const k of Object.keys(localStorage)) if (k.startsWith('rallywise.grow.u1.')) { const v = JSON.parse(localStorage.getItem(k)); v.insight.engine_version = '2026-10-26-v16'; v.insight.keyInsight.pattern = 'text'; v.insight.keyInsight.chart = null; localStorage.setItem(k, JSON.stringify(v)); }
+        localStorage.setItem('rallywise.grow.engine', JSON.stringify('2026-10-26-v16')); });
+      await pg.reload({ waitUntil: 'networkidle' }); await pg.waitForTimeout(2500);
+      const nn = pg.getByText(zh ? '以后再说' : 'Not Now', { exact: true }); if (await nn.count()) { await nn.first().click(); await pg.waitForTimeout(200); }
+      await watch(pg); await toGrow(pg, zh); await pg.waitForTimeout(1500); const tl = await timeline(pg);
+      const c2 = await pills(pg), g2 = await grow(pg);
+      ok(c2.kind === 'strip' && c2.on === 3 && g2.keyTitle === g.keyTitle && !g2.keyNaN, `${lang} keychart legacy: a pre-v17 cached insight ends on the strip (frames ${JSON.stringify([...new Set(tl.map(x => x.title))])})`);
+      // The function not yet redeployed: it serves the v16 insight, pattern "text" and chart null. The text tile, no errors.
+      server.row = null; server.post = o => (o.insight && o.insight.keyInsight ? { ...o, insight: { ...o.insight, engine_version: '2026-10-26-v16', keyInsight: { ...o.insight.keyInsight, pattern: 'text', chart: null } } } : o);
+      const p2 = await open(lang, 'footwork12', { __vp: vp }); await p2.waitForTimeout(1500);
+      const c3 = await pills(p2), g3 = await grow(p2); server.post = null;
+      ok(g3.keyTitle === g.keyTitle && c3.kind == null && await p2.locator('.rw-key:not(.is-split)').count() === 1 && !g3.keyNaN, `${lang} keychart legacy: v16 answer shows the text tile "${g3.keyTitle}", no chart`);
+      ok(!p2.errs.length, `${lang} keychart legacy: no console errors ${p2.errs.join(' | ')}`); await p2.close();
+    }
+    ok(!pg.errs.length, `${lang} ${vp.width} keychart: no console errors ${pg.errs.join(' | ')}`); await pg.close();
   }
 }
 console.log(fails ? `\n${fails} FAILED` : '\nALL PASS');

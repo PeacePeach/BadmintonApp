@@ -17,7 +17,7 @@
 //   compare  a count compared between your last 3 matches and the 3 before (games won, close games won)
 //   strip    whether a self-reported observation was noted in each match (0/1), in order
 
-export const ENGINE_VERSION = '2026-10-26-v16';
+export const ENGINE_VERSION = '2026-10-26-v17';
 export const SKILL_TAGS = ['Serve', 'Return', 'Net', 'Smash', 'Defence', 'Footwork', 'Placement'];
 const WINDOW = 10;     // latest matches the Key Insight reads
 const HISTORY = 20;    // latest matches Build Next, Strengths, opponent plans and Doubles Play read
@@ -290,17 +290,23 @@ function evidenceCandidates(matches, { focus = [], names = {}, strips = [] } = {
   const hasStrip = (tag, side) => strips.some(c => c.tag === tag && c.side === side);
   const base = (x, o) => ({ pattern: 'text', source: 'notes_tags', chart: null, direction: null, strength: 'moderate', required: [], allowed: [], match_ids: [], notes: [], ...o, ...x });
   const build = buildCandidates(matches, focus, 4), strengths = strengthCandidates(matches, 3);
+  // v17 (Han, 2026-10-26 21:24): a repeated pattern ("3 of the last 12 with notes") is drawn as the Match Strip over
+  // exactly those matches, oldest first: one pill per noted match, raised where the skill was noted on that side. It
+  // shows how often, not a trend (pattern 'frequency'; the chart is the strip component). Only when the pills add up
+  // to the counts in the copy (k of n).
+  const freq = b => (Array.isArray(b.values) && b.values.length === b.n && sum(b.values) === b.k && b.n >= 3
+    ? { pattern: 'frequency', chart: { pattern: 'strip', values: b.values, unit: '', frequency: true } } : {});
   for (const b of build) {
     if (b.mixed) { out.push(base({ id: `mixed:${b.tag}`, family: 'mixed', tier: 3, tag: b.tag, side: 'mixed', shape: 'mixed', numbers: { k: b.k, w: b.w, n }, required: [b.k, b.w], allowed: [b.k, b.w, n], notes: b.notes, score: (b.k + b.w) / n }, { evidence: { window } })); continue; }
     if (hasStrip(b.tag, 'cost')) continue;
     if (b.level === 'early') out.push(base({ id: `early:cost:${b.tag}`, family: 'early', tier: 3, tag: b.tag, side: 'cost', shape: 'early', numbers: { k: 1, n: b.n }, required: [], allowed: [1, b.n], notes: [], score: 1 - (b.age || 0) / 10 }, { evidence: { window } }));
-    else out.push(base({ id: `pattern:cost:${b.tag}`, family: 'pattern', tier: 2, tag: b.tag, side: 'cost', shape: b.returning ? 'returning' : 'repeated', numbers: { k: b.k, n: b.n }, required: [b.k], allowed: [b.k, b.n, 3], notes: b.notes, score: b.k / b.n + 0.01 * b.recent }, { evidence: { window: b.returning ? { matches: b.n, skipped: 0 } : window } }));
+    else out.push(base({ id: `pattern:cost:${b.tag}`, family: 'pattern', tier: 2, tag: b.tag, side: 'cost', shape: b.returning ? 'returning' : 'repeated', numbers: { k: b.k, n: b.n }, required: [b.k], allowed: [b.k, b.n, 3], notes: b.notes, score: b.k / b.n + 0.01 * b.recent, ...freq(b) }, { evidence: { window: b.returning ? { matches: b.n, skipped: 0 } : window } }));
   }
   for (const b of strengths) {
     if (hasStrip(b.tag, 'worked')) continue;
     if (b.level === 'early') out.push(base({ id: `early:worked:${b.tag}`, family: 'early', tier: 3, tag: b.tag, side: 'worked', shape: 'early', numbers: { k: 1, n: b.n }, required: [], allowed: [1, b.n], notes: [], score: 0.5 - (b.age || 0) / 20 }, { evidence: { window } }));
     // A strength ranks just under a cost pattern with the same count: the cost is what to act on.
-    else out.push(base({ id: `pattern:worked:${b.tag}`, family: 'pattern', tier: 2, tag: b.tag, side: 'worked', shape: 'repeated', numbers: { k: b.k, n: b.n }, required: [b.k], allowed: [b.k, b.n, 3], notes: b.notes, score: b.k / b.n - 0.001 }, { evidence: { window } }));
+    else out.push(base({ id: `pattern:worked:${b.tag}`, family: 'pattern', tier: 2, tag: b.tag, side: 'worked', shape: 'repeated', numbers: { k: b.k, n: b.n }, required: [b.k], allowed: [b.k, b.n, 3], notes: b.notes, score: b.k / b.n - 0.001, ...freq(b) }, { evidence: { window } }));
   }
   // Opponents: only those an Opponent Plan card can be made for (notes that say something specific).
   for (const o of opponentFacts(matches, names).slice(0, OPP_MAX)) {
@@ -541,6 +547,9 @@ const CAUSAL = { en: /\b(caus|because|due to|led to|leads? to|cost(s|ing)? you (
   zh: /导致|因为|由于|害你|输在|原因|让你输|才输|输掉了?.{0,4}(比赛|这几场)/ };
 const UP_WORDS = { en: /\b(more|keeps?|again|started|starting|rising|rose|up|climb)/i, zh: /多了|多起来|越来越多|反复|又|开始/ };
 const DOWN_WORDS = { en: /\b(fewer|less|dropped|down|haven't|slipp|dipped|fell|lower)/i, zh: /少了|减少|没提到|下滑|往下|降/ };
+// v17: a frequency strip shows how often a skill was noted across the window, not a change, so its copy may not read a trend into it.
+const FREQ_TREND = { en: /\b(lately|getting (worse|better)|worse|more and more|more often|less often|increas|decreas|rising|on the rise|climb|trending)/i,
+  zh: /越来越|变多|变少|多了|少了|增加|减少|上升|下降|比之前|恶化|好转/ };
 
 export function checkCopy({ title, body }, c, lang) {
   const issues = [], text = `${title || ''} ${body || ''}`;
@@ -573,6 +582,7 @@ export function checkCopy({ title, body }, c, lang) {
   } else if (c.strength !== 'strong' && (lang === 'zh' ? /进步|越来越好/.test(title) : /\b(improv|better|stronger)/i.test(title))) issues.push('overclaim');
   if (ungrounded(text, c.notes).length) issues.push('detail_not_in_notes');
   if (c.linked && CAUSAL[lang].test(text)) issues.push('causal_claim');
+  if (c.pattern === 'frequency' && FREQ_TREND[lang].test(text)) issues.push('trend_from_frequency');
   if (c.pattern === 'compare' || (c.pattern === 'strip' && c.shape !== 'recurring')) {
     const okWindow = lang === 'zh' ? /最近(有记录的)?3场/.test(body) && /之前/.test(body) : /last 3/i.test(body) && /\b(before|previous|earlier)\b|\b(up|down) from\b/i.test(body);
     if (!okWindow) issues.push('window');
@@ -612,8 +622,8 @@ export function finalizeKey(cands, ai, lang, matches) {
   return {
     status: 'ok', candidate_id: c.id, metric_id: c.id, title: copy.title, body: copy.body, pattern: c.pattern,
     // A linked strip writes each match's result under its pill (RWKeyChart xLabels) instead of 1..6.
-    // P2 / P3 insights have no chart: their window (up to 12 noted matches) doesn't fit the 6-pill strip, and a shorter
-    // strip would show a different denominator than the copy.
+    // v17: a P2 skill pattern has a frequency strip over its whole window (k raised of n, the copy's own counts); other
+    // P2 / P3 insights (opponent notes, doubles, mixed, early) have no chart.
     chart: c.chart ? { ...c.chart, ...(c.chart.results ? { xLabels: c.chart.results.map(r => (lang === 'zh' ? { W: '胜', L: '负' } : { W: 'W', L: 'L' })[r] || '·') } : {}) } : null,
     tier: c.tier || 1, level: c.tier === 3 ? (c.family === 'mixed' ? 'mixed' : 'early') : c.tier === 2 ? 'pattern' : 'trend',
     evidence: { source: c.source, family: c.family, tag: c.tag || null, side: c.side || null, shape: c.shape, direction: c.direction, strength: c.strength,
@@ -716,12 +726,12 @@ export function buildCandidates(matches, focus = [], max = 4) {
       const values = after.map(m => (has(m, 'lt', tag) ? 1 : 0)), k = sum(values);
       if (after.length < 3 || k < 2) continue;
       const notes = notesOf(after, 'lost', tag);
-      out.push({ topic_id: topic, tag, k, w: 0, n: after.length, mixed: false, level: 'confirmed', recent: sum(values.slice(-3)), latest: values[values.length - 1], returning: true, skipped: 0, notes, basis: basisOf(notes) });
+      out.push({ topic_id: topic, tag, k, w: 0, n: after.length, mixed: false, level: 'confirmed', recent: sum(values.slice(-3)), latest: values[values.length - 1], returning: true, skipped: 0, notes, basis: basisOf(notes), values });
       continue;
     }
     const mixed = row.side === 'mixed', notes = notesOf(win, 'lost', tag);
     out.push({ topic_id: topic, tag, k: row.cost, w: mixed ? row.worked : 0, n: win.length, mixed, level: row.level, recent: row.recentCost, latest: row.latestCost, age: row.latest6, returning: false, skipped,
-      notes, basis: row.level === 'early' ? 'general' : basisOf(notes) });
+      notes, basis: row.level === 'early' ? 'general' : basisOf(notes), values: win.map(m => (has(m, 'lt', tag) ? 1 : 0)) });
   }
   const confirmed = out.filter(x => x.level === 'confirmed')
     .sort((a, b) => b.k / b.n - a.k / a.n || a.mixed - b.mixed || b.recent - a.recent || b.latest - a.latest || a.tag.localeCompare(b.tag));
@@ -734,7 +744,7 @@ export function strengthCandidates(matches, max = 3) {
     if (row.side !== 'worked') continue;
     const notes = notesOf(win, 'worked', row.tag);
     out.push({ topic_id: 'tag:' + row.tag, tag: row.tag, k: row.worked, n: win.length, level: row.level, recent: row.recentWorked, age: row.latest6, notes,
-      basis: row.level === 'early' ? 'general' : basisOf(notes), skipped });
+      basis: row.level === 'early' ? 'general' : basisOf(notes), skipped, values: win.map(m => (has(m, 'wt', row.tag) ? 1 : 0)) });
   }
   const confirmed = out.filter(x => x.level === 'confirmed').sort((a, b) => b.k - a.k || b.recent - a.recent || a.tag.localeCompare(b.tag));
   const early = out.filter(x => x.level === 'early').sort((a, b) => a.age - b.age || a.tag.localeCompare(b.tag)).slice(0, EARLY_MAX);
@@ -1110,7 +1120,8 @@ export function candidateFacts(c, lang) {
     tag: `Self-reported: whether the player noted ${c.tag} under "${c.side === 'cost' ? 'What Cost Points' : 'What Worked'}" in each of their latest 6 matches with notes (k of n; r = last 3, p = the 3 before). This is mentions in notes, not counted mistakes or points.` +
       (c.linked ? ` Linked to results: of the l losses in those matches, lt had this note (the chart marks each match W/L). Say it showed up in the losses; never say it caused them.` : ''),
     pattern: `Self-reported: the player noted ${c.tag} under "${c.side === 'cost' ? 'What Cost Points' : 'What Worked'}" in k of their latest n matches with notes (2+ matches: a repeated pattern, not a trend).` +
-      (c.steady ? ' The score detectors ran and found no clear trend, so this is the main story.' : '') + (c.shape === 'returning' ? ' It came back after the player completed a Focus on it.' : ''),
+      (c.steady ? ' The score detectors ran and found no clear trend, so this is the main story.' : '') + (c.shape === 'returning' ? ' It came back after the player completed a Focus on it.' : '') +
+      (c.pattern === 'frequency' ? ' The chart shows each of the n matches, the k with this note raised: how often, not a change. Never say lately, more, less, worse or better.' : ''),
     mixed: `Self-reported: ${c.tag} was noted costing points in k and working in w of the latest n matches with notes. No clear direction: say it has been up and down; never a strength or a weakness.`,
     opponent: `The player wrote notes about how ${c.name} plays in k matches (notes below). Summarise what the notes say about them; no record, no tactics the notes don't have.`,
     doubles: `Self-reported: ${c.tag} was noted under "${c.side === 'cost' ? 'What Cost Points' : 'What Worked'}" in k of n doubles matches with notes.`,
