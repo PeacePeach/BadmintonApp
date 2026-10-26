@@ -57,7 +57,9 @@ Deno.serve(async req => {
     ]);
     if (pe || me) throw pe || me;
 
-    const recent = (matches || []).slice(0,10);
+    // v13: Build Next, Strengths, opponent plans and Doubles Play read all the fetched history (20 matches); the Key
+    // Insight keeps its own 10-match window inside the engine (normalize), so its trend standards are unchanged.
+    const recent = matches || [];
     // One ai_insights row per user holds the latest insight at the top level (what older app versions read) and the
     // other language's latest under other_lang, so switching EN <-> ZH and back is served from cache instead of
     // overwriting the other language and paying for it again.
@@ -85,14 +87,15 @@ Deno.serve(async req => {
 
     const names:any = Object.fromEntries((players || []).map((p:any)=>[p.id,p.name]));
     // Opponents the player wrote notes about, with only those notes (no record: it says nothing about how they play).
-    const opponents = G.opponentFacts(recent, names);
+    const oppDiag = { matches_with_notes:0, unknown_opponent:0, names_no_opponent:0 };
+    const opponents = G.opponentFacts(recent, names, oppDiag);
     const six = recent.slice(0,6);
     const doubles = G.doublesFacts(recent);
 
     // Engine V2 evidence: everything numeric is decided here; the model only picks and words it.
     const keyCands = G.keyCandidates(recent, previous?.keyInsight?.candidate_id).slice(0,3);
     const buildCands = G.buildCandidates(recent, focus, 4);
-    const strengthCands = G.strengthCandidates(recent, 2);
+    const strengthCands = G.strengthCandidates(recent, 3);
     const facts = {
       summary:{
         recent_matches:recent.length,
@@ -103,8 +106,8 @@ Deno.serve(async req => {
       },
       patterns:{ cost_points:counts(six,"lt"), worked:counts(six,"wt") },
       key_candidates:keyCands.map((c:any)=>G.candidateFacts(c, lang)),
-      build_candidates:buildCands.map((b:any)=>({topic_id:b.topic_id,tag:b.tag,k:b.k,n:b.n,mixed:b.mixed,...(b.mixed?{w:b.w}:{}),returning:b.returning,notes:b.notes,advice_basis:b.basis})),
-      strength_candidates:strengthCands.map((b:any)=>({topic_id:b.topic_id,tag:b.tag,k:b.k,n:b.n,notes:b.notes,advice_basis:b.basis})),
+      build_candidates:buildCands.map((b:any)=>({topic_id:b.topic_id,tag:b.tag,level:b.level,k:b.k,n:b.n,mixed:b.mixed,...(b.mixed?{w:b.w}:{}),returning:b.returning,notes:b.notes,advice_basis:b.basis})),
+      strength_candidates:strengthCands.map((b:any)=>({topic_id:b.topic_id,tag:b.tag,level:b.level,k:b.k,n:b.n,notes:b.notes,advice_basis:b.basis})),
       opponents,
       doubles
     };
@@ -196,12 +199,14 @@ OUTPUT LANGUAGE: write every visible string in ${lang === "zh" ? "natural Simpli
     const failed = [parsed.keyInsight, ...parsed.buildNext, ...parsed.strengths].filter((x:any) => x.copy_source && x.copy_source !== "ai");
     if (failed.length) console.warn("grow copy replaced", JSON.stringify(failed.map((x:any) => [x.candidate_id || x.topic_id, x.validation?.ai_issues || x.issues])));
 
-    // Opponent plans and Doubles Play are checked against the notes they came from; one that isn't is left out.
+    // Opponent plans and Doubles Play are checked against the notes they came from. A plan that fails falls back to
+    // the player's own note (when it says something specific); Doubles Play falls back to the noted doubles tags.
     const plans = G.finalizeOpponents(parsed.opponentPlans, opponents, lang);
-    const droppedPlans = plans.filter((p:any) => p.dropped);
-    if (droppedPlans.length) console.warn("opponent plans dropped", JSON.stringify(droppedPlans));
+    const droppedPlans = plans.filter((p:any) => p.dropped || p.issues);
+    if (droppedPlans.length) console.warn("opponent plans replaced or dropped", JSON.stringify(droppedPlans));
     parsed.opponentPlans = plans.filter((p:any) => !p.dropped);
     parsed.doublesPlay = G.finalizeDoubles(parsed.doublesPlay, doubles, lang);
+    parsed.coverage = G.coverage(recent, { build:parsed.buildNext, strengths:parsed.strengths, opps:opponents, plans, doubles, doublesPlay:parsed.doublesPlay, keyInsight:parsed.keyInsight, oppDiag });
 
     const generated_at = new Date().toISOString();
     if (aiStatus !== "failed") {

@@ -509,8 +509,8 @@ test('Build Next actions (Han): no tactical correction from tags or a single not
   assert.equal(off.advice_basis, 'general'); assert.ok(off.issues.some(i => /^action:/.test(i)), String(off.issues));
 });
 
-test('engine version is bumped so cached v7 insights regenerate', () => {
-  assert.equal(G.ENGINE_VERSION, '2026-10-26-v12');
+test('engine version is bumped so cached v12 insights regenerate', () => {
+  assert.equal(G.ENGINE_VERSION, '2026-10-26-v13');
 });
 
 test('opponent plans: only from notes about that opponent; record-only, unsupported or generic plans are left out', () => {
@@ -528,13 +528,16 @@ test('opponent plans: only from notes about that opponent; record-only, unsuppor
     { player_id: 'ben', plan: 'Ben: Be ready for lifts to your backhand rear court and take them early.' },
     { player_id: 'alex', plan: 'Alex struggles with your pace, so attack his backhand.' }
   ], opps, 'en');
-  assert.deepEqual(plans, [{ player_id: 'ben', plan: 'Be ready for lifts to your backhand rear court and take them early.' }]);
-  const bad = (plan, lang = 'en') => G.finalizeOpponents([{ player_id: 'ben', plan }], opps, lang)[0].dropped || [];
+  assert.deepEqual(plans, [{ player_id: 'ben', plan: 'Be ready for lifts to your backhand rear court and take them early.', level: 'repeated', copy_source: 'ai' }]);
+  const bad = (plan, lang = 'en') => G.checkPlan(plan, opps[0], lang);
   assert.ok(bad('Stay patient and play your own game.').includes('not_from_notes'));
   assert.ok(bad('Attack his forehand with drop shots.').includes('detail_not_in_notes'));
   assert.ok(bad("You've lost twice to him, so slow the game down.").includes('record_inference'));
   assert.ok(bad('Go to his backhand rear court 3 times a rally.').includes('number_not_in_evidence'));
   assert.deepEqual(G.finalizeOpponents([{ player_id: 'ben', plan: '多打他的反手后场，逼他回球。' }], opps, 'zh')[0].plan, '多打他的反手后场，逼他回球。');
+  // A plan that fails its checks falls back to the player's own note, never to invented advice.
+  const [fb] = G.finalizeOpponents([{ player_id: 'ben', plan: 'Stay patient and play your own game.' }], opps, 'en');
+  assert.equal(fb.copy_source, 'note'); assert.equal(fb.plan, 'From your notes: “他反手后场比较弱” · “Ben lifts a lot to my backhand rear court”. Plan around these next time.');
   assert.ok(bad('他输给你两次，说明心态不稳，多打快球。', 'zh').length);
   assert.ok(bad('Ben lifts to your backhand.', 'zh').includes('language'));
   // The schema only lets the model name opponents that have notes (none: no plans at all).
@@ -543,11 +546,53 @@ test('opponent plans: only from notes about that opponent; record-only, unsuppor
   assert.equal(G.modelSchema([], [], [], []).properties.opponentPlans.maxItems, 0);
 });
 
-test('doubles play: only from 3+ doubles matches with notes, and only what the notes say', () => {
+test('opponent notes: each note goes to the opponent it names; one note is an early read, never a habit', () => {
   fresh();
-  const few = [M(W, ['Net'], [], { type: 'Doubles', lost: 'side by side too often' }), M(W, ['Other'], [], { type: 'Doubles' })];
-  assert.equal(G.doublesFacts(few), null);
+  const names = { mei: 'Mei', ravi: 'Ravi', leo: 'Leo', jo: 'Jo' };
+  const ms = [
+    M(W, ['Other'], [], { type: 'Doubles', opps: ['mei', 'ravi'], opp_notes: 'Mei 杀球很重' }),
+    M(W, ['Other'], [], { type: 'Doubles', opps: ['mei', 'ravi'], opp_notes: 'Ravi likes to attack from the rear court. Mei stays at the net.' }),
+    M(W, ['Other'], [], { type: 'Doubles', opps: ['mei', 'jo'], opp_notes: 'they serve short a lot' }),
+    M(W, ['Other'], [], { opps: ['leo'], opp_notes: '反手比较弱' })
+  ];
+  const diag = { matches_with_notes: 0, unknown_opponent: 0, names_no_opponent: 0 };
+  const opps = G.opponentFacts(ms, names, diag);
+  const by = Object.fromEntries(opps.map(o => [o.player_id, o]));
+  assert.deepEqual(by.mei.notes, ['Mei stays at the net', 'Mei 杀球很重']); assert.equal(by.mei.level, 'repeated');
+  assert.deepEqual(by.ravi.notes, ['Ravi likes to attack from the rear court']); assert.equal(by.ravi.level, 'single');
+  assert.deepEqual(by.leo.notes, ['反手比较弱'], 'a singles note naming nobody is about the one opponent');
+  assert.ok(!by.jo, 'a doubles note naming neither opponent is about the pair, not about Jo');
+  assert.deepEqual(diag, { matches_with_notes: 4, unknown_opponent: 0, names_no_opponent: 1 });
+  // Chinese note, English plan: anchored through the shared badminton term, labelled as an early read.
+  const [leo] = G.finalizeOpponents([{ player_id: 'leo', plan: "Test Leo's backhand early in the first game." }], [by.leo], 'en');
+  assert.deepEqual([leo.copy_source, leo.plan], ['ai', "Early read: Test Leo's backhand early in the first game."]);
+  assert.ok(G.checkPlan('He always struggles on the backhand, so target it.', by.leo, 'en').includes('generalized_single_note'));
+  assert.ok(G.checkPlan('他每次反手都很弱，多打反手。', by.leo, 'zh').includes('generalized_single_note'));
+  const [zh] = G.finalizeOpponents([{ player_id: 'leo', plan: '开局先试探他的反手。' }], [by.leo], 'zh');
+  assert.equal(zh.plan, '初步判断：开局先试探他的反手。');
+  // No model copy at all: the note itself, labelled, in the app language.
+  assert.equal(G.finalizeOpponents([], [by.leo], 'zh')[0].plan, '初步判断：你记下“反手比较弱”。下次交手开局先验证。');
+  assert.equal(G.finalizeOpponents([], [by.leo], 'en')[0].plan, 'Early read: you noted “反手比较弱”. Test it early next time.');
+  // At most 3 cards.
+  fresh();
+  const many = ['a', 'b', 'c', 'd'].map(id => M(W, ['Other'], [], { opps: [id], opp_notes: 'smashes hard to my backhand' }));
+  const pl = G.finalizeOpponents([], G.opponentFacts(many, { a: 'A', b: 'B', c: 'C', d: 'D' }), 'en');
+  assert.equal(pl.filter(p => !p.dropped).length, 3);
+});
+
+test('doubles play: from 1 noted doubles match up (labelled early), patterns only from 2+, and only what the notes say', () => {
+  fresh();
+  assert.equal(G.doublesFacts([M(W, [], [], { type: 'Doubles' }), M(W, ['Net'])]), null, 'no doubles match with notes');
   assert.deepEqual(G.finalizeDoubles([{ name: 'Rotation', pattern: 'You stay side by side.', label: 'Try Next', action: 'Rotate earlier.' }], null, 'en'), []);
+  fresh();
+  const few = [M(W, ['Net'], [], { type: 'Doubles', lost: 'side by side too often at the net' }), M(W, [], [], { type: 'Doubles' })];
+  const ef = G.doublesFacts(few);
+  assert.deepEqual([ef.noted, ef.repeated], [1, []]);
+  const [e] = G.finalizeDoubles([{ name: 'Side by side', pattern: 'You noted staying side by side at the net.', label: 'Try Next', action: 'Try front and back after you attack.' }], ef, 'en');
+  assert.deepEqual([e.level, e.pattern], ['early', 'Early observation: You noted staying side by side at the net.']);
+  assert.deepEqual(G.finalizeDoubles([{ name: 'Side by side', pattern: 'You always stay side by side at the net.', label: 'Try Next', action: 'Rotate.' }], ef, 'en')[0].copy_source, 'template', 'one match is never "always"');
+  const [t] = G.finalizeDoubles([], ef, 'zh');
+  assert.deepEqual([t.name, t.pattern, t.label], ['网前', '初步观察：1场有记录的双打里，有1场你记下网前丢分。', 'Try Next']);
   fresh();
   const ms = [0, 1, 2, 3].map(i => M(W, ['Net'], [], { type: 'Doubles', lost: i % 2 ? 'we stayed side by side after attacking' : 'side-by-side gaps in the middle' }));
   const f = G.doublesFacts(ms);
@@ -556,7 +601,7 @@ test('doubles play: only from 3+ doubles matches with notes, and only what the n
     { name: 'Side-by-side gaps', pattern: 'You noted staying side by side after attacking.', label: 'Try Next', action: 'Switch to front and back after you attack.' },
     { name: 'Rotation', pattern: 'Your partner is too slow to cover the rear court.', label: 'Try Next', action: 'Cover more.' }
   ], f, 'en');
-  assert.equal(out.length, 1); assert.equal(out[0].name, 'Side-by-side gaps');
+  assert.equal(out.length, 1); assert.equal(out[0].name, 'Side-by-side gaps'); assert.equal(out[0].level, 'pattern');
 });
 
 test('model schema only allows the candidates that exist', () => {
@@ -604,12 +649,13 @@ const hanRecords = () => { fresh(); return [
   M(L, ['Placement'], [], { lost: '网前吊球不好' })
 ]; };
 
-test("Han's records: one Smash item (mixed, both counts), no one-note suggestions, Key Insight from the results", () => {
+test("Han's records: Smash first (mixed, both counts), one-note items only as labelled early ones, Key Insight from the results", () => {
   const ms = hanRecords(), focus = [{ topic: 'tag:Net', status: 'active' }];
   assert.equal(G.topicSides(ms).Smash, 'mixed');
   const build = G.buildCandidates(ms, focus, 4);
-  assert.deepEqual(build.map(x => `${x.tag} ${x.k}/${x.n} w${x.w}`), ['Smash 2/6 w2'], 'Return, Defence and Placement were noted once each: not recommendations');
-  assert.deepEqual(G.strengthCandidates(ms), [], 'Serve was noted working once; Smash is mixed, not a strength');
+  assert.deepEqual(build.map(x => `${x.tag} ${x.k}/${x.n} w${x.w} ${x.level}`), ['Smash 2/6 w2 confirmed', 'Placement 1/6 w0 early', 'Defence 1/6 w0 early'],
+    'Return, Defence and Placement were noted once each: at most 2 early items, newest first, after the confirmed one');
+  assert.deepEqual(G.strengthCandidates(ms).map(x => `${x.tag} ${x.level}`), ['Serve early'], 'Serve was noted working once: emerging; Smash is mixed, not a strength');
   // Only Smash's own words: the Defence half of "杀球太多。反手防守比较弱。" is not Smash evidence.
   assert.deepEqual(build[0].notes, ['后场杀球失误比较多', '杀球太多']);
   for (const lang of BOTH) {
@@ -636,16 +682,29 @@ test('two notes about the same situation make a specific item; the name may say 
   assert.deepEqual(zh.issues, []); assert.equal(zh.name, '后场杀球'); assert.equal(zh.advice_basis, 'notes');
 });
 
-test('Build Next and Strengths use the same latest 6 noted matches; older evidence does not fill a slot', () => {
+test('Build Next and Strengths read the same latest 12 noted matches; older evidence does not fill a slot', () => {
   fresh();
   const ms = [
+    M(W, ['Footwork']), M(W, ['Footwork']), // 14th and 13th noted matches back: outside the window
     M(W, ['Other']), M(W, ['Other']), M(L, ['Defence']), M(L, ['Other']),
     M(W, ['Net']), M(W, ['Net']), M(L, ['Smash']), M(W, ['Other']),
-    M(L, ['Smash', 'Defence']), M(W, ['Other'])
+    M(L, ['Smash', 'Defence']), M(W, ['Other']), M(W, ['Other']), M(W, ['Other'])
   ];
-  // Defence: 2 in all 10, but once in the latest 6. Net: active Focus.
-  assert.deepEqual(G.buildCandidates(ms, [{ topic: 'tag:Net', status: 'active' }], 4).map(x => `${x.tag} ${x.k}/${x.n}`), ['Smash 2/6']);
-  assert.deepEqual(G.buildCandidates(ms, [], 4).map(x => `${x.tag} ${x.k}/${x.n}`), ['Smash 2/6', 'Net 2/6'], 'Smash was noted in the last 3, Net was not');
+  // Defence: 2 in the window (one of them older than the latest 6). Net: active Focus. Footwork: too old.
+  assert.deepEqual(G.buildCandidates(ms, [{ topic: 'tag:Net', status: 'active' }], 4).map(x => `${x.tag} ${x.k}/${x.n} ${x.level}`), ['Defence 2/12 confirmed', 'Smash 2/12 confirmed']);
+  assert.deepEqual(G.buildCandidates(ms, [], 4).map(x => x.tag), ['Defence', 'Net', 'Smash']);
+  // A single old note (not in the latest 6 noted) is not even an early item.
+  fresh();
+  const old = [M(L, ['Return']), ...Array.from({ length: 7 }, () => M(W, ['Other']))];
+  assert.deepEqual(G.buildCandidates(old), []);
+});
+
+test('a skill is never both a strength and a weakness: one side per skill, the larger count wins, ties are mixed', () => {
+  fresh();
+  const ms = [M(W, [], ['Net']), M(W, [], ['Net']), M(L, ['Net']), M(L, ['Serve']), M(W, [], ['Serve']), M(L, ['Serve']), M(W, ['Other'])];
+  const b = G.buildCandidates(ms).map(x => x.tag), st = G.strengthCandidates(ms).map(x => x.tag);
+  assert.deepEqual(b, ['Serve']); assert.deepEqual(st, ['Net']);
+  assert.ok(!b.some(t => st.includes(t)));
 });
 
 test('Key Insight: "insufficient" only when no detector could run; "no_trend" when the evidence is there but nothing changed', () => {

@@ -17,9 +17,11 @@
 //   compare  a count compared between your last 3 matches and the 3 before (games won, close games won)
 //   strip    whether a self-reported observation was noted in each match (0/1), in order
 
-export const ENGINE_VERSION = '2026-10-26-v12';
+export const ENGINE_VERSION = '2026-10-26-v13';
 export const SKILL_TAGS = ['Serve', 'Return', 'Net', 'Smash', 'Defence', 'Footwork', 'Placement'];
-const WINDOW = 10;     // latest matches the engine reads
+const WINDOW = 10;     // latest matches the Key Insight reads
+const HISTORY = 20;    // latest matches Build Next, Strengths, opponent plans and Doubles Play read
+const SKILL_N = 12;    // matches with notes in the Build Next / Strengths window
 const NOTE_N = 6;      // matches with notes in a Skill Tag window
 const TREND_N = 6;     // scored matches in the margin trend
 const CLOSE = 3;       // a close game is decided by 3 points or fewer (as on Insights Performance)
@@ -56,12 +58,12 @@ const hasNotes = m => (m.wt || []).length > 0 || (m.lt || []).length > 0;
 // The player's free-text notes in these matches (What Worked = worked, What Cost Points = lost), latest last, at most 4.
 const notesFor = (ms, fields = ['lost', 'worked']) => ms.flatMap(m => fields.map(f => String(m[f] || '').trim().slice(0, 300)).filter(Boolean)).slice(-4);
 
-// Oldest -> latest, at most WINDOW. Input rows are the matches table (date, created_at), newest first or any order.
-export function normalize(matches) {
-  return [...(matches || [])]
-    .sort((a, b) => (a.date === b.date ? String(a.created_at || '').localeCompare(String(b.created_at || '')) : String(a.date).localeCompare(String(b.date))))
-    .slice(-WINDOW);
-}
+// Oldest -> latest, at most WINDOW (Key Insight) or HISTORY (everything else). Input rows are the matches table
+// (date, created_at), newest first or any order.
+const chronological = matches => [...(matches || [])]
+  .sort((a, b) => (a.date === b.date ? String(a.created_at || '').localeCompare(String(b.created_at || '')) : String(a.date).localeCompare(String(b.date))));
+export const normalize = matches => chronological(matches).slice(-WINDOW);
+export const history = matches => chronological(matches).slice(-HISTORY);
 
 // ---- Topics (Build Next / Focus identity) ----
 // A topic is "tag:<Skill Tag>" when it comes from a tag or its name is a tag in either language, otherwise
@@ -366,7 +368,7 @@ const CONCEPTS = {
   body: [/\bbody (shots?|smash(es)?)\b|at the body/i, /追身/], crossCourt: [/cross[- ]?court/i, /对角/], straight: [/\bstraight\b/i, /直线/],
   longRally: [/long rall/i, /多拍|长回合|相持/], endgame: [/deuce|game point|end of (the )?game|closing (out|points)|big points/i, /关键分|局末|赛点|局点/],
   decider: [/third game|deciding game|decider/i, /第三局|决胜局/], fitness: [/tired|stamina|fitness|fatigue/i, /体能|累了|疲劳/],
-  nerves: [/nerv|pressure|tense/i, /紧张|压力|心态/], height: [/too (high|low|flat)|\bheight\b/i, /太高|太低|过高|高度/],
+  nerves: [/nerv|under pressure|feel(s|ing)? (the )?pressure|pressure points|tense/i, /紧张|压力|心态/], height: [/too (high|low|flat)|\bheight\b/i, /太高|太低|过高|高度/],
   intoNet: [/into the net|net cord|hit the net/i, /(?<![记写])下网(?!前)|挂网/], out: [/\bwent out\b|hit (it )?out\b|\bwide\b/i, /出界|打出界/],
   sideBySide: [/side[- ]by[- ]side/i, /平行站位|左右站位/], frontBack: [/front[- ]and[- ]back|front[- ]back/i, /前后站位/],
   pace: [/slow(ed)? (it )?down|change (of )?pace|tempo/i, /节奏|放慢/], deception: [/decept|disguise|hold the shot/i, /假动作|骗/]
@@ -392,11 +394,27 @@ function contentTokens(t) {
   for (const run of s.match(/[㐀-鿿]+/g) || []) for (let i = 0; i + 1 < run.length; i++) { const b = run.slice(i, i + 2); if (!STOP_ZH.has(b)) out.add(b); }
   return out;
 }
+// Notes and copy are often in different languages (Chinese notes, English app), where no content word can match.
+// Then the copy is anchored when it shares a concept or one of these badminton terms with the notes. Used for
+// anchoring only: naming one of these is never a detail that has to be grounded.
+const ANCHOR = {
+  net: [/\bnet\b|front ?court|forecourt/i, /网前|前场|封网|搓球|放网/], serve: [/\bserv(e|es|ing)\b/i, /发球|发小球|发高远/],
+  return: [/\breturn/i, /接发/], smash: [/\bsmash/i, /杀球|扣杀|接杀/], defence: [/defen[cs]|\bdefend/i, /防守|接杀/],
+  footwork: [/footwork|movement|\bmov(e|es|ing)\b/i, /步法|步伐|移动/], placement: [/placement|\bplac(e|ing)\b/i, /落点|线路/],
+  attack: [/attack|aggress|offen/i, /进攻|攻击|主动|积极/], speed: [/\bfast|quick|speed/i, /快|速度/],
+  power: [/power|heavy|hard/i, /重|力量/], variation: [/vari|mix(es|ed|ing)? (it )?up|chang/i, /变化/],
+  steady: [/steady|consistent|solid|stable|reliab/i, /稳/], weak: [/\bweak/i, /弱/], pressure: [/press|pressure|target/i, /压|打我|攻我/],
+  passive: [/passive|on the back foot/i, /被动/]
+};
+const anchorTerms = t => Object.keys(ANCHOR).filter(k => ANCHOR[k].some(r => r.test(t)));
 export function anchored(text, notes) {
   const n = (notes || []).join(' \n ');
   if (conceptsIn(text).some(k => conceptsIn(n).includes(k))) return true;
   const a = contentTokens(text), b = contentTokens(n);
-  return [...a].some(x => b.has(x));
+  if ([...a].some(x => b.has(x))) return true;
+  if (CJK.test(text) === CJK.test(n)) return false;
+  const terms = anchorTerms(n);
+  return anchorTerms(text).some(k => terms.includes(k));
 }
 // A note says something specific (not just "bad day" or the tag again): it names a concept, or has 4+ English
 // words / 6+ Chinese characters.
@@ -499,25 +517,28 @@ export function finalizeKey(cands, ai, lang, matches) {
 
 // ---- Build Next and Strengths ----
 // One classifier for both lists, and for which Skill Tag strips may be a Key Insight, so a skill is never sorted two
-// ways on the same page. The window is the latest 6 matches with notes (3+ needed), as for the strips. For each tag,
+// ways on the same page. The window is the latest 12 matches with notes among the latest 20 (3+ needed): the Key
+// Insight strips compare 6, but the lists use all the recent history there is (Han, 2026-10-26). For each tag,
 // cost = matches where it was noted under What Cost Points, worked = under What Worked. A tag noted on both sides of
 // the same match in half or more of its matches says nothing either way and is left out.
-// The side (Han, 2026-10-26: one side per skill; the stronger finding over the whole window wins):
-//   cost    noted as costing points in 2+ matches, more often than working   -> Build Next
-//   worked  noted as working in 2+ matches, more often than costing points   -> Strengths
-//   mixed   2+ on each side, equally often                                   -> Build Next only, and its evidence says
-//           both counts ("costing points in 2 of 6, working in 2"): something to make consistent, never a strength,
-//           never hidden, never split into situations the notes don't repeat.
-// One mention is not a pattern, so a tag noted once is never a recommendation or a strength.
-// Build Next ranks by how often it cost points, then plain cost before mixed, then the last 3, then the latest match;
-// Strengths by how often it worked, then the last 3. Active Focus topics are left out of Build Next. A completed
-// Focus topic comes back only with new evidence: 3+ matches with notes logged since it was completed and the tag
-// noted as costing points in 2+ of them; its evidence is then counted over those matches only.
+// The side (one side per skill; the stronger finding over the whole window wins):
+//   cost    noted as costing points more often than working   -> Build Next
+//   worked  noted as working more often than costing points   -> Strengths
+//   mixed   2+ on each side, equally often                     -> Build Next only, and its evidence says both counts
+//           ("costing points in 2 of 12, and working in 2"): something to make consistent, never a strength.
+// Level: "confirmed" when noted on that side in 2+ matches, "early" when noted once, and only if that once was in
+// the latest 6 noted matches (an old single note is not actionable). An early item is always worded as one
+// observation ("Early sign: you noted it once…", 「初步观察」), never as a pattern, with a general drill as advice.
+// Build Next: confirmed first (most often, plain cost before mixed, then the last 3, then the latest match), then up
+// to 2 early ones (latest first), 4 in all. Strengths: confirmed first, then emerging (early), 3 in all.
+// Active Focus topics are left out of Build Next. A completed Focus topic comes back only with new evidence: 3+
+// matches with notes logged since it was completed and the tag noted as costing points in 2+ of them; its evidence
+// is then counted over those matches only.
 // Each item carries the player's own words about that skill (skillNotes). advice_basis is "notes" when 2+ of them
 // say something specific, else "general": the advice is then a plainly general drill, and the name and evidence may
 // not name a specific shot, side or situation either.
 // focus: [{ topic, status: 'active' | 'completed', completed_at }]
-const noteWindow = matches => { const chron = normalize(matches), noted = chron.filter(hasNotes); return { chron, noted, win: noted.slice(-NOTE_N) }; };
+const noteWindow = matches => { const chron = history(matches), noted = chron.filter(hasNotes); return { chron, noted, win: noted.slice(-SKILL_N) }; };
 const has = (m, f, tag) => (m[f] || []).includes(tag);
 const SKILL_MENTION = {
   Serve: /\bserv(e|es|ing|ice)\b|发球/i,
@@ -554,11 +575,15 @@ export function skillTable(matches) {
   if (win.length >= 3) for (const tag of SKILL_TAGS) {
     const cost = win.filter(m => has(m, 'lt', tag)).length, worked = win.filter(m => has(m, 'wt', tag)).length;
     if (!cost && !worked) continue;
-    const same = win.filter(m => has(m, 'lt', tag) && has(m, 'wt', tag)).length, l3 = win.slice(-3);
+    const same = win.filter(m => has(m, 'lt', tag) && has(m, 'wt', tag)).length, l3 = win.slice(-3), l6 = win.slice(-6);
     const side = same * 2 >= Math.max(cost, worked) ? null
-      : cost >= 2 && cost > worked ? 'cost' : worked >= 2 && worked > cost ? 'worked' : cost >= 2 && cost === worked ? 'mixed' : null;
-    rows[tag] = { tag, cost, worked, same, side, recentCost: l3.filter(m => has(m, 'lt', tag)).length, recentWorked: l3.filter(m => has(m, 'wt', tag)).length,
-      latestCost: has(win[win.length - 1], 'lt', tag) ? 1 : 0 };
+      : cost > worked ? 'cost' : worked > cost ? 'worked' : cost >= 2 ? 'mixed' : null;
+    const k = side === 'worked' ? worked : cost;
+    // An early (single) observation counts only when it is recent.
+    const recentOnce = side === 'worked' ? l6.some(m => has(m, 'wt', tag)) : l6.some(m => has(m, 'lt', tag));
+    const level = !side ? null : k >= 2 ? 'confirmed' : recentOnce ? 'early' : null;
+    rows[tag] = { tag, cost, worked, same, side: level ? side : null, level, recentCost: l3.filter(m => has(m, 'lt', tag)).length, recentWorked: l3.filter(m => has(m, 'wt', tag)).length,
+      latestCost: has(win[win.length - 1], 'lt', tag) ? 1 : 0, latest6: win.length - 1 - Math.max(...win.map((m, i) => (has(m, side === 'worked' ? 'wt' : 'lt', tag) ? i : -1))) };
   }
   return { chron, noted, win, rows, skipped: win.length ? chron.slice(chron.indexOf(win[0])).filter(m => !hasNotes(m)).length : 0 };
 }
@@ -568,6 +593,7 @@ export function topicSides(matches) {
   return Object.fromEntries(Object.values(rows).filter(r => r.side).map(r => [r.tag, r.side]));
 }
 const notesOf = (ms, f, tag) => skillNotes(ms.filter(m => has(m, f === 'lost' ? 'lt' : 'wt', tag)).map(m => m[f]).filter(Boolean), tag);
+const EARLY_MAX = 2;
 export function buildCandidates(matches, focus = [], max = 4) {
   const { noted, win, rows, skipped } = skillTable(matches), out = [];
   for (const row of Object.values(rows)) {
@@ -580,23 +606,29 @@ export function buildCandidates(matches, focus = [], max = 4) {
       const values = after.map(m => (has(m, 'lt', tag) ? 1 : 0)), k = sum(values);
       if (after.length < 3 || k < 2) continue;
       const notes = notesOf(after, 'lost', tag);
-      out.push({ topic_id: topic, tag, k, w: 0, n: after.length, mixed: false, recent: sum(values.slice(-3)), latest: values[values.length - 1], returning: true, skipped: 0, notes, basis: basisOf(notes) });
+      out.push({ topic_id: topic, tag, k, w: 0, n: after.length, mixed: false, level: 'confirmed', recent: sum(values.slice(-3)), latest: values[values.length - 1], returning: true, skipped: 0, notes, basis: basisOf(notes) });
       continue;
     }
     const mixed = row.side === 'mixed', notes = notesOf(win, 'lost', tag);
-    out.push({ topic_id: topic, tag, k: row.cost, w: mixed ? row.worked : 0, n: win.length, mixed, recent: row.recentCost, latest: row.latestCost, returning: false, skipped,
-      notes, basis: basisOf(notes) });
+    out.push({ topic_id: topic, tag, k: row.cost, w: mixed ? row.worked : 0, n: win.length, mixed, level: row.level, recent: row.recentCost, latest: row.latestCost, age: row.latest6, returning: false, skipped,
+      notes, basis: row.level === 'early' ? 'general' : basisOf(notes) });
   }
-  return out.sort((a, b) => b.k / b.n - a.k / a.n || a.mixed - b.mixed || b.recent - a.recent || b.latest - a.latest || a.tag.localeCompare(b.tag)).slice(0, max);
+  const confirmed = out.filter(x => x.level === 'confirmed')
+    .sort((a, b) => b.k / b.n - a.k / a.n || a.mixed - b.mixed || b.recent - a.recent || b.latest - a.latest || a.tag.localeCompare(b.tag));
+  const early = out.filter(x => x.level === 'early').sort((a, b) => a.age - b.age || a.tag.localeCompare(b.tag)).slice(0, EARLY_MAX);
+  return [...confirmed, ...early].slice(0, max);
 }
-export function strengthCandidates(matches, max = 2) {
+export function strengthCandidates(matches, max = 3) {
   const { win, rows, skipped } = skillTable(matches), out = [];
   for (const row of Object.values(rows)) {
     if (row.side !== 'worked') continue;
     const notes = notesOf(win, 'worked', row.tag);
-    out.push({ topic_id: 'tag:' + row.tag, tag: row.tag, k: row.worked, n: win.length, recent: row.recentWorked, notes, basis: basisOf(notes), skipped });
+    out.push({ topic_id: 'tag:' + row.tag, tag: row.tag, k: row.worked, n: win.length, level: row.level, recent: row.recentWorked, age: row.latest6, notes,
+      basis: row.level === 'early' ? 'general' : basisOf(notes), skipped });
   }
-  return out.sort((a, b) => b.k - a.k || b.recent - a.recent || a.tag.localeCompare(b.tag)).slice(0, max);
+  const confirmed = out.filter(x => x.level === 'confirmed').sort((a, b) => b.k - a.k || b.recent - a.recent || a.tag.localeCompare(b.tag));
+  const early = out.filter(x => x.level === 'early').sort((a, b) => a.age - b.age || a.tag.localeCompare(b.tag)).slice(0, EARLY_MAX);
+  return [...confirmed, ...early].slice(0, max);
 }
 // General advice for a skill when the notes don't say what went wrong (or right): practical, and labelled general.
 const GENERAL = {
@@ -614,12 +646,18 @@ export function itemTemplate(item, kind, lang) {
   const action = generalAction(item.tag, kind, lang);
   if (lang === 'zh') {
     const lastN = `最近${item.skipped ? '有记录的' : ''}${item.n}场`;
+    if (item.level === 'early') return kind === 'strength'
+      ? { name, signal: `初步亮点：${lastN}里有1场你觉得${name}发挥不错。`, action }
+      : { name, evidence: `初步观察：${lastN}里有1场你记下${name}丢分。`, action };
     if (kind === 'strength') return { name, signal: `${lastN}比赛中，有${item.k}场你觉得${name}发挥不错。`, action };
     if (item.returning) return { name, evidence: `完成这个训练目标后的${item.n}场里，又有${item.k}场你记下这里丢分。`, action };
     if (item.mixed) return { name, evidence: `${lastN}里，${item.k}场你记下它丢分，${item.w}场记下它打得好。`, action };
     return { name, evidence: `${lastN}比赛中，有${item.k}场你提到${name}的问题。`, action };
   }
   const lastN = `your last ${item.n} ${item.skipped ? 'noted ' : ''}matches`;
+  if (item.level === 'early') return kind === 'strength'
+    ? { name, signal: `Emerging: you noted ${name.toLowerCase()} working well once in ${lastN}.`, action }
+    : { name, evidence: `Early sign: you noted it costing points once in ${lastN}.`, action };
   if (kind === 'strength') return { name, signal: `You noted ${name.toLowerCase()} working well in ${item.k} of ${lastN}.`, action };
   if (item.returning) return { name, evidence: `You noted it costing points again in ${item.k} of ${item.n} matches since you completed it.`, action };
   if (item.mixed) return { name, evidence: `You noted it costing points in ${item.k} of ${lastN}, and working in ${item.w}.`, action };
@@ -670,12 +708,13 @@ export function finalizeItems(items, ai, kind, lang) {
     const aiAction = item.basis === 'notes' && !bad('action') && String(a.action || '').trim();
     return {
       topic_id: item.topic_id, tag: item.tag, rank: rank + 1,
-      name: bad('name') ? t.name : String(a.name).trim(),
-      // A mixed item's evidence is always the engine's: it has to give both counts exactly.
-      [textKey]: item.mixed || bad(textKey) ? t[textKey] : String(a[textKey]).trim(),
+      // An early item is one observation: its plain name and its labelled evidence are always the engine's. A mixed
+      // item's evidence is always the engine's too: it has to give both counts exactly.
+      name: item.level === 'early' || bad('name') ? t.name : String(a.name).trim(),
+      [textKey]: item.mixed || item.level === 'early' || bad(textKey) ? t[textKey] : String(a[textKey]).trim(),
       action: aiAction || t.action, advice_basis: aiAction ? 'notes' : 'general',
-      evidence_numbers: { k: item.k, n: item.n, ...(item.mixed ? { w: item.w } : {}) }, mixed: !!item.mixed, returning: item.returning || false,
-      copy_source: issues.length || item.mixed ? (a ? 'mixed' : 'template') : 'ai', issues
+      evidence_numbers: { k: item.k, n: item.n, ...(item.mixed ? { w: item.w } : {}) }, mixed: !!item.mixed, level: item.level || 'confirmed', returning: item.returning || false,
+      copy_source: issues.length || item.mixed || item.level === 'early' ? (a ? 'mixed' : 'template') : 'ai', issues
     };
   });
 }
@@ -683,19 +722,58 @@ export function finalizeItems(items, ai, kind, lang) {
 // ---- Opponent plans ----
 // Han (2026-10-26): a plan only for an opponent the player wrote notes about, and only from those notes. A
 // win/loss record says nothing about how someone plays, so it is not given to the model at all, and a plan that
-// isn't anchored in the notes (or adds details they don't have) is left out, never replaced by generic advice.
-// "unknown:<heard name>" is a voice-logged opponent nobody identified: no profile, no plan.
-export function opponentFacts(matches, names = {}) {
-  const by = {};
-  for (const m of [...(matches || [])].slice(0, WINDOW)) for (const pid of (m.opps || []).filter(p => p && !String(p).startsWith('unknown:'))) {
-    const note = String(m.opp_notes || '').trim().slice(0, 300);
-    if (!note) continue;
-    (by[pid] ||= { player_id: pid, name: names[pid] || 'Opponent', notes: [] }).notes.push(note);
+// isn't anchored in the notes (or adds details they don't have) is not used. "unknown:<heard name>" is a
+// voice-logged opponent nobody identified: no profile, no plan.
+// v13: notes from the whole history (20 matches), each given to the opponent it is about. A doubles note is one text
+// for two opponents: its clauses go to the opponent they name (a clause that names nobody stays with the last one
+// named); a note that names neither is about the pair, and no single opponent gets it. One note is a "single"
+// observation (the plan is labelled as an early read), two or more are "repeated".
+const GENERALIZE = { en: /\b(always|every ?time|usually|constantly|never|tends? to|habit(ually)?|all the time)\b/i, zh: /总是|每次|一向|经常|老是|习惯|从来|一贯/ };
+const nameIn = (clause, name) => {
+  const n = String(name || '').trim();
+  if (!n) return false;
+  return CJK.test(n) ? clause.includes(n) : new RegExp(`(^|[^\\p{L}])${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}])`, 'iu').test(clause);
+};
+export function attributeNote(note, opps, names = {}) {
+  const text = String(note || '').trim().slice(0, 300), out = {};
+  if (!text || !opps.length) return { by: out, unattributed: !!text };
+  const named = opps.filter(pid => nameIn(text, names[pid]));
+  if (!named.length) {
+    if (opps.length === 1) out[opps[0]] = [text];
+    return { by: out, unattributed: opps.length > 1 };
   }
-  return Object.values(by).map(o => ({ ...o, notes: o.notes.slice(0, 4) })).slice(0, 5);
+  if (named.length === 1 && opps.length === 1) { out[named[0]] = [text]; return { by: out, unattributed: false }; }
+  let cur = null;
+  for (const c of text.split(/[。！？；;.!?\n]/).map(x => x.trim()).filter(Boolean)) {
+    const who = named.filter(pid => nameIn(c, names[pid]));
+    if (who.length === 1) cur = who[0]; else if (who.length > 1) cur = null;
+    if (cur) (out[cur] ||= []).push(c);
+  }
+  return { by: Object.fromEntries(Object.entries(out).map(([k, v]) => [k, [v.join(CJK.test(v[0]) ? '。' : '. ')]])), unattributed: false };
+}
+export function opponentFacts(matches, names = {}, diag) {
+  const by = {};
+  history(matches).reverse().forEach((m, age) => {
+    const raw = (m.opps || []).filter(Boolean), opps = raw.filter(p => !String(p).startsWith('unknown:'));
+    if (!String(m.opp_notes || '').trim()) return;
+    if (diag) diag.matches_with_notes++;
+    if (!opps.length) { if (diag) diag.unknown_opponent++; return; }
+    const { by: got, unattributed } = attributeNote(m.opp_notes, opps, names);
+    if (unattributed && diag) diag.names_no_opponent++;
+    for (const [pid, notes] of Object.entries(got)) {
+      const o = (by[pid] ||= { player_id: pid, name: names[pid] || 'Opponent', notes: [], age });
+      o.notes.push(...notes);
+    }
+  });
+  return Object.values(by)
+    .map(o => ({ player_id: o.player_id, name: o.name, notes: o.notes.slice(0, 4), level: o.notes.length >= 2 ? 'repeated' : 'single', age: o.age }))
+    .sort((a, b) => b.notes.length - a.notes.length || a.age - b.age || a.name.localeCompare(b.name))
+    .slice(0, 5).map(({ age, ...o }) => o);
 }
 const RECORD = { en: /\b(record|head[- ]to[- ]head|lost to (them|him|her)|beat (you|them)|you('ve| have) (lost|won|beaten)|losses|losing streak)\b/i,
-  zh: /战绩|交手|输给|赢过|胜率|连输|连赢|胜负/ };
+  zh: /战绩|交手记录|输给|赢过|胜率|连输|连赢|胜负/ };
+export const EARLY_LABEL = { en: { opp: 'Early read: ', doubles: 'Early observation: ' }, zh: { opp: '初步判断：', doubles: '初步观察：' } };
+const stripLabel = (s, lang, kind) => { const l = EARLY_LABEL[lang][kind].trim().replace(/[:：]$/, ''); return s.replace(new RegExp(`^${l}\\s*[:：]?\\s*`, 'i'), ''); };
 export function checkPlan(plan, o, lang) {
   const issues = [];
   if (!plan) return ['empty'];
@@ -705,42 +783,116 @@ export function checkPlan(plan, o, lang) {
   if (RECORD[lang].test(plan)) issues.push('record_inference');
   if (ungrounded(plan, o.notes, { advice: true }).length) issues.push('detail_not_in_notes');
   if (!anchored(plan, o.notes)) issues.push('not_from_notes');
+  // One note is one match: never a habit.
+  if (o.level === 'single' && GENERALIZE[lang].test(plan)) issues.push('generalized_single_note');
   if (lang === 'zh' ? zhLen(plan) > 36 : words(plan) > 24) issues.push('length');
   return issues;
 }
-export function finalizeOpponents(ai, opps, lang) {
-  return (ai || []).map(p => {
-    const o = opps.find(x => x.player_id === p.player_id);
-    if (!o) return null;
-    let plan = String(p.plan || '').trim();
-    const name = String(o.name || '').trim();
-    if (name) for (const pre of [name + ':', name + '：', 'against ' + name + ':']) if (plan.toLowerCase().startsWith(pre.toLowerCase())) { plan = plan.slice(pre.length).trim(); break; }
-    const issues = checkPlan(plan, o, lang);
-    return issues.length ? { player_id: o.player_id, dropped: issues } : { player_id: o.player_id, plan };
-  }).filter(Boolean);
+// When the model has no usable plan for an opponent whose notes say something specific, the card shows the
+// player's own note and a neutral next step, so the section never invents a tendency and never hides real notes.
+export function opponentTemplate(o, lang) {
+  const q = (s, n) => `“${s.length > n ? s.slice(0, n - 1) + '…' : s}”`;
+  if (o.level === 'single') return lang === 'zh' ? `${EARLY_LABEL.zh.opp}你记下${q(o.notes[0], 40)}。下次交手开局先验证。` : `${EARLY_LABEL.en.opp}you noted ${q(o.notes[0], 60)}. Test it early next time.`;
+  const two = o.notes.slice(0, 2).map(n => q(n, lang === 'zh' ? 20 : 50));
+  return lang === 'zh' ? `你的记录：${two.join('')}。下次交手提前针对。` : `From your notes: ${two.join(' · ')}. Plan around these next time.`;
 }
+export function finalizeOpponents(ai, opps, lang) {
+  const out = [];
+  for (const o of opps) {
+    const p = (ai || []).find(x => x && x.player_id === o.player_id);
+    let plan = String(p?.plan || '').trim(), issues = p ? [] : ['no_ai_copy'];
+    if (p) {
+      const name = String(o.name || '').trim();
+      if (name) for (const pre of [name + ':', name + '：', 'against ' + name + ':']) if (plan.toLowerCase().startsWith(pre.toLowerCase())) { plan = plan.slice(pre.length).trim(); break; }
+      plan = stripLabel(plan, lang, 'opp');
+      issues = checkPlan(plan, o, lang);
+    }
+    if (!issues.length) out.push({ player_id: o.player_id, plan: o.level === 'single' ? EARLY_LABEL[lang].opp + plan : plan, level: o.level, copy_source: 'ai' });
+    else if (specificNote(o.notes[0])) out.push({ player_id: o.player_id, plan: opponentTemplate(o, lang), level: o.level, copy_source: 'note', issues });
+    else out.push({ player_id: o.player_id, dropped: issues.concat('note_not_specific') });
+  }
+  // At most OPP_MAX cards, in the engine's order (most notes, then most recent); the rest are reported as dropped.
+  let shown = 0;
+  return out.map(p => p.dropped || ++shown <= OPP_MAX ? p : { player_id: p.player_id, dropped: ['over_limit'] });
+}
+export const OPP_MAX = 3;
 
 // ---- Doubles play ----
-// Only from 3+ doubles matches with notes; each item must be anchored in those notes, with no new details.
+// v13: from the doubles matches with notes in the history (latest 6 doubles), from 1 noted match up. A skill noted in
+// 2+ of them is a pattern; anything else is an early observation, labelled so, and may not be worded as a habit.
+// Each item must be anchored in those notes and tags, with no new details.
 export function doublesFacts(matches) {
-  const ds = normalize(matches).filter(m => m.type === 'Doubles').slice(-6), noted = ds.filter(m => hasNotes(m) || m.worked || m.lost);
-  if (noted.length < 3) return null;
-  const cnt = f => { const c = {}; for (const m of ds) for (const t of (m[f] || [])) c[t] = (c[t] || 0) + 1; return Object.entries(c).sort((a, b) => b[1] - a[1]).map(([tag, count]) => ({ tag, count })); };
-  const notes = ds.flatMap(m => [m.worked ? { kind: 'worked', text: String(m.worked).trim().slice(0, 300) } : null, m.lost ? { kind: 'cost_points', text: String(m.lost).trim().slice(0, 300) } : null]).filter(Boolean).slice(-8);
-  return { matches: ds.length, cost_points: cnt('lt'), strengths: cnt('wt'), notes };
+  const ds = history(matches).filter(m => m.type === 'Doubles').slice(-6), noted = ds.filter(m => hasNotes(m) || m.worked || m.lost);
+  if (!noted.length) return null;
+  const cnt = f => { const c = {}; for (const m of noted) for (const t of (m[f] || [])) c[t] = (c[t] || 0) + 1; return Object.entries(c).sort((a, b) => b[1] - a[1]).map(([tag, count]) => ({ tag, count })); };
+  const notes = noted.flatMap(m => [m.worked ? { kind: 'worked', text: String(m.worked).trim().slice(0, 300) } : null, m.lost ? { kind: 'cost_points', text: String(m.lost).trim().slice(0, 300) } : null]).filter(Boolean).slice(-8);
+  const cost_points = cnt('lt'), strengths = cnt('wt');
+  const repeated = [...cost_points, ...strengths].filter(x => x.count >= 2).map(x => x.tag);
+  const by_match = noted.map(m => [m.worked, m.lost].map(x => String(x || '').trim()).filter(Boolean)).filter(x => x.length);
+  return { matches: ds.length, noted: noted.length, repeated, cost_points, strengths, notes, by_match };
+}
+const tagLabels = t => [APP_TAG_LABELS.en[t], APP_TAG_LABELS.zh[t], TAG.en[t] && TAG.en[t][1], TAG.zh[t] && TAG.zh[t][1]].filter(Boolean);
+// Template items when the model wrote none that pass: one per noted skill (repeated first), from the tag counts.
+export function doublesTemplate(facts, lang) {
+  const items = [...facts.cost_points.map(x => ({ ...x, side: 'cost' })), ...facts.strengths.map(x => ({ ...x, side: 'worked' }))]
+    .sort((a, b) => b.count - a.count || (a.side === 'cost' ? -1 : 1)).slice(0, 2);
+  return items.map(x => {
+    const name = APP_TAG_LABELS[lang][x.tag], early = x.count < 2, n = facts.noted;
+    const pattern = lang === 'zh'
+      ? (early ? EARLY_LABEL.zh.doubles : '') + `${n}场有记录的双打里，${x.count === 1 ? '有1场' : `有${x.count}场`}你记下${name}${x.side === 'cost' ? '丢分' : '打得好'}。`
+      : (early ? EARLY_LABEL.en.doubles : '') + `you noted ${name.toLowerCase()} ${x.side === 'cost' ? 'costing points' : 'working'} in ${x.count} of ${n} noted doubles ${n === 1 ? 'match' : 'matches'}.`;
+    return { name, pattern: lang === 'zh' ? pattern : cap(pattern), label: x.side === 'cost' ? 'Try Next' : 'Keep Doing', action: generalAction(x.tag, x.side === 'cost' ? 'build' : 'strength', lang),
+      level: early ? 'early' : 'pattern', copy_source: 'template' };
+  });
 }
 export function finalizeDoubles(ai, facts, lang) {
   if (!facts) return [];
-  const notes = facts.notes.map(n => n.text), counts = [facts.matches, ...facts.cost_points.map(x => x.count), ...facts.strengths.map(x => x.count), 3];
+  const notes = facts.notes.map(n => n.text), counts = [facts.matches, facts.noted, ...facts.cost_points.map(x => x.count), ...facts.strengths.map(x => x.count), 1, 2, 3];
   const tags = [...facts.cost_points, ...facts.strengths].map(x => x.tag);
-  const labels = tags.flatMap(t => [APP_TAG_LABELS.en[t], APP_TAG_LABELS.zh[t], TAG.en[t] && TAG.en[t][1]]).filter(Boolean);
-  return (ai || []).filter(d => {
-    const text = `${d.name || ''} ${d.pattern || ''} ${d.action || ''}`;
-    if (!d.name || !d.pattern || (lang === 'zh' ? !CJK.test(text) : CJK.test(text))) return false;
-    if (BAN[lang].some(r => r.test(text)) || numbersIn(text).some(n => !counts.includes(n))) return false;
-    return !ungrounded(`${d.name} ${d.pattern}`, notes).length && !ungrounded(d.action || '', notes, { advice: true }).length &&
-      anchored(`${d.name} ${d.pattern}`, [...notes, ...labels]);
-  }).slice(0, 2);
+  const labels = tags.flatMap(tagLabels);
+  // An item is a pattern when it is about a skill noted in 2+ doubles matches, or when the notes of 2+ different
+  // doubles matches say it; otherwise it is an early observation.
+  const repNotes = facts.repeated.flatMap(tagLabels);
+  const inMatches = t => (facts.by_match || []).filter(ns => anchored(t, ns)).length;
+  const ok = (ai || []).map(d => {
+    const pattern = stripLabel(String(d.pattern || '').trim(), lang, 'doubles');
+    const text = `${d.name || ''} ${pattern} ${d.action || ''}`;
+    if (!d.name || !pattern || (lang === 'zh' ? !CJK.test(text) : CJK.test(text))) return null;
+    if (BAN[lang].some(r => r.test(text)) || numbersIn(text).some(n => !counts.includes(n))) return null;
+    if (ungrounded(`${d.name} ${pattern}`, notes).length || ungrounded(d.action || '', notes, { advice: true }).length) return null;
+    if (!anchored(`${d.name} ${pattern}`, [...notes, ...labels])) return null;
+    const isPattern = !!(repNotes.length && anchored(`${d.name} ${pattern}`, repNotes) || inMatches(`${d.name} ${pattern}`) >= 2);
+    if (!isPattern && GENERALIZE[lang].test(`${pattern} ${d.action || ''}`)) return null;
+    return { name: String(d.name).trim(), pattern: isPattern ? pattern : EARLY_LABEL[lang].doubles + pattern, label: d.label, action: String(d.action || '').trim(),
+      level: isPattern ? 'pattern' : 'early', copy_source: 'ai' };
+  }).filter(Boolean).slice(0, 2);
+  return ok.length ? ok : doublesTemplate(facts, lang);
+}
+
+// ---- Coverage ----
+// Why each section has the cards it has, stored with the insight (insight_json.coverage) so an empty section can be
+// explained from the row itself.
+export function coverage(matches, { build = [], strengths = [], opps = [], plans = [], doubles = null, doublesPlay = [], keyInsight = null, oppDiag = null } = {}) {
+  const { noted, win, rows } = skillTable(matches), h = history(matches);
+  const reason = (n, why) => (n ? null : why);
+  const skillWhy = side => !win.length ? 'no_matches_with_skill_tags' : win.length < 3 ? 'fewer_than_3_noted_matches'
+    : !Object.values(rows).some(r => r.side === side || side === 'cost' && r.side === 'mixed') ? (side === 'worked' ? 'no_skill_noted_working_more_than_costing' : 'no_skill_noted_costing_more_than_working') : 'all_in_active_focus';
+  return {
+    engine: ENGINE_VERSION,
+    matches_read: h.length, noted_matches: noted.length, skill_window: win.length,
+    key_insight: keyInsight ? keyInsight.status || 'ok' : 'none',
+    build_next: { cards: build.length, confirmed: build.filter(x => x.level !== 'early').length, early: build.filter(x => x.level === 'early').length, zero_reason: reason(build.length, skillWhy('cost')) },
+    strengths: { cards: strengths.length, confirmed: strengths.filter(x => x.level !== 'early').length, early: strengths.filter(x => x.level === 'early').length, zero_reason: reason(strengths.length, skillWhy('worked')) },
+    opponent_plans: { cards: plans.filter(p => !p.dropped).length, opponents_with_notes: opps.length, ...(oppDiag || {}),
+      from_ai: plans.filter(p => p.copy_source === 'ai').length, from_note: plans.filter(p => p.copy_source === 'note').length,
+      not_shown: plans.filter(p => p.dropped?.includes('over_limit')).length,
+      dropped: plans.filter(p => p.dropped && !p.dropped.includes('over_limit')).map(p => ({ player_id: p.player_id, issues: p.dropped })),
+      replaced_ai_copy: plans.filter(p => p.copy_source === 'note' && !p.issues?.includes('no_ai_copy')).map(p => ({ player_id: p.player_id, issues: p.issues })),
+      zero_reason: reason(plans.filter(p => !p.dropped).length, !opps.length ? (oppDiag?.matches_with_notes ? 'notes_not_about_a_known_opponent' : 'no_opponent_notes') : 'notes_not_specific') },
+    doubles_play: { cards: doublesPlay.length, doubles_matches: h.filter(m => m.type === 'Doubles').length, noted_doubles: doubles ? doubles.noted : 0,
+      patterns: doublesPlay.filter(d => d.level === 'pattern').length, early: doublesPlay.filter(d => d.level === 'early').length, from_ai: doublesPlay.filter(d => d.copy_source === 'ai').length,
+      zero_reason: reason(doublesPlay.length, !h.some(m => m.type === 'Doubles') ? 'no_doubles_matches' : !doubles ? 'no_doubles_match_with_notes' : 'no_skill_tags_in_doubles') }
+  };
 }
 
 // ---- The model's part ----
@@ -755,9 +907,9 @@ export function modelSchema(keyIds, buildIds, strengthIds, oppIds = []) {
         properties: { candidate_id: en(keyIds), title: { type: 'string' }, body: { type: 'string' } } }] },
       buildNext: { type: 'array', maxItems: 4, items: { type: 'object', additionalProperties: false, required: ['topic_id', 'name', 'evidence', 'action'],
         properties: { topic_id: en(buildIds), name: { type: 'string' }, evidence: { type: 'string' }, action: { type: 'string' } } } },
-      strengths: { type: 'array', maxItems: 2, items: { type: 'object', additionalProperties: false, required: ['topic_id', 'name', 'signal', 'action'],
+      strengths: { type: 'array', maxItems: 3, items: { type: 'object', additionalProperties: false, required: ['topic_id', 'name', 'signal', 'action'],
         properties: { topic_id: en(strengthIds), name: { type: 'string' }, signal: { type: 'string' }, action: { type: 'string' } } } },
-      opponentPlans: { type: 'array', maxItems: oppIds.length ? 2 : 0, items: { type: 'object', additionalProperties: false, required: ['player_id', 'plan'],
+      opponentPlans: { type: 'array', maxItems: oppIds.length, items: { type: 'object', additionalProperties: false, required: ['player_id', 'plan'],
         properties: { player_id: en(oppIds), plan: { type: 'string' } } } },
       doublesPlay: { type: 'array', maxItems: 2, items: { type: 'object', additionalProperties: false, required: ['name', 'pattern', 'label', 'action'],
         properties: { name: { type: 'string' }, pattern: { type: 'string' }, label: { type: 'string', enum: ['Try Next', 'Keep Doing'] }, action: { type: 'string' } } } }
@@ -799,13 +951,16 @@ export const ITEM_RULES = `BUILD NEXT / STRENGTHS (Engine V2):
 - name: the skill in 1–4 words (Chinese max 8 characters). Make it more specific ("Backhand defence") only when its notes say so. No numbers.
 - evidence / signal: why it is here, conversationally, using only k and n if you use numbers. These are the player's own notes: "you noted", 「你记下」.
 - advice_basis "notes": the action may build on what the notes say, one concrete thing to try, using only shots and situations the notes name. Don't add a correction of your own (no "use fewer X, try Y" unless the notes say so). advice_basis "general": the notes don't show a pattern, so don't name a specific shot, side, cause or situation anywhere in the item (name the skill plainly); the engine shows a general drill as the action.
-- If returning is true, the player completed a Focus on this before and it came up again since; say so naturally.`;
+- If returning is true, the player completed a Focus on this before and it came up again since; say so naturally.
+- level "early": noted once only. The engine writes its name and labelled evidence; keep your copy plain and never call it a pattern, a habit or an established strength.`;
 
 export const OPPONENT_RULES = `OPPONENT PLANS:
-- opponents lists only opponents the player wrote notes about, with those notes. Give a plan only when the notes say something about how that opponent plays; otherwise leave them out. Return an empty list rather than generic advice.
+- opponents lists only opponents the player wrote notes about, each with only the notes about that opponent. Write one plan per opponent whose notes say something about how they play; leave out one whose notes don't. Never generic advice.
+- level "single": the plan comes from one note, one match. Write it as a tentative read to test ("Test his backhand early"), never as a habit: no "always", "every time", "usually", 「总是」「每次」「经常」. The engine adds the "Early read" label; don't write it. level "repeated": the notes agree across matches, so the plan can be firmer.
 - Never infer a style or weakness from results; you don't have them. Never mention the record, wins or losses.
-- Every detail in the plan (shots, sides, situations) must come from that opponent's notes. One concise instruction, no name prefix.`;
+- Every detail in the plan (shots, sides, situations) must come from that opponent's notes. The notes may be in another language than the output: translate what they say faithfully, adding nothing. One concise instruction, no name prefix.`;
 
 export const DOUBLES_RULES = `DOUBLES PLAY:
-- If doubles is null there are not enough doubles matches with notes: return an empty list.
-- Otherwise write at most 2 items, each from what the doubles notes and tags actually say. Describe the pattern naturally, then one practical adjustment or habit to keep. No details the notes don't have.`;
+- If doubles is null there are no doubles matches with notes: return an empty list.
+- Otherwise write at most 2 items, each from what the doubles notes and tags actually say (notes may be in another language: translate faithfully). Describe what was noted naturally, then one practical adjustment or habit to keep. No details the notes don't have.
+- repeated lists the skills noted in 2+ doubles matches: only those may be described as a pattern. Anything else is an early observation from one match: say what happened that time, never "always", "usually", 「总是」「经常」. The engine adds the "Early observation" label; don't write it.`;
