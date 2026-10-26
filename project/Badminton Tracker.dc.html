@@ -2988,12 +2988,22 @@ class Component extends DCLogic {
     const V = window.RallywiseVoice;
     this.setPs(p => {
       const heard = p.slots[k] ? p.slots[k].heard : '';
+      // The search includes every saved player, even someone tentatively assigned elsewhere.
+      // Choosing them for this role moves them here, clearing their previous slot.
+      const assign = (slots) => {
+        const next = { ...slots };
+        if (who.id) for (const other of V.slotKeys(p.type)) {
+          if (other !== k && next[other]?.id === who.id) next[other] = { heard: '', id: null, cands: [], state: 'missing' };
+        }
+        return next;
+      };
       if (k === 'partner' && p.pool.length) {
         const i = p.pool.findIndex(x => x === who);
         const pool = i >= 0 ? p.pool : p.pool.concat([who]);
-        return { slots: V.choosePartner(p.slots, pool, i >= 0 ? i : pool.length - 1), pool: [], picking: null, q: '' };
+        const slots = V.choosePartner(assign(p.slots), pool, i >= 0 ? i : pool.length - 1);
+        return { slots, pool: [], picking: null, q: '' };
       }
-      return { slots: { ...p.slots, [k]: { heard: who.heard || heard, ...who } }, picking: null, q: '' };
+      return { slots: { ...assign(p.slots), [k]: { heard: who.heard || heard, ...who } }, picking: null, q: '' };
     });
   }
   psPickId(k, id) { const heard = this.state.ps.slots[k] ? this.state.ps.slots[k].heard : ''; this.psFill(k, { heard, id, cands: [], state: 'confirmed' }); }
@@ -4308,14 +4318,14 @@ class Component extends DCLogic {
         const partnerRow = p.pool.length ? ask(this.t('whoPartner'), p.pool.map(x => ({ label: x.id ? this.nm(x.id) : x.heard, pick: () => this.psFill('partner', x) })), '', 'partner') : slotRow('partner');
         const mine = d ? [me, partnerRow] : [me], theirs = !p.type ? [] : d ? [slotRow('opp1'), slotRow('opp2')] : [slotRow('opp1')];
         const warn = rows => rows.some(r => r.ask || r.empty);
-        const chosen = V.slotKeys(p.type).filter(k => k !== k0).map(k => p.slots[k] && p.slots[k].id).filter(Boolean), q = p.q.trim(), ql = q.toLowerCase();
+        const q = p.q.trim(), ql = q.toLowerCase();
         v.ps = { main: !k0, picking: !!k0, screen: k0 ? this.t('selectRole', { role: roles[k0] }) : this.t('rvPlayers'), gap: d ? '24px' : '32px',
           types: ['Singles', 'Doubles'].map(t => ({ label: this.typeLabel(t), on: t === p.type, cls: t === p.type ? 'is-active' : '', select: () => this.psType(t) })),
           sides: p.type ? [{ label: this.t('yourSide'), warn: warn(mine), rows: mine }, { label: this.t('opponents'), warn: warn(theirs), rows: theirs }] : [],
           slotLabel: k0 ? roles[k0] : '', q: p.q, hasQ: !!p.q, searchCls: p.q ? 'is-filled' : '',
           onQ: e => this.setPs({ q: e.target.value }), clearQ: e => { e.preventDefault(); this.setPs({ q: '' }); },
           canAdd: !!k0 && !!q && !s.players.some(x => x.name.toLowerCase() === ql), addLabel: this.t('addAsNew', { name: q }), add: () => this.psAddNew(k0, q),
-          list: k0 ? s.players.filter(x => x.id !== 'me' && !chosen.includes(x.id) && (x.name.toLowerCase().includes(ql) || (!!q && !!window.RallywiseNames && !!window.RallywiseNames.match(q, x.name)))).map(x => {
+          list: k0 ? s.players.filter(x => x.id !== 'me' && (x.name.toLowerCase().includes(ql) || (!!q && !!window.RallywiseNames && !!window.RallywiseNames.match(q, x.name)))).map(x => {
             const r = k0 === 'partner' ? this.with(x.id) : this.vs(x.id);
             return { name: x.name, initials: this.ini(x.id), avCls: this.avDir(x.id), sub: r.n ? this.t(k0 === 'partner' ? 'together' : 'h2h', { r: this.recWords(r) }) : this.t('newPlayer'), pick: () => k0 === 'partner' && p.pool.length ? this.psFill('partner', { heard: '', id: x.id, cands: [], state: 'confirmed' }) : this.psPickId(k0, x.id) };
           }) : [],
