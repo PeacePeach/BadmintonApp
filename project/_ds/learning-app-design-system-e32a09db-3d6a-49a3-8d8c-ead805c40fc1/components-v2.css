@@ -193,7 +193,7 @@
 /* App bar: fixed above the scrolling content. The time sits where the phone's status bar is; the action floats
    at the header's position and stays put while content scrolls under its glass. */
 .rw-status{position:absolute;top:18px;left:34px;font:500 15px/1 var(--font-sans);color:var(--rw-text-primary);pointer-events:none;}
-.rw-appbar-action{position:absolute;top:58px;right:20px;}
+.rw-appbar-action{position:absolute;top:var(--rw-appbar-top);right:var(--rw-appbar-inset);}
 /* Scrim behind the app bar: content fades into the app background and blurs more the closer it gets to the top,
    so the time and the floating button stay readable over anything. Three blur layers, each masked to a band. */
 .rw-appbar-scrim{position:absolute;top:0;left:0;right:0;height:var(--rw-appbar-scrim-h);pointer-events:none;opacity:0;transition:opacity var(--dur-base) var(--ease-out);}
@@ -253,11 +253,13 @@
 @media (prefers-reduced-motion:reduce){.rw-tab,.rw-form-bar,.rw-appbar-scrim,.rw-title-fade{transition:none;}}
 /* ---------- Voice Log Match (Figma 207:7730; Review 217:8404, 248:2470) ---------- */
 /* App bar title: the glass Back/Close button (IconButton variant "glass") with the screen name beside it. */
-.rw-appbar-title{display:flex;align-items:center;gap:var(--rw-appbar-title-gap);}
+/* One App bar on every screen: the same row (top --rw-appbar-top, side --rw-appbar-inset, 40px glass buttons) whether
+   it floats (.rw-appbar-action) or sits in the page; screens only switch Back/Close, the name and the action on or off. */
+.rw-appbar-title{display:flex;align-items:center;gap:var(--rw-appbar-title-gap);min-height:var(--rw-appbar-btn);}
 .rw-appbar-name{font:var(--rw-type-appbar-title);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);margin:0;}
 /* Detail page (Figma Focus Details 203:6377): the name sits in the middle of the screen, Back on the left, an
    optional action on the right. The empty third column keeps the name centred when there is no action. */
-.rw-appbar-title.is-centered{display:grid;grid-template-columns:44px 1fr 44px;}
+.rw-appbar-title.is-centered{display:grid;grid-template-columns:var(--rw-appbar-btn) 1fr var(--rw-appbar-btn);}  /* columns = the 40px visible button (its 44px hit area overhangs 2px each side), so ⋯ lands where the floating one is */
 .rw-appbar-title.is-centered>.rw-appbar-name{grid-column:2;text-align:center;}
 /* Detail page body: App bar, then the first component 40px below it, then 24px between components. */
 .rw-page{display:flex;flex-direction:column;gap:var(--rw-page-gap);}

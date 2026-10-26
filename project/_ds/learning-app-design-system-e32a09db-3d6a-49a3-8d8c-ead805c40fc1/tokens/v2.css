@@ -343,6 +343,9 @@
   --rw-tab-active-fg: var(--rw-color-text-on-selected);  /* active border, label and icon are all N600 (Han, 2026-10-23) */
   /* App bar: scrim height covers the status time and the 40px action (58 + 40) plus the fade */
   --rw-appbar-scrim-h: 124px;
+  --rw-appbar-top: 58px;                              /* top of the App bar row (below the status time) */
+  --rw-appbar-inset: 20px;                            /* left/right edge of the Back and ⋯ buttons = screen side padding */
+  --rw-appbar-btn: 40px;                              /* visible glass button (44px hit area, margin -2) */
   /* Bottom Nav */
   --rw-nav-fg: var(--rw-color-text-inactive);
   --rw-nav-active-bg: var(--rw-color-surface-selected);
