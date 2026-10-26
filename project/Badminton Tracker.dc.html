@@ -1173,7 +1173,7 @@ button:disabled{cursor:default !important;}
             </div>
             <sc-for list="{{ detail.rows }}" as="r" hint-placeholder-count="3">
               <div class="rw-game-table-row" role="row">
-                <div class="rw-game-table-game {{ r.gameCls }}" role="cell"><span>{{ r.label }}</span><sc-if value="{{ r.res }}" hint-placeholder-val="{{ true }}"><span class="rw-result {{ r.resCls }}">{{ r.res }}</span></sc-if><sc-if value="{{ r.res2 }}" hint-placeholder-val="{{ false }}"><span class="rw-result {{ r.res2Cls }}">{{ r.res2 }}</span></sc-if></div>
+                <div class="rw-game-table-game" role="cell"><span>{{ r.label }}</span><sc-if value="{{ r.res }}" hint-placeholder-val="{{ true }}"><span class="rw-result {{ r.resCls }}">{{ r.res }}</span></sc-if></div>
                 <sc-if value="{{ r.scored }}" hint-placeholder-val="{{ true }}">
                   <div class="rw-game-table-score {{ r.aCls }}" role="cell">{{ r.a }}</div>
                   <div class="rw-game-table-score {{ r.bCls }}" role="cell">{{ r.b }}</div>
@@ -1182,6 +1182,7 @@ button:disabled{cursor:default !important;}
               </div>
             </sc-for>
           </div>
+          <sc-if value="{{ detail.unordered }}" hint-placeholder-val="{{ false }}"><p class="rw-caption" style="margin:-28px 0 0;">{{ detail.unordered }}</p></sc-if>
           <sc-if value="{{ detail.hasNotes }}" hint-placeholder-val="{{ true }}">
             <section aria-labelledby="detail-notes" style="display:flex;flex-direction:column;gap:12px;">
               <h2 id="detail-notes" class="rw-section-title">{{ tx.notes }}</h2>
@@ -2166,7 +2167,7 @@ const I18N = {
     flagResult: 'Missing result', flagScores: 'Check scores', flagNotes: 'Check notes', flagConflict: 'Check result',
     rvWLOpen: '{w} Win : {l} Loss · {n} not set', wlShort: '{w}W : {l}L',
     matchResults: 'Match Results', matchNotes: 'Match Notes', addScore: 'Add score', removeGame: 'Remove last game', yourOpponents: 'your opponents',
-    gameNoScore: '{game} · {r}', gamesUnordered: 'Order not known', notRecorded: 'Not recorded', gamesWonN: '{n} Won', gamesLostN: '{n} Lost'
+    gameNoScore: '{game} · {r}', gamesUnordered: 'Order not known: {r}', notRecorded: 'Not recorded', gamesWonN: '{n} Won', gamesLostN: '{n} Lost'
   },
   zh: {
     matches: '比赛', insights: '洞察', players: '球友', settings: '设置', profile: '个人资料', logOut: '退出登录',
@@ -2319,7 +2320,7 @@ const I18N = {
     flagResult: '缺少结果', flagScores: '确认比分', flagNotes: '确认笔记', flagConflict: '确认结果',
     rvWLOpen: '{w}胜 : {l}负 · {n}局未填', wlShort: '{w}胜 : {l}负',
     matchResults: '比赛结果', matchNotes: '比赛笔记', addScore: '添加比分', removeGame: '删除最后一局', yourOpponents: '对手',
-    gameNoScore: '{game} · {r}', gamesUnordered: '顺序未知', notRecorded: '未录入', gamesWonN: '{n}胜', gamesLostN: '{n}负'
+    gameNoScore: '{game} · {r}', gamesUnordered: '顺序未知：{r}', notRecorded: '未录入', gamesWonN: '{n}胜', gamesLostN: '{n}负'
   }
 };
 function deviceLang() {
@@ -4293,21 +4294,19 @@ class Component extends DCLogic {
       const openP = id => () => { if (!this.unknown(id)) this.go('player', { playerId: id }); };
       const sd = this.sides(m);
       const pRow = (id, sub) => ({ name: this.nm(id), initials: this.ini(id), avCls: this.avDir(id), sub, static: this.unknown(id), open: openP(id) });
-      const rec = r => r.n ? this.t('h2h', { r: this.recWords(r) }) : '';
+      const rec = r => r.n ? this.t('h2h', { r: this.recWords(r) }) : '', gr = window.RallywiseVoice.detailRows(m.games);
       v.detail = {
         // Figma date style: 20 Sep 2026 (zh 2026年9月20日).
         dateLong: this.lang() === 'zh' ? this.date(m.date, true) : this.date(m.date) + ' ' + m.date.slice(0, 4),
         title: m.type === 'Doubles' ? this.t('youAndVs', { p: m.partner ? this.first(m.partner) : '?', o: this.teamB(m) }) : this.t('youVs', { name: this.teamB(m) }),
         aShort: m.partner ? this.t('you') + ' & ' + this.first(m.partner).slice(0, 1) : this.t('you'),
-        // Every game whose order is known keeps its numbered row and result (dot + Win / Loss); the winner's score is N800 and
-        // a game saved without a score says Not recorded across both score columns (Han 2026-10-26: never an aggregate, never
-        // an invented score). Games known only by the aggregate are one "Order not known" row with their counts.
-        rows: (gr => gr.rows.map(x => ({ label: this.t('game', { n: x.n }), res: x.r ? this.t(x.r === 'W' ? 'gameWin' : 'gameLoss') : '', resCls: x.r === 'W' ? 'is-win' : 'is-loss',
-            res2: '', gameCls: '', scored: x.a != null, missing: x.a == null, a: x.a != null ? String(x.a) : '', b: x.b != null ? String(x.b) : '',
-            aCls: x.r === 'W' ? 'is-high' : '', bCls: x.r === 'L' ? 'is-high' : '' }))
-          .concat(gr.unordered ? [{ label: this.t('gamesUnordered'), gameCls: 'is-unordered', scored: false, missing: true,
-            res: gr.unordered.w ? this.t('gamesWonN', { n: gr.unordered.w }) : gr.unordered.l ? this.t('gamesLostN', { n: gr.unordered.l }) : '',
-            resCls: gr.unordered.w ? 'is-win' : 'is-loss', res2: gr.unordered.w && gr.unordered.l ? this.t('gamesLostN', { n: gr.unordered.l }) : '', res2Cls: 'is-loss' }] : []))(window.RallywiseVoice.detailRows(m.games)),
+        // Every saved game keeps its numbered row in saved order with its result (dot + Win / Loss); the winner's score is N800
+        // and a game saved without a score says Not recorded across both score columns (Han 2026-10-26). Results known only
+        // as an aggregate whose order can't be told get no Win / Loss per game; their counts are a caption under the table.
+        rows: gr.rows.map(x => ({ label: this.t('game', { n: x.n }), res: x.r ? this.t(x.r === 'W' ? 'gameWin' : 'gameLoss') : '', resCls: x.r === 'W' ? 'is-win' : 'is-loss',
+          scored: x.a != null, missing: x.a == null, a: x.a != null ? String(x.a) : '', b: x.b != null ? String(x.b) : '',
+          aCls: x.r === 'W' ? 'is-high' : '', bCls: x.r === 'L' ? 'is-high' : '' })),
+        unordered: gr.unordered ? this.t('gamesUnordered', { r: [gr.unordered.w && this.t('gamesWonN', { n: gr.unordered.w }), gr.unordered.l && this.t('gamesLostN', { n: gr.unordered.l })].filter(Boolean).join(' · ') }) : '',
         hasNotes: !!(m.wt.length || m.lt.length || m.worked || m.lost || m.on),
         noteRows: [
           (m.wt.length || m.worked) && { label: this.t('noteWorked'), tags: m.wt.map(t => this.tagLabel(t)).join(' · '), text: m.worked },

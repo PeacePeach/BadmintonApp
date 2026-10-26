@@ -276,18 +276,19 @@
   }
   const gameResult = g => Array.isArray(g) ? (g[0] > g[1] ? 'W' : g[0] < g[1] ? 'L' : null) : g && (g.r === 'W' || g.r === 'L') ? g.r : null;
   const hasScore = g => Array.isArray(g) && typeof g[0] === 'number' && typeof g[1] === 'number';
-  // Match Detail game table from saved games (Han 2026-10-26). Every game whose order is known keeps its own numbered row
-  // with its result; a game without a score has a, b null (shown as Not recorded), never an invented score. Games known only
-  // through the aggregate ({ r, u: 1 }) get no numbered row: they are counted in unordered { w, l }, so no order is invented.
+  // Match Detail game table from saved games (Han 2026-10-26). Every saved game keeps its own numbered row in saved order,
+  // with its result and score; a game without a score has a, b null (shown as Not recorded), never an invented score.
+  // Games covered only by a heard aggregate ({ r, u: 1 }) show their result only when it is certain: all of them share it
+  // (e.g. one open game, or "won 2-0"). Otherwise their rows have r null and their counts are in unordered { w, l }, shown
+  // apart from the table, so no individual result is invented and every result is counted exactly once.
   function detailRows(games) {
-    const rows = [], unordered = { w: 0, l: 0 };
-    (games || []).forEach((g, i) => {
-      const r = gameResult(g);
-      if (g && g.u) { if (r === 'W') unordered.w++; else if (r === 'L') unordered.l++; return; }
+    const gs = games || [], agg = gs.filter(g => g && g.u).map(gameResult);
+    const sure = new Set(agg).size <= 1;
+    const rows = gs.map((g, i) => {
       const sc = hasScore(g);
-      rows.push({ n: i + 1, r, a: sc ? g[0] : null, b: sc ? g[1] : null });
+      return { n: i + 1, r: g && g.u && !sure ? null : gameResult(g), a: sc ? g[0] : null, b: sc ? g[1] : null };
     });
-    return { rows, unordered: unordered.w || unordered.l ? unordered : null };
+    return { rows, unordered: sure ? null : { w: agg.filter(r => r === 'W').length, l: agg.filter(r => r === 'L').length } };
   }
   // A saved match's games back to draft games + aggregate (Edit).
   function fromSaved(games) {
