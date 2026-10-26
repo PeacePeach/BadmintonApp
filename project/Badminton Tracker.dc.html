@@ -408,7 +408,7 @@ button:disabled{cursor:default !important;}
             <div class="rw-surface rw-tile" style="display:flex;flex-direction:column;gap:12px;min-height:110px;">
               <div class="rw-eyebrow tl">{{ tx.totalMatches }}</div>
               <div style="display:flex;flex-direction:column;gap:8px;">
-                <div class="rw-metric-value">{{ overall.n }}</div>
+                <div class="rw-metric-value">{{ overall.all }}</div>
                 <div class="rw-subtitle">{{ overallWL }}</div>
               </div>
             </div>
@@ -2104,7 +2104,7 @@ const I18N = {
     tSomethingWrong: 'Something went wrong', tNoConnection: 'No connection',
     tagline: 'Track your game. Grow with every match.',
     // Matches
-    loadingMatches: 'Loading matches', totalMatches: 'Total Matches', winRate: 'Win Rate', logMatch: 'Log Match', wl: '{w}–{l} W–L',
+    loadingMatches: 'Loading matches', totalMatches: 'Total Matches', winRate: 'Win Rate', logMatch: 'Log Match', wl: '{w}–{l} W–L', wlOpen: '{w}–{l} W–L · {t} undecided',
     all: 'All', Singles: 'Singles', Doubles: 'Doubles', win: 'Win', loss: 'Loss', you: 'You', record: '{w}–{l}',
     noMatches: 'No Matches Yet', noMatchesBody: 'Log your first match to start tracking results.',
     hiName: 'Hi, {name}', hiThere: 'Hi there', greetUp: 'Your win rate improved by {d}% in the last month. Keep going!',
@@ -2272,7 +2272,7 @@ const I18N = {
     tProfileSaved: '资料已保存', tPasswordUpdated: '密码已更新', tAccountDeleted: '账号已删除', tPlayerAdded: '球友已添加',
     tSomethingWrong: '出了点问题', tNoConnection: '没有网络连接',
     tagline: '记录每一场，越打越好。',
-    loadingMatches: '正在加载比赛', totalMatches: '总场次', winRate: '胜率', logMatch: '记录比赛', wl: '{w}胜 {l}负',
+    loadingMatches: '正在加载比赛', totalMatches: '总场次', winRate: '胜率', logMatch: '记录比赛', wl: '{w}胜 {l}负', wlOpen: '{w}胜 {l}负 · {t}场未分胜负',
     all: '全部', Singles: '单打', Doubles: '双打', win: '胜', loss: '负', you: '我', record: '{w}胜 {l}负',
     noMatches: '还没有比赛记录', noMatchesBody: '记录第一场比赛，开始追踪你的表现。',
     hiName: '嗨，{name}', hiThere: '嗨', greetUp: '最近一个月你的胜率提升了 {d}%，继续加油！',
@@ -3563,11 +3563,12 @@ class Component extends DCLogic {
       open: () => this.go('detail', { detailId: m.id })
     };
   }
-  // Win rate over decided matches: a level match (1–1 games, voice-logged) is neither a win nor a loss (Engine v12
-  // rule, now also on Performance), so it no longer counts as a loss here.
+  // Match stats (RallywiseVoice.matchRecord, Han 2026-10-26): all = every saved match, n = decided matches (w + l), the
+  // win-rate denominator. A level match (1–1 games) or one with no game result saved is neither a win nor a loss: it
+  // counts in all (Total Matches) and in t, never in the win rate, and never as a loss.
   rec(list) {
-    const rs = list.map(m => this.res(m.games)), w = rs.filter(r => r.win).length, l = rs.filter(r => !r.win && !r.even).length, n = w + l;
-    return { w, l, n, t: list.length - n, label: `${w}–${l}`, pct: n ? w / n : 0, pctStr: n ? Math.round(w / n * 100) + '%' : '—', barW: n ? Math.round(w / n * 100) + '%' : '0%' };
+    const r = window.RallywiseVoice.matchRecord(list), { w, l } = r, n = r.decided;
+    return { all: r.total, w, l, n, t: r.open, label: `${w}–${l}`, pct: n ? w / n : 0, pctStr: n ? Math.round(w / n * 100) + '%' : '—', barW: n ? Math.round(w / n * 100) + '%' : '0%' };
   }
   // Matches greeting: first name, then last 30 days' win rate against the 30 days before (3+ matches in each),
   // otherwise how many matches are logged.
@@ -3982,7 +3983,7 @@ class Component extends DCLogic {
             if (r.needsConfirm) { this.toAuth('login'); this.setState({ f: { ...this.blankForm(), email } }); return this.flash(this.t('tConfirmEmail'), 'info'); }
             await this.signedIn(b, r.user); this.setState({ agree: false });
           }); },
-      tx: { ...I18N.en, ...(I18N[this.lang()] || {}) }, resendInLabel: this.t('resendIn', { n: s.resendIn }), overallWL: this.t('wl', { w: overall.w, l: overall.l }),
+      tx: { ...I18N.en, ...(I18N[this.lang()] || {}) }, resendInLabel: this.t('resendIn', { n: s.resendIn }), overallWL: this.t(overall.t ? 'wlOpen' : 'wl', { w: overall.w, l: overall.l, t: overall.t }),
       langOptions: LANGS.map(([code, label]) => { const on = this.lang() === code;
         return { label, lang: code === 'zh' ? 'zh-Hans' : 'en', on, border: on ? 'var(--ghost-button-outline-highlight)' : 'transparent',
           dotBg: on ? 'var(--control-selected-bg)' : 'transparent', dotBorder: on ? 'var(--control-selected-bg)' : 'var(--control-outline)', select: () => this.setLang(code) }; }),
@@ -4333,7 +4334,7 @@ class Component extends DCLogic {
       const chosen = ['partner', 'opp1', 'opp2'].map(k => log[k]).filter(Boolean);
       v.pickList = s.players.filter(p => p.id !== 'me' && !chosen.includes(p.id) && p.name.toLowerCase().includes(q)).map(p => {
         const r = log.active === 'partner' ? this.with(p.id) : this.vs(p.id);
-        return { name: p.name, initials: this.ini(p.id), avCls: this.avDir(p.id), sub: r.n ? this.t(log.active === 'partner' ? 'together' : 'h2h', { r: this.recWords(r) }) : this.t('newPlayer'), pick: () => this.pick(p.id) };
+        return { name: p.name, initials: this.ini(p.id), avCls: this.avDir(p.id), sub: r.all ? this.t(log.active === 'partner' ? 'together' : 'h2h', { r: this.recWords(r) }) : this.t('newPlayer'), pick: () => this.pick(p.id) };
       });
       v.pickEmpty = !v.pickList.length && !v.canAddNew && (q
         ? empty('no-results', this.t('noPlayersFound'), this.t('noPlayersFoundLogBody'))
@@ -4488,7 +4489,7 @@ class Component extends DCLogic {
           canAdd: !!k0 && !!q && !s.players.some(x => x.name.toLowerCase() === ql), addLabel: this.t('addAsNew', { name: q }), add: () => this.psAddNew(k0, q),
           list: k0 ? s.players.filter(x => x.id !== 'me' && (x.name.toLowerCase().includes(ql) || (!!q && !!window.RallywiseNames && !!window.RallywiseNames.match(q, x.name)))).map(x => {
             const r = k0 === 'partner' ? this.with(x.id) : this.vs(x.id);
-            return { name: x.name, initials: this.ini(x.id), avCls: this.avDir(x.id), sub: r.n ? this.t(k0 === 'partner' ? 'together' : 'h2h', { r: this.recWords(r) }) : this.t('newPlayer'), pick: () => k0 === 'partner' && p.pool.length ? this.psFill('partner', { heard: '', id: x.id, cands: [], state: 'confirmed' }) : this.psPickId(k0, x.id) };
+            return { name: x.name, initials: this.ini(x.id), avCls: this.avDir(x.id), sub: r.all ? this.t(k0 === 'partner' ? 'together' : 'h2h', { r: this.recWords(r) }) : this.t('newPlayer'), pick: () => k0 === 'partner' && p.pool.length ? this.psFill('partner', { heard: '', id: x.id, cands: [], state: 'confirmed' }) : this.psPickId(k0, x.id) };
           }) : [],
           back: () => this.setPs({ picking: null, q: '' }), close: () => this.setState({ ps: null }), save: () => this.psSave() };
         v.ps.none = !!k0 && !v.ps.list.length && !v.ps.canAdd;
@@ -4505,7 +4506,7 @@ class Component extends DCLogic {
       const openP = id => () => { if (!this.unknown(id)) this.go('player', { playerId: id }); };
       const sd = this.sides(m);
       const pRow = (id, sub) => ({ name: this.nm(id), initials: this.ini(id), avCls: this.avDir(id), sub, static: this.unknown(id), open: openP(id) });
-      const rec = r => r.n ? this.t('h2h', { r: this.recWords(r) }) : '', gr = window.RallywiseVoice.detailRows(m.games);
+      const rec = r => r.all ? this.t('h2h', { r: this.recWords(r) }) : '', gr = window.RallywiseVoice.detailRows(m.games);
       v.detail = {
         // Figma date style: 20 Sep 2026 (zh 2026年9月20日).
         // The saved scoring format follows the date; matches saved before formats were stored show none (never guessed).
@@ -4527,7 +4528,7 @@ class Component extends DCLogic {
           m.on && { label: this.t('noteOn', { name: this.teamB(m) }), tags: '', text: m.on }
         ].filter(Boolean),
         // Everyone else in the match: partner (record together), opponents (head-to-head), then players whose side isn't known.
-        players: (sd.partner ? [pRow(sd.partner, this.with(sd.partner).n ? this.t('partnerRec', { r: this.recWords(this.with(sd.partner)) }) : '')] : [])
+        players: (sd.partner ? [pRow(sd.partner, this.with(sd.partner).all ? this.t('partnerRec', { r: this.recWords(this.with(sd.partner)) }) : '')] : [])
           .concat(sd.opps.map(id => pRow(id, this.unknown(id) ? '' : rec(this.vs(id)))), sd.others.map(id => pRow(id, '')))
       };
       v.detail.hasPlayers = v.detail.players.length > 0;
@@ -4536,7 +4537,7 @@ class Component extends DCLogic {
     if (v.isPlayers) {
       v.playerList = s.players.filter(p => p.id !== 'me' && p.name.toLowerCase().includes(q)).map(p => {
         const o = this.vs(p.id), w = this.with(p.id);
-        const parts = [o.n ? this.t('h2h', { r: this.recWords(o) }) : null, w.n ? this.t('partnerRec', { r: this.recWords(w) }) : null].filter(Boolean);
+        const parts = [o.all ? this.t('h2h', { r: this.recWords(o) }) : null, w.all ? this.t('partnerRec', { r: this.recWords(w) }) : null].filter(Boolean);
         return { name: p.name, initials: this.ini(p.id), avCls: this.avDir(p.id), sub: parts.join(' · ') || this.t('noMatchesYet'), open: () => this.go('player', { playerId: p.id }) };
       });
       v.playersEmpty = !v.playerList.length && (q
@@ -4550,8 +4551,9 @@ class Component extends DCLogic {
     if (v.isPlayer) {
       const id = s.playerId, o = this.vs(id), si = this.vs(id, 'Singles'), du = this.vs(id, 'Doubles'), w = this.with(id);
       const inv = all.filter(m => m.opps.includes(id) || m.partner === id);
-      // Each Metric tile: win rate as the big value, games record (1W : 2L) below; a dash with no matches.
-      const st = (label, r) => ({ label, value: r.n ? r.pctStr : '–', sub: r.n ? this.t('wlShort', { w: r.w, l: r.l }) : this.t('noMatchesShort') });
+      // Each Metric tile: win rate as the big value, games record (1W : 2L) below; a dash with no decided match, and
+      // "No matches" only when there is no saved match at all (undecided ones still count as played).
+      const st = (label, r) => ({ label, value: r.n ? r.pctStr : '–', sub: r.all ? this.t('wlShort', { w: r.w, l: r.l }) : this.t('noMatchesShort') });
       v.profile = { name: this.nm(id), initials: this.ini(id), avCls: this.avDir(id), sub: this.t(inv.length === 1 ? 'playedTogether1' : 'playedTogether', { n: inv.length }),
         stats: [st(this.t('overallH2H'), o), st(this.t('singlesH2H'), si), st(this.t('doublesH2H'), du), st(this.t('asPartner'), w)],
         recent: inv.slice(0, 5).map(m => this.card(m)),

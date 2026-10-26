@@ -315,6 +315,14 @@
   }
   const gameResult = g => Array.isArray(g) ? (g[0] > g[1] ? 'W' : g[0] < g[1] ? 'L' : null) : g && (g.r === 'W' || g.r === 'L') ? g.r : null;
   const hasScore = g => Array.isArray(g) && typeof g[0] === 'number' && typeof g[1] === 'number';
+  // One match's outcome from its games: 'W' / 'L' when one side won more games, null when it is undecided (level games,
+  // e.g. 1-1, or no game result saved at all).
+  const matchOutcome = m => { const gs = (m && m.games) || [], w = gs.filter(g => gameResult(g) === 'W').length, l = gs.filter(g => gameResult(g) === 'L').length;
+    return w > l ? 'W' : l > w ? 'L' : null; };
+  // Match stats over saved matches (Han 2026-10-26). total counts EVERY saved match, whatever is missing (scores, players,
+  // results); win rate is over decided matches only: w, l, decided = w + l, open = total - decided. Never drops a match.
+  const matchRecord = list => { const os = (list || []).map(matchOutcome), w = os.filter(o => o === 'W').length, l = os.filter(o => o === 'L').length, decided = w + l;
+    return { total: os.length, w, l, decided, open: os.length - decided, pct: decided ? w / decided : null }; };
   // Match Detail game table from saved games (Han 2026-10-26). Every saved game keeps its own numbered row in saved order,
   // with its result and score; a game without a score has a, b null (shown as Not recorded), never an invented score.
   // Games covered only by a heard aggregate ({ r, u: 1 }) show their result only when it is certain: all of them share it
@@ -401,7 +409,7 @@
   }
 
   const api = { SAMPLES, SCENARIOS, sample, chunks, cues, mockParse, resolve, resolveAll, inferType, lineup, choosePartner, unresolved, slotKeys,
-    toDraft, fits, tally, savedGames, gameResult, hasScore, detailRows, fromSaved, winnerScore, MAX_GAMES,
+    toDraft, fits, tally, savedGames, gameResult, hasScore, matchOutcome, matchRecord, detailRows, fromSaved, winnerScore, MAX_GAMES,
     FORMATS, DEFAULT_FORMAT, isFormat, cap, validScore, winnerOf, badScores, reformat, scoringOf, UNKNOWN, isUnknown, unknownId, heardOf, isParticipant, participantId, sidesOf, savedPlayers };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.RallywiseVoice = api;
