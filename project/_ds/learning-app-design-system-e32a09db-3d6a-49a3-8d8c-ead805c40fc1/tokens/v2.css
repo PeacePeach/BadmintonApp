@@ -478,6 +478,7 @@
   --rw-weight-min: 500;
   --rw-tracking: -0.16px;
   --rw-zh-ink-shift: 0.07em;   /* Chinese glyphs sit this far above a Poppins line box centre; zh text in centred components moves down by it */
+  --rw-zh-ink-mid: 0.375em;   /* middle of Noto Sans SC's Chinese ink above the baseline (outlines -0.067..0.816em, mean of the app's labels) */
   --rw-type-title: 600 24px/28.8px var(--font-sans);
   --rw-type-lead: 500 16px/1.4 var(--font-sans);
   --rw-type-eyebrow: 500 12px/13px var(--font-sans);

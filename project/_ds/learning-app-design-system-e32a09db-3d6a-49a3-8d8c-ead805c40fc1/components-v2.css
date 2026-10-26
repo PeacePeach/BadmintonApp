@@ -138,6 +138,17 @@
 .rw-pill::after{content:"";position:absolute;inset:-6px 0;}
 .rw-pill-sm{font:var(--rw-type-pill-sm);}
 .rw-pill.is-active{border-color:var(--rw-pill-active-border);color:var(--rw-pill-active-fg);}
+/* Pill and Chip labels (Han 2026-10-26): the label is a <span> centred by flex. Centring its line box leaves the text wherever the
+   engine draws Poppins in that box (its 1050/350 ascender/descender), and iOS WebKit draws it higher than Chrome (avatars, 2206577).
+   So the label is trimmed to cap height and baseline, which come from the font itself, and flex centres the capitals. Most labels
+   are lowercase words, whose body ends at x-height, so the label rises a quarter of the cap-to-x-height gap (1ex/1cap, ~0.4px):
+   halfway between centring the capitals and centring the lowercase. ZH: Chinese ink is centred 0.375em above the baseline
+   (Noto Sans SC outlines), a little above the capitals' middle, so the label moves down by the difference.
+   Measured in WebKit at 3x (pills.py): label ink centre within ~0.3px of the pill centre in EN and ZH, selected or not. */
+@supports (text-box:trim-both cap alphabetic){
+  :is(.rw-pill,.rw-chip)>span:not(.rw-cue-mark,.sr-only){text-box:trim-both cap alphabetic;position:relative;top:calc((1ex - 1cap) / 4);}
+  :root[lang="zh-Hans"] :is(.rw-pill,.rw-chip)>span:not(.rw-cue-mark,.sr-only){top:calc(var(--rw-zh-ink-mid) - .5cap);}
+}
 /* Metric: eyebrow, value, Insight Subtitle, Simple bar */
 .rw-eyebrow{font:var(--rw-type-eyebrow);letter-spacing:1.1px;text-transform:uppercase;color:var(--rw-text-secondary);}
 .rw-metric-value{font:var(--rw-type-metric);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);font-variant-numeric:var(--font-variant-numeric-metric);}
@@ -298,8 +309,6 @@
 /* Recognition cue: a status pill (Pills / Small), not a button. Done = Highlight Fill + check; pending = Inactive Fill + dashed ring. */
 .rw-cue{cursor:default;height:var(--rw-cue-h);gap:4px;padding:0 9px 0 8px;border:none;background:var(--rw-cue-pending-bg);color:var(--rw-cue-pending-fg);transition:background var(--rw-motion-state) var(--rw-ease-enter),color var(--rw-motion-state) var(--rw-ease-enter);}
 .rw-cue::after{content:none;}
-/* Center the label on the mark by its cap height, not its line box. Safari draws Poppins about 1px higher in a 15px line. */
-.rw-cue>span:not(.rw-cue-mark){text-box:trim-both cap alphabetic;}
 .rw-cue.is-done{background:var(--rw-cue-done-bg);color:var(--rw-cue-done-fg);}
 /* Pending ring: 1px inside stroke, 2px dash / 2px gap like Figma (a CSS dashed border can't set the dash length). */
 .rw-cue-mark{width:14px;height:14px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:transparent;background:repeating-conic-gradient(var(--rw-cue-ring) 0 18deg,transparent 0 36deg);-webkit-mask:radial-gradient(closest-side,transparent calc(100% - 1px),#000 calc(100% - 1px));mask:radial-gradient(closest-side,transparent calc(100% - 1px),#000 calc(100% - 1px));}
@@ -473,13 +482,8 @@ button.rw-input-row{cursor:pointer;}
 .rw-sheet-title-group{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;}
 .rw-select-anchor{position:relative;display:flex;flex-shrink:0;}
 /* Padding measured on the ink (Han 2026-10-26): the 14px ChevronDown has ~2px of empty box past its stroke and the label ~1.5px of side bearing, so 10 left / 8 right
-   gives the same 11.5px from the pill edge to the label and to the chevron. Vertical centring is by ink weight, the way the
-   eye reads it: EN trims the label to cap height (same in Safari and Chrome, like .rw-menu-item) and lifts it 0.5px so the
-   lowercase word, not just the digits, sits on the chevron's centre; ZH lifts its full line box 0.5px. Measured: label and
-   chevron ink centres within 0.1px of each other and of the pill centre (tests/pill.js). */
+   gives the same 11.5px from the pill edge to the label and to the chevron. The label centres like every Pill label (above). */
 .rw-pill.rw-select-pill{gap:4px;padding:0 8px 0 10px;}
-.rw-select-pill>span{text-box:trim-both cap alphabetic;transform:translateY(-.5px);}
-:root[lang="zh-Hans"] .rw-select-pill>span{text-box:normal;transform:translateY(-.5px);}
 .rw-select-menu.is-pill{top:calc(100% + 8px);min-width:160px;}
 .rw-game-score{width:100px;display:flex;align-items:center;justify-content:flex-end;gap:8px;font:var(--rw-type-row-value);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);white-space:nowrap;font-variant-numeric:tabular-nums;}
 .rw-score-placeholder{color:var(--rw-placeholder-text);font:inherit;letter-spacing:inherit;white-space:nowrap;}

@@ -442,7 +442,7 @@ button:disabled{cursor:default !important;}
           <sc-if value="{{ hasMatches }}" hint-placeholder-val="{{ true }}">
           <div role="group" style="display:flex;gap:8px;">
             <sc-for list="{{ filters }}" as="f" hint-placeholder-count="3">
-              <button class="rw-surface rw-pill {{ f.cls }}" aria-pressed="{{ f.active }}" onClick="{{ f.select }}">{{ f.label }}</button>
+              <button class="rw-surface rw-pill {{ f.cls }}" aria-pressed="{{ f.active }}" onClick="{{ f.select }}"><span>{{ f.label }}</span></button>
             </sc-for>
           </div>
           </sc-if>
@@ -882,7 +882,7 @@ button:disabled{cursor:default !important;}
                     <div aria-hidden="true" class="rw-dots">
                       <sc-for list="{{ w.dots }}" as="d" hint-placeholder-count="3"><i class="{{ d.cls }}"></i></sc-for>
                     </div>
-                    <sc-if value="{{ w.hasTag }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" class="rw-chip">{{ w.tag }}</span></sc-if>
+                    <sc-if value="{{ w.hasTag }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" class="rw-chip"><span>{{ w.tag }}</span></span></sc-if>
                   </li>
                 </sc-for>
               </ul>
@@ -1754,14 +1754,14 @@ button:disabled{cursor:default !important;}
           <div role="group" aria-labelledby="ns-worked" style="display:flex;flex-direction:column;gap:14px;">
             <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;"><h3 id="ns-worked" class="rw-section-title">{{ tx.whatWorked }}</h3><span class="rw-meta">{{ tx.pickUpTo3 }}</span></div>
             <div style="display:flex;flex-wrap:wrap;gap:8px;">
-              <sc-for list="{{ ns.worked }}" as="t" hint-placeholder-count="8"><button type="button" class="rw-surface rw-pill rw-pill-xs {{ t.cls }}" aria-pressed="{{ t.on }}" onClick="{{ t.toggle }}">{{ t.label }}</button></sc-for>
+              <sc-for list="{{ ns.worked }}" as="t" hint-placeholder-count="8"><button type="button" class="rw-surface rw-pill rw-pill-xs {{ t.cls }}" aria-pressed="{{ t.on }}" onClick="{{ t.toggle }}"><span>{{ t.label }}</span></button></sc-for>
             </div>
             <textarea class="rw-textarea" value="{{ ns.workedText }}" onChange="{{ ns.onWorked }}" placeholder="{{ tx.workedPh }}" aria-label="{{ tx.whatWorked }}"></textarea>
           </div>
           <div role="group" aria-labelledby="ns-lost" style="display:flex;flex-direction:column;gap:14px;">
             <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;"><h3 id="ns-lost" class="rw-section-title">{{ tx.whatCost }}</h3><span class="rw-meta">{{ tx.pickUpTo3 }}</span></div>
             <div style="display:flex;flex-wrap:wrap;gap:8px;">
-              <sc-for list="{{ ns.lost }}" as="t" hint-placeholder-count="8"><button type="button" class="rw-surface rw-pill rw-pill-xs {{ t.cls }}" aria-pressed="{{ t.on }}" onClick="{{ t.toggle }}">{{ t.label }}</button></sc-for>
+              <sc-for list="{{ ns.lost }}" as="t" hint-placeholder-count="8"><button type="button" class="rw-surface rw-pill rw-pill-xs {{ t.cls }}" aria-pressed="{{ t.on }}" onClick="{{ t.toggle }}"><span>{{ t.label }}</span></button></sc-for>
             </div>
             <textarea class="rw-textarea" value="{{ ns.lostText }}" onChange="{{ ns.onLost }}" placeholder="{{ tx.lostPh }}" aria-label="{{ tx.whatCost }}"></textarea>
           </div>
@@ -1959,7 +1959,7 @@ button:disabled{cursor:default !important;}
             <h3 id="focus-how" class="rw-section-title">{{ tx.howQ }}</h3>
             <div role="radiogroup" aria-labelledby="focus-how" style="display:flex;flex-wrap:wrap;gap:8px;">
               <sc-for list="{{ sh.types }}" as="o" hint-placeholder-count="2">
-                <button type="button" role="radio" aria-checked="{{ o.on }}" class="rw-surface rw-pill rw-pill-sm {{ o.cls }}" onClick="{{ o.select }}">{{ o.label }}</button>
+                <button type="button" role="radio" aria-checked="{{ o.on }}" class="rw-surface rw-pill rw-pill-sm {{ o.cls }}" onClick="{{ o.select }}"><span>{{ o.label }}</span></button>
               </sc-for>
             </div>
           </div>
@@ -1977,7 +1977,7 @@ button:disabled{cursor:default !important;}
                 <h3 id="focus-long" class="rw-section-title">{{ tx.howLong }}</h3>
                 <div role="radiogroup" aria-labelledby="focus-long" style="display:flex;flex-wrap:wrap;gap:8px;">
                   <sc-for list="{{ sh.weekOpts }}" as="c" hint-placeholder-count="5">
-                    <button type="button" role="radio" aria-checked="{{ c.on }}" aria-disabled="{{ c.off }}" class="rw-surface rw-pill rw-pill-sm {{ c.cls }}" onClick="{{ c.select }}">{{ c.label }}</button>
+                    <button type="button" role="radio" aria-checked="{{ c.on }}" aria-disabled="{{ c.off }}" class="rw-surface rw-pill rw-pill-sm {{ c.cls }}" onClick="{{ c.select }}"><span>{{ c.label }}</span></button>
                   </sc-for>
                 </div>
               </div>
@@ -1988,7 +1988,7 @@ button:disabled{cursor:default !important;}
               <h3 id="focus-matches" class="rw-section-title">{{ tx.howManyMatches }}</h3>
               <div role="radiogroup" aria-labelledby="focus-matches" style="display:flex;flex-wrap:wrap;gap:8px;">
                 <sc-for list="{{ sh.matchOpts }}" as="c" hint-placeholder-count="4">
-                  <button type="button" role="radio" aria-checked="{{ c.on }}" class="rw-surface rw-pill rw-pill-sm {{ c.cls }}" onClick="{{ c.select }}">{{ c.label }}</button>
+                  <button type="button" role="radio" aria-checked="{{ c.on }}" class="rw-surface rw-pill rw-pill-sm {{ c.cls }}" onClick="{{ c.select }}"><span>{{ c.label }}</span></button>
                 </sc-for>
               </div>
             </div>
