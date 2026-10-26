@@ -590,8 +590,8 @@ test('regression: AI evidence must state both occurrences and window, EN/ZH', ()
 test('mixed Smash evidence: distinct situations may be shown on both sides without inferring causes', () => {
   fresh();
   const ms = [
-    M(W,['Other'],['Smash'],{worked:'杀球配合劈吊，打到反手区效果好'}),
-    M(W,['Other'],['Smash'],{worked:'我的杀球吊球在反手区有用'}),
+    M(W,['Other'],['Smash'],{worked:'杀球靠边线打效果好'}),
+    M(W,['Other'],['Smash'],{worked:'杀球打边线很有效'}),
     M(L,['Smash'],[],{lost:'后场杀球失误比较多'}),
     M(L,['Other'],['Return']),
     M(L,['Smash'],[],{lost:'后场杀球容易失误'}),
@@ -600,4 +600,8 @@ test('mixed Smash evidence: distinct situations may be shown on both sides witho
   assert.equal(G.topicSides(ms).Smash,'both');
   assert.equal(G.buildCandidates(ms).filter(x=>x.tag==='Smash').length,1);
   assert.equal(G.strengthCandidates(ms).filter(x=>x.tag==='Smash').length,1);
+  const [b] = G.finalizeItems(G.buildCandidates(ms), null, 'build', 'zh');
+  const [w] = G.finalizeItems(G.strengthCandidates(ms), null, 'strength', 'zh');
+  assert.equal(b.name,'后场杀球'); assert.equal(w.name,'边线杀球');
+  assert.equal(b.advice_basis,'general');
 });
