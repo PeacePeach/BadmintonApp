@@ -492,13 +492,13 @@ export function finalizeKey(cands, ai, lang) {
 const noteWindow = matches => { const chron = normalize(matches), noted = chron.filter(hasNotes); return { chron, noted, win: noted.slice(-NOTE_N) }; };
 const has = (m, f, tag) => (m[f] || []).includes(tag);
 const SKILL_MENTION = {
-  Serve: /\\bserv(e|es|ing|ice)\\b|发球/i,
-  Return: /\\breturn(s|ing)?\\b|接发/i,
-  Net: /\\bnet\\b|网前|放网/i,
-  Smash: /\\bsmash(es|ing|ed)?\\b|杀球|扣杀/i,
-  Defence: /\\bdefen[cs]e\\b|防守|接杀/i,
-  Footwork: /\\bfootwork\\b|步法|步伐|移动/i,
-  Placement: /\\bplacement\\b|落点|线路/i
+  Serve: /\bserv(e|es|ing|ice)\b|发球/i,
+  Return: /\breturn(s|ing)?\b|接发/i,
+  Net: /\bnet\b|网前|放网/i,
+  Smash: /\bsmash(es|ing|ed)?\b|杀球|扣杀/i,
+  Defence: /\bdefen[cs]e\b|防守|接杀/i,
+  Footwork: /\bfootwork\b|步法|步伐|移动/i,
+  Placement: /\bplacement\b|落点|线路/i
 };
 const mentionsSkill = (note, tag) => SKILL_MENTION[tag]?.test(note) || false;
 // Count only concepts in the clauses about this skill. A note can also discuss
