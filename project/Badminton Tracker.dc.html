@@ -1173,9 +1173,12 @@ button:disabled{cursor:default !important;}
             </div>
             <sc-for list="{{ detail.rows }}" as="r" hint-placeholder-count="3">
               <div class="rw-game-table-row" role="row">
-                <div class="rw-game-table-game" role="cell"><span>{{ r.label }}</span><sc-if value="{{ r.res }}" hint-placeholder-val="{{ true }}"><span class="rw-result {{ r.resCls }}">{{ r.res }}</span></sc-if></div>
-                <div class="rw-game-table-score {{ r.aCls }}" role="cell">{{ r.a }}</div>
-                <div class="rw-game-table-score {{ r.bCls }}" role="cell">{{ r.b }}</div>
+                <div class="rw-game-table-game {{ r.gameCls }}" role="cell"><span>{{ r.label }}</span><sc-if value="{{ r.res }}" hint-placeholder-val="{{ true }}"><span class="rw-result {{ r.resCls }}">{{ r.res }}</span></sc-if><sc-if value="{{ r.res2 }}" hint-placeholder-val="{{ false }}"><span class="rw-result {{ r.res2Cls }}">{{ r.res2 }}</span></sc-if></div>
+                <sc-if value="{{ r.scored }}" hint-placeholder-val="{{ true }}">
+                  <div class="rw-game-table-score {{ r.aCls }}" role="cell">{{ r.a }}</div>
+                  <div class="rw-game-table-score {{ r.bCls }}" role="cell">{{ r.b }}</div>
+                </sc-if>
+                <sc-if value="{{ r.missing }}" hint-placeholder-val="{{ false }}"><div class="rw-game-table-missing" role="cell">{{ tx.notRecorded }}</div></sc-if>
               </div>
             </sc-for>
           </div>
@@ -2163,7 +2166,7 @@ const I18N = {
     flagResult: 'Missing result', flagScores: 'Check scores', flagNotes: 'Check notes', flagConflict: 'Check result',
     rvWLOpen: '{w} Win : {l} Loss · {n} not set', wlShort: '{w}W : {l}L',
     matchResults: 'Match Results', matchNotes: 'Match Notes', addScore: 'Add score', removeGame: 'Remove last game', yourOpponents: 'your opponents',
-    gameNoScore: '{game} · {r}', gamesUnordered: 'Games won, order not known'
+    gameNoScore: '{game} · {r}', gamesUnordered: 'Order not known', notRecorded: 'Not recorded', gamesWonN: '{n} Won', gamesLostN: '{n} Lost'
   },
   zh: {
     matches: '比赛', insights: '洞察', players: '球友', settings: '设置', profile: '个人资料', logOut: '退出登录',
@@ -2316,7 +2319,7 @@ const I18N = {
     flagResult: '缺少结果', flagScores: '确认比分', flagNotes: '确认笔记', flagConflict: '确认结果',
     rvWLOpen: '{w}胜 : {l}负 · {n}局未填', wlShort: '{w}胜 : {l}负',
     matchResults: '比赛结果', matchNotes: '比赛笔记', addScore: '添加比分', removeGame: '删除最后一局', yourOpponents: '对手',
-    gameNoScore: '{game} · {r}', gamesUnordered: '双方各赢局数（顺序未知）'
+    gameNoScore: '{game} · {r}', gamesUnordered: '顺序未知', notRecorded: '未录入', gamesWonN: '{n}胜', gamesLostN: '{n}负'
   }
 };
 function deviceLang() {
@@ -4279,14 +4282,15 @@ class Component extends DCLogic {
         dateLong: this.lang() === 'zh' ? this.date(m.date, true) : this.date(m.date) + ' ' + m.date.slice(0, 4),
         title: m.type === 'Doubles' ? this.t('youAndVs', { p: m.partner ? this.first(m.partner) : '?', o: this.teamB(m) }) : this.t('youVs', { name: this.teamB(m) }),
         aShort: m.partner ? this.t('you') + ' & ' + this.first(m.partner).slice(0, 1) : this.t('you'),
-        // Each scored game shows its result (dot + Win / Loss) and the winner's score in N800; a game without a score shows
-        // its result and dashes; games whose order isn't known are one line of games won by each side.
-        rows: m.games.map((g, i) => ({ g, i })).filter(x => !(x.g && x.g.u)).map(({ g, i }) => {
-          const k = this.gameRes(g), sc = Array.isArray(g);
-          return { label: this.t('game', { n: i + 1 }), res: this.t(k === 'W' ? 'gameWin' : 'gameLoss'), resCls: k === 'W' ? 'is-win' : 'is-loss',
-            a: sc ? String(g[0]) : '–', b: sc ? String(g[1]) : '–', aCls: k === 'W' ? 'is-high' : '', bCls: k === 'L' ? 'is-high' : '' };
-        }).concat(m.games.some(g => g && g.u) ? [{ label: this.t('gamesUnordered'), res: '', a: String(m.games.filter(g => g && g.u && g.r === 'W').length),
-          b: String(m.games.filter(g => g && g.u && g.r === 'L').length), aCls: 'is-high', bCls: 'is-high' }] : []),
+        // Every game whose order is known keeps its numbered row and result (dot + Win / Loss); the winner's score is N800 and
+        // a game saved without a score says Not recorded across both score columns (Han 2026-10-26: never an aggregate, never
+        // an invented score). Games known only by the aggregate are one "Order not known" row with their counts.
+        rows: (gr => gr.rows.map(x => ({ label: this.t('game', { n: x.n }), res: x.r ? this.t(x.r === 'W' ? 'gameWin' : 'gameLoss') : '', resCls: x.r === 'W' ? 'is-win' : 'is-loss',
+            res2: '', gameCls: '', scored: x.a != null, missing: x.a == null, a: x.a != null ? String(x.a) : '', b: x.b != null ? String(x.b) : '',
+            aCls: x.r === 'W' ? 'is-high' : '', bCls: x.r === 'L' ? 'is-high' : '' }))
+          .concat(gr.unordered ? [{ label: this.t('gamesUnordered'), gameCls: 'is-unordered', scored: false, missing: true,
+            res: gr.unordered.w ? this.t('gamesWonN', { n: gr.unordered.w }) : gr.unordered.l ? this.t('gamesLostN', { n: gr.unordered.l }) : '',
+            resCls: gr.unordered.w ? 'is-win' : 'is-loss', res2: gr.unordered.w && gr.unordered.l ? this.t('gamesLostN', { n: gr.unordered.l }) : '', res2Cls: 'is-loss' }] : []))(window.RallywiseVoice.detailRows(m.games)),
         hasNotes: !!(m.wt.length || m.lt.length || m.worked || m.lost || m.on),
         noteRows: [
           (m.wt.length || m.worked) && { label: this.t('noteWorked'), tags: m.wt.map(t => this.tagLabel(t)).join(' · '), text: m.worked },

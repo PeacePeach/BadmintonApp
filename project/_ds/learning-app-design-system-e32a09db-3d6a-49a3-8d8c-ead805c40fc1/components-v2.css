@@ -82,7 +82,7 @@
      Focus TextBlock (173:14436) .. .rw-surface.rw-tile.rw-focus-tile > .rw-tile-title + .rw-focus-body (.rw-focus-goal + .rw-bullets)
      Chip (week tag) .............. .rw-chip (24px, Current / Done / Skipped)
    Match Detail (Figma 365:8096):
-     Game table ................... .rw-surface.rw-game-table > .rw-game-table-row[.is-head] (.rw-game-table-game: label + .rw-result, .rw-game-table-score[.is-high] x2)
+     Game table ................... .rw-surface.rw-game-table > .rw-game-table-row[.is-head] (.rw-game-table-game[.is-unordered]: label + .rw-result, .rw-game-table-score[.is-high] x2 | .rw-game-table-missing)
      Notes tile ................... .rw-surface.rw-notes > .rw-note (.rw-note-head: .rw-note-label + .rw-note-tags, .rw-note-text)
    ========================================================= */
 /* Screen background: app background + glow. The glow stays fixed while the content scrolls over it. */
@@ -664,6 +664,10 @@ button.rw-input-row{cursor:pointer;}
 .rw-game-table-game>.rw-result{height:auto;}
 .rw-game-table-score{text-align:center;font:var(--rw-type-game-score);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);font-variant-numeric:tabular-nums;}
 .rw-game-table-score.is-high{color:var(--rw-text-primary);}
+/* A game saved without a score: Not recorded across both score columns; unordered games wrap their counts under the label. */
+.rw-game-table-missing{grid-column:span 2;text-align:center;font:var(--rw-type-caption);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
+.rw-game-table-game.is-unordered{flex-wrap:wrap;row-gap:8px;}
+.rw-game-table-game.is-unordered>span:first-child{flex-basis:100%;}
 .rw-notes{border-radius:var(--rw-tile-radius);padding:20px;display:flex;flex-direction:column;gap:18px;}
 .rw-note{display:flex;flex-direction:column;gap:6px;}
 .rw-note+.rw-note{border-top:1px solid var(--rw-color-divider);padding-top:18px;}

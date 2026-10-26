@@ -276,6 +276,19 @@
   }
   const gameResult = g => Array.isArray(g) ? (g[0] > g[1] ? 'W' : g[0] < g[1] ? 'L' : null) : g && (g.r === 'W' || g.r === 'L') ? g.r : null;
   const hasScore = g => Array.isArray(g) && typeof g[0] === 'number' && typeof g[1] === 'number';
+  // Match Detail game table from saved games (Han 2026-10-26). Every game whose order is known keeps its own numbered row
+  // with its result; a game without a score has a, b null (shown as Not recorded), never an invented score. Games known only
+  // through the aggregate ({ r, u: 1 }) get no numbered row: they are counted in unordered { w, l }, so no order is invented.
+  function detailRows(games) {
+    const rows = [], unordered = { w: 0, l: 0 };
+    (games || []).forEach((g, i) => {
+      const r = gameResult(g);
+      if (g && g.u) { if (r === 'W') unordered.w++; else if (r === 'L') unordered.l++; return; }
+      const sc = hasScore(g);
+      rows.push({ n: i + 1, r, a: sc ? g[0] : null, b: sc ? g[1] : null });
+    });
+    return { rows, unordered: unordered.w || unordered.l ? unordered : null };
+  }
   // A saved match's games back to draft games + aggregate (Edit).
   function fromSaved(games) {
     const out = games.map(g => g && g.u ? { w: null, l: null } : { w: gameResult(g) === 'W' ? 'us' : gameResult(g) === 'L' ? 'them' : null, l: hasScore(g) ? Math.min(g[0], g[1]) : null });
@@ -339,7 +352,7 @@
   }
 
   const api = { SAMPLES, SCENARIOS, sample, chunks, cues, mockParse, resolve, resolveAll, inferType, lineup, choosePartner, unresolved, slotKeys,
-    toDraft, fits, tally, savedGames, gameResult, hasScore, fromSaved, winnerScore, MAX_GAMES, UNKNOWN, isUnknown, unknownId, heardOf, isParticipant, participantId, sidesOf, savedPlayers };
+    toDraft, fits, tally, savedGames, gameResult, hasScore, detailRows, fromSaved, winnerScore, MAX_GAMES, UNKNOWN, isUnknown, unknownId, heardOf, isParticipant, participantId, sidesOf, savedPlayers };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.RallywiseVoice = api;
 })(typeof window !== 'undefined' ? window : globalThis);
