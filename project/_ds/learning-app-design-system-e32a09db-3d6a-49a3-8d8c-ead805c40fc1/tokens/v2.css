@@ -221,20 +221,14 @@
   --rw-illustration-line: var(--rw-b100);
   --rw-illustration-fill: var(--rw-b200);
   --rw-illustration-detail: var(--rw-b50);
-  /* Soft Glow (Han, 2026-10-26): no solid circle; B100 fading from 30% at the centre into the page (16% read too weak, Han 04:23).
-     Eased stops so the glow has no visible rim. Drawing box /
-     glow diameter: 110 / 120px, compact (dense screens) 96 / 104px. The drawings themselves are 60-90px inside the box. */
-  --rw-illustration-glow: radial-gradient(circle closest-side, color-mix(in srgb, var(--rw-b100) 30%, transparent) 0%, color-mix(in srgb, var(--rw-b100) 20%, transparent) 30%, color-mix(in srgb, var(--rw-b100) 9%, transparent) 60%, color-mix(in srgb, var(--rw-b100) 2%, transparent) 85%, transparent 100%);
-  /* Strength per drawing (Han, 04:30): open line drawings (racket) read brighter, so they get the soft glow (-18%);
-     drawings with a large solid body (error card, chart card) hide the centre, so they get the strong glow, which also
-     bleeds 8px past the layout box (glow 136px, compact 120px) without moving anything. */
-  --rw-illustration-glow-strong: radial-gradient(circle closest-side, color-mix(in srgb, var(--rw-b100) 34%, transparent) 0%, color-mix(in srgb, var(--rw-b100) 27%, transparent) 40%, color-mix(in srgb, var(--rw-b100) 14%, transparent) 65%, color-mix(in srgb, var(--rw-b100) 4%, transparent) 87%, transparent 100%);
-  --rw-illus-glow-soft-opacity: .82;
-  --rw-illus-glow-strong-bleed: 8px;
+  /* Backdrop circle (Han, 2026-10-26 05:05, after trying Soft Glow): a translucent B100 disc, lighter toward the bottom,
+     large enough to sit behind the whole drawing (reference: Han's shared empty-state set): disc 120px (compact 104px),
+     drawings 60-90px inside it. The old V1 circle was the same size but faded to nothing at the bottom, so it read small. */
+  --rw-illustration-backdrop: linear-gradient(180deg, color-mix(in srgb, var(--rw-b100) 14%, transparent) 0%, color-mix(in srgb, var(--rw-b100) 4%, transparent) 100%);
   --rw-illus-size: 110px;
-  --rw-illus-glow-size: 120px;
+  --rw-illus-box-size: 120px;
   --rw-illus-size-compact: 96px;
-  --rw-illus-glow-size-compact: 104px;
+  --rw-illus-box-size-compact: 104px;
   --rw-illustration-surface: var(--rw-color-bg-app);
   --rw-icon-btn-size: 40px;
   /* InlineBanner (Figma Foundation 333:8797): a reusable in-content prompt, e.g. "Who is “Chris”?" (Han, 2026-10-23).

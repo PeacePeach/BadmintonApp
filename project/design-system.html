@@ -425,14 +425,14 @@
 
     <h3>Style rules</h3>
     <ul class="rules">
-      <li>Soft Glow: a faint B100 radial glow (<code>--rw-illustration-glow</code>, 16% at the centre, fading out) behind the drawing, no solid circle or container. Drawing box 110px on a 120px glow; <code>compact</code> 96 / 104px on dense screens.</li>
+      <li>Translucent backdrop circle (<code>--rw-illustration-backdrop</code>, B100 14% at the top to 4% at the bottom) large enough to sit behind the whole drawing: 120px disc behind a 110px drawing box; <code>compact</code> 104 / 96px on dense screens.</li>
       <li>2px outlines in <code>--rw-illustration-line</code>, object bodies in <code>--rw-illustration-surface</code> (the app background).</li>
       <li>One small filled area per drawing in <code>--rw-illustration-fill</code>, with <code>--rw-illustration-detail</code> for lines on top of it.</li>
       <li>Flat 2D only: no 3D, shading, scenes, heavy gradients or decoration. Not used in auth or onboarding.</li>
     </ul>
 
     <h3>Tokens</h3>
-    <div class="semantic-row"><div class="semantic-name">--rw-illustration-glow</div><div class="semantic-preview" style="background: var(--rw-illustration-glow);"></div><span class="usage">→ B100, 16% at the centre to 0% (Soft Glow)</span></div>
+    <div class="semantic-row"><div class="semantic-name">--rw-illustration-backdrop</div><div class="semantic-preview" style="background: var(--rw-illustration-backdrop);"></div><span class="usage">→ B100, 14% at the top to 4% at the bottom (backdrop circle)</span></div>
     <div class="semantic-row"><div class="semantic-name">--rw-illustration-line</div><div class="semantic-preview" style="background: var(--rw-illustration-line);"></div><span class="usage">→ B100 (V2; V1 --illustration-line is the fallback)</span></div>
     <div class="semantic-row"><div class="semantic-name">--rw-illustration-fill</div><div class="semantic-preview" style="background: var(--rw-illustration-fill);"></div><span class="usage">→ B200 (V2; V1 --illustration-fill is the fallback)</span></div>
     <div class="semantic-row"><div class="semantic-name">--rw-illustration-surface</div><div class="semantic-preview" style="background: var(--rw-illustration-surface);"></div><span class="usage">→ --rw-color-bg-app (Purplegrey 900) (V2; V1 --illustration-surface is the fallback)</span></div>

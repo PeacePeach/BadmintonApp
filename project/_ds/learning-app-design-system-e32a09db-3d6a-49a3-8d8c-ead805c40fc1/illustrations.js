@@ -1,13 +1,13 @@
 /* Rallywise illustrations
    Simple flat graphics for empty, error, success and connection states.
-   Style: Soft Glow (a faint B100 radial glow behind the drawing, .rw-illus in
+   Style: a translucent B100 backdrop circle behind the whole drawing (.rw-illus in
    components-v2.css), 2px outlines, object bodies in the app background colour,
    one small filled area in brand blue. All colours come
    from the --rw-illustration-* tokens in tokens/v2.css (V1 --illustration-* in
    tokens/colors.css as the fallback).
 
    Exposes on window.LearningAppDesignSystem_e32a09:
-     Illustration({ name, compact, title })    drawing on its Soft Glow
+     Illustration({ name, compact, title })    drawing on its backdrop circle
      EmptyState({ illustration, title, body, actionLabel, onAction, compact, page, style })
                                   compact: smaller graphic for dense screens (Insights, Player profile)
                                   page: full-page state (offline, load error), centred in the free space
@@ -115,9 +115,6 @@
       <path d="M54 48l54 60" fill="none" stroke="${FILL}" stroke-width="3.5" stroke-linecap="round"/>`,
   };
 
-  // Soft Glow strength per drawing: soft for open line art, strong where a solid body covers the glow's centre.
-  const GLOW = { 'no-matches': 'soft', 'error': 'strong', 'no-insights': 'strong' };
-
   let seq = 0;
   function illustrationMarkup(name, uid) {
     const draw = drawings[name];
@@ -135,7 +132,7 @@
       role: title ? 'img' : undefined,
       'aria-label': title,
       'aria-hidden': title ? undefined : true,
-      className: 'rw-illus' + (compact ? ' is-compact' : '') + (GLOW[name] ? ' is-glow-' + GLOW[name] : ''),
+      className: 'rw-illus' + (compact ? ' is-compact' : ''),
       style,
       dangerouslySetInnerHTML: { __html: illustrationMarkup(name, ref.current) },
     });
