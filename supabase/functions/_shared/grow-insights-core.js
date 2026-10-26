@@ -590,6 +590,25 @@ export function buildCandidates(matches, focus = [], max = 4) {
       if (out.length >= 2) break;
     }
   }
+  // If only one recurring problem exists, offer one clearly labelled exploratory
+  // suggestion based on a *real* single observation, never pretend it recurred.
+  if (out.length < 2) {
+    const exploratory = [];
+    for (const tag of SKILL_TAGS) {
+      if (out.some(x => x.tag === tag) || sides[tag] === 'worked' || sides[tag] === 'ambiguous') continue;
+      const topic='tag:'+tag, fs=focus.filter(f=>f.topic===topic);
+      if (fs.some(f=>f.status==='active' || f.status==='completed')) continue;
+      const observed=win.filter(m=>has(m,'lt',tag));
+      if (observed.length !== 1) continue;
+      const notes=notesFor(observed,['lost']);
+      if (!notes.length) continue; // a bare tag isn't enough for a tentative recommendation
+      exploratory.push({topic_id:topic,tag,k:1,n:win.length,recent:win.slice(-3).filter(m=>has(m,'lt',tag)).length,
+        latest:has(win[win.length-1],'lt',tag)?1:0,returning:false,skipped:0,notes,basis:'general',
+        contextName:null,exploratory:true});
+    }
+    exploratory.sort((a,b)=>b.recent-a.recent||b.latest-a.latest||a.tag.localeCompare(b.tag));
+    if (exploratory.length) out.push(exploratory[0]);
+  }
   return out.sort((a, b) => b.k / b.n - a.k / a.n || b.recent - a.recent || b.latest - a.latest || a.tag.localeCompare(b.tag)).slice(0, max);
 }
 export function strengthCandidates(matches, max = 2) {
@@ -622,6 +641,10 @@ export const generalAction = (tag, kind, lang) => GENERAL[lang][kind === 'streng
 export function itemTemplate(item, kind, lang) {
   const name = APP_TAG_LABELS[lang][item.tag]; // the app's own tag name, as on the Skill Tag chips
   const action = generalAction(item.tag, kind, lang);
+  if (item.exploratory) {
+    if (lang==='zh') return {name,evidence:`最近${item.n}场有1场你提到${name}的问题；可以先试着练练。`,action};
+    return {name,evidence:`You mentioned a ${name.toLowerCase()} issue in 1 of ${item.n} matches. Worth a try.`,action};
+  }
   if (item.contextName && item.tag === 'Smash') {
     const backcourt = item.contextName.en === 'Backcourt smashes';
     const kindKey = backcourt ? 'rearCourt' : 'sideline';
@@ -685,14 +708,14 @@ export function finalizeItems(items, ai, kind, lang) {
     const a = (ai || []).find(x => x && x.topic_id === item.topic_id), t = itemTemplate(item, kind, lang);
     const issues = a ? checkItem(a, item, kind, lang) : ['no_ai_copy'];
     const bad = f => issues.some(i => i.startsWith(f + ':')) || !a;
-    const aiAction = item.basis === 'notes' && !bad('action') && String(a.action || '').trim();
+    const aiAction = !item.exploratory && item.basis === 'notes' && !bad('action') && String(a.action || '').trim();
     return {
       topic_id: item.topic_id, tag: item.tag, rank: rank + 1,
-      name: item.contextName?.[lang] || (bad('name') ? t.name : String(a.name).trim()),
-      [textKey]: item.contextName ? t[textKey] : (bad(textKey) ? t[textKey] : String(a[textKey]).trim()),
+      name: item.exploratory ? t.name : (item.contextName?.[lang] || (bad('name') ? t.name : String(a.name).trim())),
+      [textKey]: (item.contextName || item.exploratory) ? t[textKey] : (bad(textKey) ? t[textKey] : String(a[textKey]).trim()),
       action: aiAction || t.action, advice_basis: aiAction ? 'notes' : 'general',
       evidence_numbers: { k: item.k, n: item.n }, returning: item.returning || false,
-      copy_source: item.contextName ? 'template' : (issues.length ? (a ? 'mixed' : 'template') : 'ai'), issues
+      copy_source: (item.contextName || item.exploratory) ? 'template' : (issues.length ? (a ? 'mixed' : 'template') : 'ai'), issues
     };
   });
 }
