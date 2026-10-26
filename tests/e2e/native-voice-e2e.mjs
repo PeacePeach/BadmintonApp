@@ -15,12 +15,19 @@ const OUT = process.argv[2] || path.join(HERE, '..', 'out', 'native-voice');
 // asks Speech Recognition (if undetermined), then, only if that is granted, the Microphone (if undetermined), and
 // answers 'granted' only when both are; start() rejects 'Missing permission' (speech) or asks/rejects for the mic.
 // Each iOS dialog is logged in S.dialogs and takes 300 ms; S.answer says what the user taps.
-const FAKE_SHELL = (opts) => {
+// flavor 'capgo' copies @capgo/capacitor-speech-recognition 8 instead (Capacitor 8 / SPM): checkPermissions reports
+// both permissions together (denied if either is), start() rejects 'Missing speech recognition permission.' /
+// 'User denied microphone access.', and a session ends with ONE listeningState {state:'stopped', status:'stopped'}
+// after the final text (stop() first sends {state:'stoppingListening'}).
+const FAKE_SHELL = ([flavor, opts]) => {
   const L = {}, S = window.__sr = { speech: 'prompt', mic: 'prompt', answer: { speech: 'granted', mic: 'granted' }, dialogs: [], running: false, text: '', starts: [], stops: 0, failStart: null, live: 0, ...(opts || {}) };
+  const capgo = flavor === 'capgo';
+  const both = () => S.speech === 'denied' || S.mic === 'denied' ? 'denied' : S.speech === 'prompt' || S.mic === 'prompt' ? 'prompt' : 'granted';
+  const STOPPED = capgo ? { state: 'stopped', status: 'stopped', sessionId: 1, reason: 'results' } : { status: 'stopped' };
   const emit = (n, d) => (L[n] || []).forEach(f => f(d));
   const dialog = async k => { S.dialogs.push(k); S.inDialog = true; await new Promise(r => setTimeout(r, 300)); S.inDialog = false; S[k] = S.answer[k]; };
   const plugin = {
-    checkPermissions: async () => ({ speechRecognition: S.speech }),
+    checkPermissions: async () => ({ speechRecognition: capgo ? both() : S.speech }),
     requestPermissions: async () => {
       if (S.speech === 'prompt') await dialog('speech');
       if (S.speech !== 'granted') return { speechRecognition: S.speech };
@@ -28,9 +35,9 @@ const FAKE_SHELL = (opts) => {
       return { speechRecognition: S.mic === 'granted' ? 'granted' : 'denied' };
     },
     start: async o => {
-      if (S.speech !== 'granted') throw new Error('Missing permission');
+      if (S.speech !== 'granted') throw new Error(capgo ? 'Missing speech recognition permission.' : 'Missing permission');
       if (S.mic === 'prompt') await dialog('mic');
-      if (S.mic !== 'granted') throw new Error('User denied access to microphone');
+      if (S.mic !== 'granted') throw new Error(capgo ? 'User denied microphone access.' : 'User denied access to microphone');
       if (S.failStart) throw new Error(S.failStart);
       if (S.running) throw new Error('Ongoing speech recognition');
       S.running = true; S.text = ''; S.starts.push(o); emit('listeningState', { status: 'started' });
@@ -38,14 +45,14 @@ const FAKE_SHELL = (opts) => {
     stop: async () => {
       S.stops++;
       if (!S.running) return;
-      S.running = false; emit('listeningState', { status: 'stopped' });
-      setTimeout(() => { if (S.text) emit('partialResults', { matches: [S.text] }); emit('listeningState', { status: 'stopped' }); }, 200);
+      S.running = false; emit('listeningState', capgo ? { state: 'stoppingListening', sessionId: 1, reason: 'userStop' } : { status: 'stopped' });
+      setTimeout(() => { if (S.text) emit('partialResults', { matches: [S.text] }); emit('listeningState', STOPPED); }, 200);
     },
     addListener: async (n, f) => { (L[n] = L[n] || []).push(f); S.live++; return { remove: () => { L[n] = L[n].filter(g => g !== f); S.live--; } }; },
   };
   // Test controls: say more words, or have Apple end the session (pause, ~1 minute, error).
   window.__say = t => { if (!S.running) return; S.text += t; emit('partialResults', { matches: [S.text] }); };
-  window.__appleEnd = () => { if (!S.running) return; S.running = false; emit('listeningState', { status: 'stopped' }); };
+  window.__appleEnd = () => { if (!S.running) return; S.running = false; emit('listeningState', STOPPED); };
   window.Capacitor = { isNativePlatform: () => true, getPlatform: () => 'ios', isPluginAvailable: n => n === 'SpeechRecognition', Plugins: { SpeechRecognition: plugin } };
 };
 const SEED = lang => { localStorage.clear(); localStorage.setItem('mock.session', '1');
@@ -56,11 +63,12 @@ const check = (name, ok, info) => { results.push(`${ok ? 'PASS' : 'FAIL'} ${name
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
 const browser = await chromium.launch();
+let FLAVOR = 'community';
 async function open(lang, { native = true, web = false, plugin = true, sr = null } = {}) {
   const ctx = await browser.newContext({ viewport: { width: 393, height: 852 }, deviceScaleFactor: 2 });
   await ctx.route('https://unpkg.com/**', async r => { const res = await r.fetch({ url: r.request().url().replace('https://unpkg.com/', 'https://cdn.jsdelivr.net/npm/') }); await r.fulfill({ response: res }); });
   await ctx.route('**/rallywise-backend.js', r => r.fulfill({ contentType: 'application/javascript', body: MOCK }));
-  if (native) await ctx.addInitScript(FAKE_SHELL, sr);
+  if (native) await ctx.addInitScript(FAKE_SHELL, [FLAVOR, sr]);
   if (native && !plugin) await ctx.addInitScript(() => { window.Capacitor.isPluginAvailable = () => false; delete window.Capacitor.Plugins.SpeechRecognition; });
   if (web) await ctx.addInitScript(() => {
     window.__web = { made: 0 };
@@ -84,76 +92,77 @@ const tap = pg => pg.click('.rw-rec-btn');
 const sr = pg => pg.evaluate(() => ({ ...window.__sr }));
 const sheet = pg => pg.evaluate(() => { const e = document.querySelector('[data-screen-label="Voice permission"]'); return e ? e.querySelector('.rw-sheet-title').innerText : null; });
 const back = pg => pg.evaluate(() => { for (const v of ['hidden', 'visible']) { Object.defineProperty(document, 'visibilityState', { value: v, configurable: true }); document.dispatchEvent(new Event('visibilitychange')); } });
-const shot = async (pg, lang, f) => { fs.mkdirSync(path.join(OUT, lang), { recursive: true }); await pg.screenshot({ path: path.join(OUT, lang, f) }); };
+const shot = async (pg, lang, f) => { const d = path.join(OUT, FLAVOR, lang); fs.mkdirSync(d, { recursive: true }); await pg.screenshot({ path: path.join(d, f) }); };
 
-for (const lang of ['en', 'zh']) {
+for (const flavor of ['community', 'capgo']) for (const lang0 of ['en', 'zh']) {
+  FLAVOR = flavor; const lang = lang0, L = `${flavor} ${lang}`;
   const T = lang === 'zh'
-    ? { a: '我和小明打单打，', b: '第一局21比15赢了', c: '网前打得好', close: '关闭', speechTitle: '允许语音识别', micTitle: '允许使用麦克风', noPlugin: '语音输入需要最新版', nothing: '没有识别到内容', failed: '语音识别中断了', want: '我和小明打单打，第一局21比15赢了' }
-    : { a: 'I played singles with Alex', b: 'won the first game 21 15', c: 'my net play was good', close: 'Close', speechTitle: 'Allow speech recognition', micTitle: 'Allow microphone access', noPlugin: 'Voice input needs the latest Rallywise app', nothing: 'Nothing was recognised', failed: 'Speech recognition stopped', want: 'I played singles with Alex won the first game 21 15' };
+    ? { a: '我和小明打单打，', b: '第一局21比15赢了', c: '网前打得好', close: '关闭', speechTitle: '允许语音输入', micTitle: '允许使用麦克风', noPlugin: '语音输入需要最新版', nothing: '没有识别到内容', failed: '语音识别中断了', want: '我和小明打单打，第一局21比15赢了' }
+    : { a: 'I played singles with Alex', b: 'won the first game 21 15', c: 'my net play was good', close: 'Close', speechTitle: 'Allow voice input', micTitle: 'Allow microphone access', noPlugin: 'Voice input needs the latest Rallywise app', nothing: 'Nothing was recognised', failed: 'Speech recognition stopped', want: 'I played singles with Alex won the first game 21 15' };
   // 1. First use: one tap -> iOS asks Speech Recognition, then Microphone -> recording starts by itself.
   let { ctx, pg } = await open(lang);
   await tap(pg); await wait(150);
   let s = await sr(pg);
-  check(`${lang}: first tap opens the native Speech Recognition dialog; screen does not pretend to record`, s.inDialog && s.dialogs[0] === 'speech' && await live(pg) === 'false' && s.starts.length === 0, s);
+  check(`${L}: first tap opens the native Speech Recognition dialog; screen does not pretend to record`, s.inDialog && s.dialogs[0] === 'speech' && await live(pg) === 'false' && s.starts.length === 0, s);
   await wait(300);
   s = await sr(pg);
-  check(`${lang}: then the native Microphone dialog`, s.inDialog && s.dialogs.join() === 'speech,mic' && await live(pg) === 'false', s);
+  check(`${L}: then the native Microphone dialog`, s.inDialog && s.dialogs.join() === 'speech,mic' && await live(pg) === 'false', s);
   await wait(400);
   s = await sr(pg);
-  check(`${lang}: both allowed -> records without another tap, in ${lang === 'zh' ? 'zh-CN' : 'en-US'}`, s.speech === 'granted' && s.mic === 'granted' && s.starts.length === 1 && s.starts[0].language === (lang === 'zh' ? 'zh-CN' : 'en-US') && s.starts[0].partialResults === true && await live(pg) === 'true', s);
+  check(`${L}: both allowed -> records without another tap, in ${lang === 'zh' ? 'zh-CN' : 'en-US'}`, s.speech === 'granted' && s.mic === 'granted' && s.starts.length === 1 && s.starts[0].language === (lang === 'zh' ? 'zh-CN' : 'en-US') && s.starts[0].partialResults === true && await live(pg) === 'true', s);
   await pg.evaluate(t => window.__say(t), T.a); await wait(100);
-  check(`${lang}: live transcription`, await text(pg) === T.a, await text(pg));
+  check(`${L}: live transcription`, await text(pg) === T.a, await text(pg));
   await shot(pg, lang, '1-recording.png');
   await pg.evaluate(() => window.__appleEnd()); await wait(500);
   s = await sr(pg);
-  check(`${lang}: Apple ends a session -> listens again, still recording`, s.starts.length === 2 && s.running && await live(pg) === 'true', s);
+  check(`${L}: Apple ends a session -> listens again, still recording`, s.starts.length === 2 && s.running && await live(pg) === 'true', s);
   await pg.evaluate(t => window.__say(t), T.b); await wait(100);
-  check(`${lang}: second session joins the first`, await text(pg) === T.want, await text(pg));
+  check(`${L}: second session joins the first`, await text(pg) === T.want, await text(pg));
   await wait(1200);
-  check(`${lang}: timer runs`, /0:0[1-9]/.test(await pg.$eval('.rw-rec-timer', e => e.innerText)), await pg.$eval('.rw-rec-timer', e => e.innerText));
+  check(`${L}: timer runs`, /0:0[1-9]/.test(await pg.$eval('.rw-rec-timer', e => e.innerText)), await pg.$eval('.rw-rec-timer', e => e.innerText));
   await tap(pg); await wait(600);
   s = await sr(pg);
-  check(`${lang}: Stop ends recording, keeps text, removes listeners`, await live(pg) === 'false' && await text(pg) === T.want && !s.running && s.live === 0, { t: await text(pg), s });
+  check(`${L}: Stop ends recording, keeps text, removes listeners`, await live(pg) === 'false' && await text(pg) === T.want && !s.running && s.live === 0, { t: await text(pg), s });
   await shot(pg, lang, '2-stopped.png');
   // 2. Repeat session: already allowed, so no dialog; appends to the text already there.
   await tap(pg); await wait(300);
-  check(`${lang}: already allowed -> starts at once, no dialog`, (await sr(pg)).dialogs.length === 2 && await live(pg) === 'true');
+  check(`${L}: already allowed -> starts at once, no dialog`, (await sr(pg)).dialogs.length === 2 && await live(pg) === 'true');
   await pg.evaluate(t => window.__say(t), T.c); await wait(100);
   await tap(pg); await wait(600);
   const sep = lang === 'zh' ? '' : ' ';
-  check(`${lang}: second recording appends`, await text(pg) === T.want + sep + T.c && (await sr(pg)).starts.length === 3, await text(pg));
+  check(`${L}: second recording appends`, await text(pg) === T.want + sep + T.c && (await sr(pg)).starts.length === 3, await text(pg));
   // 3. Typing while recording stops the mic and keeps the words.
   await tap(pg); await wait(300);
   await pg.evaluate(() => window.__say(' extra'));
   await pg.click('.rw-voice-text'); await wait(300);
   s = await sr(pg);
-  check(`${lang}: editing stops the mic, keeps visible text`, await live(pg) === 'false' && !s.running && s.live === 0 && (await text(pg)).endsWith('extra'), { t: await text(pg), s });
+  check(`${L}: editing stops the mic, keeps visible text`, await live(pg) === 'false' && !s.running && s.live === 0 && (await text(pg)).endsWith('extra'), { t: await text(pg), s });
   await pg.fill('.rw-voice-text', 'typed by hand');
-  check(`${lang}: manual edit works`, await text(pg) === 'typed by hand');
+  check(`${L}: manual edit works`, await text(pg) === 'typed by hand');
   // 4. App goes to background (call, home button): stops, keeps text.
   await wait(1100);
   await tap(pg); await wait(300);
   await pg.evaluate(() => window.__say(' then a call came'));
   await pg.evaluate(() => { Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
   await wait(600);
-  check(`${lang}: background/interruption stops and keeps text`, await live(pg) === 'false' && (await text(pg)).includes('then a call came') && !(await sr(pg)).running, await text(pg));
+  check(`${L}: background/interruption stops and keeps text`, await live(pg) === 'false' && (await text(pg)).includes('then a call came') && !(await sr(pg)).running, await text(pg));
   await pg.evaluate(() => { Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
   // 5. Empty session: nothing said.
   await pg.fill('.rw-voice-text', '');
   await tap(pg); await wait(300); await tap(pg); await wait(1700);
-  check(`${lang}: nothing heard -> "${T.nothing}" toast, not recording`, (await toast(pg)).includes(T.nothing) && await live(pg) === 'false');
+  check(`${L}: nothing heard -> "${T.nothing}" toast, not recording`, (await toast(pg)).includes(T.nothing) && await live(pg) === 'false');
   await shot(pg, lang, '3-nothing.png');
   // 6. Sessions that die at once (no network / mic busy) three times: stop with an error, no endless loop.
   await wait(3500);
   await tap(pg); await wait(300);
   for (let i = 0; i < 3; i++) { await pg.evaluate(() => window.__appleEnd()); await wait(400); }
   s = await sr(pg);
-  check(`${lang}: repeated instant failures stop with "${T.failed}"`, (await toast(pg)).includes(T.failed) && await live(pg) === 'false' && !s.running, s);
+  check(`${L}: repeated instant failures stop with "${T.failed}"`, (await toast(pg)).includes(T.failed) && await live(pg) === 'false' && !s.running, s);
   // 7. Start rejected (mic used by another app).
   await wait(3500);
   await pg.evaluate(() => { window.__sr.failStart = 'Microphone is already in use by another application.'; });
   await tap(pg); await wait(400);
-  check(`${lang}: start rejected -> error toast, idle`, (await toast(pg)).includes(T.failed) && await live(pg) === 'false');
+  check(`${L}: start rejected -> error toast, idle`, (await toast(pg)).includes(T.failed) && await live(pg) === 'false');
   await pg.evaluate(() => { window.__sr.failStart = null; });
   // 8. Continue while recording: final words kept, then the parse step runs.
   await wait(3500);
@@ -163,7 +172,7 @@ for (const lang of ['en', 'zh']) {
   await wait(1500);
   // The mock backend has no AI parser, so moving on ends at its "not set up" toast or at Review.
   s = await sr(pg);
-  check(`${lang}: Continue while recording stops the mic, keeps the words and moves on to parsing`, !s.running && s.live === 0 && (await pg.$('.rw-rec-btn') === null || (await live(pg) === 'false' && await text(pg) === T.a)), { s, t: await pg.$('.rw-rec-btn') && await text(pg) });
+  check(`${L}: Continue while recording stops the mic, keeps the words and moves on to parsing`, !s.running && s.live === 0 && (await pg.$('.rw-rec-btn') === null || (await live(pg) === 'false' && await text(pg) === T.a)), { s, t: await pg.$('.rw-rec-btn') && await text(pg) });
   await shot(pg, lang, '4-continue.png');
   await ctx.close();
 
@@ -171,19 +180,19 @@ for (const lang of ['en', 'zh']) {
   ({ ctx, pg } = await open(lang, { sr: { answer: { speech: 'denied', mic: 'granted' } } }));
   await tap(pg); await wait(800);
   s = await sr(pg);
-  check(`${lang}: speech denied -> "${T.speechTitle}" sheet, not recording, no toast`, await sheet(pg) === T.speechTitle && await live(pg) === 'false' && s.starts.length === 0 && s.live === 0 && s.dialogs.join() === 'speech' && !(await toast(pg)).includes(T.nothing), { s, sheet: await sheet(pg) });
+  check(`${L}: speech denied -> "${T.speechTitle}" sheet, not recording, no toast`, await sheet(pg) === T.speechTitle && await live(pg) === 'false' && s.starts.length === 0 && s.live === 0 && s.dialogs.join() === 'speech' && !(await toast(pg)).includes(T.nothing), { s, sheet: await sheet(pg) });
   await shot(pg, lang, '5-speech-denied.png');
   await pg.click('[data-screen-label="Voice permission"] .rw-btn-primary');
   await wait(200);
-  check(`${lang}: Open Settings asks iOS to open app-settings:`, pg.__nav.includes('app-settings:') && await pg.$('.rw-rec-btn') !== null, pg.__nav);
+  check(`${L}: Open Settings asks iOS to open app-settings:`, pg.__nav.includes('app-settings:') && await pg.$('.rw-rec-btn') !== null, pg.__nav);
   // Back from Settings, still off: sheet stays, no dialog.
   await back(pg); await wait(400);
-  check(`${lang}: back from Settings still off -> sheet stays, no dialog`, await sheet(pg) === T.speechTitle && (await sr(pg)).dialogs.length === 1 && await live(pg) === 'false');
+  check(`${L}: back from Settings still off -> sheet stays, no dialog`, await sheet(pg) === T.speechTitle && (await sr(pg)).dialogs.length === 1 && await live(pg) === 'false');
   // Back from Settings with both turned on: sheet closes and recording starts by itself.
   await pg.evaluate(() => { window.__sr.speech = 'granted'; window.__sr.mic = 'granted'; });
   await back(pg); await wait(500);
   s = await sr(pg);
-  check(`${lang}: back from Settings allowed -> sheet closes, records`, await sheet(pg) === null && await live(pg) === 'true' && s.starts.length === 1, s);
+  check(`${L}: back from Settings allowed -> sheet closes, records`, await sheet(pg) === null && await live(pg) === 'true' && s.starts.length === 1, s);
   await tap(pg); await wait(1700);
   await ctx.close();
 
@@ -191,40 +200,42 @@ for (const lang of ['en', 'zh']) {
   ({ ctx, pg } = await open(lang, { sr: { answer: { speech: 'granted', mic: 'denied' } } }));
   await tap(pg); await wait(900);
   s = await sr(pg);
-  check(`${lang}: mic denied -> "${T.micTitle}" sheet, not recording`, await sheet(pg) === T.micTitle && await live(pg) === 'false' && s.starts.length === 0 && s.dialogs.join() === 'speech,mic', { s, sheet: await sheet(pg) });
+  // Capgo reports both permissions as one, so a denied mic gets the both-permissions sheet.
+  const micT = flavor === 'capgo' ? T.speechTitle : T.micTitle;
+  check(`${L}: mic denied -> "${micT}" sheet, not recording`, await sheet(pg) === micT && await live(pg) === 'false' && s.starts.length === 0 && s.dialogs.join() === 'speech,mic', { s, sheet: await sheet(pg) });
   await shot(pg, lang, '6-mic-denied.png');
   await pg.click(`[data-screen-label="Voice permission"] button[aria-label="${T.close}"]`);
   await wait(300);
-  check(`${lang}: X closes the sheet`, await sheet(pg) === null, await sheet(pg));
-  await pg.fill('.rw-voice-text', 'typed'); check(`${lang}: can type after denial`, await text(pg) === 'typed');
+  check(`${L}: X closes the sheet`, await sheet(pg) === null, await sheet(pg));
+  await pg.fill('.rw-voice-text', 'typed'); check(`${L}: can type after denial`, await text(pg) === 'typed');
   await tap(pg); await wait(400);
-  check(`${lang}: tapping the mic again shows the sheet again, no dialog`, await sheet(pg) === T.micTitle && (await sr(pg)).dialogs.length === 2);
+  check(`${L}: tapping the mic again shows the sheet again, no dialog`, await sheet(pg) === micT && (await sr(pg)).dialogs.length === 2);
   await ctx.close();
 
   // 11. Denied earlier (both already decided): no dialog at all, sheet at once.
   ({ ctx, pg } = await open(lang, { sr: { speech: 'denied', mic: 'denied' } }));
   await tap(pg); await wait(300);
-  check(`${lang}: denied before -> sheet at once, no dialog`, await sheet(pg) === T.speechTitle && (await sr(pg)).dialogs.length === 0 && await live(pg) === 'false');
+  check(`${L}: denied before -> sheet at once, no dialog`, await sheet(pg) === T.speechTitle && (await sr(pg)).dialogs.length === 0 && await live(pg) === 'false');
   await ctx.close();
 
   // 12. Speech allowed earlier but microphone never asked: the mic dialog only, then records.
   ({ ctx, pg } = await open(lang, { sr: { speech: 'granted' } }));
   await tap(pg); await wait(700);
   s = await sr(pg);
-  check(`${lang}: speech already allowed -> only the mic dialog, then records`, s.dialogs.join() === 'mic' && await live(pg) === 'true' && s.starts.length === 1, s);
+  check(`${L}: speech already allowed -> only the mic dialog, then records`, s.dialogs.join() === 'mic' && await live(pg) === 'true' && s.starts.length === 1, s);
   await ctx.close();
 
   // 13. iOS app build without the plugin: clear message, never the browser recognizer, never a recording state.
   ({ ctx, pg } = await open(lang, { plugin: false, web: true }));
   await tap(pg); await wait(300);
-  check(`${lang}: app without plugin -> "${T.noPlugin}" toast, no web fallback`, (await toast(pg)).includes(T.noPlugin) && await live(pg) === 'false' && await pg.evaluate(() => window.__web.made) === 0);
+  check(`${L}: app without plugin -> "${T.noPlugin}" toast, no web fallback`, (await toast(pg)).includes(T.noPlugin) && await live(pg) === 'false' && await pg.evaluate(() => window.__web.made) === 0);
   await ctx.close();
 
   // 14. Web (no Capacitor): the browser recognizer path, unchanged.
   ({ ctx, pg } = await open(lang, { native: false, web: true }));
   await tap(pg); await wait(300);
   const w = await pg.evaluate(() => ({ made: window.__web.made, lang: window.__web.lang }));
-  check(`${lang}: Web still uses the browser recognizer`, w.made === 1 && w.lang === (lang === 'zh' ? 'zh-CN' : 'en-US'), w);
+  check(`${L}: Web still uses the browser recognizer`, w.made === 1 && w.lang === (lang === 'zh' ? 'zh-CN' : 'en-US'), w);
   await ctx.close();
 }
 await browser.close();

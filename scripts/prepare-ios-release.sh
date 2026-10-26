@@ -9,9 +9,11 @@
 #   5. Runs `npx cap sync ios` and checks the iOS project is still there with the same
 #      Bundle ID, version, build number and signing team.
 #   6. Checks Simplified Chinese (zh-Hans) is declared, and adds it to Info.plist only if missing.
-#   7. Voice input: installs @capacitor-community/speech-recognition in the Capacitor project if missing
-#      (the version that matches its Capacitor), and adds the microphone and speech recognition
-#      permission texts to Info.plist if missing. WKWebView has no working Web Speech API.
+#   7. Voice input: installs a speech recognition plugin in the Capacitor project if missing
+#      (@capgo/capacitor-speech-recognition for Capacitor 8, which supports Swift Package Manager and
+#      CocoaPods; @capacitor-community/speech-recognition for Capacitor 5-7 with CocoaPods), and adds the
+#      microphone and speech recognition permission texts to Info.plist if missing. WKWebView has no
+#      working Web Speech API. It never switches the project between SPM and CocoaPods.
 #
 # It never creates a Capacitor or Xcode project, never changes signing, Bundle ID, version or
 # build number, never deletes files, and never uploads anything.
@@ -28,7 +30,7 @@ REPO=""
 REQUIRE=""
 ZH_FIX=1
 SPEECH=1
-SPEECH_PKG="@capacitor-community/speech-recognition"
+SPEECH_PKG=""
 MIC_TEXT="Rallywise uses the microphone so you can describe a match by voice."
 SPEECH_TEXT="Rallywise turns what you say about a match into text, so it can fill in the match for you to review."
 BACKUP_ROOT="$HOME/Rallywise-release/backups"
@@ -188,15 +190,23 @@ if [ ! -d node_modules/@capacitor/cli ]; then
   if [ -f package-lock.json ]; then npm ci; else npm install; fi
 fi
 if [ "$SPEECH" = 1 ]; then
-  bold "Voice input plugin ($SPEECH_PKG)"
+  bold "Voice input plugin"
   CAP_MAJOR="$(node -e 'try { process.stdout.write(String(require(process.argv[1] + "/node_modules/@capacitor/core/package.json").version.split(".")[0])); } catch (e) {}' "$CAP")"
   [ -n "$CAP_MAJOR" ] || die "Could not read the @capacitor/core version in $CAP/node_modules."
-  [ "$CAP_MAJOR" -ge 5 ] || die "Capacitor $CAP_MAJOR is too old for $SPEECH_PKG (needs 5 or later)."
-  [ -f "$IOS/Podfile" ] || die "$IOS has no Podfile (Swift Package Manager project). $SPEECH_PKG needs CocoaPods; nothing was changed for voice."
+  if [ -f "$IOS/Podfile" ]; then IOS_DEPS="CocoaPods"; else IOS_DEPS="Swift Package Manager"; fi
+  ok "Capacitor $CAP_MAJOR, iOS dependencies via $IOS_DEPS"
+  if [ "$CAP_MAJOR" -ge 8 ]; then
+    SPEECH_PKG="@capgo/capacitor-speech-recognition"; PLUGIN_MAJOR=8; SPEECH_NATIVE="CapgoCapacitorSpeechRecognition"
+  elif [ "$CAP_MAJOR" -ge 5 ] && [ "$IOS_DEPS" = "CocoaPods" ]; then
+    SPEECH_PKG="@capacitor-community/speech-recognition"; PLUGIN_MAJOR="$CAP_MAJOR"; SPEECH_NATIVE="CapacitorCommunitySpeechRecognition"
+  else
+    die "Capacitor $CAP_MAJOR with $IOS_DEPS has no supported speech plugin here (needs Capacitor 8, or 5-7 with CocoaPods). Nothing was changed for voice; the web files were already copied. Run again with --no-speech to finish the sync."
+  fi
+  OTHER="@capacitor-community/speech-recognition"; [ "$SPEECH_PKG" = "$OTHER" ] && OTHER="@capgo/capacitor-speech-recognition"
+  [ -d "node_modules/$OTHER" ] && die "$OTHER is also installed. Both register the same SpeechRecognition plugin; remove it first (npm uninstall $OTHER)."
   if [ -d "node_modules/$SPEECH_PKG" ]; then
     ok "$SPEECH_PKG $(node -p "require('./node_modules/$SPEECH_PKG/package.json').version") already installed"
   else
-    PLUGIN_MAJOR="$CAP_MAJOR"; [ "$CAP_MAJOR" -gt 7 ] && PLUGIN_MAJOR=7
     STAMP2="$(date +%Y%m%d-%H%M%S)"
     cp package.json "$BACKUP_ROOT/package.json-$STAMP2"; [ -f package-lock.json ] && cp package-lock.json "$BACKUP_ROOT/package-lock.json-$STAMP2"
     npm install --save "$SPEECH_PKG@^$PLUGIN_MAJOR" || die "Could not install $SPEECH_PKG@^$PLUGIN_MAJOR (Capacitor $CAP_MAJOR)."
@@ -253,8 +263,9 @@ if [ "$BEFORE" != "$AFTER" ]; then
 fi
 ok "Bundle ID, version, build number and signing unchanged"
 if [ "$SPEECH" = 1 ]; then
-  if grep -q 'CapacitorCommunitySpeechRecognition' "$IOS/Podfile"; then ok "Podfile includes the speech recognition plugin"
-  else die "The speech recognition plugin is not in $IOS/Podfile after sync; voice input would not work in the app."; fi
+  if [ -f "$IOS/Podfile" ]; then DEPS_FILE="$IOS/Podfile"; else DEPS_FILE="$IOS/CapApp-SPM/Package.swift"; fi
+  if [ -f "$DEPS_FILE" ] && grep -q -e "$SPEECH_NATIVE" -e "$SPEECH_PKG" "$DEPS_FILE"; then ok "$(basename "$DEPS_FILE") includes $SPEECH_NATIVE"
+  else die "$SPEECH_NATIVE is not in $DEPS_FILE after sync; voice input would not work in the app."; fi
 fi
 
 # ---------------------------------------------------------------- Chinese localization

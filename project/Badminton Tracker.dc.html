@@ -2211,9 +2211,9 @@ const I18N = {
     micLang: 'This device can’t recognise this language. Type instead.', micFailed: 'Speech recognition stopped. Try again, or type instead.',
     micNothing: 'Nothing was recognised. Try again a little closer to the mic.',
     micNoPlugin: 'Voice input needs the latest Rallywise app. Update it, or type instead.',
-    permTitleMic: 'Allow microphone access', permTitleSpeech: 'Allow speech recognition', openSettings: 'Open Settings',
+    permTitleMic: 'Allow microphone access', permTitleSpeech: 'Allow voice input', openSettings: 'Open Settings',
     permBodyMic: 'Rallywise needs the microphone to hear you describe your match. Open Settings, turn on Microphone, then come back. You can also type instead.',
-    permBodySpeech: 'Rallywise uses Apple speech recognition to turn your voice into text. Open Settings, turn on Speech Recognition and Microphone, then come back. You can also type instead.',
+    permBodySpeech: 'Rallywise needs the Microphone and Speech Recognition to turn your voice into text. Open Settings, turn on both, then come back. You can also type instead.',
     vErrSignin: 'Sign in again to read your description.', vErrTooLong: 'That description is too long. Shorten it a little and try again.',
     vErrRate: 'Too many requests in a short time. Wait a minute and try again.', vErrNetwork: 'Couldn’t reach the server. Check your connection and try again.',
     vEngineOld: 'Server parser is {v}, not {want}.',
@@ -2370,9 +2370,9 @@ const I18N = {
     micLang: '这台设备不能识别这种语言，请直接打字。', micFailed: '语音识别中断了。请再试一次，或直接打字。',
     micNothing: '没有识别到内容。靠近麦克风再试一次。',
     micNoPlugin: '语音输入需要最新版 Rallywise。请更新应用，或直接打字。',
-    permTitleMic: '允许使用麦克风', permTitleSpeech: '允许语音识别', openSettings: '打开设置',
+    permTitleMic: '允许使用麦克风', permTitleSpeech: '允许语音输入', openSettings: '打开设置',
     permBodyMic: 'Rallywise 需要麦克风来听你描述比赛。请打开设置，开启“麦克风”，然后回来。也可以直接打字。',
-    permBodySpeech: 'Rallywise 用 Apple 语音识别把你说的话转成文字。请打开设置，开启“语音识别”和“麦克风”，然后回来。也可以直接打字。',
+    permBodySpeech: 'Rallywise 需要“麦克风”和“语音识别”才能把你说的话转成文字。请打开设置，把两项都打开，然后回来。也可以直接打字。',
     vErrSignin: '请重新登录后再读取描述。', vErrTooLong: '描述太长了，请稍微删减后再试。',
     vErrRate: '短时间内请求太多，请等一分钟再试。', vErrNetwork: '连不上服务器，请检查网络后再试。',
     vEngineOld: '服务器解析器是 {v}，不是 {want}。',
@@ -2887,8 +2887,9 @@ class Component extends DCLogic {
     };
     rec.r = r; r.start();
   }
-  // iOS app: WKWebView has no working Web Speech API, so the Capacitor shell uses Apple's recognizer through
-  // @capacitor-community/speech-recognition. Web keeps the browser recognizer above.
+  // iOS app: WKWebView has no working Web Speech API, so the Capacitor shell uses Apple's recognizer through a
+  // plugin named SpeechRecognition: @capgo/capacitor-speech-recognition (Capacitor 8, SPM) or
+  // @capacitor-community/speech-recognition (Capacitor 5-7, CocoaPods). Web keeps the browser recognizer above.
   nativeApp() { try { const C = window.Capacitor; return !!(C && C.isNativePlatform && C.isNativePlatform()); } catch (e) { return false; } }
   nativeSpeech() {
     try {
@@ -2897,9 +2898,10 @@ class Component extends DCLogic {
       return (C.Plugins && C.Plugins.SpeechRecognition) || (C.registerPlugin && C.registerPlugin('SpeechRecognition')) || null;
     } catch (e) { return null; }
   }
-  // Which permission is missing: null (both granted), 'speech' or 'mic'. The plugin's checkPermissions only reports
-  // Speech Recognition; its requestPermissions shows iOS's own dialog for Speech Recognition and then the Microphone,
-  // whichever iOS hasn't asked yet, and with both already decided it shows nothing and just answers (granted = both).
+  // Which permission is missing: null (both granted), 'mic', or 'speech' (Speech Recognition, or not known which).
+  // checkPermissions reports Speech Recognition (community plugin) or both (Capgo's, for Capacitor 8 / SPM);
+  // requestPermissions shows iOS's own dialog for Speech Recognition and then the Microphone, whichever iOS hasn't
+  // asked yet, and with both already decided it shows nothing and just answers (granted = both).
   async recNativePerm(NS) {
     if ((await NS.checkPermissions()).speechRecognition === 'denied') return 'speech';
     if ((await NS.requestPermissions()).speechRecognition === 'granted') return null;
@@ -2968,7 +2970,8 @@ class Component extends DCLogic {
   }
   recNativeState(rec, NS, d) {
     if (this._rec !== rec || !d || d.status !== 'stopped') return;
-    if (rec.stopping) { if (++rec.stops >= 2) rec.settle(); return; }
+    // Capgo's plugin sends one 'stopped' (with state) after the final text; the community plugin sends stop()'s own first.
+    if (rec.stopping) { if (d.state === 'stopped' || ++rec.stops >= 2) rec.settle(); return; }
     rec.done = this.joinText(rec.done, rec.seg); rec.seg = '';
     // Sessions that end at once without words (no network, mic taken by a call) three times in a row: give up.
     rec.fails = !rec.heard && Date.now() - rec.t0 < 2000 ? rec.fails + 1 : 0;
