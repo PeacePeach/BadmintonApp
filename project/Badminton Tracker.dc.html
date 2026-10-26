@@ -2511,7 +2511,7 @@ class Component extends DCLogic {
     this._saved = this.dataState({ ...a, focuses: a.focuses || [], focusPeriods: a.focusPeriods || [] }); this.sync = sync; this.user = { ...user, anonId }; this._retryUser = null;
     const savedLang = a.prefs && a.prefs.lang;
     if (savedLang === 'en' || savedLang === 'zh') { this._deviceLang = savedLang; try { localStorage.setItem(LANG_KEY, savedLang); } catch (e) {} }
-    if (b.insights) b.insights.cached().then(insight => { if (insight && /^2026-10-26-v(?:9|[1-9][0-9]+)$/.test(insight.engine_version || '') && this.user && this.user.id === user.id && this.insightLang(insight) === this.lang()) this.setState({ aiGrow: insight }); }).catch(() => {});
+    if (b.insights) b.insights.cached().then(insight => { if (insight && /^20\d{2}-\d{2}-\d{2}-v(?:9|[1-9]\d+)$/.test(insight.engine_version || '') && this.user && this.user.id === user.id && this.insightLang(insight) === this.lang()) this.setState({ aiGrow: insight }); }).catch(() => {});
     if (migrated) this.flash(this.t('tMigrated'));
     const A = window.RallywiseAnalytics, c = this.analyticsCtx(a.prefs);
     if (A) { A.setAccount(anonId); if (c && c.consent === 'no') A.clear(anonId); }
