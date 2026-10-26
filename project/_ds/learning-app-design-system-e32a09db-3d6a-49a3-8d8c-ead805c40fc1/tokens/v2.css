@@ -323,7 +323,7 @@
   --rw-gap-zero: var(--rw-color-text-tertiary);
   --rw-chart-label-fg: var(--rw-color-text-tertiary);
   /* Insights / Grow: KeyInsight, section header, Tile full wide / half width (Figma 203:5215) */
-  --rw-key-icon: var(--rw-color-icon-accent);  /* B100 Sparkles (AI) on the Key insight head */
+  --rw-key-icon: var(--rw-color-icon-accent);  /* B100 Sparkle (AI) on the Key insight head */
   --rw-key-bar-w: 212px;
   /* Split KeyInsight: text left, chart right, 6:4 (Han, 2026-10-25; was half and half). key-chart.js draws the chart. */
   --rw-key-split-gap: 16px;
