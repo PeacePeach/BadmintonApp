@@ -2572,7 +2572,11 @@ class Component extends DCLogic {
       const b = await this.api();
       // The function reads the saved rows: a change still being saved (a Focus just added) goes first.
       if (this.sync && this.sync.pending) await this.sync.push(this.dataState()).catch(() => {});
-      insight = await b.insights.generate(lang, sig);
+      // The other language being prepared for exactly this: wait for it instead of asking twice. Any other one
+      // finishes first, so two requests never write the account's insight row at once.
+      const pre = this._growPre;
+      if (pre) await pre.p.catch(() => {});
+      insight = pre && pre.want === want ? await pre.p.catch(() => b.insights.generate(lang, sig)) : await b.insights.generate(lang, sig);
       this._growVerified[want] = true;
       if (insight) { insight._sig = sig; this.growSeen(insight.engine_version); if (insight.ai_status !== 'failed') this.growStore(lang, sig, insight); }
     } catch (e) { failed = true; }
@@ -2589,6 +2593,19 @@ class Component extends DCLogic {
     }
     // The language or the data changed while this was running: bring it up to date now.
     if (this._growAgain || !now()) { this._growAgain = false; setTimeout(() => this.refreshGrow(), 0); }
+    else if (insight && insight.ai_status !== 'failed') this.growPrepare(lang === 'zh' ? 'en' : 'zh', sig);
+  }
+  // After Grow is up to date in one language, the other is made in the background (one at a time), so switching
+  // language shows it at once. Skipped when this device already has it for the same data.
+  async growPrepare(lang, sig) {
+    const want = lang + ':' + sig, have = this.growLocal(lang);
+    if ((have && have._sig === sig) || (this._growPre && this._growPre.want === want) || !this.user) return;
+    const uid = this.user.id, run = async () => { const b = await this.api(); return b.insights.generate(lang, sig); };
+    const pre = this._growPre = { want, p: run() };
+    try {
+      const insight = await pre.p;
+      if (insight && this.user && this.user.id === uid) { insight._sig = sig; this.growSeen(insight.engine_version); if (insight.ai_status !== 'failed') { this.growStore(lang, sig, insight); (this._growVerified = this._growVerified || {})[want] = true; } }
+    } catch (e) {} finally { if (this._growPre === pre) this._growPre = null; }
   }
   // On open: restore the saved session, load its data, then leave the splash.
   async restore() {
@@ -2664,7 +2681,7 @@ class Component extends DCLogic {
     this.toAuth('login');
     this.setState({ email: '', players: [], matches: [], focuses: [], focusPeriods: [], focusId: null, sheet: null, confirmDeleteFocus: null, prefs: this.newPrefs(), onboarded: true, detailId: null, playerId: null, log: null, menu: false,
       blocked: null, loading: false, aiGrow: null, growBusy: false, growError: false, growUpdating: false, growFailed: false, confirmDelete: null, confirmDeleteAccount: false });
-    this._growReq = null; this._growAgain = false; this._growVerified = {};
+    this._growReq = null; this._growAgain = false; this._growVerified = {}; this._growPre = null;
   }
   // Log Out: saves anything still unsaved if it can, ends this device's session and clears the screen.
   async signOut() {

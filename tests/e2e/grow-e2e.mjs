@@ -226,8 +226,8 @@ server.row = null; server.aiCalls = 0;
   await pg.getByRole('button', { name: 'Delete', exact: true }).last().click(); await pg.waitForTimeout(800);
   await pg.getByText('Insights', { exact: true }).first().click(); await pg.waitForTimeout(1500);
   const after = await grow(pg);
-  ok(server.aiCalls === 2 && after.keyTitle && !NOT_ENOUGH.test(after.keyTitle) && JSON.stringify(after) !== JSON.stringify(before),
-    `delete: regenerated on 5 matches (${server.aiCalls} calls): "${after.keyTitle}" | ${JSON.stringify(after.build)}`);
+  ok(server.aiCalls === 4 && after.keyTitle && !NOT_ENOUGH.test(after.keyTitle) && JSON.stringify(after) !== JSON.stringify(before),
+    `delete: regenerated on 5 matches (${server.aiCalls} calls: EN + ZH prepared in the background, before and after): "${after.keyTitle}" | ${JSON.stringify(after.build)}`);
   await shot(pg, 'en', '9-after-delete.png');
   ok(!pg.errs.length, `delete: no console errors ${pg.errs.join(' | ')}`);
   await pg.close(); }
@@ -349,7 +349,7 @@ if (!process.env.ONLY || process.env.ONLY === 'cache') for (const [lang, vp] of 
   let pg = await open(lang, 'han17', { __vp: vp }); await watch(pg); await pg.waitForTimeout(AI_MS + 1200);
   let tl = await timeline(pg);
   let lg0 = (await glog(pg)).at(-1);
-  ok(LOADING.test(tl[0].title) && firstReal(tl) && lg0 && lg0.ms >= AI_MS && server.aiCalls === 1, `${tag} first time: loading tile, then the insight ${lg0 && lg0.ms} ms after Grow asked, ${server.aiCalls} model call`);
+  ok(LOADING.test(tl[0].title) && firstReal(tl) && lg0 && lg0.ms >= AI_MS && server.aiCalls === 2, `${tag} first time: loading tile, then the insight ${lg0 && lg0.ms} ms after Grow asked; ${server.aiCalls} model calls (this language + the other prepared in the background)`);
   timings.push({ lang, case: 'first time (no cache)', key_ms: lg0 && lg0.ms, ai_calls: server.aiCalls, server: lg0 });
   const key1 = (await grow(pg)).keyTitle;
   // b. Reopen the app (same device): the cached insight at once, no loading tile; one silent check, a cache hit.
@@ -374,8 +374,8 @@ if (!process.env.ONLY || process.env.ONLY === 'cache') for (const [lang, vp] of 
   for (let i = 0; i < 4; i++) { await pg.waitForTimeout(80); await pg.getByRole('tab', { name: zh ? '提升' : 'Grow', exact: true }).first().click().catch(() => {}); }
   await pg.waitForTimeout(AI_MS + 1200); tl = await timeline(pg);
   const upd = tl.filter(x => UPDATING.test(x.status || '')), lg = (await glog(pg)).at(-1);
-  ok(upd.length && !tl.some(x => LOADING.test(x.title || '')) && !UPDATING.test(tl.at(-1).status) && await gens(pg) === 1 && server.aiCalls - calls === 1,
-    `${tag} Add to Focus: previous insight kept with "${upd[0] && upd[0].status}" for ${upd.length ? upd.at(-1).t - upd[0].t : 0} ms, never the loading tile, ${await gens(pg)} function call for 5 taps, ${server.aiCalls - calls} model call`);
+  ok(upd.length && !tl.some(x => LOADING.test(x.title || '')) && !UPDATING.test(tl.at(-1).status) && await gens(pg) === 2 && server.aiCalls - calls === 2,
+    `${tag} Add to Focus: previous insight kept with "${upd[0] && upd[0].status}" for ${upd.length ? upd.at(-1).t - upd[0].t : 0} ms, never the loading tile, ${await gens(pg)} function calls for 5 taps (1 + the other language), ${server.aiCalls - calls} model calls`);
   ok(lg && lg.timing && lg.timing.reused.items > 0 && lg.timing.asked.items < lg.timing.reused.items + lg.timing.asked.items,
     `${tag} Add to Focus: copy reused for ${lg && lg.timing.reused.items} cards, ${lg && lg.timing.asked.items} sent to the model (key ${lg && lg.timing.asked.key})`);
   timings.push({ lang, case: 'Add to Focus on Grow (SWR)', key_ms: 0, updated_ms: upd.length ? upd.at(-1).t - upd[0].t : null, ai_calls: server.aiCalls - calls, server: lg });
@@ -410,7 +410,7 @@ if (!process.env.ONLY || process.env.ONLY === 'cache') for (const [lang, vp] of 
   server.aiFail = false; calls = server.aiCalls; await watch(pg);
   await pg.locator('.rw-key .rw-grow-status button').click(); await pg.waitForTimeout(AI_MS + 1200); tl = await timeline(pg);
   const after = await pg.evaluate(() => (document.querySelector('.rw-key .rw-grow-status') || {}).textContent || '');
-  ok(!after && server.aiCalls - calls === 1 && tl.some(x => UPDATING.test(x.status || '')), `${tag} Retry: Updating, then up to date (${server.aiCalls - calls} model call), status now "${after}"`);
+  ok(!after && server.aiCalls - calls === 2 && tl.some(x => UPDATING.test(x.status || '')), `${tag} Retry: Updating, then up to date (${server.aiCalls - calls} model call), status now "${after}"`);
   // g. The function can't be reached at all: same, from the app's side.
   await pg.evaluate(() => localStorage.setItem('mock.edgeFail', 'true'));
   await pg.locator('.rw-advice.is-half').first().locator('button').click(); await pg.waitForTimeout(400);
@@ -434,14 +434,29 @@ if (!process.env.ONLY || process.env.ONLY === 'cache') {
     for (let i = 0; i < 4 && !(await tab.first().isVisible().catch(() => false)); i++) { await pg.locator('.rw-appbar-title button').first().click(); await pg.waitForTimeout(300); }
     await watch(pg); await tab.first().click(); await pg.waitForTimeout(AI_MS + 900); const tl = await timeline(pg);
     return { tl, gens: await gens(pg), key: (await grow(pg)).keyTitle }; };
-  let r = await setLang('zh');
-  ok(server.aiCalls === 2 && /[一-鿿]/.test(r.key), `cache lang: first ZH made once (${server.aiCalls} model calls in all)`);
-  for (const l of ['en', 'zh', 'en']) {
+  // Han 2026-10-26 17:25: the other language is prepared in the background, so even the first switch is instant.
+  ok(server.aiCalls === 2, `cache lang: EN shown, ZH prepared in the background (${server.aiCalls} model calls)`);
+  let r;
+  for (const l of ['zh', 'en', 'zh', 'en']) {
     const c = server.aiCalls; r = await setLang(l);
     ok(server.aiCalls === c && r.tl[0] && r.tl[0].title && !LOADING.test(r.tl[0].title) && !r.tl.some(x => LOADING.test(x.title || '') || UPDATING.test(x.status || '')) && (l === 'zh') === /[一-鿿]/.test(r.key),
       `cache lang: to ${l} instant ("${r.tl[0] && r.tl[0].title}" at ${r.tl[0] && r.tl[0].t} ms), ${server.aiCalls - c} model calls, ${r.gens} function calls`);
     timings.push({ lang: l, case: 'language switch (both cached)', key_ms: r.tl[0] && r.tl[0].t, ai_calls: server.aiCalls - c, function_calls: r.gens });
   }
+  // h2. Switching while the other language is still being prepared: it waits for that request, never a second one.
+  { server.row = null; server.aiCalls = 0; server.aiMs = 3000;
+    const p3 = await open('en', 'han17', { __vp: { width: 390, height: 844 } }); await p3.waitForTimeout(3300);
+    await p3.evaluate(() => { window.__gen = []; });
+    await p3.locator('.rw-appbar-action button').click(); await p3.waitForTimeout(150);
+    await p3.getByText('Settings', { exact: true }).first().click(); await p3.waitForTimeout(250);
+    await p3.locator('[data-screen-label="Settings"] .rw-group-row').nth(2).click(); await p3.waitForTimeout(250);
+    await p3.locator('[data-screen-label="Language"] .rw-group-row', { hasText: '简体中文' }).first().click(); await p3.waitForTimeout(150);
+    const tab = p3.getByText('洞察', { exact: true });
+    for (let i = 0; i < 4 && !(await tab.first().isVisible().catch(() => false)); i++) { await p3.locator('.rw-appbar-title button').first().click(); await p3.waitForTimeout(200); }
+    await tab.first().click(); await p3.waitForTimeout(3500);
+    const k = (await grow(p3)).keyTitle;
+    ok(server.aiCalls === 2 && await gens(p3) === 0 && /[\u4e00-\u9fff]/.test(k), `cache lang: switch during background prep: ${server.aiCalls} model calls in all, ${await gens(p3)} extra function calls, "${k}"`);
+    await p3.close(); server.aiMs = AI_MS; }
   // i. Engine change: a cached insight from an older engine is never shown; Grow loads a current one instead.
   await pg.evaluate(() => { for (const k of Object.keys(localStorage)) if (k.startsWith('rallywise.grow.u1.')) { const v = JSON.parse(localStorage.getItem(k)); v.insight.engine_version = '2026-10-25-v13'; v.insight.keyInsight.title = 'OLD ENGINE'; localStorage.setItem(k, JSON.stringify(v)); } });
   await pg.reload({ waitUntil: 'networkidle' }); await pg.waitForTimeout(2500);
