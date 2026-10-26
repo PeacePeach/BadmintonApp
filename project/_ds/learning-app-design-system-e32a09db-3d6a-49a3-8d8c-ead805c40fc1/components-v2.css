@@ -65,6 +65,7 @@
      IconButton XSmall (20px) ..... .rw-icon-btn-xs (score stepper)
      Pills XSmall (Selectable) .... .rw-surface.rw-pill.rw-pill-xs[.is-active]
      TextArea ..................... .rw-textarea (Unfilled, Filled Inactive, Typing = :focus)
+     Scoring format select ........ .rw-sheet-title-group > .rw-sheet-title + .rw-select-anchor > .rw-pill.rw-pill-xs.rw-select-pill (label + ChevronDown 14) + .rw-select-menu.is-pill; invalid score: .rw-game.is-error + .rw-field-note.is-error (Han 2026-10-26)
    Create Focus (Figma 173:13428, Add to Focus sheet 199:3641):
      Stepper ...................... .rw-surface.rw-stepper > .rw-stepper-btn (Minus 18) + .rw-stepper-value + .rw-stepper-btn (Plus 18)
      Helper / meta text 13px ...... .rw-meta
@@ -459,6 +460,12 @@ button.rw-input-row{cursor:pointer;}
 .rw-game{min-height:64px;padding:16px;border-radius:999px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .rw-game-label{min-width:54px;font:var(--rw-type-row-value);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);white-space:nowrap;}
 .rw-game-checks{display:flex;gap:8px;}
+.rw-game.is-error{box-shadow:inset 0 0 0 1px var(--rw-color-status-error);}   /* score doesn't fit the scoring format: same 1px error border as input rows */
+/* Scoring format select next to the sheet title: Pills XSmall with ChevronDown, opening the select menu under it. */
+.rw-sheet-title-group{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;}
+.rw-select-anchor{position:relative;display:flex;flex-shrink:0;}
+.rw-select-pill{gap:4px;padding:0 8px 0 10px;}
+.rw-select-menu.is-pill{top:calc(100% + 8px);min-width:160px;}
 .rw-game-score{width:100px;display:flex;align-items:center;justify-content:flex-end;gap:8px;font:var(--rw-type-row-value);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);white-space:nowrap;font-variant-numeric:tabular-nums;}
 .rw-score-placeholder{color:var(--rw-placeholder-text);font:inherit;letter-spacing:inherit;white-space:nowrap;}
 /* Button / Tertiary, Medium (Figma Button 171:12474): no fill, 16px icon + 12px label, both N400. */

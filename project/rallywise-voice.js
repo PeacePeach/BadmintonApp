@@ -241,9 +241,48 @@
     return { partner: pick('partner') || null, opps: [who('opp1'), who('opp2')].filter(Boolean).concat(pool.map(p => participantId(p.heard))) };
   }
 
-  // The app's 21-point scoring from Log Match: a game stores the winner and the loser's points.
+  // Scoring format (Han 2026-10-26): every game of a match is played to 21 (default), 15 or 11 points. A game stores the
+  // winner and the loser's points; the winner's points follow from the format, unless the draft holds them as ws (a heard
+  // score, or one entered under another format). Changing the format never changes a score: ws keeps it as it was.
+  const FORMATS = [11, 15, 21], DEFAULT_FORMAT = 21;
+  const isFormat = t => FORMATS.includes(t);
   const cap = t => ({ 21: 30, 15: 21, 11: 15 }[t]);
   const winnerScore = (l, t) => l >= t - 1 ? Math.min(l + 2, cap(t)) : t;
+  // Valid final score for format t: winner on t with the loser at most t - 2; from t - 1 all, two clear up to the cap
+  // (30 / 21 / 15), where the next point wins (29-30, 20-21, 14-15).
+  const validScore = (a, b, t) => {
+    const lo = Math.min(a, b), hi = Math.max(a, b);
+    return isFormat(t) && Number.isInteger(lo) && Number.isInteger(hi) && lo >= 0 && lo <= cap(t) - 1 && hi === winnerScore(lo, t);
+  };
+  const winnerOf = (g, t) => g.ws != null ? g.ws : winnerScore(g.l, t);
+  // Draft games whose score does not fit format t (indexes). Games without a score never conflict.
+  const badScores = (games, t) => games.reduce((o, g, i) => g.w && g.l != null && !validScore(winnerOf(g, t), g.l, t) ? o.concat(i) : o, []);
+  // The format changes from a to b: every score keeps its points (ws holds the winner's when b would derive another).
+  const reformat = (games, a, b) => games.map(g => {
+    if (!g.w || g.l == null) return g;
+    const ws = winnerOf(g, a), { ws: _, ...rest } = g;
+    return ws === winnerScore(g.l, b) ? rest : { ...rest, ws };
+  });
+  // A scoring format the player said out loud (EN/ZH): "11-point games", "first to 15", "21分制", "一局11分", "打到15分".
+  // Only an explicit mention counts; scores never decide it, and two different formats mentioned give none.
+  const FORMAT_WORDS = { eleven: 11, fifteen: 15, twentyone: 21, '十一': 11, '十五': 15, '二十一': 21 };
+  const N_EN = '(11|15|21|eleven|fifteen|twenty[- ]?one)', N_ZH = '(11|15|21|二十一|十一|十五)';
+  const FORMAT_RES = [
+    // "11-point games", "15 point format", "21-pt scoring"; not a margin ("won by 11 points", "an 11-point lead")
+    { re: new RegExp('(\\b(?:by|down|up|of|trailing|leading)\\s+)?\\b' + N_EN + '[- ]?(?:points?|pts?)(?![- ]?(?:lead|gap|margin|deficit|run|streak|swing))\\b', 'gi'), skip: 1, n: 2 },
+    { re: new RegExp('\\b(?:first|race|games?(?:\\s+(?:were|are|was|is|go|went))?(?:\\s+up)?|play(?:ed|ing)?(?:\\s+up)?|scoring|format)\\s+to\\s+' + N_EN + '\\b', 'gi'), n: 1 },
+    { re: new RegExp(N_ZH + '\\s*分\\s*(?:制|赛制|一局|的局|的比赛|的赛)', 'g'), n: 1 },
+    { re: new RegExp('(?:打到|打|每局|一局|赛制(?:是|为)?)\\s*' + N_ZH + '\\s*分(?!钟)', 'g'), n: 1 }
+  ];
+  function scoringOf(text) {
+    const found = new Set();
+    for (const { re, skip, n } of FORMAT_RES) for (const m of String(text || '').matchAll(re)) {
+      if (skip && m[skip]) continue;
+      const w = m[n].toLowerCase().replace(/[- ]/g, ''), t = FORMAT_WORDS[w] || parseInt(w, 10);
+      if (isFormat(t)) found.add(t);
+    }
+    return found.size === 1 ? [...found][0] : null;
+  }
   const MAX_GAMES = 9;
 
   // ---------- Result (Result sheet, Figma 349:3528; Han 2026-10-23) ----------
@@ -270,7 +309,7 @@
     return games.map(g => {
       if (!g.w) { const r = rem.W > 0 ? 'W' : 'L'; rem[r]--; return { r, u: 1 }; }
       if (g.l == null) return { r: g.w === 'us' ? 'W' : 'L', ...(g.u ? { u: 1 } : {}) };
-      const ws = winnerScore(g.l, format);
+      const ws = winnerOf(g, format);
       return g.w === 'us' ? [ws, g.l] : [g.l, ws];
     });
   }
@@ -290,9 +329,15 @@
     });
     return { rows, unordered: sure ? null : { w: agg.filter(r => r === 'W').length, l: agg.filter(r => r === 'L').length } };
   }
-  // A saved match's games back to draft games + aggregate (Edit).
-  function fromSaved(games) {
-    const out = games.map(g => g && g.u ? { w: null, l: null } : { w: gameResult(g) === 'W' ? 'us' : gameResult(g) === 'L' ? 'them' : null, l: hasScore(g) ? Math.min(g[0], g[1]) : null });
+  // A saved match's games back to draft games + aggregate (Edit). With the match's format, a score that format would show
+  // differently keeps its points in ws, so editing never changes a saved score.
+  function fromSaved(games, format) {
+    const out = games.map(g => {
+      if (g && g.u) return { w: null, l: null };
+      const d = { w: gameResult(g) === 'W' ? 'us' : gameResult(g) === 'L' ? 'them' : null, l: hasScore(g) ? Math.min(g[0], g[1]) : null };
+      if (format && d.w && d.l != null && Math.max(g[0], g[1]) !== winnerScore(d.l, format)) d.ws = Math.max(g[0], g[1]);
+      return d;
+    });
     const any = games.some(g => g && g.u);
     return { games: out, totals: any ? { w: games.filter(g => gameResult(g) === 'W').length, l: games.filter(g => gameResult(g) === 'L').length } : null };
   }
@@ -326,9 +371,12 @@
       const g = byNum[i] || {}, has = g.my_score != null && g.their_score != null;
       const w = g.result === 'win' ? 'us' : g.result === 'loss' ? 'them' : has && g.my_score !== g.their_score ? (g.my_score > g.their_score ? 'us' : 'them') : null;
       let l = has ? Math.min(g.my_score, g.their_score) : null;
-      // A score the app can't store (or one that disagrees with the result) is dropped and flagged, never altered.
-      if (l != null && (!w || winnerScore(l, format) !== Math.max(g.my_score, g.their_score) || (w === 'us') !== (g.my_score > g.their_score))) { l = null; fp.result = 'scores'; }
-      d.games.push({ w, l });
+      const ws = has ? Math.max(g.my_score, g.their_score) : null;
+      // A score no format can hold (or one that disagrees with the result) is dropped and flagged, never altered. A score
+      // valid in another format ("11-9" with no format said) is kept as heard and flagged, so choosing 11 makes it valid.
+      if (l != null && (!w || !FORMATS.some(t => validScore(ws, l, t)) || (w === 'us') !== (g.my_score > g.their_score))) { l = null; fp.result = 'scores'; }
+      if (l != null && ws !== winnerScore(l, format)) { d.games.push({ w, l, ws }); fp.result = 'scores'; }
+      else d.games.push({ w, l });
     }
     // Only one side of the total and no count ("won two"): those games all share one result, so no order is invented.
     if (!d.games.length && !n && (t.wins || t.losses)) for (let i = 0; i < Math.min(t.wins || t.losses, MAX_GAMES); i++) d.games.push({ w: t.wins ? 'us' : 'them', l: null });
@@ -353,7 +401,8 @@
   }
 
   const api = { SAMPLES, SCENARIOS, sample, chunks, cues, mockParse, resolve, resolveAll, inferType, lineup, choosePartner, unresolved, slotKeys,
-    toDraft, fits, tally, savedGames, gameResult, hasScore, detailRows, fromSaved, winnerScore, MAX_GAMES, UNKNOWN, isUnknown, unknownId, heardOf, isParticipant, participantId, sidesOf, savedPlayers };
+    toDraft, fits, tally, savedGames, gameResult, hasScore, detailRows, fromSaved, winnerScore, MAX_GAMES,
+    FORMATS, DEFAULT_FORMAT, isFormat, cap, validScore, winnerOf, badScores, reformat, scoringOf, UNKNOWN, isUnknown, unknownId, heardOf, isParticipant, participantId, sidesOf, savedPlayers };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.RallywiseVoice = api;
 })(typeof window !== 'undefined' ? window : globalThis);

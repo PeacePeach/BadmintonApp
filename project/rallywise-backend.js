@@ -157,10 +157,16 @@
   const toPlayerRow = (uid, p) => ({ user_id: uid, id: String(p.id), name: String(p.name || ''), level: LEVELS.includes(p.level) ? p.level : null });
   const toMatchRow = (uid, m) => ({ user_id: uid, id: String(m.id), date: m.date, type: m.type, partner: m.partner || null, opps: m.opps || [],
     games: m.games || [], wt: m.wt || [], lt: m.lt || [], worked: m.worked || '', lost: m.lost || '', opp_notes: m.on || '',
+    ...(scoringCol ? { scoring: FORMATS.includes(m.scoring) ? m.scoring : null } : {}),
     ...(m.createdAt ? { created_at: m.createdAt } : {}) });
   const fromPlayerRow = r => r.id === 'me' ? { id: r.id, name: r.name, level: r.level } : (r.level ? { id: r.id, name: r.name, level: r.level } : { id: r.id, name: r.name });
   const fromMatchRow = r => ({ id: r.id, date: r.date, type: r.type, partner: r.partner, opps: r.opps || [], games: r.games || [],
-    wt: r.wt || [], lt: r.lt || [], worked: r.worked || '', lost: r.lost || '', on: r.opp_notes || '', createdAt: r.created_at });
+    wt: r.wt || [], lt: r.lt || [], worked: r.worked || '', lost: r.lost || '', on: r.opp_notes || '', createdAt: r.created_at,
+    ...(FORMATS.includes(r.scoring) ? { scoring: r.scoring } : {}) });
+  // Scoring format (11 / 15 / 21; 20261026000000_match_scoring.sql) is sent only once load() has seen the column, like
+  // topic_id below. Matches saved before it have none (null), and none is ever guessed for them.
+  const FORMATS = [11, 15, 21];
+  let scoringCol = false;
   // topic_id (Grow topic, 20261025000000_focus_topic_id.sql) is sent only once load() has seen the column, so the
   // app keeps saving Focus the same way before that migration runs.
   let focusTopicCol = false;
@@ -269,15 +275,16 @@
       const db = sb(), uid = user.id;
       // Focus rows load alongside; if their tables aren't there yet, Focus starts empty and isn't synced.
       const focus = async q => { const r = await q; if (r.error && missingTable(r.error)) return null; if (r.error) throw dataFail(r.error); return r.data; };
-      const [profile, players, matches, focusItems, focusPeriods, topicCol] = await Promise.all([
+      const [profile, players, matches, focusItems, focusPeriods, topicCol, scoringOk] = await Promise.all([
         run(db.from('profiles').select('onboarded, prefs, anon_id').eq('user_id', uid).maybeSingle()),
         run(db.from('players').select('id, name, level').eq('user_id', uid).order('created_at')),
         run(db.from('matches').select('*').eq('user_id', uid).order('date', { ascending: false }).order('created_at', { ascending: false })),
         focus(db.from('focus_items').select('*').eq('user_id', uid).order('created_at', { ascending: false })),
         focus(db.from('focus_periods').select('*').eq('user_id', uid).order('period_start')),
-        db.from('focus_items').select('topic_id').limit(1).then(r => !r.error, () => false)
+        db.from('focus_items').select('topic_id').limit(1).then(r => !r.error, () => false),
+        db.from('matches').select('scoring').limit(1).then(r => !r.error, () => false)
       ]);
-      focusTopicCol = !!topicCol;
+      focusTopicCol = !!topicCol; scoringCol = !!scoringOk;
       const focusReady = !!(focusItems && focusPeriods);
       if (!focusReady) console.warn('[rallywise] Focus tables not found; apply supabase/migrations/20261016000000_focus.sql. Focus changes are not saved.');
       const focuses = focusReady ? focusItems.map(fromFocusRow) : [], periods = focusReady ? focusPeriods.map(fromPeriodRow) : [];

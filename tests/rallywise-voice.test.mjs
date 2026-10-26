@@ -142,9 +142,62 @@ test('result: an aggregate counts only while it fits, and never fills a game in'
 
 test('result: an unstorable score is dropped and flagged, the result is kept', () => {
   const r = V.mockParse('x', 'en'); Object.assign(r, { match_type: 'singles', game_count: 1,
-    games: [{ number: 1, result: 'win', my_score: 21, their_score: 20, interrupted: false }] });
+    games: [{ number: 1, result: 'win', my_score: 25, their_score: 21, interrupted: false }] });
   const d = V.toDraft(r, players, 21);
   assert.deepEqual(d.games, [{ w: 'us', l: null }]); assert.equal(d.flags.result, 'scores');
+});
+
+// ---------- Scoring format (Han 2026-10-26) ----------
+test('scoring: valid final scores for 11, 15 and 21, including extended games', () => {
+  const ok = { 21: [[21, 0], [21, 19], [22, 20], [28, 26], [30, 28], [30, 29]], 15: [[15, 13], [16, 14], [20, 18], [21, 19], [21, 20]], 11: [[11, 0], [11, 9], [12, 10], [14, 12], [15, 13], [15, 14]] };
+  const bad = { 21: [[21, 20], [22, 19], [31, 29], [30, 27], [11, 9], [15, 13], [20, 18]], 15: [[15, 14], [21, 18], [22, 20], [11, 9], [21, 19.5]], 11: [[11, 10], [16, 14], [15, 12], [21, 19], [12, 9]] };
+  for (const t of [11, 15, 21]) {
+    for (const [a, b] of ok[t]) { assert.equal(V.validScore(a, b, t), true, `${a}-${b} in ${t}`); assert.equal(V.validScore(b, a, t), true); }
+    for (const [a, b] of bad[t]) assert.equal(V.validScore(a, b, t), false, `${a}-${b} in ${t}`);
+  }
+  assert.equal(V.validScore(21, 19, 18), false);
+});
+
+test('scoring: only an explicitly said format is detected (EN/ZH); scores never decide it', () => {
+  const cases = [['Played 11-point games with Alex, won 11-9, 11-7', 11], ['first to 15 today, lost 13-15', 15], ['We used the 21 point format', 21],
+    ['games to eleven', 11], ['twenty-one point games', 21], ['今天打的11分制，11比9', 11], ['一局15分，赢了15比12', 15], ['打到21分', 21], ['赛制是15分', 15],
+    ['won 11-9 and 11-7', null], ['won by 11 points 21-10', null], ['had an 11-point lead', null], ['lost 19 to 21', null], ['打了21分钟', null],
+    ['11-point and 15-point games', null], ['', null], ['赢了11比9', null]];
+  for (const [t, f] of cases) assert.equal(V.scoringOf(t), f, t);
+});
+
+test('scoring: changing the format never changes a score; conflicts are reported', () => {
+  const games = [{ w: 'us', l: 17 }, { w: 'them', l: 19 }, { w: 'us', l: null }, { w: null, l: null }];
+  const to11 = V.reformat(games, 21, 11);
+  assert.deepEqual(V.savedGames(to11, null, 11).slice(0, 3), [[21, 17], [19, 21], { r: 'W' }]);
+  assert.deepEqual(V.badScores(to11, 11), [0, 1]);
+  assert.deepEqual(V.badScores(games, 21), []);
+  // ...and back: the scores fit again and nothing is held apart from the format.
+  assert.deepEqual(V.reformat(to11, 11, 21), games);
+  assert.deepEqual(V.badScores(V.reformat(to11, 11, 21), 21), []);
+  // A score valid in both formats needs no override (21-19 is a 15-point extended game too).
+  assert.deepEqual(V.reformat([{ w: 'us', l: 19 }], 21, 15), [{ w: 'us', l: 19 }]);
+});
+
+test('scoring: voice keeps a heard score that fits another format, flagged until the format fits', () => {
+  const r = V.mockParse('x', 'en'); Object.assign(r, { match_type: 'singles', game_count: 2,
+    games: [{ number: 1, result: 'win', my_score: 11, their_score: 9, interrupted: false }, { number: 2, result: 'loss', my_score: 7, their_score: 11, interrupted: false }] });
+  const d21 = V.toDraft(r, players, 21);
+  assert.deepEqual(d21.games, [{ w: 'us', l: 9, ws: 11 }, { w: 'them', l: 7, ws: 11 }]); assert.equal(d21.flags.result, 'scores');
+  assert.deepEqual(V.badScores(d21.games, 21), [0, 1]);
+  assert.deepEqual(V.badScores(V.reformat(d21.games, 21, 11), 11), []);
+  const d11 = V.toDraft(r, players, 11);
+  assert.deepEqual(d11.games, [{ w: 'us', l: 9 }, { w: 'them', l: 7 }]); assert.equal(d11.flags.result, null);
+  assert.deepEqual(V.savedGames(d11.games, null, 11), [[11, 9], [7, 11]]);
+});
+
+test('scoring: Edit restores saved scores exactly under their format', () => {
+  assert.deepEqual(V.fromSaved([[11, 9], [12, 14], { r: 'W' }], 11).games, [{ w: 'us', l: 9 }, { w: 'them', l: 12 }, { w: 'us', l: null }]);
+  // A historical score that its format would show differently keeps its points.
+  const fs = V.fromSaved([[11, 9]], 21);
+  assert.deepEqual(fs.games, [{ w: 'us', l: 9, ws: 11 }]);
+  assert.deepEqual(V.savedGames(fs.games, null, 21), [[11, 9]]);
+  assert.deepEqual(V.badScores(fs.games, 21), [0]);
 });
 
 test('live cues', () => {

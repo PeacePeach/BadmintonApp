@@ -1621,7 +1621,21 @@ button:disabled{cursor:default !important;}
         <span class="rw-sheet-grabber" aria-hidden="true"></span>
         <div class="rw-sheet-bar">
           <span></span>
-          <h2 id="rs-title" class="rw-sheet-title">{{ tx.matchResults }}</h2>
+          <div class="rw-sheet-title-group">
+            <h2 id="rs-title" class="rw-sheet-title">{{ tx.matchResults }}</h2>
+            <!-- Scoring format (Han 2026-10-26): Pills XSmall + ChevronDown opening the select menu (Check N600 on the chosen one). -->
+            <span class="rw-select-anchor">
+              <button type="button" class="rw-surface rw-pill rw-pill-xs rw-select-pill" aria-haspopup="listbox" aria-expanded="{{ rs.fmtOpen }}" aria-label="{{ tx.scoringLabel }}: {{ rs.fmtLabel }}" onClick="{{ rs.toggleFmt }}"><span>{{ rs.fmtLabel }}</span><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronDown" size="{{ 14 }}" hint-size="14px,14px"></x-import></button>
+              <sc-if value="{{ rs.fmtOpen }}" hint-placeholder-val="{{ false }}">
+                <div class="rw-select-catch" onClick="{{ rs.toggleFmt }}"></div>
+                <div class="rw-menu rw-select-menu is-pill" role="listbox" aria-label="{{ tx.scoringLabel }}">
+                  <sc-for list="{{ rs.fmts }}" as="o" hint-placeholder-count="3">
+                    <button type="button" role="option" aria-selected="{{ o.on }}" class="rw-menu-item rw-select-option" onClick="{{ o.select }}"><span>{{ o.label }}</span><sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 18 }}" hint-size="18px,18px"></x-import></sc-if></button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </span>
+          </div>
           <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="X" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.close }}" onClick="{{ rs.close }}" hint-size="44px,44px"></x-import>
         </div>
         <span class="rw-sheet-divider"></span>
@@ -1630,7 +1644,7 @@ button:disabled{cursor:default !important;}
         <div style="display:flex;flex-direction:column;gap:16px;">
           <div style="display:flex;flex-direction:column;gap:8px;">
             <sc-for list="{{ rs.rows }}" as="g" hint-placeholder-count="3">
-              <div class="rw-surface rw-game" role="group" aria-label="{{ g.label }}">
+              <div class="rw-surface rw-game {{ g.errCls }}" role="group" aria-label="{{ g.label }}">
                 <span class="rw-game-label">{{ g.label }}</span>
                 <span class="rw-game-checks">
                   <button type="button" class="rw-check {{ g.wCls }}" aria-pressed="{{ g.wOn }}" aria-label="{{ g.wLabel }}" onClick="{{ g.setW }}">{{ g.w }}</button>
@@ -1651,6 +1665,7 @@ button:disabled{cursor:default !important;}
                 </span>
               </div>
             </sc-for>
+            <sc-if value="{{ rs.hasBad }}" hint-placeholder-val="{{ false }}"><p class="rw-field-note is-error" role="alert">{{ rs.badText }}</p></sc-if>
           </div>
           <div style="display:flex;justify-content:space-between;padding:0 4px;">
             <span style="display:flex;opacity: {{ rs.removeOp }};pointer-events: {{ rs.removePe }};" aria-disabled="{{ rs.removeOff }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Minus" variant="add" size="{{ 40 }}" iconSize="{{ 18 }}" label="{{ tx.removeGame }}" onClick="{{ rs.remove }}" hint-size="40px,40px"></x-import></span>
@@ -1658,7 +1673,7 @@ button:disabled{cursor:default !important;}
           </div>
         </div>
       </div>
-      <div class="rw-sheet-foot"><button type="button" class="rw-btn rw-btn-primary" onClick="{{ rs.save }}">{{ tx.save }}</button></div>
+      <div class="rw-sheet-foot"><button type="button" class="rw-btn rw-btn-primary" disabled="{{ rs.cantSave }}" onClick="{{ rs.save }}">{{ tx.save }}</button></div>
     </div>
   </sc-if>
 
@@ -2167,7 +2182,9 @@ const I18N = {
     flagResult: 'Missing result', flagScores: 'Check scores', flagNotes: 'Check notes', flagConflict: 'Check result',
     rvWLOpen: '{w} Win : {l} Loss · {n} not set', wlShort: '{w}W : {l}L',
     matchResults: 'Match Results', matchNotes: 'Match Notes', addScore: 'Add score', removeGame: 'Remove last game', yourOpponents: 'your opponents',
-    gameNoScore: '{game} · {r}', gamesUnordered: 'Order not known: {r}', notRecorded: 'Not recorded', gamesWonN: '{n} Won', gamesLostN: '{n} Lost'
+    gameNoScore: '{game} · {r}', gamesUnordered: 'Order not known: {r}', notRecorded: 'Not recorded', gamesWonN: '{n} Won', gamesLostN: '{n} Lost',
+    scoringFmt: '{n} points', scoringLabel: 'Scoring', scoreBad1: "Game {g} score doesn't fit {n}-point scoring. Change the score or the scoring.",
+    scoreBadN: "Scores in games {g} don't fit {n}-point scoring. Change the scores or the scoring.", listSep: ', '
   },
   zh: {
     matches: '比赛', insights: '洞察', players: '球友', settings: '设置', profile: '个人资料', logOut: '退出登录',
@@ -2320,7 +2337,9 @@ const I18N = {
     flagResult: '缺少结果', flagScores: '确认比分', flagNotes: '确认笔记', flagConflict: '确认结果',
     rvWLOpen: '{w}胜 : {l}负 · {n}局未填', wlShort: '{w}胜 : {l}负',
     matchResults: '比赛结果', matchNotes: '比赛笔记', addScore: '添加比分', removeGame: '删除最后一局', yourOpponents: '对手',
-    gameNoScore: '{game} · {r}', gamesUnordered: '顺序未知：{r}', notRecorded: '未录入', gamesWonN: '{n}胜', gamesLostN: '{n}负'
+    gameNoScore: '{game} · {r}', gamesUnordered: '顺序未知：{r}', notRecorded: '未录入', gamesWonN: '{n}胜', gamesLostN: '{n}负',
+    scoringFmt: '{n}分制', scoringLabel: '赛制', scoreBad1: '第{g}局比分不符合{n}分制，请修改比分或赛制。',
+    scoreBadN: '第{g}局比分不符合{n}分制，请修改比分或赛制。', listSep: '、'
   }
 };
 function deviceLang() {
@@ -2902,6 +2921,8 @@ class Component extends DCLogic {
     const r = res.result;
     if (r.multiple_lineups) return this.setVoice({ parsing: false, lineup: true });
     const V = window.RallywiseVoice, base = this.newLog();
+    // A scoring format said out loud ("11-point games", "21分制") preselects it; otherwise 21 (Han 2026-10-26).
+    base.format = V.scoringOf(text) || V.DEFAULT_FORMAT;
     const { flags, slots, pool, people, totals, ...fields } = V.toDraft(r, this.state.players, base.format);
     let log = { ...base, ...fields, step: 'review', startedAt: v.startedAt || Date.now(), active: null,
       voice: { flags, slots, pool, people: people || [], totals, dirty: {}, from: text } };
@@ -2926,6 +2947,7 @@ class Component extends DCLogic {
   // ones. A tie is valid; missing or contradicting results block (Han, 2026-10-23). Players may stay unknown, scores and notes are optional.
   reviewReady(log) {
     if (!log.type || log.voice.flags.result === 'conflict') return false;
+    if (window.RallywiseVoice.badScores(log.games, log.format).length) return false;
     return window.RallywiseVoice.tally(log.games, log.voice.totals).ok;
   }
   // Result and Notes open their bottom sheets (Figma 349:3528, 349:3793).
@@ -2989,7 +3011,7 @@ class Component extends DCLogic {
   // optional, and a heard aggregate is kept as it is, counting whenever it fits the games.
   rsOpen() {
     const l = this.state.log; if (!l) return;
-    const games = l.games.length ? l.games.map(g => ({ w: g.w || null, l: g.l == null ? null : g.l, ...(g.u ? { u: 1 } : {}) })) : [{ w: null, l: null }];
+    const games = l.games.length ? l.games.map(g => ({ w: g.w || null, l: g.l == null ? null : g.l, ...(g.w && g.l != null && g.ws != null ? { ws: g.ws } : {}), ...(g.u ? { u: 1 } : {}) })) : [{ w: null, l: null }];
     // When only an aggregate is known, display a usable W...W,L...L default while
     // marking each generated result as unknown-order (u). Never invent scores.
     const totals = l.voice.totals;
@@ -3008,13 +3030,18 @@ class Component extends DCLogic {
   rsGame(i, fn) { this.setRs(r => ({ games: r.games.map((g, j) => j === i ? fn(g) : g) })); }
   // Tapping the selected letter again clears it; a game with no result has no score.
   rsMark(i, w) { this.rsGame(i, g => g.w === w && !g.u ? { w: null, l: null } : { ...g, w, u: undefined }); }
-  rsAddScore(i) { this.rsGame(i, g => ({ ...g, l: this.state.rs.format - 6 })); }
-  rsStep(i, d) { const cap = this.cap(this.state.rs.format); this.rsGame(i, g => ({ ...g, l: Math.max(0, Math.min(cap - 1, g.l + d)) })); }
+  // A stepped or newly added score follows the chosen format (ws is dropped, the winner's points are derived again).
+  rsAddScore(i) { this.rsGame(i, ({ ws, ...g }) => ({ ...g, l: this.state.rs.format - 6 })); }
+  rsStep(i, d) { const cap = this.cap(this.state.rs.format); this.rsGame(i, ({ ws, ...g }) => ({ ...g, l: Math.max(0, Math.min(cap - 1, g.l + d)) })); }
+  // Scoring format (Han 2026-10-26): one format for every game. Switching it never changes an entered score; a score that
+  // doesn't fit the new format is outlined and explained under the games, and the sheet can't be saved until it fits.
+  rsFormat(f) { this.setRs(r => ({ fmtOpen: false, format: f, games: window.RallywiseVoice.reformat(r.games, r.format, f) })); }
   rsAdd() { this.setRs(r => r.games.length < r.max ? { games: r.games.concat([{ w: null, l: null }]) } : {}); }
   rsRemove() { this.setRs(r => r.games.length > 1 ? { games: r.games.slice(0, -1) } : {}); }
   rsSave() {
     const r = this.state.rs;
-    this.setState(s => ({ rs: null, log: { ...s.log, games: r.games, voice: { ...s.log.voice, totals: r.totals,
+    if (window.RallywiseVoice.badScores(r.games, r.format).length) return;
+    this.setState(s => ({ rs: null, log: { ...s.log, games: r.games, format: r.format, voice: { ...s.log.voice, totals: r.totals,
       dirty: { ...s.log.voice.dirty, result: true }, flags: { ...s.log.voice.flags, result: null } } } }));
   }
   // Notes sheet (Figma 349:3793): tags (up to 3 a side) and three notes, edited as a copy like the other sheets.
@@ -3064,8 +3091,11 @@ class Component extends DCLogic {
   // slots; an Unknown Player keeps the name that was heard, and participants whose side was never confirmed go back to
   // the pool, so the Players sheet asks about them as it does after a voice log. Games come back with their aggregate.
   editReview(m) {
-    const V = window.RallywiseVoice, sd = this.sides(m), fs = V.fromSaved(m.games), sc = this.scored(m.games);
-    const t = (sc.length && [21, 15, 11].find(f => sc.every(g => { const w = g[0] > g[1] ? 'us' : 'them', l = Math.min(g[0], g[1]); return this.scoreOf({ w, l }, f).join() === g.join(); }))) || this.fmt();
+    const V = window.RallywiseVoice, sd = this.sides(m), sc = this.scored(m.games);
+    // The saved scoring format comes back as it was. A match saved before formats were stored keeps the earlier rule (the
+    // format its scores were entered in, else 21); a match without scores is never given a format from them.
+    const t = V.isFormat(m.scoring) ? m.scoring : (sc.length && [21, 15, 11].find(f => sc.every(g => { const w = g[0] > g[1] ? 'us' : 'them', l = Math.min(g[0], g[1]); return this.scoreOf({ w, l }, f).join() === g.join(); }))) || this.fmt();
+    const fs = V.fromSaved(m.games, t);
     const log = { type: m.type, partner: null, opp1: null, opp2: null }, slots = {};
     const put = (k, id) => {
       if (!id) slots[k] = { heard: '', id: null, cands: [], state: 'missing' };
@@ -3438,7 +3468,7 @@ class Component extends DCLogic {
   scoreOf(g, t) {
     if (g.l == null) return { r: g.w === 'us' ? 'W' : 'L', ...(g.u ? { u: 1 } : {}) };
     const cap = this.cap(t);
-    const ws = g.l >= t - 1 ? Math.min(g.l + 2, cap) : t;
+    const ws = g.ws != null ? g.ws : g.l >= t - 1 ? Math.min(g.l + 2, cap) : t;
     return g.w === 'us' ? [ws, g.l] : [g.l, ws];
   }
   // Voice drafts may hold open games covered by a heard aggregate (log.voice.totals); see RallywiseVoice.savedGames.
@@ -3465,7 +3495,7 @@ class Component extends DCLogic {
     const pl = log.voice ? window.RallywiseVoice.savedPlayers(type, log.voice.slots || {}, log.voice.pool || [], k => log[k])
       : { partner: type === 'Doubles' ? log.partner : null, opps: type === 'Doubles' ? [log.opp1, log.opp2] : [log.opp1] };
     const m = { id: log.editId || 'n' + Date.now(), createdAt: prev ? prev.createdAt : new Date().toISOString(), date: log.date || this.today(), type, partner: pl.partner,
-      opps: pl.opps, games: this.draftGames(log), wt: log.wt, lt: log.lt, worked: log.worked.trim(), lost: log.lost.trim(),
+      opps: pl.opps, games: this.draftGames(log), ...(window.RallywiseVoice.isFormat(log.format) ? { scoring: log.format } : {}), wt: log.wt, lt: log.lt, worked: log.worked.trim(), lost: log.lost.trim(),
       // Do not attach opponent-specific notes to an unconfirmed/unknown opponent.
       on: (type === 'Doubles' ? [log.opp1, log.opp2] : [log.opp1]).every(id => id && this.state.players.some(p => p.id === id)) ? log.on.trim() : '' };
     const matches = log.editId
@@ -4212,17 +4242,21 @@ class Component extends DCLogic {
       v.rv = { back: () => ed ? this.goBack() : this.voiceBack(), title: this.t(ed ? 'editMatch' : 'logMatch'), hint: this.t(ed ? 'editHint' : 'reviewHint'),
         rows: [row('players', 'rvPlayers', log.type ? names.join(sep) : this.t('selectType'), !log.type, f.players === 'unknown' && 'flagUnknown', !log.type, () => this.psOpen()),
           row('result', 'rvResult', wl.state === 'missing' ? this.t('notMentioned') : this.t(wl.open ? 'rvWLOpen' : 'rvWL', { w: wl.w, l: wl.l, n: wl.open }), wl.state === 'missing',
-            f.result === 'conflict' ? 'flagConflict' : !wl.ok ? 'flagResult' : f.result === 'scores' && 'flagScores'),
+            f.result === 'conflict' ? 'flagConflict' : !wl.ok ? 'flagResult' : (f.result === 'scores' || window.RallywiseVoice.badScores(log.games, log.format).length > 0) && 'flagScores'),
           row('notes', 'rvNotes', notes || log.wt.concat(log.lt).map(t => this.tagLabel(t)).join(sep) || this.t('noNotes'), !notes && !log.wt.length && !log.lt.length, f.notes && 'flagNotes')],
         saving: !!log.saving, idle: !log.saving, saveErr: !!log.saveErr, ctaLabel: this.t(log.saveErr ? 'saveAgain' : ed ? 'saveChanges' : 'logMatch'), cantSave: !ready || !!log.saving,
         next: () => { if (this.reviewReady(this.state.log)) this.save(); } };
       v.hasRs = !!s.rs;
       if (s.rs) {
-        const r = s.rs, cap = this.cap(r.format);
+        const r = s.rs, cap = this.cap(r.format), bad = window.RallywiseVoice.badScores(r.games, r.format);
         v.rs = { close: () => this.setState({ rs: null }), save: () => this.rsSave(),
+          fmtLabel: this.t('scoringFmt', { n: r.format }), fmtOpen: !!r.fmtOpen, toggleFmt: () => this.setRs(x => ({ fmtOpen: !x.fmtOpen })),
+          fmts: [21, 15, 11].map(f => ({ label: this.t('scoringFmt', { n: f }), on: f === r.format, select: () => this.rsFormat(f) })),
+          hasBad: bad.length > 0, cantSave: bad.length > 0,
+          badText: bad.length ? this.t(bad.length > 1 ? 'scoreBadN' : 'scoreBad1', { g: bad.map(i => i + 1).join(this.t('listSep')), n: r.format }) : '',
           rows: r.games.map((g, i) => {
             const label = this.t('game', { n: i + 1 }), sg = g.w && g.l != null ? this.scoreOf(g, r.format) : null;
-            return { label, w: this.t('dotW'), l: this.t('dotL'), wCls: g.w === 'us' ? 'is-win' : '', lCls: g.w === 'them' ? 'is-loss' : '', wOn: g.w === 'us', lOn: g.w === 'them',
+            return { label, errCls: bad.includes(i) ? 'is-error' : '', w: this.t('dotW'), l: this.t('dotL'), wCls: g.w === 'us' ? 'is-win' : '', lCls: g.w === 'them' ? 'is-loss' : '', wOn: g.w === 'us', lOn: g.w === 'them',
               wLabel: this.t('gameNoScore', { game: label, r: this.t('resultWin') }), lLabel: this.t('gameNoScore', { game: label, r: this.t('resultLoss') }),
               setW: () => this.rsMark(i, 'us'), setL: () => this.rsMark(i, 'them'),
               hasScore: !!sg, canAddScore: !!g.w && !sg, scorePending: !g.w, score: sg ? `${sg[0]} : ${sg[1]}` : '', addScore: () => this.rsAddScore(i),
@@ -4303,7 +4337,9 @@ class Component extends DCLogic {
       const rec = r => r.n ? this.t('h2h', { r: this.recWords(r) }) : '', gr = window.RallywiseVoice.detailRows(m.games);
       v.detail = {
         // Figma date style: 20 Sep 2026 (zh 2026年9月20日).
-        dateLong: this.lang() === 'zh' ? this.date(m.date, true) : this.date(m.date) + ' ' + m.date.slice(0, 4),
+        // The saved scoring format follows the date; matches saved before formats were stored show none (never guessed).
+        dateLong: (this.lang() === 'zh' ? this.date(m.date, true) : this.date(m.date) + ' ' + m.date.slice(0, 4))
+          + (window.RallywiseVoice.isFormat(m.scoring) ? ' · ' + this.t('scoringFmt', { n: m.scoring }) : ''),
         title: m.type === 'Doubles' ? this.t('youAndVs', { p: m.partner ? this.first(m.partner) : '?', o: this.teamB(m) }) : this.t('youVs', { name: this.teamB(m) }),
         aShort: m.partner ? this.t('you') + ' & ' + this.first(m.partner).slice(0, 1) : this.t('you'),
         // Every saved game keeps its numbered row in saved order with its result (dot + Win / Loss); the winner's score is N800
