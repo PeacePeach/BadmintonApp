@@ -1259,7 +1259,7 @@ button:disabled{cursor:default !important;}
           </sc-for>
         </div>
         <section aria-labelledby="player-recent" class="rw-page-section" style="display:flex;flex-direction:column;gap:12px;">
-          <h2 id="player-recent" class="rw-section-title">{{ tx.recentMatches }}</h2>
+          <sc-if value="{{ profile.recent.length }}" hint-placeholder-val="{{ true }}"><h2 id="player-recent" class="rw-section-title">{{ tx.recentMatches }}</h2></sc-if>
           <div style="display:flex;flex-direction:column;gap:10px;">
             <sc-for list="{{ profile.recent }}" as="m" hint-placeholder-count="3">
               <div onClick="{{ m.open }}" class="rw-surface rw-tile rw-match rw-press {{ m.tileCls }}">
@@ -3627,6 +3627,7 @@ class Component extends DCLogic {
   renderVals() {
     const s = this.state, A = 'var(--action-primary)';
     const all = s.matches;
+    const fil = s.filter === 'All' || all.some(m => m.type === s.filter) ? s.filter : 'All';
     const overall = this.rec(all);
     const q = s.search.trim().toLowerCase();
     const exists = s.players.some(p => p.name.toLowerCase() === q);
@@ -3707,8 +3708,9 @@ class Component extends DCLogic {
         { label: this.t('settings'), icon: 'Settings', select: () => this.go('settings') },
         { label: this.t('logOut'), icon: 'LogOut', cls: 'has-sep', select: () => this.signOut() }
       ],
-      filters: ['All', 'Singles', 'Doubles'].map(f => ({ label: f === 'All' ? this.t('all') : this.typeLabel(f), active: s.filter === f, cls: s.filter === f ? 'is-active' : '', select: () => this.setState({ filter: f }) })),
-      matchCards: all.filter(m => s.filter === 'All' || m.type === s.filter).map(m => this.card(m)),
+      // A type with no matches gets no pill; a filter on a hidden type falls back to All (Han, 2026-10-26).
+      filters: ['All', 'Singles', 'Doubles'].filter(f => f === 'All' || all.some(m => m.type === f)).map(f => ({ label: f === 'All' ? this.t('all') : this.typeLabel(f), active: fil === f, cls: fil === f ? 'is-active' : '', select: () => this.setState({ filter: f }) })),
+      matchCards: all.filter(m => fil === 'All' || m.type === fil).map(m => this.card(m)),
       // No matches at all: show only the empty state, no All / Singles / Doubles pills (Han, 2026-10-23).
       hasMatches: all.length > 0
     };

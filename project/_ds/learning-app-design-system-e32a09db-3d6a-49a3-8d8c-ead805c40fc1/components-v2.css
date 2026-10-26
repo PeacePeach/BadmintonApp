@@ -27,7 +27,7 @@
      Graphs / Large bar ........... .rw-form[.is-down] > .rw-form-bars > .rw-form-bar[.is-recent] + .rw-chart-label
      Performance breakdown ........ .rw-breakdown (label, .rw-bar, .rw-row-value + .rw-row-sub); score gap row: fill .is-up|.is-down + .rw-breakdown-mid (dashed zero line)
      Illustration ................. .rw-illus[.is-compact] > .rw-illus-art > svg (illustrations.js; backdrop circle that also masks the drawing's base)
-     EmptyState ................... [.rw-empty-group >] .rw-empty (centred in the free space) > .rw-illus + .rw-empty-title + .rw-empty-body + .rw-btn.rw-btn-primary (illustrations.js)
+     EmptyState ................... [.rw-empty-group >] .rw-empty (centred in the free space) > .rw-illus + .rw-empty-title + .rw-empty-body + .rw-btn.rw-btn-primary (full width) (illustrations.js)
      Insight / ListRow ............ .rw-list-row (.rw-avatar, .rw-eyebrow, .rw-name, .rw-list-value, .rw-caption)
    Insights / Grow (Figma 203:5215):
      KeyInsight ................... .rw-surface.rw-tile.rw-key > .rw-key-head (dot + .rw-label) + .rw-key-title + .rw-key-body + .rw-bar.rw-key-bar
@@ -511,7 +511,7 @@ button.rw-input-row{cursor:pointer;}
 .rw-empty .rw-illus.is-compact + .rw-empty-title{margin-top:var(--rw-illus-title-gap-compact);}
 .rw-empty-title{margin-top:12px;font:var(--rw-type-empty-title);letter-spacing:var(--rw-tracking);color:var(--rw-empty-title-fg);}
 .rw-empty-body{margin-top:8px;max-width:280px;font:var(--rw-type-empty-body);letter-spacing:var(--rw-tracking);color:var(--rw-empty-body-fg);}
-.rw-empty .rw-btn-primary{margin-top:24px;}
+.rw-empty .rw-btn-primary{margin:24px -16px 0;align-self:stretch;}  /* full width to the 20px page gutter, like every primary button (Han, 2026-10-26) */
 /* Every empty state centres vertically in the space left between the content above it and the bottom nav (Han, 2026-10-26):
    the screen fills the scroll area, each flex column on the way down to the empty state grows, and the empty state centres
    itself. .rw-empty-group keeps an empty state and the screen's own button together (Focus). */
