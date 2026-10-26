@@ -1238,49 +1238,63 @@ button:disabled{cursor:default !important;}
       </div>
     </sc-if>
 
-    <!-- PLAYER PROFILE -->
+    <!-- PLAYER PROFILE (V2): detail-page App bar, large Letter avatar + name, four Metric tiles (record like Recent Record),
+         then Recent Matches as the Matches list Match cards. -->
     <sc-if value="{{ isPlayer }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Player Profile" style="display:flex;flex-direction:column;gap:22px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
-          <div style="font:500 17px/1 var(--font-sans);">{{ tx.player }}</div>
-          <div style="width:48px;"></div>
+      <div data-screen-label="Player Profile" class="rw-page">
+        <div class="rw-appbar-title is-centered">
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ArrowLeft" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="44px,44px"></x-import>
+          <h1 class="rw-appbar-name">{{ tx.player }}</h1>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
-          <div class="rw-avatar-fill {{ profile.avCls }}" style="width:88px;height:88px;border-radius:50%;color:var(--icon-badge-fg);display:flex;align-items:center;justify-content:center;font:500 28px/1 var(--font-sans);">{{ profile.initials }}</div>
-          <div style="font:600 26px/1.2 var(--font-sans);">{{ profile.name }}</div>
-          <div style="font:400 14px/1 var(--font-sans);color:var(--text-secondary);">{{ profile.sub }}</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;">
+          <div class="rw-avatar rw-avatar-lg {{ profile.avCls }}" aria-hidden="true">{{ profile.initials }}</div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;max-width:100%;">
+            <h2 class="rw-title" style="overflow-wrap:anywhere;">{{ profile.name }}</h2>
+            <div class="rw-subtitle">{{ profile.sub }}</div>
+          </div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;">
           <sc-for list="{{ profile.stats }}" as="s" hint-placeholder-count="4">
-            <div style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:8px;">
-              <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ s.label }}</div>
-              <div style="font:500 32px/1 var(--font-sans);color: {{ s.fg }};">{{ s.value }}</div>
-              <div style="font:400 12px/1 var(--font-sans);color:var(--text-secondary);">{{ s.sub }}</div>
+            <div class="rw-surface rw-tile" style="display:flex;flex-direction:column;gap:12px;">
+              <div class="rw-eyebrow tl">{{ s.label }}</div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <sc-if value="{{ s.has }}" hint-placeholder-val="{{ true }}">
+                  <div class="rw-metric-value rw-record" role="text" aria-label="{{ s.aria }}"><span aria-hidden="true">{{ s.w }}</span><span class="rw-record-unit" aria-hidden="true">{{ tx.dotW }}</span><span class="rw-record-sep" aria-hidden="true">·</span><span aria-hidden="true">{{ s.l }}</span><span class="rw-record-unit" aria-hidden="true">{{ tx.dotL }}</span></div>
+                </sc-if>
+                <sc-if value="{{ s.none }}" hint-placeholder-val="{{ false }}"><div class="rw-metric-value" aria-hidden="true">–</div></sc-if>
+                <div class="rw-subtitle">{{ s.sub }}</div>
+              </div>
             </div>
           </sc-for>
         </div>
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          <div style="font:500 19px/1.3 var(--font-sans);">{{ tx.recentMatches }}</div>
-          <sc-for list="{{ profile.recent }}" as="m" hint-placeholder-count="3">
-            <div onClick="{{ m.open }}" style="background:var(--surface-primary);border-radius:26px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;cursor:pointer;">
-              <div style="display:flex;justify-content:space-between;align-items:center;">
-                <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ m.dateLabel }} · {{ m.type }}</div>
-                <div style="height:26px;padding:0 12px;border-radius:99px;display:flex;align-items:center;font:600 12px/1 var(--font-sans);background: {{ m.badgeBg }};color: {{ m.badgeFg }};">{{ m.resultLabel }}</div>
-              </div>
-              <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;">
-                <div style="display:flex;flex-direction:column;gap:3px;min-width:0;">
-                  <div style="font:500 16px/1.3 var(--font-sans);overflow-wrap:anywhere;">{{ m.teamA }}</div>
-                  <div style="font:400 15px/1.3 var(--font-sans);color:var(--neutral-600);overflow-wrap:anywhere;">vs {{ m.teamB }}</div>
+        <section aria-labelledby="player-recent" style="display:flex;flex-direction:column;gap:12px;">
+          <h2 id="player-recent" class="rw-section-title">{{ tx.recentMatches }}</h2>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <sc-for list="{{ profile.recent }}" as="m" hint-placeholder-count="3">
+              <div onClick="{{ m.open }}" class="rw-surface rw-tile rw-match rw-press {{ m.tileCls }}">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                  <div class="rw-caption"><span class="rw-match-dot" aria-hidden="true"></span>{{ m.dateLabel }} · {{ m.type }}</div>
+                  <span class="rw-match-chevron" aria-hidden="true"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="ChevronRight" size="{{ 18 }}" hint-size="18px,18px"></x-import></span>
                 </div>
-                <div style="font:500 28px/1 var(--font-sans);flex-shrink:0;">{{ m.gamesWon }}</div>
+                <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;">
+                  <div style="display:flex;align-items:center;gap:15px;min-width:0;">
+                    <div class="rw-players {{ m.playersCls }}" aria-hidden="true">
+                      <sc-for list="{{ m.players }}" as="p" hint-placeholder-count="2"><div class="rw-avatar rw-avatar-sm {{ p.avCls }}">{{ p.ini }}</div></sc-for>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:3px;min-width:0;">
+                      <div class="rw-name">{{ m.teamA }}</div>
+                      <div class="rw-name is-muted">vs {{ m.teamB }}</div>
+                    </div>
+                  </div>
+                  <div class="rw-score">{{ m.score }}</div>
+                </div>
               </div>
-            </div>
-          </sc-for>
-          <sc-if value="{{ profile.recentEmpty }}" hint-placeholder-val="{{ false }}">
-            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ profile.recentEmpty.illustration }}" title="{{ profile.recentEmpty.title }}" body="{{ profile.recentEmpty.body }}" size="{{ 120 }}" style="{{ profile.recentEmpty.style }}" hint-size="350px,260px"></x-import>
-          </sc-if>
-        </div>
+            </sc-for>
+            <sc-if value="{{ profile.recentEmpty }}" hint-placeholder-val="{{ false }}">
+              <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.EmptyState" illustration="{{ profile.recentEmpty.illustration }}" title="{{ profile.recentEmpty.title }}" body="{{ profile.recentEmpty.body }}" size="{{ 120 }}" style="{{ profile.recentEmpty.style }}" hint-size="350px,260px"></x-import>
+            </sc-if>
+          </div>
+        </section>
       </div>
     </sc-if>
 
@@ -2060,7 +2074,7 @@ const I18N = {
     // Players · Player
     addName: 'Add “{name}”', partnerRec: 'Partner {r}', noMatchesYet: 'No matches yet',
     noPlayersFoundBody: 'Check the spelling, or add them as a new player.', noPlayersBody: 'Players you add or play against will show up here.',
-    player: 'Player', playedTogether: '{n} matches together or against',
+    player: 'Player', playedTogether: '{n} matches together or against', playedTogether1: '1 match together or against',
     overallH2H: 'Overall H2H', singlesH2H: 'Singles H2H', doublesH2H: 'Doubles H2H', asPartner: 'As Partner',
     pctWinRate: '{p} win rate', noMatchesShort: 'No matches', recentMatches: 'Recent Matches',
     noTogether: 'No Matches Together Yet', noTogetherBody: 'Matches you play with or against them will show up here.',
@@ -2210,7 +2224,7 @@ const I18N = {
     delete: '删除', cancel: '取消',
     addName: '添加“{name}”', partnerRec: '搭档 {r}', noMatchesYet: '还没有比赛',
     noPlayersFoundBody: '检查一下拼写，或把对方添加为新球友。', noPlayersBody: '你添加或交过手的球友会显示在这里。',
-    player: '球友', playedTogether: '同场 {n} 场',
+    player: '球友', playedTogether: '同场 {n} 场', playedTogether1: '同场 1 场',
     overallH2H: '总交手', singlesH2H: '单打交手', doublesH2H: '双打交手', asPartner: '作为搭档',
     pctWinRate: '胜率 {p}', noMatchesShort: '暂无比赛', recentMatches: '近期比赛',
     noTogether: '还没有同场比赛', noTogetherBody: '你们同场的比赛会显示在这里。',
@@ -3487,8 +3501,8 @@ class Component extends DCLogic {
     const exists = s.players.some(p => p.name.toLowerCase() === q);
     const v = {
       scrollRef: this.scrollRef, onScroll: this.onScroll, overall, greeting: this.greeting(all),
-      scrollCls: ['matches', 'insights', 'focus', 'detail', 'voice', 'review', 'players', 'profile', 'settings', 'account', 'password', 'language', 'notifications', 'privacy', 'login', 'signup', 'forgot', 'resetSent'].includes(s.screen)
-        ? 'rw-scroll is-v2' + (['detail', 'focusDetail', 'profile', 'settings', 'account', 'password', 'language', 'notifications', 'privacy'].includes(s.screen) ? ' is-detail' : '') : 'rw-scroll',
+      scrollCls: ['matches', 'insights', 'focus', 'detail', 'voice', 'review', 'players', 'player', 'profile', 'settings', 'account', 'password', 'language', 'notifications', 'privacy', 'login', 'signup', 'forgot', 'resetSent'].includes(s.screen)
+        ? 'rw-scroll is-v2' + (['detail', 'focusDetail', 'player', 'profile', 'settings', 'account', 'password', 'language', 'notifications', 'privacy'].includes(s.screen) ? ' is-detail' : '') : 'rw-scroll',
       isMatches: s.screen === 'matches', isInsights: s.screen === 'insights', isLog: s.screen === 'log', isVoice: s.screen === 'voice' && !!s.voice, isReview: s.screen === 'review' && !!s.log, voiceRef: this.voiceRef,
       isDetail: s.screen === 'detail', isPlayers: s.screen === 'players', isPlayer: s.screen === 'player',
       isLogin: s.screen === 'login', isSignup: s.screen === 'signup', isSplash: s.screen === 'splash', skipSplash: () => this.leaveSplash(),
@@ -4074,8 +4088,10 @@ class Component extends DCLogic {
     if (v.isPlayer) {
       const id = s.playerId, o = this.vs(id), si = this.vs(id, 'Singles'), du = this.vs(id, 'Doubles'), w = this.with(id);
       const inv = all.filter(m => m.opps.includes(id) || m.partner === id);
-      const st = (label, r) => ({ label, value: r.n ? r.label : '—', sub: r.n ? this.t('pctWinRate', { p: r.pctStr }) : this.t('noMatchesShort'), fg: 'var(--text-primary)' });
-      v.profile = { name: this.nm(id), initials: this.ini(id), avCls: this.avDir(id), sub: this.t('playedTogether', { n: inv.length }),
+      // Each Metric tile shows the record like Recent Record (big numbers, small W / L units), or a dash with no matches.
+      const st = (label, r) => ({ label, has: r.n > 0, none: !r.n, w: r.w, l: r.l, aria: r.n ? this.recWords(r) : '',
+        sub: r.n ? this.t('pctWinRate', { p: r.pctStr }) : this.t('noMatchesShort') });
+      v.profile = { name: this.nm(id), initials: this.ini(id), avCls: this.avDir(id), sub: this.t(inv.length === 1 ? 'playedTogether1' : 'playedTogether', { n: inv.length }),
         stats: [st(this.t('overallH2H'), o), st(this.t('singlesH2H'), si), st(this.t('doublesH2H'), du), st(this.t('asPartner'), w)],
         recent: inv.slice(0, 5).map(m => this.card(m)),
         recentEmpty: !inv.length && { ...empty('no-matches', this.t('noTogether'), this.t('noTogetherBody')), style: { padding: '8px 16px' } } };
