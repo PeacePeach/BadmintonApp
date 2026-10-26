@@ -145,12 +145,14 @@ test("Han-shaped account: every section has cards in EN and ZH, with or without 
       const r = await han17(H.matches).call(lang, () => new Error('upstream 500'));
       const i = r.insight, c = i.coverage;
       assert.equal(i.keyInsight.status, 'ok');
-      assert.deepEqual([i.buildNext.length, i.strengths.length, i.opponentPlans.length, i.doublesPlay.length], [4, 2, 3, 2], lang);
+      // v15: without the model, only an opponent with a noted weakness or tactic that worked gets a card (Leo); notes
+      // that only say how someone plays need a real plan, so they wait for the model.
+      assert.deepEqual([i.buildNext.length, i.strengths.length, i.opponentPlans.length, i.doublesPlay.length], [4, 2, 1, 2], lang);
       assert.deepEqual(i.buildNext.map(b => b.level), ['confirmed', 'confirmed', 'confirmed', 'early']);
       assert.deepEqual(i.strengths.map(b => `${b.tag} ${b.level}`), ['Serve confirmed', 'Footwork early']);
       assert.ok(!i.buildNext.some(b => i.strengths.some(s => s.tag === b.tag)), 'no skill on both lists');
-      assert.deepEqual(i.opponentPlans.map(p => [p.player_id, p.level]), [['alex', 'repeated'], ['leo', 'repeated'], ['ravi', 'single']]);
-      assert.match(i.opponentPlans[2].plan, lang === 'zh' ? /^初步判断：/ : /^Early read: /);
+      assert.deepEqual(i.opponentPlans.map(p => [p.player_id, p.level, p.plan_type]), [['leo', 'repeated', 'suggested']]);
+      assert.match(i.opponentPlans[0].plan, lang === 'zh' ? /^可以试试：你记下“Leo 网前不太积极”/ : /^Try: you noted “Leo 网前不太积极”/);
       assert.ok(i.doublesPlay.every(d => d.level === 'early' && (lang === 'zh' ? /^初步观察：/ : /^Early observation: /).test(d.pattern)), 'no doubles skill was noted twice');
       assert.deepEqual([c.matches_read, c.noted_matches, c.opponent_plans.matches_with_notes, c.doubles_play.doubles_matches, c.doubles_play.noted_doubles], [17, 12, 9, 5, 3]);
     }
@@ -163,9 +165,10 @@ test("Han-shaped account: the model's cross-language plans and doubles items pas
       const zh = lang === 'zh';
       return { keyInsight: null, buildNext: [], strengths: [],
         opponentPlans: [
-          { player_id: 'alex', plan: zh ? '多准备反手底线的回球，接杀后别急着挡网前。' : 'Expect pressure on your backhand rear court; prepare that side early.' },
-          { player_id: 'leo', plan: zh ? '接发前站稳，留意他的发球变化。' : "Stay ready on return: Leo's serve varies a lot." },
+          { player_id: 'alex', plan: zh ? '多准备反手底线的回球，接杀后别急着挡网前。' : 'Cover your backhand rear court early; he keeps attacking it.' },
+          { player_id: 'leo', plan: zh ? '多打他的反手，网前主动放网逼他上前。' : 'Attack his backhand and play tight at the net, where he is less active.' },
           { player_id: 'ravi', plan: zh ? '他总是后场进攻，多压他后场。' : 'Ravi always attacks from the rear court, so keep him there.' },
+          { player_id: 'jo', plan: zh ? '多挑高球，别让他在网前封。' : "Lift deep early so Jo can't rush the net." },
           { player_id: 'mei', plan: zh ? '准备好防守重杀。' : 'Be ready to defend heavy smashes.' }
         ],
         doublesPlay: [
@@ -179,8 +182,10 @@ test("Han-shaped account: the model's cross-language plans and doubles items pas
       assert.ok(sent.opponents.every(o => !o.notes.some(n => /^(Mei|Ravi|Jo|Alex|Leo)/.test(n) && !n.startsWith(o.name))), 'each opponent only gets notes about them');
       const p = Object.fromEntries(i.opponentPlans.map(x => [x.player_id, x]));
       assert.equal(p.alex.copy_source, 'ai', JSON.stringify(p.alex)); assert.equal(p.leo.copy_source, 'ai', JSON.stringify(p.leo));
-      assert.equal(p.ravi.copy_source, 'note', 'one note is never "always"'); assert.ok(p.ravi.issues.includes('generalized_single_note'));
-      assert.equal(i.opponentPlans.length, 3);
+      assert.ok(!p.ravi, 'one note is never "always", and there is no actionable template for it');
+      assert.ok(i.coverage.opponent_plans.dropped.some(d => d.player_id === 'ravi' && d.issues.includes('generalized_single_note')));
+      assert.deepEqual(i.opponentPlans.map(x => [x.player_id, x.plan_type]), [['alex', 'suggested'], ['leo', 'suggested'], ['jo', 'early']]);
+      assert.match(p.jo.plan, lang === 'zh' ? /^初步判断：/ : /^Early read: /);
       assert.deepEqual(i.doublesPlay.map(d => [d.copy_source, d.level]), [['ai', 'early'], ['ai', 'early']], lang);
       assert.match(i.doublesPlay[0].pattern, lang === 'zh' ? /^初步观察：有一场/ : /^Early observation: One match/);
     }
@@ -193,7 +198,7 @@ test('low data: one noted singles match and one noted doubles match still give l
       assert.deepEqual([i.keyInsight.status, i.keyInsight.tier, i.keyInsight.level], ['ok', 3, 'early'], 'P3: an early read, not "no_trend"');
       assert.deepEqual([i.buildNext.length, i.strengths.length], [0, 0], 'Build Next / Strengths need 3 noted matches');
       assert.equal(i.coverage.build_next.zero_reason, 'fewer_than_3_noted_matches');
-      assert.deepEqual(i.opponentPlans.map(p => [p.player_id, p.level]), [['mei', 'single'], ['leo', 'single']]);
+      assert.deepEqual(i.opponentPlans.map(p => [p.player_id, p.level]), [['leo', 'single']], 'Mei: only how she plays, no card without a plan');
       assert.deepEqual(i.doublesPlay.map(d => [d.tag || d.name, d.level]), [[lang === 'zh' ? '防守' : 'Defence', 'early']]);
     }
 });
@@ -204,7 +209,8 @@ test('high data: 25 matches with notes on every one: Build Next at most 4, Stren
     { type: i % 4 ? 'Singles' : 'Doubles', opps: i % 4 ? [['alex', 'ben', 'cy', 'dee'][i % 4]] : ['ben', 'cy'], opp_notes: i % 4 ? 'smashes hard to my backhand rear court' : 'Ben stays at the net', lost: 'defence too far back', worked: 'serve was steady' }));
   const players = [{ id: 'me', name: 'Han' }, { id: 'alex', name: 'Alex' }, { id: 'ben', name: 'Ben' }, { id: 'cy', name: 'Cy' }, { id: 'dee', name: 'Dee' }];
   for (const lang of ['en', 'zh']) {
-    const i = (await account(ms, [], players).call(lang, () => new Error('down'))).insight;
+    const plan = lang === 'zh' ? '提前护住反手后场，多打高远球拉开节奏。' : 'Cover your backhand rear court early and clear deep to slow the pace.';
+    const i = (await account(ms, [], players).call(lang, b => { const f = JSON.parse(b.input[1].content); return { keyInsight: null, buildNext: [], strengths: [], doublesPlay: [], opponentPlans: f.opponents.map(o => ({ player_id: o.player_id, plan })) }; })).insight;
     assert.ok(i.buildNext.length <= 4 && i.strengths.length <= 3 && i.opponentPlans.length <= 3 && i.doublesPlay.length <= 2);
     assert.ok(i.buildNext.length + i.strengths.length > 0);
     assert.ok(!i.buildNext.some(b => i.strengths.some(s => s.tag === b.tag)));

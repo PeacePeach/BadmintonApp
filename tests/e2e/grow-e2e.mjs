@@ -30,7 +30,9 @@ async function edge(lang, dbJson, sig) {
     from: t => t === 'ai_insights' ? { ...q(server.row), upsert: async row => { server.row = row; return { error: null }; } }
       : t === 'focus_items' ? { select: () => Promise.resolve({ data: focus, error: null }) }
       : q(t === 'players' ? db.players.map(p => ({ id: p.id, name: p.name })) : rows) });
-  globalThis.fetch = async () => { server.aiCalls++;
+  globalThis.fetch = async (u, init) => { server.aiCalls++;
+    // server.answer(facts): what the fake model writes (default: no copy).
+    if (server.answer) { const f = JSON.parse(JSON.parse(init.body).input[1].content); return { ok: true, json: async () => ({ output: [{ content: [{ type: 'output_text', text: JSON.stringify({ keyInsight: null, buildNext: [], strengths: [], opponentPlans: [], doublesPlay: [], ...server.answer(f) }) }] }] }) }; }
     if (server.aiMs) await new Promise(r => setTimeout(r, server.aiMs));
     if (server.aiFail) return { ok: false, status: 500, text: async () => 'fake upstream failure' };
     return { ok: true, json: async () => ({ output: [{ content: [{ type: 'output_text', text: JSON.stringify({ keyInsight: null, buildNext: [], strengths: [], opponentPlans: [], doublesPlay: [] }) }] }] }) }; };
@@ -172,8 +174,9 @@ for (const lang of process.env.ONLY ? [] : ['en', 'zh']) {
     pg = await open(lang, 'han17'); await pg.waitForTimeout(1800); g = await grow(pg); server.aiFail = false;
     const t = zh ? { b: '下一步提升', s: '你的优势', o: '对手策略', d: '双打配合' } : { b: 'Build Next', s: 'Your Strengths', o: 'Opponent Plans', d: 'Doubles Play' };
     const n = Object.fromEntries(Object.entries(t).map(([k, v]) => [k, g.counts[v] || 0]));
-    ok(g.keyTitle && !NOT_ENOUGH.test(g.keyTitle) && n.b === 2 && (fail || server.row.insight_json.buildNext.length === 4) && n.s === 2 && n.o === 3 && n.d === 2, `${lang} han17${fail ? ' (model failed)' : ''}: Key "${g.keyTitle}", Build Next 2 shown of ${server.row ? server.row.insight_json.buildNext.length : '4 (not cached: model failed)'} stored, cards ${JSON.stringify(n)} (sections ${JSON.stringify(g.counts)})`);
-    ok(g.opps.some(o => (zh ? /^初步判断：/ : /^Early read: /).test(o[1])) && g.doubles.every(d => (zh ? /^初步观察：/ : /^Early observation: /).test(d[1])), `${lang} han17: early opponent read and doubles observations labelled ${JSON.stringify([g.opps, g.doubles])}`);
+    ok(g.keyTitle && !NOT_ENOUGH.test(g.keyTitle) && n.b === 2 && (fail || server.row.insight_json.buildNext.length === 4) && n.s === 2 && n.o === 1 && n.d === 2, `${lang} han17${fail ? ' (model failed)' : ''}: Key "${g.keyTitle}", Build Next 2 shown of ${server.row ? server.row.insight_json.buildNext.length : '4 (not cached: model failed)'} stored, cards ${JSON.stringify(n)} (sections ${JSON.stringify(g.counts)})`);
+    // v15 (no model copy here): only Leo, whose notes name a weakness, gets a plan, labelled "Try"; style-only notes wait for the model.
+    ok(g.opps.length === 1 && g.opps[0][0] === 'Leo' && (zh ? /^可以试试：/ : /^Try: /).test(g.opps[0][1]) && g.doubles.every(d => (zh ? /^初步观察：/ : /^Early observation: /).test(d[1])), `${lang} han17: opponent plan and doubles observations labelled ${JSON.stringify([g.opps, g.doubles])}`);
     ok(!g.build.some(b => g.strengths.some(s => s[0] === b[0])), `${lang} han17: no skill in both Build Next and Strengths`);
     ok(!pg.errs.length, `${lang} han17: no console errors ${pg.errs.join(' | ')}`);
     await shot(pg, lang, fail ? '9-han17-model-failed.png' : '8-han17.png'); await pg.close();
@@ -541,6 +544,33 @@ if (!process.env.ONLY || process.env.ONLY === 'build') for (const lang of ['en',
   ok(b && b.n === 1 && b.full, `${lang} build: 1 card is full width (${JSON.stringify(b)})`); await shot(pg, lang, '19-build-one.png'); await pg.close();
   pg = await open(lang, 'bare'); await pg.waitForTimeout(1500); b = await box(pg);
   ok(b === null, `${lang} build: 0 cards, no Build Next section`); await pg.close();
+}
+
+// 14. Opponent Plans v15 (Han, 2026-10-26 18:21) in the app: Yang / Yorick / Stefan from Han's verified notes, the model
+// writing plans that pass the checks; labels, subtitle, names and the 3-card limit, EN and ZH.
+if (!process.env.ONLY || process.env.ONLY === 'opp') {
+  for (const lang of ['en', 'zh']) {
+    const zh = lang === 'zh';
+    let i = 0; const ms = [];
+    const N = { yang: ['Yang防守很强，喜欢调动我前后场。', '经常把我的杀球和吊球挡到网前，让我很难回位。', '我的对角劈吊、边线杀球和打他反手的高远球都得分了。21分的长局我体能跟不上。'],
+      yorick: ['Yorick移动很快。', '他的杀球很快但不是很重。我跟不上他的移动和节奏。'], stefan: ['Stefan后场反手容易失误。', '他有时杀球下网。'], kai: ['Kai 网前很稳'] };
+    for (const [id, list] of Object.entries(N)) for (const t of list) ms.push(M(i++, i % 2 ? W : L, ['Other'], [], { opps: [id], on: t }));
+    ACCOUNTS.rivals = { matches: ms, focuses: [], players: [{ id: 'me', name: 'Han Li', level: 'Intermediate' }, { id: 'yang', name: 'Yang' }, { id: 'yorick', name: 'Yorick' }, { id: 'stefan', name: 'Stefan' }, { id: 'kai', name: 'Kai' }] };
+    const A = { en: { yang: 'Go back to cross-court sliced drops, sideline smashes and clears to his backhand.', yorick: 'His smashes are fast but light: stand closer, block or counter them, and keep the pace in your hands.', stefan: 'Clear deep to his backhand rear court and make him play it.', kai: 'Keep the net tight.' },
+      zh: { yang: '继续用对角劈吊、边线杀球和打他反手的高远球。', yorick: '他杀球快但不重：站前一点，挡网或反抽，别跟着他的节奏跑。', stefan: '多打他反手后场，逼他在那里出球。', kai: '网前保持紧。' } }[lang];
+    server.row = null; server.aiCalls = 0; let sent = null;
+    server.answer = f => { sent = f.opponents; return { opponentPlans: f.opponents.map(o => ({ player_id: o.player_id, plan: A[o.player_id] })) }; };
+    const pg = await open(lang, 'rivals'); await pg.waitForTimeout(1500);
+    const g = await grow(pg), sub = await pg.evaluate(t => { const sec = [...document.querySelectorAll('section')].find(x => (x.querySelector('.rw-section-title') || {}).textContent === t); return sec ? sec.querySelector('.rw-hint').textContent : null; }, zh ? '对手策略' : 'Opponent Plans');
+    server.answer = null;
+    const LB = zh ? ['之前奏效：', '可以试试：'] : ['Worked before: ', 'Try: '];
+    const by = Object.fromEntries(g.opps);
+    ok(sub === (zh ? '根据比赛记录制定对策' : 'Game plans based on your match notes'), `${lang} opp: subtitle "${sub}"`);
+    ok(g.opps.length === 3 && by.Yang === LB[0] + A.yang && by.Yorick === LB[1] + A.yorick && by.Stefan === LB[1] + A.stefan, `${lang} opp: ${JSON.stringify(g.opps)}`);
+    ok(sent && JSON.stringify(sent.map(o => [o.player_id, o.notes.length, o.plan_type])) === JSON.stringify([['yang', 3, 'proven'], ['stefan', 2, 'suggested'], ['yorick', 2, 'suggested'], ['kai', 1, 'early']]),
+      `${lang} opp: identities, match counts and plan types sent to the model ${JSON.stringify(sent && sent.map(o => [o.player_id, o.notes.length, o.plan_type]))}`);
+    await shot(pg, lang, '20-opponent-plans.png'); ok(!pg.errs.length, `${lang} opp: no console errors ${pg.errs.join(' | ')}`); await pg.close();
+  }
 }
 console.log(fails ? `\n${fails} FAILED` : '\nALL PASS');
 await browser.close();

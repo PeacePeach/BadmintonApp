@@ -525,7 +525,7 @@ test('Build Next actions (Han): no tactical correction from tags or a single not
 });
 
 test('engine version is bumped so cached v12 insights regenerate', () => {
-  assert.equal(G.ENGINE_VERSION, '2026-10-26-v14');
+  assert.equal(G.ENGINE_VERSION, '2026-10-26-v15');
 });
 
 test('opponent plans: only from notes about that opponent; record-only, unsupported or generic plans are left out', () => {
@@ -540,19 +540,20 @@ test('opponent plans: only from notes about that opponent; record-only, unsuppor
   assert.deepEqual(opps.map(o => o.player_id), ['ben']); // Alex has a record but no notes; unknown:Chris is nobody
   assert.ok(!('record' in opps[0]));
   const plans = G.finalizeOpponents([
-    { player_id: 'ben', plan: 'Ben: Be ready for lifts to your backhand rear court and take them early.' },
+    { player_id: 'ben', plan: 'Ben: Attack his backhand rear court and take his lifts early.' },
     { player_id: 'alex', plan: 'Alex struggles with your pace, so attack his backhand.' }
   ], opps, 'en');
-  assert.deepEqual(plans, [{ player_id: 'ben', plan: 'Be ready for lifts to your backhand rear court and take them early.', level: 'repeated', copy_source: 'ai' }]);
+  // v15: built on a noted weakness (他反手后场比较弱), not yet tried: labelled "Try".
+  assert.deepEqual(plans, [{ player_id: 'ben', plan: 'Try: Attack his backhand rear court and take his lifts early.', level: 'repeated', plan_type: 'suggested', copy_source: 'ai' }]);
   const bad = (plan, lang = 'en') => G.checkPlan(plan, opps[0], lang);
   assert.ok(bad('Stay patient and play your own game.').includes('not_from_notes'));
   assert.ok(bad('Attack his forehand with drop shots.').includes('detail_not_in_notes'));
   assert.ok(bad("You've lost twice to him, so slow the game down.").includes('record_inference'));
   assert.ok(bad('Go to his backhand rear court 3 times a rally.').includes('number_not_in_evidence'));
-  assert.deepEqual(G.finalizeOpponents([{ player_id: 'ben', plan: '多打他的反手后场，逼他回球。' }], opps, 'zh')[0].plan, '多打他的反手后场，逼他回球。');
-  // A plan that fails its checks falls back to the player's own note, never to invented advice.
+  assert.deepEqual(G.finalizeOpponents([{ player_id: 'ben', plan: '多打他的反手后场，逼他回球。' }], opps, 'zh')[0].plan, '可以试试：多打他的反手后场，逼他回球。');
+  // A plan that fails its checks falls back to the player's own note about the weakness, never to invented advice.
   const [fb] = G.finalizeOpponents([{ player_id: 'ben', plan: 'Stay patient and play your own game.' }], opps, 'en');
-  assert.equal(fb.copy_source, 'note'); assert.equal(fb.plan, 'From your notes: “他反手后场比较弱” · “Ben lifts a lot to my backhand rear court”. Plan around these next time.');
+  assert.equal(fb.copy_source, 'note'); assert.equal(fb.plan, 'Try: you noted “他反手后场比较弱”. Make it your first target.');
   assert.ok(bad('他输给你两次，说明心态不稳，多打快球。', 'zh').length);
   assert.ok(bad('Ben lifts to your backhand.', 'zh').includes('language'));
   // The schema only lets the model name opponents that have notes (none: no plans at all).
@@ -580,17 +581,19 @@ test('opponent notes: each note goes to the opponent it names; one note is an ea
   assert.deepEqual(diag, { matches_with_notes: 4, unknown_opponent: 0, names_no_opponent: 1 });
   // Chinese note, English plan: anchored through the shared badminton term, labelled as an early read.
   const [leo] = G.finalizeOpponents([{ player_id: 'leo', plan: "Test Leo's backhand early in the first game." }], [by.leo], 'en');
-  assert.deepEqual([leo.copy_source, leo.plan], ['ai', "Early read: Test Leo's backhand early in the first game."]);
+  assert.deepEqual([leo.copy_source, leo.plan], ['ai', "Early read: Test Leo's backhand early in the first game."], 'a noted weakness may be tested (Han: Stefan)');
   assert.ok(G.checkPlan('He always struggles on the backhand, so target it.', by.leo, 'en').includes('generalized_single_note'));
   assert.ok(G.checkPlan('他每次反手都很弱，多打反手。', by.leo, 'zh').includes('generalized_single_note'));
   const [zh] = G.finalizeOpponents([{ player_id: 'leo', plan: '开局先试探他的反手。' }], [by.leo], 'zh');
   assert.equal(zh.plan, '初步判断：开局先试探他的反手。');
   // No model copy at all: the note itself, labelled, in the app language.
-  assert.equal(G.finalizeOpponents([], [by.leo], 'zh')[0].plan, '初步判断：你记下“反手比较弱”。下次交手开局先验证。');
-  assert.equal(G.finalizeOpponents([], [by.leo], 'en')[0].plan, 'Early read: you noted “反手比较弱”. Test it early next time.');
+  assert.equal(G.finalizeOpponents([], [by.leo], 'zh')[0].plan, '初步判断：你记下“反手比较弱”。开局就针对这一点。');
+  assert.equal(G.finalizeOpponents([], [by.leo], 'en')[0].plan, 'Early read: you noted “反手比较弱”. Make it your first target.');
+  // v15: a note that only says how they play gives no card without a real plan for it.
+  assert.deepEqual(G.finalizeOpponents([], [by.ravi], 'en')[0].dropped, ['no_ai_copy', 'no_actionable_plan']);
   // At most 3 cards.
   fresh();
-  const many = ['a', 'b', 'c', 'd'].map(id => M(W, ['Other'], [], { opps: [id], opp_notes: 'smashes hard to my backhand' }));
+  const many = ['a', 'b', 'c', 'd'].map(id => M(W, ['Other'], [], { opps: [id], opp_notes: 'weak backhand in the rear court' }));
   const pl = G.finalizeOpponents([], G.opponentFacts(many, { a: 'A', b: 'B', c: 'C', d: 'D' }), 'en');
   assert.equal(pl.filter(p => !p.dropped).length, 3);
 });

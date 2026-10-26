@@ -17,7 +17,7 @@
 //   compare  a count compared between your last 3 matches and the 3 before (games won, close games won)
 //   strip    whether a self-reported observation was noted in each match (0/1), in order
 
-export const ENGINE_VERSION = '2026-10-26-v14';
+export const ENGINE_VERSION = '2026-10-26-v15';
 export const SKILL_TAGS = ['Serve', 'Return', 'Net', 'Smash', 'Defence', 'Footwork', 'Placement'];
 const WINDOW = 10;     // latest matches the Key Insight reads
 const HISTORY = 20;    // latest matches Build Next, Strengths, opponent plans and Doubles Play read
@@ -842,7 +842,8 @@ const GENERALIZE = { en: /\b(always|every ?time|usually|constantly|never|tends? 
 const nameIn = (clause, name) => {
   const n = String(name || '').trim();
   if (!n) return false;
-  return CJK.test(n) ? clause.includes(n) : new RegExp(`(^|[^\\p{L}])${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}])`, 'iu').test(clause);
+  // A Latin name may sit right against Chinese text ("Yang防守很强"): only Latin letters around it make it part of a word.
+  return CJK.test(n) ? clause.includes(n) : new RegExp(`(^|[^\\p{Script=Latin}])${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{Script=Latin}])`, 'iu').test(clause);
 };
 export function attributeNote(note, opps, names = {}) {
   const text = String(note || '').trim().slice(0, 300), out = {};
@@ -876,14 +877,56 @@ export function opponentFacts(matches, names = {}, diag) {
     }
   });
   return Object.values(by)
-    .map(o => ({ player_id: o.player_id, name: o.name, notes: o.notes.slice(0, 4), level: o.notes.length >= 2 ? 'repeated' : 'single', age: o.age }))
+    .map(o => { const notes = o.notes.slice(0, 4), level = notes.length >= 2 ? 'repeated' : 'single', evidence = opponentEvidence(notes);
+      return { player_id: o.player_id, name: o.name, notes, level, evidence, plan_type: planType(level, evidence), age: o.age }; })
     .sort((a, b) => b.notes.length - a.notes.length || a.age - b.age || a.name.localeCompare(b.name))
     .slice(0, 5).map(({ age, ...o }) => o);
 }
+// v15 (Han, 2026-10-26 18:21): what each sentence of the notes about an opponent says, so a plan builds on what
+// already worked against them, then on what they get wrong, and never just restates how they play.
+//   worked        a shot or tactic of the player's that scored or worked against them
+//   weakness      something the opponent gets wrong
+//   player_limits the player's own difficulty (stamina, keeping up): shapes the plan, never said about the opponent
+//   patterns      anything else: how the opponent plays
+const OPP_KIND = {
+  self: [/^\s*(i|i'm|i am|i was|i get|i got|me)\b|\b(my (stamina|fitness|legs)|hard for me to keep up|i (struggle|couldn't|can't|could not|cannot) keep up)\b/i, /^\s*我|我的体能|我体能/],
+  worked: [/\b(scored|scoring|won (me )?(a lot of |many |some )?(the )?points?|got (me )?points|worked( well)?|effective|paid off|winners?|successful(ly)?)\b/i, /得分|拿分|赢分|有效|奏效|管用|好用|成功/],
+  weakness: [/\b(mistakes?|errors?|unforced|miss(es|ed)?|into the net|nets (it|his|her|their)|weak(er|ness)?|struggles? (with|on|to)|unreliable|shaky|loose|passive|not (very |particularly |that |so )?(powerful|strong|heavy|aggressive|active))\b/i, /失误|下网|挂网|出界|弱|不稳|漏接|吃力|被动|不(太|够|是很|怎么)(重|有力|积极|主动)/]
+};
+export function opponentEvidence(notes) {
+  const ev = { worked: [], weakness: [], patterns: [], player_limits: [] };
+  for (const n of notes || []) for (const c of String(n).split(/[。！？；;.!?\n]/).map(x => x.trim()).filter(Boolean)) {
+    const is = k => OPP_KIND[k].some(r => r.test(c));
+    (is('self') && !is('worked') ? ev.player_limits : is('worked') ? ev.worked : is('weakness') ? ev.weakness : ev.patterns).push(c);
+  }
+  return ev;
+}
+// proven: a tactic that worked against them, noted in 2+ matches with them. suggested: built from their weaknesses or
+// patterns, not yet tried. early: one match only. none: nothing a plan can be built on (only the player's own limits).
+const planType = (level, ev) => level === 'single' ? (ev.worked.length || ev.weakness.length || ev.patterns.length ? 'early' : 'none')
+  : ev.worked.length ? 'proven' : ev.weakness.length || ev.patterns.length ? 'suggested' : 'none';
 const RECORD = { en: /\b(record|head[- ]to[- ]head|lost to (them|him|her)|beat (you|them)|you('ve| have) (lost|won|beaten)|losses|losing streak)\b/i,
   zh: /战绩|交手记录|输给|赢过|胜率|连输|连赢|胜负/ };
 export const EARLY_LABEL = { en: { opp: 'Early read: ', doubles: 'Early observation: ' }, zh: { opp: '初步判断：', doubles: '初步观察：' } };
+// v15: every plan says what it rests on. The engine adds the label; the model never writes it.
+export const PLAN_LABEL = { en: { proven: 'Worked before: ', suggested: 'Try: ', early: EARLY_LABEL.en.opp }, zh: { proven: '之前奏效：', suggested: '可以试试：', early: EARLY_LABEL.zh.opp } };
 const stripLabel = (s, lang, kind) => { const l = EARLY_LABEL[lang][kind].trim().replace(/[:：]$/, ''); return s.replace(new RegExp(`^${l}\\s*[:：]?\\s*`, 'i'), ''); };
+const stripPlanLabel = (s, lang) => Object.values(PLAN_LABEL[lang]).reduce((t, l) => t.replace(new RegExp(`^${l.trim().replace(/[:：]$/, '')}\\s*[:：]?\\s*`, 'i'), ''), s);
+// The plan uses what worked: it shares a shot, side or word with the worked notes that the other notes about this
+// opponent don't have ("smashes" is in both Yang's worked and blocked notes, "cross-court" / "backhand" only in worked).
+function usesWorked(plan, ev) {
+  const w = ev.worked.join(' \n '), o = [...ev.weakness, ...ev.patterns].join(' \n ');
+  const only = (f, x, y) => { const b = new Set(f(y)); return [...f(x)].filter(k => !b.has(k)); };
+  const tok = t => [...contentTokens(t)], con = [only(conceptsIn, w, o), only(tok, w, o), only(anchorTerms, w, o)];
+  if (!con.some(x => x.length)) return anchored(plan, ev.worked);
+  const pc = new Set([...conceptsIn(plan), ...tok(plan), ...anchorTerms(plan)]);
+  return con.some(x => x.some(k => pc.has(k)));
+}
+// A plan has to tell the player what to do. Watching, probing or "testing how" they play only repeats what the
+// notes already say.
+const OBSERVE_ONLY = { en: /\b(probe|observe|watch (for|how|out)|see (how|if|whether)|test (how|whether|if|his|her|their) (movement|speed|pace|defen[cs]e|smash)|expect|be aware|notice|find out)\b/i, zh: /观察|看看|留意|摸清|先看|试探.{0,4}(移动|速度|节奏|防守|杀球)|预计/ };
+const ACTION = { en: /\b(target|attack|aim|play|use|go|hit|send|push|keep|serve|lift|clear|drop|smash|slice|move|make|force|vary|stay|pull|take|block|drive|repeat|mix|test|open|work|stretch|shorten|slow|speed|rush|direct|feed|finish|cover|guard|defend|counter|return|stand)/i, zh: /打|攻|压|吊|杀|用|放|挑|推|拉|发|逼|主动|保持|调动|变|控制|回|针对|多|先/ };
+const THEIR_LIMIT = { en: /\b(his|her|their|he|she|they)('s| is| are| has| have)? (stamina|fitness|endurance|tired|fatigue)/i, zh: /(他|她|对手).{0,3}(体能|耐力|累)/ };
 export function checkPlan(plan, o, lang) {
   const issues = [];
   if (!plan) return ['empty'];
@@ -895,6 +938,14 @@ export function checkPlan(plan, o, lang) {
   if (!anchored(plan, o.notes)) issues.push('not_from_notes');
   // One note is one match: never a habit.
   if (o.level === 'single' && GENERALIZE[lang].test(plan)) issues.push('generalized_single_note');
+  const ev = o.evidence || opponentEvidence(o.notes), about = [...ev.worked, ...ev.weakness, ...ev.patterns];
+  if (OBSERVE_ONLY[lang].test(plan)) issues.push('observe_only');
+  if (!ACTION[lang].test(plan)) issues.push('no_action');
+  // What already worked against them comes first.
+  if (ev.worked.length && !usesWorked(plan, ev)) issues.push('proven_tactic_ignored');
+  if (about.length && !anchored(plan, about)) issues.push('not_about_opponent');
+  const nm = String(o.name || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  if (THEIR_LIMIT[lang].test(plan) || (nm && new RegExp(`${nm}('s)?\\s*(的)?\\s*(stamina|fitness|endurance|体能|耐力)`, 'i').test(plan))) issues.push('player_limit_given_to_opponent');
   if (lang === 'zh' ? zhLen(plan) > 36 : words(plan) > 24) issues.push('length');
   return issues;
 }
@@ -902,9 +953,12 @@ export function checkPlan(plan, o, lang) {
 // player's own note and a neutral next step, so the section never invents a tendency and never hides real notes.
 export function opponentTemplate(o, lang) {
   const q = (s, n) => `“${s.length > n ? s.slice(0, n - 1) + '…' : s}”`;
-  if (o.level === 'single') return lang === 'zh' ? `${EARLY_LABEL.zh.opp}你记下${q(o.notes[0], 40)}。下次交手开局先验证。` : `${EARLY_LABEL.en.opp}you noted ${q(o.notes[0], 60)}. Test it early next time.`;
-  const two = o.notes.slice(0, 2).map(n => q(n, lang === 'zh' ? 20 : 50));
-  return lang === 'zh' ? `你的记录：${two.join('')}。下次交手提前针对。` : `From your notes: ${two.join(' · ')}. Plan around these next time.`;
+  // v15: the player's own words, turned into one thing to do: what worked first, else what the opponent gets wrong.
+  // With neither (only how they play), there is no card: a quote of their style is not a plan.
+  const ev = o.evidence || opponentEvidence(o.notes), L = PLAN_LABEL[lang];
+  if (ev.worked.length) return lang === 'zh' ? `${o.level === 'single' ? L.early : L.proven}你记下${q(ev.worked[0], 40)}。下次交手开局就再用。` : `${o.level === 'single' ? L.early : L.proven}you noted ${q(ev.worked[0], 100)}. Go back to it early next time.`;
+  if (ev.weakness.length) return lang === 'zh' ? `${o.level === 'single' ? L.early : L.suggested}你记下${q(ev.weakness[0], 40)}。开局就针对这一点。` : `${o.level === 'single' ? L.early : L.suggested}you noted ${q(ev.weakness[0], 100)}. Make it your first target.`;
+  return null;
 }
 export function finalizeOpponents(ai, opps, lang) {
   const out = [];
@@ -914,12 +968,14 @@ export function finalizeOpponents(ai, opps, lang) {
     if (p) {
       const name = String(o.name || '').trim();
       if (name) for (const pre of [name + ':', name + '：', 'against ' + name + ':']) if (plan.toLowerCase().startsWith(pre.toLowerCase())) { plan = plan.slice(pre.length).trim(); break; }
-      plan = stripLabel(plan, lang, 'opp');
+      plan = stripPlanLabel(stripLabel(plan, lang, 'opp'), lang);
       issues = checkPlan(plan, o, lang);
     }
-    if (!issues.length) out.push({ player_id: o.player_id, plan: o.level === 'single' ? EARLY_LABEL[lang].opp + plan : plan, level: o.level, copy_source: 'ai' });
-    else if (specificNote(o.notes[0])) out.push({ player_id: o.player_id, plan: opponentTemplate(o, lang), level: o.level, copy_source: 'note', issues });
-    else out.push({ player_id: o.player_id, dropped: issues.concat('note_not_specific') });
+    const type = o.plan_type || planType(o.level, o.evidence || opponentEvidence(o.notes)), t = type !== 'none' && specificNote(o.notes[0]) ? opponentTemplate(o, lang) : null;
+    if (type === 'none') out.push({ player_id: o.player_id, dropped: issues.concat('nothing_to_build_a_plan_on') });
+    else if (!issues.length) out.push({ player_id: o.player_id, plan: PLAN_LABEL[lang][type] + plan, level: o.level, plan_type: type, copy_source: 'ai' });
+    else if (t) out.push({ player_id: o.player_id, plan: t, level: o.level, plan_type: type, copy_source: 'note', issues });
+    else out.push({ player_id: o.player_id, dropped: issues.concat(specificNote(o.notes[0]) ? 'no_actionable_plan' : 'note_not_specific') });
   }
   // At most OPP_MAX cards, in the engine's order (most notes, then most recent); the rest are reported as dropped.
   let shown = 0;
@@ -1072,10 +1128,12 @@ export const ITEM_RULES = `BUILD NEXT / STRENGTHS (Engine V2):
 - level "early": noted once only. The engine writes its name and labelled evidence; keep your copy plain and never call it a pattern, a habit or an established strength.`;
 
 export const OPPONENT_RULES = `OPPONENT PLANS:
-- opponents lists only opponents the player wrote notes about, each with only the notes about that opponent. Write one plan per opponent whose notes say something about how they play; leave out one whose notes don't. Never generic advice.
-- level "single": the plan comes from one note, one match. Write it as a tentative read to test ("Test his backhand early"), never as a habit: no "always", "every time", "usually", 「总是」「每次」「经常」. The engine adds the "Early read" label; don't write it. level "repeated": the notes agree across matches, so the plan can be firmer.
-- Never infer a style or weakness from results; you don't have them. Never mention the record, wins or losses.
-- Every detail in the plan (shots, sides, situations) must come from that opponent's notes. The notes may be in another language than the output: translate what they say faithfully, adding nothing. One concise instruction, no name prefix.`;
+- opponents lists only opponents the player wrote notes about, each with only the notes about that opponent, sorted into evidence: worked (the player's shots or tactics that scored or worked against them), weakness (what the opponent gets wrong), patterns (how the opponent plays) and player_limits (the player's OWN difficulties). Never generic advice.
+- Write one concrete instruction: what to do next time against them. Never just restate how they play, and never tell the player to probe, observe, watch, "see how" or "test how" something the notes already establish.
+- plan_type "proven": build the plan on the worked evidence first (go back to those shots), adding a weakness or pattern only if it fits. plan_type "suggested": nothing has been noted working yet; turn the weaknesses (first) or patterns into a specific response (e.g. fast but light smashes -> stand closer and block or counter; strong front-back movement -> keep it deep and wide). plan_type "early": one match only; a tentative plan, never a habit: no "always", "every time", "usually", 「总是」「每次」「经常」.
+- player_limits are the player's, never the opponent's: you may shape the plan around them (shorter rallies when the player's stamina fades) but never say the opponent has them.
+- Never infer a style, weakness or result from the record; you don't have it. Never mention the record, wins or losses. Never invent a weakness, shot preference or outcome.
+- Every detail about the opponent (shots, sides, situations) must come from that opponent's notes; a shot you suggest trying is fine. The notes may be in another language than the output: translate faithfully. One concise instruction, no name prefix, no label (the engine adds "Worked before" / "Try" / "Early read").`;
 
 export const DOUBLES_RULES = `DOUBLES PLAY:
 - If doubles is null there are no doubles matches with notes: return an empty list.
