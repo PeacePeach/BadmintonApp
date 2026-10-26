@@ -198,7 +198,7 @@
 .rw-name.is-muted{color:var(--rw-text-secondary);}
 .rw-score{font:var(--rw-type-score);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);white-space:nowrap;flex-shrink:0;font-variant-numeric:var(--font-variant-numeric-metric);}
 /* Bottom Nav: floating glass pill */
-.rw-nav{position:absolute;left:0;right:0;bottom:0;padding:0 16px 32px;display:flex;justify-content:center;pointer-events:none;}
+.rw-nav{position:absolute;left:0;right:0;bottom:0;padding:0 16px var(--rw-nav-bottom);display:flex;justify-content:center;pointer-events:none;}
 .rw-nav-bar{pointer-events:auto;display:flex;gap:12px;padding:4px;border-radius:100px;}
 .rw-nav-item{width:84px;height:60px;padding:8px 16px 10px;border-radius:100px;border:1px solid transparent;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:var(--rw-nav-fg);font:var(--rw-type-nav);letter-spacing:var(--rw-tracking);white-space:nowrap;transition:background var(--rw-motion-press) var(--rw-ease-enter),border-color var(--rw-motion-press) var(--rw-ease-enter),color var(--rw-motion-press) var(--rw-ease-enter);}
 .rw-nav-item.is-active{background:var(--rw-nav-active-bg);border-color:var(--rw-nav-active-border);color:var(--rw-nav-active-fg);}
@@ -340,7 +340,7 @@
 @media (prefers-reduced-motion:reduce){.rw-wave.is-live>i{animation:none;}.rw-cue,.rw-wave>i,.rw-rec-btn{transition:none;}}
 /* Bottom Sheet: scrim, then the sheet pinned to the bottom of the phone. Header = grabber, title bar, full-bleed divider. */
 .rw-sheet-scrim{position:absolute;inset:0;background:var(--rw-sheet-scrim);animation:rw-fade var(--rw-motion-sheet-in) var(--rw-ease-enter);}
-.rw-sheet{position:absolute;left:0;right:0;bottom:0;max-height:calc(100% - 44px);display:flex;flex-direction:column;gap:32px;padding:12px 20px 34px;background:var(--rw-sheet-bg);border-radius:var(--rw-sheet-radius) var(--rw-sheet-radius) 0 0;animation:rw-sheet-in var(--rw-motion-sheet-in) var(--rw-ease-enter);}
+.rw-sheet{position:absolute;left:0;right:0;bottom:0;max-height:calc(100% - max(44px, var(--rw-safe-top)));display:flex;flex-direction:column;gap:32px;padding:12px 20px max(34px, var(--rw-safe-bottom));background:var(--rw-sheet-bg);border-radius:var(--rw-sheet-radius) var(--rw-sheet-radius) 0 0;animation:rw-sheet-in var(--rw-motion-sheet-in) var(--rw-ease-enter);}
 .rw-sheet-head{display:flex;flex-direction:column;align-items:center;gap:16px;flex-shrink:0;}
 .rw-sheet-grabber{width:40px;height:5px;border-radius:99px;background:var(--rw-sheet-grabber);}
 .rw-sheet-bar{width:100%;display:grid;grid-template-columns:40px minmax(0,1fr) 40px;align-items:center;min-height:40px;}
@@ -357,7 +357,7 @@
 /* Overflow menu: drops from the floating ⋯ button (top 58 + 44px, 8px gap). Glass-rimmed tile over the sheet scrim.
    .has-sep puts a divider above an item (Log Out, Delete) so the last action sits apart. */
 .rw-menu-scrim{position:absolute;inset:0;background:var(--rw-menu-scrim);animation:rw-fade var(--rw-motion-menu) var(--rw-ease-enter);}
-.rw-menu{position:absolute;top:110px;right:20px;min-width:200px;box-sizing:border-box;padding:6px;display:flex;flex-direction:column;border-radius:var(--rw-menu-radius);background:var(--rw-menu-bg);box-shadow:var(--rw-glass-rim);transform-origin:top right;animation:rw-menu-in var(--rw-motion-menu) var(--rw-ease-enter);}
+.rw-menu{position:absolute;top:calc(var(--rw-appbar-top) + 52px);right:20px;min-width:200px;box-sizing:border-box;padding:6px;display:flex;flex-direction:column;border-radius:var(--rw-menu-radius);background:var(--rw-menu-bg);box-shadow:var(--rw-glass-rim);transform-origin:top right;animation:rw-menu-in var(--rw-motion-menu) var(--rw-ease-enter);}
 .rw-menu-item{height:48px;padding:0 12px;display:flex;align-items:center;gap:12px;border:none;border-radius:var(--rw-menu-item-radius);background:transparent;color:var(--rw-menu-item-fg);font:var(--rw-type-list-value);letter-spacing:var(--rw-tracking);text-align:left;white-space:nowrap;cursor:pointer;transition:background var(--rw-motion-press) var(--rw-ease-enter);}
 .rw-menu-item>:first-child{color:var(--rw-menu-item-icon);flex-shrink:0;}
 /* Trim the label to its cap height so flex centres the capitals on the icon wherever Poppins sits in its line box

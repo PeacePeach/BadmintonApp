@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Rallywise">
-<meta name="theme-color" content="#1b1a1d">
+<meta name="theme-color" content="#121113">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
 <!-- Every script and font ships with the app (assets/vendor, assets/fonts), so the packaged iOS app opens without the
@@ -67,6 +67,13 @@ body{margin:0;background:var(--bg-primary);font-family:"Poppins",system-ui,sans-
    components-v2.css covers the DS fields; keyboard scroll reset in the script above). */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation;}
 html,body{overflow-x:hidden;}
+/* iOS shell (Han 2026-10-26): the app is one screen-sized shell whose only scroller is the page scroller (.rw-scroll).
+   On a phone the document itself never scrolls or rubber-bands, so a short page (Settings, Account...) can't be dragged
+   as a whole, showing another colour above or below it. Every layer behind the screens is the V2 app background, so
+   nothing lighter shows around the shell either (overscroll, keyboard, View Transition snapshots). Safe areas live in
+   tokens/v2.css (--rw-safe-top/bottom -> App bar row, scrim, menu, sheet); the shell is exactly the dynamic viewport. */
+@media (max-width:500px){html,body{overflow:hidden;overscroll-behavior:none;}}
+.rw-scroll{overscroll-behavior-y:contain;}
 :where(input:not([type=checkbox],[type=radio],[type=range],[type=hidden]),textarea,select,[contenteditable]){font-size:var(--rw-field-font,16px);}
 *{box-sizing:border-box;}
 *::-webkit-scrollbar{display:none;}
@@ -77,8 +84,8 @@ input::placeholder,textarea::placeholder{color:var(--rw-placeholder-text);opacit
 .search-field-outline{border:var(--control-outline-width) solid var(--control-outline);}
 .search-field-outline:focus-within{border-color:var(--ghost-button-outline-highlight);}
 /* App shell is full-screen by default. The physical iPhone supplies the device corners. */
-html,body,#dc-root,#dc-root>.sc-host{width:100%;height:100%;min-height:100%;background:var(--bg-primary);}
-.stage{width:100% !important;height:100vh !important;height:100dvh !important;min-height:100vh !important;padding:0 !important;}
+html,body,#dc-root,#dc-root>.sc-host{width:100%;height:100%;min-height:100%;background:var(--rw-bg-app);}
+.stage{width:100% !important;height:100vh !important;height:100dvh !important;min-height:0 !important;padding:0 !important;}
 .phone{width:100% !important;height:100vh !important;height:100dvh !important;border-radius:0 !important;box-shadow:none !important;}
 .fake-status{display:none !important;}
 /* Keep the old framed phone preview only on larger desktop browser windows. */
@@ -133,9 +140,9 @@ button:disabled{cursor:default !important;}
 </style>
 </helmet>
 <div class="stage" style="width:100%;height:100vh;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:0;">
-<div data-screen-label="Phone" class="phone rw-vt-page" style="position:relative;width:100%;height:100vh;border-radius:0;background:var(--bg-primary);overflow:hidden;color:var(--text-primary);box-shadow:none;">
+<div data-screen-label="Phone" class="phone rw-vt-page" style="position:relative;width:100%;height:100vh;border-radius:0;background:var(--rw-bg-app);overflow:hidden;color:var(--text-primary);box-shadow:none;">
 
-  <div ref="{{ scrollRef }}" class="{{ scrollCls }}" onScroll="{{ onScroll }}" style="position:absolute;inset:0;overflow-x:hidden;overflow-y:auto;padding:var(--rw-appbar-top) var(--rw-appbar-inset) 120px;">
+  <div ref="{{ scrollRef }}" class="{{ scrollCls }}" onScroll="{{ onScroll }}" style="position:absolute;inset:0;overflow-x:hidden;overflow-y:auto;padding:var(--rw-appbar-top) var(--rw-appbar-inset) var(--rw-scroll-end);">
 
     <!-- LOG IN -->
     <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
@@ -1790,7 +1797,7 @@ button:disabled{cursor:default !important;}
 
   <!-- Onboarding footer: Primary button; on Ready a second full-width button on tile fill (the auth social-button style). -->
   <sc-if value="{{ isOnboarding }}" hint-placeholder-val="{{ false }}">
-    <div class="rw-btn-stack" style="position:absolute;left:0;right:0;bottom:0;padding:14px var(--rw-appbar-inset) 34px;">
+    <div class="rw-btn-stack" style="position:absolute;left:0;right:0;bottom:0;padding:14px var(--rw-appbar-inset) max(34px, var(--rw-safe-bottom));">
       <button type="button" class="rw-btn rw-btn-primary" onClick="{{ obNext }}" disabled="{{ obCantGo }}">{{ obCtaLabel }}</button>
       <sc-if value="{{ obReady }}" hint-placeholder-val="{{ false }}">
         <button type="button" class="rw-btn rw-btn-social" onClick="{{ obToMatches }}">{{ tx.goToMatches }}</button>

@@ -370,12 +370,18 @@
   --rw-tab-fg: var(--rw-color-text-secondary);
   --rw-tab-active-border: var(--rw-color-border-selected);
   --rw-tab-active-fg: var(--rw-color-text-on-selected);  /* active border, label and icon are all N600 (Han, 2026-10-23) */
-  /* App bar: scrim height covers the status time and the 40px action (58 + 40) plus the fade */
-  --rw-appbar-scrim-h: 124px;
-  --rw-appbar-top: 58px;                              /* top of the App bar row (below the status time) */
+  /* iOS safe areas (status bar / Dynamic Island, home indicator); 0 in a desktop browser */
+  --rw-safe-top: env(safe-area-inset-top, 0px);
+  --rw-safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* App bar: 58 on the design phone (status bar 47); never inside a taller status bar (iPhone 15 59, 16 Pro 62) */
+  --rw-appbar-top: max(58px, var(--rw-safe-top));     /* top of the App bar row (below the status time) */
+  --rw-appbar-scrim-h: calc(var(--rw-appbar-top) + 66px);   /* covers the status time and the 40px action plus the fade (124 on the design phone) */
   --rw-appbar-inset: 20px;                            /* left/right edge of the Back and ⋯ buttons = screen side padding */
   --rw-appbar-btn: 40px;                              /* visible glass button (44px hit area, margin -2) */
-  /* Bottom Nav */
+  /* Bottom Nav: 32px off the bottom edge, its buttons (4px inside the glass bar) clear the 34px home indicator */
+  --rw-nav-bottom: 32px;
+  /* Page scroller end space, the same on every page: Bottom Nav (32 + 68 bar) + 20 = 120 */
+  --rw-scroll-end: calc(var(--rw-nav-bottom) + 88px);
   --rw-nav-fg: var(--rw-color-text-inactive);
   --rw-nav-active-bg: var(--rw-color-surface-selected);
   --rw-nav-active-border: var(--rw-color-border-selected);
