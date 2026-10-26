@@ -16,7 +16,7 @@ const src = fs.readFileSync(path.join(ROOT, 'supabase/functions/generate-grow-in
   .replace('"../_shared/grow-insights-core.js"', JSON.stringify(CORE));
 const FN = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'grow-edge-')), 'fn.mts');
 fs.writeFileSync(FN, src);
-const env = { SUPABASE_URL: 'x', SUPABASE_ANON_KEY: 'x', OPENAI_API_KEY: 'sk-test' };
+const env = { SUPABASE_URL: 'x', SUPABASE_ANON_KEY: 'x', OPENAI_API_KEY: 'sk-test', GROW_AI_TIMEOUT_MS: '50' };
 globalThis.Deno = { serve: h => { globalThis.__growHandler = h; }, env: { get: k => env[k] } };
 await import(pathToFileURL(FN).href);
 
@@ -32,6 +32,9 @@ function account(matches, focus = [], players = [{ id: 'me', name: 'Han' }, { id
     globalThis.fetch = async (url, init) => {
       db.calls++; const out = ai(JSON.parse(init.body));
       if (out instanceof Error) return { ok: false, status: 500, text: async () => out.message };
+      // 'hang': never answers until the function gives up on it; { raw }: the model's text as is (not JSON).
+      if (out === 'hang') return new Promise((_, no) => init.signal.addEventListener('abort', () => no(Object.assign(new Error('aborted'), { name: 'AbortError' }))));
+      if (out && out.raw != null) return { ok: true, json: async () => ({ output: [{ content: [{ type: 'output_text', text: out.raw }] }] }) };
       return { ok: true, json: async () => ({ output: [{ content: [{ type: 'output_text', text: JSON.stringify(out) }] }] }) };
     };
     const res = await globalThis.__growHandler(new Request('http://x', { method: 'POST', headers: { Authorization: 'Bearer t' }, body: JSON.stringify({ lang }) }));
@@ -90,10 +93,11 @@ test('EN and ZH each keep their own cache: switching back and forth makes no new
   assert.equal((await more.call('en')).cached, false);
 });
 
-test('few matches: "insufficient" with how many more (plus a labelled early item); enough but steady: "no_trend" and no model call', async () => {
+test('few matches: one note gives a labelled early Key Insight; enough but nothing noted: "no_trend" and no model call', async () => {
   const few = account([M(0, W, ['Net'], []), M(1, L, ['Other'], []), M(2, W, ['Other'], [])]);
   const r = await few.call('en');
-  assert.deepEqual([r.insight.keyInsight.status, r.insight.keyInsight.more], ['insufficient', 3]);
+  // Engine v14: one note is an early observation (P3), labelled so, rather than "not enough data".
+  assert.deepEqual([r.insight.keyInsight.status, r.insight.keyInsight.tier, r.insight.keyInsight.title], ['ok', 3, 'Early sign: Net play']);
   assert.deepEqual(r.insight.buildNext.map(b => [b.tag, b.level, b.evidence]), [['Net', 'early', 'Early sign: you noted it costing points once in your last 3 matches.']]);
   const steady = account(Array.from({ length: 10 }, (_, i) => M(i, i % 2 ? L : W, ['Other'], [])));
   const s = await steady.call('zh');
@@ -186,7 +190,7 @@ test('low data: one noted singles match and one noted doubles match still give l
     const ms = [H.matches[5], H.matches[6]]; // Net worked + note on Leo; doubles Defence cost + note on Mei
     for (const lang of ['en', 'zh']) {
       const i = (await han17(ms).call(lang, () => new Error('down'))).insight;
-      assert.equal(i.keyInsight.status, 'insufficient');
+      assert.deepEqual([i.keyInsight.status, i.keyInsight.tier, i.keyInsight.level], ['ok', 3, 'early'], 'P3: an early read, not "no_trend"');
       assert.deepEqual([i.buildNext.length, i.strengths.length], [0, 0], 'Build Next / Strengths need 3 noted matches');
       assert.equal(i.coverage.build_next.zero_reason, 'fewer_than_3_noted_matches');
       assert.deepEqual(i.opponentPlans.map(p => [p.player_id, p.level]), [['mei', 'single'], ['leo', 'single']]);
@@ -207,5 +211,53 @@ test('high data: 25 matches with notes on every one: Build Next at most 4, Stren
     assert.equal(i.coverage.matches_read, 20); assert.equal(i.coverage.skill_window, 12);
     assert.equal(i.opponentPlans.length, 3);
     assert.ok(i.opponentPlans.every(p => p.level === 'repeated'));
+  }
+});
+
+
+// ---- Engine v14 ----
+const flat17 = () => H.matches.map(m => ({ ...m, games: [[21, 19], [19, 21]] }));
+test('v14: 17 matches with no clear score change and evidence in every section: the Key Insight is the repeated pattern, never no_trend (EN, ZH, model ok / failed / invalid / timeout)', async () => {
+  const answers = { ok: undefined, failed: () => new Error('500'), invalid: () => ({ raw: 'not json {' }), wrongIds: () => ({ keyInsight: { candidate_id: 'trend:margin', title: 'Scores up', body: 'x' }, buildNext: [], strengths: [], opponentPlans: [], doublesPlay: [] }), timeout: () => 'hang' };
+  for (const lang of ['en', 'zh']) for (const [name, ai] of Object.entries(answers)) {
+    const a = han17(flat17()), r = await a.call(lang, ai), i = r.insight;
+    assert.equal(r.status, 200, name);
+    assert.deepEqual([i.keyInsight.status, i.keyInsight.tier, i.keyInsight.candidate_id], ['ok', 2, 'pattern:cost:Defence'], `${lang} ${name}`);
+    assert.ok(i.buildNext.length && i.strengths.length && i.opponentPlans.length && i.doublesPlay.length, `${lang} ${name}`);
+    assert.equal(i.ai_status, name === 'ok' || name === 'wrongIds' ? 'ok' : 'failed', `${lang} ${name}`);
+    assert.equal(a.writes, i.ai_status === 'failed' ? 0 : 1, 'a failed call is not cached');
+    assert.equal(i.coverage.key_insight, 'ok');
+  }
+});
+
+test('v14: the model sees the 3 best Key Insight candidates with their tier; the stored insight lists every candidate considered', async () => {
+  let sent;
+  const r = await han17(flat17()).call('en', body => { sent = JSON.parse(body.input[1].content); return { keyInsight: null, buildNext: [], strengths: [], opponentPlans: [], doublesPlay: [] }; });
+  assert.deepEqual(sent.key_candidates.map(c => [c.candidate_id, c.tier]), [['pattern:cost:Defence', 2], ['pattern:worked:Serve', 2], ['opponent:alex', 2]]);
+  assert.ok(r.insight.keyInsight.candidates.length >= 8);
+  assert.deepEqual(r.insight.keyInsight.candidates.slice(-1)[0].tier, 3);
+});
+
+test('scenario matrix: 0, 1, 3, 6, 10, 18 and 20+ matches, sparse and rich notes: no NaN, sections agree with the Key Insight, EN and ZH give the same cards', async () => {
+  const rich = H.matches, sparse = H.matches.map((m, i) => (i % 3 ? { ...m, wt: [], lt: [], worked: '', lost: '', opp_notes: '' } : m));
+  const more = Array.from({ length: 8 }, (_, i) => ({ ...H.matches[i], id: 'x' + i, date: `2026-10-${String(10 + i).padStart(2, '0')}`, created_at: `2026-10-${String(10 + i).padStart(2, '0')}T12:00:00Z` }));
+  for (const [kind, base] of Object.entries({ rich, sparse })) for (const n of [0, 1, 3, 6, 10, 17, 18, 25]) {
+    const ms = [...base, ...more].slice(0, n);
+    const out = {};
+    for (const lang of ['en', 'zh']) {
+      const r = await han17(ms).call(lang, () => new Error('down'));
+      assert.equal(r.status, 200);
+      if (!n) { assert.equal(r.insight, null, 'no matches: no insight (the app shows its empty state)'); continue; }
+      const i = r.insight, txt = JSON.stringify(i);
+      assert.ok(!/NaN|Infinity|undefined/.test(txt), `${kind} ${n} ${lang}: ${txt.match(/.{40}(NaN|Infinity|undefined).{20}/)}`);
+      const cards = i.buildNext.length + i.strengths.length + i.opponentPlans.length + i.doublesPlay.length;
+      if (cards) assert.equal(i.keyInsight.status, 'ok', `${kind} ${n} ${lang}: sections have ${cards} cards but Key is ${i.keyInsight.status}`);
+      if (i.keyInsight.status === 'ok') assert.deepEqual(i.keyInsight.validation.issues, [], `${kind} ${n} ${lang}: ${i.keyInsight.title} / ${i.keyInsight.body}`);
+      else assert.ok(['no_trend', 'insufficient'].includes(i.keyInsight.status));
+      for (const b of i.buildNext) assert.ok(!i.strengths.some(s => s.tag === b.tag), 'one side per skill');
+      assert.ok(i.buildNext.length <= 4 && i.strengths.length <= 3 && i.opponentPlans.length <= 3 && i.doublesPlay.length <= 2);
+      out[lang] = [i.keyInsight.candidate_id || i.keyInsight.status, i.buildNext.map(b => b.topic_id + b.level), i.strengths.map(b => b.topic_id + b.level), i.opponentPlans.map(p => p.player_id + p.level), i.doublesPlay.length];
+    }
+    if (n) assert.deepEqual(out.en, out.zh, `${kind} ${n}: EN and ZH differ`);
   }
 });

@@ -17,7 +17,7 @@
 //   compare  a count compared between your last 3 matches and the 3 before (games won, close games won)
 //   strip    whether a self-reported observation was noted in each match (0/1), in order
 
-export const ENGINE_VERSION = '2026-10-26-v13';
+export const ENGINE_VERSION = '2026-10-26-v14';
 export const SKILL_TAGS = ['Serve', 'Return', 'Net', 'Smash', 'Defence', 'Footwork', 'Placement'];
 const WINDOW = 10;     // latest matches the Key Insight reads
 const HISTORY = 20;    // latest matches Build Next, Strengths, opponent plans and Doubles Play read
@@ -255,15 +255,69 @@ export function rankCandidates(cands, previousId) {
 }
 
 // The Key Insight candidates worth showing, best first. all: true keeps the ones under the quality bar (tests, reports).
-export function keyCandidates(matches, previousId, { all = false } = {}) {
+// Engine v14 (Han, 2026-10-26): the Key Insight follows one hierarchy, and never says "no clear change" while the
+// sections under it hold evidence it could have used.
+//   P1 performance trend   score trend / games won / close games (objective, unchanged standards)
+//   P2 repeated pattern    a Skill Tag strip (latest 6 noted), or a skill noted on one side in 2+ matches of the
+//                          Build Next / Strengths window, or 2+ notes about one opponent, or a skill noted in 2+
+//                          doubles matches: the same evidence those sections show
+//   P3 early observation   one recent note (labelled early), or a skill noted both ways (mixed)
+//   P4 none                no_trend (the detectors ran, nothing to say) or insufficient (too little to run them)
+// Each candidate carries tier 1-3; the list is ordered by tier, then by group, then by score.
+const GROUP = { trend: 0, compare: 0, tag: 1, pattern: 2, opponent: 3, doubles: 4, mixed: 5, early: 6 };
+export function keyCandidates(matches, previousId, { all = false, focus = [], names = {} } = {}) {
   const chron = normalize(matches);
   // A strip only on the side the skill is sorted to (see Build Next and Strengths), so the Key Insight never says the
   // opposite of the lists under it. Mixed skills have no strip.
   const sides = topicSides(matches);
-  const found = [trendCandidate(chron), compareCandidate(chron, 'games'), compareCandidate(chron, 'close'),
-    ...tagCandidates(chron).filter(c => sides[c.tag] === c.side)].filter(Boolean);
-  const ranked = rankCandidates(found, previousId);
-  return all ? ranked : ranked.filter(c => c.quality >= KEY_MIN_QUALITY);
+  const p1 = rankCandidates([trendCandidate(chron), compareCandidate(chron, 'games'), compareCandidate(chron, 'close')].filter(Boolean), previousId)
+    .filter(c => all || c.quality >= KEY_MIN_QUALITY);
+  const strips = rankCandidates(tagCandidates(chron).filter(c => sides[c.tag] === c.side), previousId).filter(c => all || c.quality >= KEY_MIN_QUALITY);
+  const rest = evidenceCandidates(matches, { focus, names, strips });
+  const kc = keyCounts(matches), steady = !p1.length && (kc.scored >= KEY_NEED.scored || kc.results >= KEY_NEED.results);
+  for (const c of rest) if (c.family === 'pattern') c.steady = steady;
+  p1.forEach(c => { c.tier = 1; }); strips.forEach(c => { c.tier = 2; });
+  // The same insight as last time goes after the others in its group.
+  const order = c => [c.tier, GROUP[c.family], c.id === previousId ? 1 : 0, -(c.score || 0)];
+  return [...p1, ...strips, ...rest].sort((x, y) => { const a = order(x), b = order(y); for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] - b[i]; return x.id.localeCompare(y.id); });
+}
+
+// P2 / P3 candidates from the evidence Build Next, Strengths, Opponent Plans and Doubles Play use (same functions,
+// same windows), so the Key Insight can only summarise what those sections can show.
+function evidenceCandidates(matches, { focus = [], names = {}, strips = [] } = {}) {
+  const out = [], { win, skipped } = skillTable(matches), n = win.length;
+  const window = { matches: n, skipped };
+  const hasStrip = (tag, side) => strips.some(c => c.tag === tag && c.side === side);
+  const base = (x, o) => ({ pattern: 'text', source: 'notes_tags', chart: null, direction: null, strength: 'moderate', required: [], allowed: [], match_ids: [], notes: [], ...o, ...x });
+  const build = buildCandidates(matches, focus, 4), strengths = strengthCandidates(matches, 3);
+  for (const b of build) {
+    if (b.mixed) { out.push(base({ id: `mixed:${b.tag}`, family: 'mixed', tier: 3, tag: b.tag, side: 'mixed', shape: 'mixed', numbers: { k: b.k, w: b.w, n }, required: [b.k, b.w], allowed: [b.k, b.w, n], notes: b.notes, score: (b.k + b.w) / n }, { evidence: { window } })); continue; }
+    if (hasStrip(b.tag, 'cost')) continue;
+    if (b.level === 'early') out.push(base({ id: `early:cost:${b.tag}`, family: 'early', tier: 3, tag: b.tag, side: 'cost', shape: 'early', numbers: { k: 1, n: b.n }, required: [], allowed: [1, b.n], notes: [], score: 1 - (b.age || 0) / 10 }, { evidence: { window } }));
+    else out.push(base({ id: `pattern:cost:${b.tag}`, family: 'pattern', tier: 2, tag: b.tag, side: 'cost', shape: b.returning ? 'returning' : 'repeated', numbers: { k: b.k, n: b.n }, required: [b.k], allowed: [b.k, b.n, 3], notes: b.notes, score: b.k / b.n + 0.01 * b.recent }, { evidence: { window: b.returning ? { matches: b.n, skipped: 0 } : window } }));
+  }
+  for (const b of strengths) {
+    if (hasStrip(b.tag, 'worked')) continue;
+    if (b.level === 'early') out.push(base({ id: `early:worked:${b.tag}`, family: 'early', tier: 3, tag: b.tag, side: 'worked', shape: 'early', numbers: { k: 1, n: b.n }, required: [], allowed: [1, b.n], notes: [], score: 0.5 - (b.age || 0) / 20 }, { evidence: { window } }));
+    // A strength ranks just under a cost pattern with the same count: the cost is what to act on.
+    else out.push(base({ id: `pattern:worked:${b.tag}`, family: 'pattern', tier: 2, tag: b.tag, side: 'worked', shape: 'repeated', numbers: { k: b.k, n: b.n }, required: [b.k], allowed: [b.k, b.n, 3], notes: b.notes, score: b.k / b.n - 0.001 }, { evidence: { window } }));
+  }
+  // Opponents: only those an Opponent Plan card can be made for (notes that say something specific).
+  for (const o of opponentFacts(matches, names).slice(0, OPP_MAX)) {
+    const k = o.notes.length;
+    out.push(base({ id: `${k >= 2 ? 'opponent' : 'early:opponent'}:${o.player_id}`, family: k >= 2 ? 'opponent' : 'early', tier: k >= 2 ? 2 : 3, source: 'opp_notes', player_id: o.player_id, name: o.name,
+      side: 'opponent', shape: k >= 2 ? 'repeated' : 'early', numbers: { k }, required: [], allowed: [k, 1, 2, 3], notes: o.notes, score: k >= 2 ? k / 10 : 0.2 }, { evidence: { window: { matches: HISTORY, skipped: 0 } } }));
+  }
+  const d = doublesFacts(matches);
+  // Doubles notes without a Skill Tag: still something Doubles Play can show, so still an early observation here.
+  if (d && !d.cost_points.length && !d.strengths.length && d.notes.length) out.push(base({ id: 'early:doubles:notes', family: 'early', tier: 3, side: 'notes', shape: 'early', doubles: true,
+    numbers: { n: d.noted }, allowed: [d.noted, 1], notes: d.notes.map(t => t.text), score: 0.05 }, { evidence: { window: { matches: d.noted, skipped: 0 } } }));
+  if (d) for (const x of [...d.cost_points.map(t => ({ ...t, side: 'cost' })), ...d.strengths.map(t => ({ ...t, side: 'worked' }))].sort((a, b) => b.count - a.count).slice(0, 1)) {
+    const rep = x.count >= 2;
+    out.push(base({ id: `${rep ? 'doubles' : 'early:doubles'}:${x.side}:${x.tag}`, family: rep ? 'doubles' : 'early', tier: rep ? 2 : 3, tag: x.tag, side: x.side, shape: rep ? 'repeated' : 'early', doubles: true,
+      numbers: { k: x.count, n: d.noted }, required: rep ? [x.count] : [], allowed: [x.count, d.noted, 1], notes: d.notes.map(t => t.text), score: rep ? x.count / d.noted - 0.5 : 0.1 }, { evidence: { window: { matches: d.noted, skipped: 0 } } }));
+  }
+  return out;
 }
 
 // ---- Key Insight template copy (also the fallback when AI copy fails validation) ----
@@ -276,6 +330,7 @@ const margin = (v, lang) => {
 };
 export function keyTemplate(c, lang) {
   const P = phr(lang, c), N = c.numbers;
+  if (['pattern', 'mixed', 'early', 'opponent', 'doubles'].includes(c.family)) return evidenceTemplate(c, lang, P, N);
   if (c.family === 'trend') {
     const up = c.direction === 'up', strong = c.strength === 'strong';
     if (lang === 'zh') return {
@@ -318,6 +373,44 @@ export function keyTemplate(c, lang) {
     : { title: `${T} is working for you`, body: `You noted it winning points in ${N.k} of ${P.lastN(N.n)}.` };
   return { title: cost ? `${T} has started to cost you` : `${T} is starting to pay off`,
     body: `You noted it in ${N.r} of ${P.last3.replace(/ matches$/, '')}, ${N.p === 0 ? 'none' : N.p} in the 3 before.` };
+}
+
+// P2 / P3 wording. A summary of the discovery, not the card text under it: the title says what it means, the body
+// gives the count and, for early ones, that it is too early to call a pattern. Never a habit from one note.
+function evidenceTemplate(c, lang, P, N) {
+  const zh = lang === 'zh', T = c.tag ? tagTitle(lang, c.tag) : '', w = c.tag ? tagWord(lang, c.tag) : '', cost = c.side === 'cost';
+  const lastN = P.lastN(N.n);
+  if (c.family === 'pattern') {
+    if (c.shape === 'returning') return zh ? { title: `${T}又开始丢分了`, body: `完成训练目标后的${N.n}场里，又有${N.k}场你记下${w}丢分。` }
+      : { title: `${T} is costing points again`, body: `You noted it in ${N.k} of ${N.n} matches since you completed it.` };
+    // steady: the score detectors had enough matches and found no clear change, so this is the bigger story.
+    const st = c.steady;
+    if (zh) return cost ? { title: `${T}还在反复丢分`, body: `${st ? '比分没有明显变化，但' : ''}${lastN}里有${N.k}场你记下${w}丢分。` }
+      : { title: `${T}一直在帮你得分`, body: `${st ? '比分没有明显变化，但' : ''}${lastN}里有${N.k}场你记下${w}打得好。` };
+    // The "no real trend" clause only when it still fits the 3-line body.
+    const fit = (title, a, b) => ({ title, body: st && lineCount(a, KEY_FIT.body.size) <= KEY_FIT.body.lines ? a : b });
+    return cost ? fit(`${T} keeps costing you points`, `You noted it in ${N.k} of ${lastN}; scores show no real trend.`, `You noted it in ${N.k} of ${lastN}.`)
+      : fit(`${T} keeps working for you`, `Noted working in ${N.k} of ${lastN}; scores show no real trend.`, `You noted it working in ${N.k} of ${lastN}.`);
+  }
+  if (c.family === 'mixed') return zh ? { title: `${T}时好时坏`, body: `${lastN}里，${N.k}场你记下它丢分，${N.w}场记下它打得好。` }
+    : { title: `${T} has been up and down`, body: `Noted costing points in ${N.k} and working in ${N.w} of ${lastN}.` };
+  if (c.family === 'opponent') return zh ? { title: `${c.name}：已有${N.k}场记录`, body: `你在${N.k}场比赛里记下了${c.name}的打法，对手策略就来自这些记录。` }
+    : { title: `You have a read on ${c.name}`, body: `You noted how ${c.name} plays in ${N.k} matches. See the plan below.` };
+  if (c.family === 'doubles') return zh ? { title: `双打里${T}反复出现`, body: `${N.n}场有记录的双打里，有${N.k}场你记下${w}${cost ? '丢分' : '打得好'}。` }
+    : { title: `${T} keeps coming up in doubles`, body: `You noted it ${cost ? 'costing points' : 'working'} in ${N.k} of ${N.n} noted doubles matches.` };
+  // early
+  if (c.side === 'opponent') return zh ? { title: `初步判断：${c.name}`, body: `目前只有1场关于${c.name}的记录，下次交手先验证。` }
+    : { title: `Early read on ${c.name}`, body: `You noted how they play once so far. Test it next time.` };
+  if (c.side === 'notes') return zh ? { title: '初步观察：双打', body: `你已经记下了${N.n}场双打，还不算规律，多记几场再看。` }
+    : { title: 'Early doubles notes', body: `You have notes on ${N.n} doubles ${N.n === 1 ? 'match' : 'matches'}. Too early to call a pattern.` };
+  if (c.doubles) return zh ? { title: `初步观察：双打${T}`, body: `${N.n}场有记录的双打里有1场你记下${w}${cost ? '丢分' : '打得好'}，还不算规律。` }
+    : { title: `Early doubles sign: ${T}`, body: `Noted ${cost ? 'costing points' : 'working'} in 1 of ${N.n} noted doubles. Too early to call.` };
+  if (zh) return cost ? { title: `初步观察：${T}`, body: `${lastN}里有1场你记下${w}丢分，还不算规律。` }
+    : { title: `初步观察：${T}有亮点`, body: `${lastN}里有1场你记下${w}打得好，还不算稳定优势。` };
+  // The first wording that fits the tile (title 2 lines, body 3).
+  const first = (list, f) => list.find(x => lineCount(x, f.size) <= f.lines) || list[list.length - 1];
+  return cost ? { title: `Early sign: ${T}`, body: first([`Noted costing points once in ${lastN}. Too early to call.`, `Noted as a cost once in ${lastN}. Too early to call.`, 'Noted as a cost once. Too early to call.'], KEY_FIT.body) }
+    : { title: first([`Early sign: ${T} is working`, `Early sign: ${T}`], KEY_FIT.title), body: first([`Noted working once in ${lastN}. Too early to call.`, 'Noted working once. Too early to call.'], KEY_FIT.body) };
 }
 
 // ---- Fit: lines on the Key Insight tile ----
@@ -459,11 +552,22 @@ export function checkCopy({ title, body }, c, lang) {
   const nums = numbersIn(text).map(Math.abs);
   if (nums.some(n => !c.allowed.includes(n))) issues.push('number_not_in_evidence');
   if (c.required.some(n => !nums.includes(n) && !(n === 3 && /all 3|每场都/.test(text)) && !(n === 0 && /(haven't|none|level|都没|没提到|打平)/i.test(text)))) issues.push('number_missing');
-  if (c.chart.unit !== '%' && /%/.test(text)) issues.push('unit');
+  if (/%/.test(text)) issues.push('unit');
   if (c.family === 'trend' && !(lang === 'zh' ? /分/.test(body) : /\bpoints?\b/i.test(body))) issues.push('unit');
   if (c.direction === 'down' && c.shape !== 'recurring' && UP_WORDS[lang].test(text) && !DOWN_WORDS[lang].test(text)) issues.push('direction');
   if ((c.direction === 'up') && DOWN_WORDS[lang].test(title)) issues.push('direction');
-  if (c.source === 'notes_tags') {
+  // P2 / P3 (Engine v14): self-reported, so "you noted"; an early one must say it is early and never call it a habit;
+  // an opponent insight never brings in the record.
+  if (c.family === 'early') {
+    if (!(lang === 'zh' ? /初步|还不算|只有1场/ : /\bearly\b|too early|so far/i).test(text)) issues.push('not_labelled_early');
+    if (GENERALIZE[lang].test(text)) issues.push('generalized_single_note');
+  }
+  if (c.source === 'opp_notes') {
+    if (RECORD[lang].test(text)) issues.push('record_inference');
+    if (!text.includes(c.name)) issues.push('opponent_not_named');
+  }
+  if (c.family === 'mixed' && !(numbersIn(text).includes(c.numbers.k) && numbersIn(text).includes(c.numbers.w))) issues.push('number_missing');
+  if (c.source === 'notes_tags' || c.source === 'opp_notes') {
     if (!NOTE_WORDS[lang].test(text)) issues.push('not_marked_self_reported');
     if (MEASURED[lang].test(text)) issues.push('measured_claim_from_notes');
   } else if (c.strength !== 'strong' && (lang === 'zh' ? /进步|越来越好/.test(title) : /\b(improv|better|stronger)/i.test(title))) issues.push('overclaim');
@@ -499,7 +603,8 @@ export function keyStatus(matches) {
 // matches: the records the candidates came from, to tell "insufficient" from "no_trend" when there is no candidate.
 export function finalizeKey(cands, ai, lang, matches) {
   if (!cands.length) return matches ? { ...keyStatus(matches), reason: 'no_candidate' } : { status: 'insufficient', reason: 'no_candidate' };
-  const c = (ai && cands.find(x => x.id === ai.candidate_id)) || cands[0];
+  // The model may only pick within the best tier (a pattern never replaces a measured trend, an early note never a pattern).
+  const picked = ai && cands.find(x => x.id === ai.candidate_id), c = picked && (picked.tier || 1) <= (cands[0].tier || 1) ? picked : cands[0];
   let copy = ai && ai.candidate_id === c.id ? { title: String(ai.title || '').trim(), body: String(ai.body || '').trim() } : null;
   let issues = copy ? checkCopy(copy, c, lang) : ['no_ai_copy'], source = 'ai';
   if (issues.length) { copy = keyTemplate(c, lang); source = 'template'; }
@@ -507,9 +612,14 @@ export function finalizeKey(cands, ai, lang, matches) {
   return {
     status: 'ok', candidate_id: c.id, metric_id: c.id, title: copy.title, body: copy.body, pattern: c.pattern,
     // A linked strip writes each match's result under its pill (RWKeyChart xLabels) instead of 1..6.
-    chart: { ...c.chart, ...(c.chart.results ? { xLabels: c.chart.results.map(r => (lang === 'zh' ? { W: '胜', L: '负' } : { W: 'W', L: 'L' })[r] || '·') } : {}) },
+    // P2 / P3 insights have no chart: their window (up to 12 noted matches) doesn't fit the 6-pill strip, and a shorter
+    // strip would show a different denominator than the copy.
+    chart: c.chart ? { ...c.chart, ...(c.chart.results ? { xLabels: c.chart.results.map(r => (lang === 'zh' ? { W: '胜', L: '负' } : { W: 'W', L: 'L' })[r] || '·') } : {}) } : null,
+    tier: c.tier || 1, level: c.tier === 3 ? (c.family === 'mixed' ? 'mixed' : 'early') : c.tier === 2 ? 'pattern' : 'trend',
     evidence: { source: c.source, family: c.family, tag: c.tag || null, side: c.side || null, shape: c.shape, direction: c.direction, strength: c.strength,
-      score: c.score, numbers: c.numbers, ...c.evidence },
+      score: c.score, numbers: c.numbers, ...(c.player_id ? { player_id: c.player_id } : {}), ...c.evidence },
+    // Every candidate considered, best first (for the report and for checking why this one was picked).
+    candidates: cands.map(x => ({ id: x.id, tier: x.tier || 1, numbers: x.numbers, ...(x.quality != null ? { quality: x.quality } : {}) })),
     match_ids: c.match_ids, copy_source: source,
     validation: { passed: !tIssues.length, ai_issues: source === 'template' ? issues : [], issues: tIssues }
   };
@@ -925,15 +1035,22 @@ export function candidateFacts(c, lang) {
       ? 'Close games (decided by 3 points or fewer) won in your last 3 matches (r of rn) vs the 3 before (p of pn). Objective score data.'
       : 'Games won in your last 3 matches (r of rn) vs the 3 before (p of pn). Objective score data.',
     tag: `Self-reported: whether the player noted ${c.tag} under "${c.side === 'cost' ? 'What Cost Points' : 'What Worked'}" in each of their latest 6 matches with notes (k of n; r = last 3, p = the 3 before). This is mentions in notes, not counted mistakes or points.` +
-      (c.linked ? ` Linked to results: of the l losses in those matches, lt had this note (the chart marks each match W/L). Say it showed up in the losses; never say it caused them.` : '')
+      (c.linked ? ` Linked to results: of the l losses in those matches, lt had this note (the chart marks each match W/L). Say it showed up in the losses; never say it caused them.` : ''),
+    pattern: `Self-reported: the player noted ${c.tag} under "${c.side === 'cost' ? 'What Cost Points' : 'What Worked'}" in k of their latest n matches with notes (2+ matches: a repeated pattern, not a trend).` +
+      (c.steady ? ' The score detectors ran and found no clear trend, so this is the main story.' : '') + (c.shape === 'returning' ? ' It came back after the player completed a Focus on it.' : ''),
+    mixed: `Self-reported: ${c.tag} was noted costing points in k and working in w of the latest n matches with notes. No clear direction: say it has been up and down; never a strength or a weakness.`,
+    opponent: `The player wrote notes about how ${c.name} plays in k matches (notes below). Summarise what the notes say about them; no record, no tactics the notes don't have.`,
+    doubles: `Self-reported: ${c.tag} was noted under "${c.side === 'cost' ? 'What Cost Points' : 'What Worked'}" in k of n doubles matches with notes.`,
+    early: `ONE observation so far (${c.side === 'opponent' ? `one note about ${c.name}` : `${c.tag} noted ${c.side === 'cost' ? 'costing points' : 'working'} once${c.doubles ? ' in doubles' : ''}`}). It is an early observation: say so ("Early sign", "too early to call", 「初步观察」「还不算规律」). Never a habit, a trend or an established strength or weakness.`
   }[c.family];
-  return { candidate_id: c.id, pattern: c.pattern, source: c.source, shape: c.shape, direction: c.direction, strength: c.strength,
-    numbers: c.numbers, linked_to_losses: !!c.linked, skipped_matches_without_notes: c.evidence.window.skipped || 0, how_to_read: how,
+  return { candidate_id: c.id, tier: c.tier || 1, pattern: c.pattern, source: c.source, shape: c.shape, direction: c.direction, strength: c.strength,
+    numbers: c.numbers, linked_to_losses: !!c.linked, skipped_matches_without_notes: c.evidence.window.skipped || 0, how_to_read: how, ...(c.name ? { opponent: c.name } : {}),
     notes: c.notes || [], reference: keyTemplate(c, lang) };
 }
 
 export const KEY_RULES = `KEY INSIGHT (Engine V2):
-- The engine already found, ranked and quality-checked the candidates in key_candidates and computed every number. Pick ONE candidate_id (the first is the strongest; choose another only if its notes make it more specific and useful) and write its title and body. If key_candidates is empty, return null: there is nothing worth highlighting yet, and that is fine.
+- The engine already found, ranked and quality-checked the candidates in key_candidates and computed every number. Pick ONE candidate_id and write its title and body. The first is the best. tier 1 = a measured score trend, tier 2 = a repeated pattern from the notes, tier 3 = an early observation or a mixed signal: never pick a lower tier over a higher one; within a tier choose another only if its notes make it more specific and useful. If key_candidates is empty, return null.
+- The Key Insight summarises the discovery; don't copy the Build Next / Strengths card wording. A tier 3 early observation must say it is early (title or body) and never sound like a pattern.
 - Title: the takeaway in plain words, like a coach after a few matches ("Your serve is still costing you points", 「发球还在让你丢分」). Never a database description ("Net play is coming up less", 「网前丢分提及减少」, 「最近提到网前丢分少了」). Body: the evidence in one natural sentence, matching the chart.
 - The card is narrow (text column about 172px): the title must fit in 2 lines and the body in 3 lines. That is about 30 characters for an English title and 60 for an English body, 12 Chinese characters for a title and 34 for a body (punctuation counts). Copy that is longer is thrown away. Say it simply rather than squeeze it.
 - Use ONLY the candidate's numbers. Never compute, round differently, add percentages, fractions like "2/6" or other numbers. Every number you write must be one of them.

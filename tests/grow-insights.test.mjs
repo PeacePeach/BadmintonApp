@@ -16,6 +16,7 @@ const W = [[21, 17], [21, 18]], L = [[17, 21], [18, 21]];
 const tagRow = (tag, row, games = W) => row.map(v => M(games, v ? [tag] : ['Other']));
 
 const BOTH = ['en', 'zh'];
+const H = await import('./fixtures/han-shape.mjs');
 const copyOk = (k, lang) => { assert.equal(k.status, 'ok'); assert.deepEqual(k.validation.issues, [], `${lang}: ${k.validation.issues}`); };
 
 // ---- Chart selection follows the evidence ----
@@ -27,9 +28,15 @@ test('regression: "fewer net errors lately" [1,1,1,0,1,0] is never a Comparison,
   fresh();
   const ms = tagRow('Net', [1, 1, 1, 0, 1, 0]);
   const all = G.keyCandidates(ms, null, { all: true });
-  assert.equal(all.find(x => x.tag === 'Net'), undefined);
+  assert.equal(all.find(x => x.family === 'tag' && x.tag === 'Net'), undefined, 'no strip');
   assert.ok(!all.some(x => x.pattern === 'compare'));
-  for (const lang of BOTH) assert.deepEqual(G.finalizeKey(G.keyCandidates(ms), null, lang), { status: 'insufficient', reason: 'no_candidate' });
+  // Engine v14: what it does show is the repeated cost (noted in 4 of 6), never an improvement.
+  for (const lang of BOTH) {
+    const k = G.finalizeKey(G.keyCandidates(ms), null, lang, ms);
+    assert.deepEqual([k.status, k.tier, k.candidate_id, k.chart], ['ok', 2, 'pattern:cost:Net', null]);
+    assert.doesNotMatch(k.title + k.body, /less|fewer|improv|better|lately|少了|进步|改善|减少/, k.title);
+    assert.deepEqual(k.validation.issues, []);
+  }
   // When the same skill starts being noted as working, that is positive evidence: an emerging "what worked" strip.
   fresh();
   // Net noted as costing points in the first 2 matches, then as working in each of the last 3.
@@ -101,7 +108,7 @@ test('strip: recurring cost tag (4 of 6, 2 of the last 3)', () => {
 
 test('strip: noted 4 of 6 but not lately is neither "recurring" nor an improvement', () => {
   fresh();
-  assert.equal(G.keyCandidates(tagRow('Serve', [1, 1, 1, 1, 0, 0]), null, { all: true }).find(x => x.tag === 'Serve'), undefined);
+  assert.equal(G.keyCandidates(tagRow('Serve', [1, 1, 1, 1, 0, 0]), null, { all: true }).find(x => x.family === 'tag' && x.tag === 'Serve'), undefined);
 });
 
 test('strip: a cost tag that lines up with the losses is "linked"; the chart shows each result, the copy never says it caused them', () => {
@@ -185,15 +192,21 @@ test('strip: emerging cost tag', () => {
 test('weak evidence: one match of difference is not an insight', () => {
   fresh();
   const cs = G.keyCandidates(tagRow('Defence', [1, 1, 0, 1, 0, 0]));
-  assert.equal(cs.find(x => x.tag === 'Defence'), undefined);
+  assert.equal(cs.find(x => x.family === 'tag' && x.tag === 'Defence'), undefined, 'no strip: not a change');
+  assert.equal(cs[0].id, 'pattern:cost:Defence', 'but a repeated pattern (3 of 6)');
 });
 
-test('insufficient evidence: few matches give no Key Insight', () => {
+test('few matches: no trend or strip from 3 matches, but a skill noted in all 3 is a repeated pattern; nothing noted is insufficient', () => {
   fresh();
   const ms = [M(W, ['Net']), M(L, ['Net']), M(W, ['Net'])];
   const cs = G.keyCandidates(ms);
-  assert.equal(cs.length, 0);
-  assert.deepEqual(G.finalizeKey(cs, null, 'en'), { status: 'insufficient', reason: 'no_candidate' });
+  assert.ok(!cs.some(c => c.tier === 1 || c.family === 'tag'));
+  assert.deepEqual(cs.map(c => [c.id, c.tier, c.numbers.k, c.numbers.n]), [['pattern:cost:Net', 2, 3, 3]]);
+  const k = G.finalizeKey(cs, null, 'en', ms);
+  assert.deepEqual([k.title, k.body], ['Net play keeps costing you points', 'You noted it in 3 of your last 3 matches.']);
+  fresh();
+  const none = [M(W, ['Other']), M(L, ['Other']), M(W, ['Other'])];
+  assert.deepEqual(G.finalizeKey(G.keyCandidates(none), null, 'en', none).status, 'insufficient');
 });
 
 test('missing notes are skipped, never counted as "not noted"; the copy says "noted matches"', () => {
@@ -210,7 +223,7 @@ test('missing notes are skipped, never counted as "not noted"; the copy says "no
   assert.match(zh.body, /最近有记录的3场/);
   // Matches without notes in between are not read as "Net didn't cost points".
   fresh();
-  assert.equal(G.keyCandidates([M(W, ['Net']), M(W, ['Net']), M(W, ['Net']), M(W), M(W), M(W), M(W, ['Other']), M(W, ['Net'])], null, { all: true }).length, 0);
+  assert.equal(G.keyCandidates([M(W, ['Net']), M(W, ['Net']), M(W, ['Net']), M(W), M(W), M(W), M(W, ['Other']), M(W, ['Net'])], null, { all: true }).filter(c => c.family === 'tag').length, 0);
 });
 
 test('contradictory observations: a tag noted on both sides of the same matches is not used', () => {
@@ -235,8 +248,9 @@ test('competing candidates: ranked deterministically; objective evidence first o
   const a = G.keyCandidates(ms).map(c => c.id), b = G.keyCandidates(ms).map(c => c.id);
   assert.deepEqual(a, b);
   assert.ok(a.includes('trend:margin') && a.includes('strip:cost:Serve:emerging'), String(a));
-  const again = G.keyCandidates(ms, a[0]);
-  assert.notEqual(again[0].id, a[0], 'the same insight as last time drops below a different one');
+  // Engine v14: a measured trend (tier 1) always leads; the same insight as last time drops below another of its tier only.
+  assert.deepEqual(a.slice(0, 2), ['trend:margin', 'strip:cost:Serve:emerging']);
+  assert.equal(G.keyCandidates(ms, a[0])[0].id, 'trend:margin');
   // ...but it is still shown when it is the only one worth showing (quality ignores the repeat discount).
   fresh();
   const one = tagRow('Footwork', [0, 0, 0, 1, 1, 1]), id = G.keyCandidates(one)[0].id;
@@ -249,9 +263,10 @@ test('quality bar: weak candidates are dropped and the tile says there is not en
   // "What worked" noted in 4 of 6: a frequency, already on Strengths; below the bar on its own.
   const ms = [1, 0, 1, 1, 0, 1].map(v => M(W, ['Other'], v ? ['Smash'] : []));
   const all = G.keyCandidates(ms, null, { all: true }), shown = G.keyCandidates(ms);
-  assert.ok(all.some(c => c.tag === 'Smash') && all.every(c => c.quality < G.KEY_MIN_QUALITY));
-  assert.equal(shown.length, 0);
-  for (const lang of BOTH) assert.equal(G.finalizeKey(shown, null, lang).status, 'insufficient');
+  assert.ok(all.some(c => c.family === 'tag' && c.tag === 'Smash') && all.filter(c => c.family === 'tag').every(c => c.quality < G.KEY_MIN_QUALITY));
+  assert.ok(!shown.some(c => c.family === 'tag'), 'the strip is under the bar');
+  // ...but the repeated strength itself (the one on Strengths) is the Key Insight, not "not enough data".
+  for (const lang of BOTH) assert.equal(G.finalizeKey(shown, null, lang, ms).candidate_id, 'pattern:worked:Smash');
   // Missing data: no matches, matches without scores or notes.
   assert.equal(G.keyCandidates([]).length, 0);
   fresh(); assert.equal(G.keyCandidates([M([]), M([]), M([]), M([]), M([]), M([])]).length, 0);
@@ -347,7 +362,7 @@ test('every template passes its own checks, in both languages, for every shape',
   for (const tag of G.SKILL_TAGS) for (const [name, row] of Object.entries(rows)) for (const side of ['cost', 'worked']) for (const lost of [false, true]) {
     fresh();
     const ms = row.map((v, i) => M(lost && i % 2 ? L : W, side === 'cost' ? (v ? [tag] : ['Other']) : ['Other'], side === 'worked' && v ? [tag] : []));
-    const c = G.keyCandidates(ms, null, { all: true }).find(x => x.tag === tag && x.side === side);
+    const c = G.keyCandidates(ms, null, { all: true }).find(x => x.family === 'tag' && x.tag === tag && x.side === side);
     if (!c) { assert.ok(name.startsWith('fading'), `${tag} ${side} ${name}`); continue; }
     for (const lang of BOTH) {
       const k = G.finalizeKey([c], null, lang);
@@ -457,7 +472,7 @@ test('one side per skill: Build Next and Strengths never share a topic; the stro
   assert.equal(G.strengthCandidates(tie).some(x => x.tag === 'Net'), false);
   const [net] = G.buildCandidates(tie);
   assert.deepEqual([net.tag, net.k, net.w, net.n, net.mixed], ['Net', 3, 3, 6, true]);
-  assert.ok(G.keyCandidates(tie, null, { all: true }).every(c => c.tag !== 'Net'), 'no strip for a mixed skill');
+  assert.ok(G.keyCandidates(tie, null, { all: true }).every(c => c.tag !== 'Net' || c.family === 'mixed'), 'no strip or pattern for a mixed skill, only a mixed signal');
   const en = G.finalizeItems([net], [{ topic_id: 'tag:Net', name: 'Net play', evidence: 'You noted net play costing you points in 3 of your last 6 matches.', action: '' }], 'build', 'en')[0];
   assert.equal(en.evidence, 'You noted it costing points in 3 of your last 6 matches, and working in 3.');
   assert.equal(en.name, 'Net play'); assert.equal(en.mixed, true);
@@ -510,7 +525,7 @@ test('Build Next actions (Han): no tactical correction from tags or a single not
 });
 
 test('engine version is bumped so cached v12 insights regenerate', () => {
-  assert.equal(G.ENGINE_VERSION, '2026-10-26-v13');
+  assert.equal(G.ENGINE_VERSION, '2026-10-26-v14');
 });
 
 test('opponent plans: only from notes about that opponent; record-only, unsupported or generic plans are left out', () => {
@@ -614,7 +629,7 @@ test('model schema only allows the candidates that exist', () => {
 // ---- Representative outputs (printed for the report) ----
 test('print representative outputs', () => {
   const out = [];
-  const show = (label, ms) => { const [c] = G.keyCandidates(ms); for (const lang of BOTH) { const k = G.finalizeKey(c ? [c] : [], null, lang); out.push(`${label} [${lang}] ${k.status === 'ok' ? `${k.pattern} ${JSON.stringify(k.chart.values)} | ${k.title} | ${k.body}` : 'insufficient'}`); } };
+  const show = (label, ms) => { const [c] = G.keyCandidates(ms); for (const lang of BOTH) { const k = G.finalizeKey(c ? [c] : [], null, lang); out.push(`${label} [${lang}] ${k.status === 'ok' ? `${k.pattern} ${JSON.stringify(k.chart && k.chart.values)} | ${k.title} | ${k.body}` : 'insufficient'}`); } };
   fresh(); show('fewer net errors', tagRow('Net', [1, 1, 1, 0, 1, 0]));
   fresh(); show('serve in losses', [1, 1, 0, 1, 1, 1].map((v, i) => M([L, L, W, L, W, L][i], v ? ['Serve'] : ['Other'])));
   fresh(); show('recurring serve', tagRow('Serve', [1, 0, 1, 1, 0, 1]));
@@ -707,23 +722,99 @@ test('a skill is never both a strength and a weakness: one side per skill, the l
   assert.ok(!b.some(t => st.includes(t)));
 });
 
-test('Key Insight: "insufficient" only when no detector could run; "no_trend" when the evidence is there but nothing changed', () => {
-  // 4 matches: not enough for any detector. The tile says how many more it needs.
+test('Key Insight P4: "insufficient" only when no detector could run and nothing was noted; "no_trend" only when nothing at all is eligible', () => {
+  // 4 matches, no Skill Tags: not enough for any detector, nothing to report. The tile says how many more it needs.
   fresh();
-  const few = [M(W, ['Net']), M(L, ['Net']), M(W, ['Other']), M(L, ['Smash'])];
+  const few = [M(W, ['Other']), M(L, ['Other']), M(W, ['Other']), M(L, ['Other'])];
   assert.deepEqual(G.finalizeKey(G.keyCandidates(few), null, 'en', few), { status: 'insufficient', counts: { matches: 4, scored: 4, results: 4, noted: 4 }, more: 2, reason: 'no_candidate' });
-  // Voice-only results ({ r }), 5 matches: still insufficient, 1 more.
   fresh();
   const voice = [W, L, W, L, W].map(() => M([{ r: 'W' }, { r: 'L' }, { r: 'W' }]));
   assert.equal(G.finalizeKey([], null, 'en', voice).more, 1);
-  // 10 steady matches with notes, nothing changing: enough evidence, no clear change. Not "not enough data".
+  // 10 steady matches, notes but no skill: the detectors ran, nothing changed, nothing repeated. no_trend.
   fresh();
-  const steady = Array.from({ length: 10 }, (_, i) => M(i % 2 ? L : W, i % 3 ? ['Other'] : ['Serve'], i % 4 ? [] : ['Net']));
+  const steady = Array.from({ length: 10 }, (_, i) => M(i % 2 ? L : W, ['Other']));
   assert.deepEqual(G.keyCandidates(steady), []);
   const k = G.finalizeKey(G.keyCandidates(steady), null, 'zh', steady);
   assert.equal(k.status, 'no_trend'); assert.equal(k.counts.matches, 10); assert.equal(k.title, undefined, 'no made-up copy');
-  // Han's v7 screenshot: a 4/6 strength under the quality bar. Enough evidence, no clear change.
+});
+
+// ---- Engine v14: the Key Insight hierarchy ----
+// Han (2026-10-26): with 18 matches and evidence-backed recommendations, Key Insight said "No clear change yet".
+const sections = (ms, focus = [], names = {}) => ({ build: G.buildCandidates(ms, focus, 4), strengths: G.strengthCandidates(ms, 3), opps: G.opponentFacts(ms, names), doubles: G.doublesFacts(ms) });
+test('v14 invariant: whenever Build Next, Strengths, Opponent Plans or Doubles Play has evidence, the Key Insight is not no_trend / insufficient', () => {
+  const cases = {
+    steadyWithPatterns: () => Array.from({ length: 10 }, (_, i) => M(i % 2 ? L : W, i % 3 ? ['Other'] : ['Serve'], i % 4 ? [] : ['Net'])),
+    v7Strength: () => [M(W, ['Other'], ['Smash']), M(W, ['Other'], ['Smash']), M(L, ['Other'], ['Smash']), M(L, ['Smash'], []), M(W, ['Other'], ['Smash']), M(L, ['Smash'], [])],
+    oneEarly: () => [M(W, ['Other']), M(L, ['Placement']), M(W, ['Other'])],
+    mixedOnly: () => [M(W, ['Net']), M(W, [], ['Net']), M(L, ['Net']), M(W, [], ['Net'])],
+    opponentOnly: () => [M(W, ['Other'], [], { opps: ['ben'], opp_notes: 'Ben lifts to my backhand' }), M(L), M(W)],
+    doublesNotesOnly: () => [M(W, [], [], { type: 'Doubles', worked: 'we rotated well' }), M(L), M(W)],
+    hanShape: () => H.rows()
+  };
+  for (const [name, mk] of Object.entries(cases)) {
+    fresh();
+    const ms = mk(), names = { ben: 'Ben', ...Object.fromEntries(H.players.map(p => [p.id, p.name])) };
+    const sec = sections(ms, [], names), any = sec.build.length || sec.strengths.length || sec.opps.length || sec.doubles;
+    assert.ok(any, name);
+    for (const lang of BOTH) {
+      const k = G.finalizeKey(G.keyCandidates(ms, null, { names }), null, lang, ms);
+      assert.equal(k.status, 'ok', `${name} ${lang}: ${JSON.stringify(k)}`);
+      assert.deepEqual(k.validation.issues, [], `${name} ${lang}: ${k.title} / ${k.body}`);
+      assert.ok(G.lineCount(k.title, 17) <= 2 && G.lineCount(k.body, 14) <= 3, `${name} ${lang}: ${k.title} / ${k.body}`);
+    }
+  }
+});
+
+test('v14 hierarchy: P1 trend beats any pattern; P2 pattern beats early; P3 is labelled early; the model cannot pick a lower tier', () => {
   fresh();
-  const han = [M(W, ['Other'], ['Smash']), M(W, ['Other'], ['Smash']), M(L, ['Other'], ['Smash']), M(L, ['Smash'], []), M(W, ['Other'], ['Smash']), M(L, ['Smash'], [])];
-  assert.equal(G.finalizeKey(G.keyCandidates(han), null, 'en', han).status, 'no_trend');
+  // Rising margins and Defence noted costing points in 4 matches: the trend leads.
+  const ms = [[15, 21], [16, 21], [18, 21], [21, 18], [21, 16], [21, 14]].map((g, i) => M([g], i % 2 ? ['Defence'] : ['Other']));
+  const cs = G.keyCandidates(ms);
+  assert.equal(cs[0].id, 'trend:margin');
+  assert.ok(cs.some(c => c.id === 'pattern:cost:Defence' && c.tier === 2));
+  const k = G.finalizeKey(cs, { candidate_id: 'pattern:cost:Defence', title: 'Defence keeps costing you points', body: 'You noted it in 3 of your last 6 matches.' }, 'en', ms);
+  assert.equal(k.candidate_id, 'trend:margin', 'a pattern never replaces a measured trend');
+  // No trend: the repeated pattern leads, before the one-off notes.
+  fresh();
+  const flat = [M(W, ['Defence']), M(L, ['Placement']), M(W, ['Defence']), M(L, ['Other']), M(W, ['Other'], ['Footwork']), M(L, ['Other'])];
+  const fc = G.keyCandidates(flat);
+  assert.deepEqual(fc.map(c => [c.id, c.tier]), [['pattern:cost:Defence', 2], ['early:cost:Placement', 3], ['early:worked:Footwork', 3]]);
+  // Only early notes: labelled early in both languages, never as a habit.
+  fresh();
+  const early = [M(W, ['Other']), M(L, ['Placement']), M(W, ['Other'])];
+  const en = G.finalizeKey(G.keyCandidates(early), null, 'en', early), zh = G.finalizeKey(G.keyCandidates(early), null, 'zh', early);
+  assert.deepEqual([en.tier, en.level, en.title, en.body], [3, 'early', 'Early sign: Placement', 'Noted as a cost once in your last 3 matches. Too early to call.']);
+  assert.deepEqual([zh.title, zh.body], ['初步观察：落点', '最近3场里有1场你记下落点丢分，还不算规律。']);
+  assert.ok(G.checkCopy({ title: 'Placement keeps costing you', body: 'You always lose points on placement, noted once.' }, G.keyCandidates(early)[0], 'en').includes('not_labelled_early'));
+  // The model's own wording of an early one must say it is early.
+  const bad = G.finalizeKey(G.keyCandidates(early), { candidate_id: 'early:cost:Placement', title: 'Placement is costing you', body: 'You noted it once in your last 3 matches.' }, 'en', early);
+  assert.equal(bad.copy_source, 'template'); assert.ok(bad.validation.ai_issues.includes('not_labelled_early'));
+});
+
+test("v14 on Han-shaped data: candidates and pick, EN and ZH agree, and the Key Insight isn't a copy of a card", () => {
+  const rows = H.rows(), names = Object.fromEntries(H.players.map(p => [p.id, p.name]));
+  const cs = G.keyCandidates(rows, null, { names });
+  assert.deepEqual(cs.map(c => c.id), ['trend:margin', 'compare:games_won', 'pattern:cost:Defence', 'pattern:worked:Serve', 'opponent:alex', 'opponent:leo',
+    'mixed:Net', 'mixed:Smash', 'early:cost:Placement', 'early:worked:Footwork', 'early:opponent:ravi', 'early:doubles:cost:Defence']);
+  // Same records with no clear score change: the repeated Defence pattern, not "No clear change yet".
+  const flat = rows.map(m => ({ ...m, games: [[21, 19], [19, 21]] }));
+  const fc = G.keyCandidates(flat, null, { names });
+  assert.equal(fc[0].id, 'pattern:cost:Defence');
+  const en = G.finalizeKey(fc, null, 'en', flat), zh = G.finalizeKey(fc, null, 'zh', flat);
+  assert.deepEqual([en.candidate_id, zh.candidate_id, en.status], ['pattern:cost:Defence', 'pattern:cost:Defence', 'ok']);
+  assert.equal(en.title, 'Defence keeps costing you points'); assert.equal(en.body, 'You noted it in 3 of the last 12 with notes; scores show no real trend.');
+  assert.equal(zh.body, '比分没有明显变化，但最近有记录的12场里有3场你记下防守丢分。');
+  const [card] = G.finalizeItems(G.buildCandidates(flat, [], 4), null, 'build', 'en');
+  assert.notEqual(en.body, card.evidence);
+  assert.ok(en.candidates.length >= 10 && en.candidates[0].id === 'pattern:cost:Defence');
+});
+
+test('v14: an active Focus skill is left out of the Key Insight pattern just as from Build Next; a completed one returns only on new evidence', () => {
+  fresh();
+  const ms = [M(W, ['Defence'], ['Serve']), M(L, ['Defence']), M(W, ['Other']), M(L, ['Defence']), M(W, ['Other'], ['Serve']), M(L, ['Other'])];
+  assert.equal(G.keyCandidates(ms)[0].id, 'pattern:cost:Defence');
+  const focus = [{ topic: 'tag:Defence', status: 'active' }];
+  const cs = G.keyCandidates(ms, null, { focus });
+  assert.ok(!cs.some(c => c.id === 'pattern:cost:Defence'));
+  assert.equal(cs[0].id, 'pattern:worked:Serve');
 });

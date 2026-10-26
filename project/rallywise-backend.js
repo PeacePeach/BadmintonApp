@@ -312,7 +312,11 @@
   const insights = {
     // lang is the app language ('en' | 'zh'): insights are written, cached and returned in that language.
     async generate(lang) {
-      const { data, error } = await sb().functions.invoke('generate-grow-insights', { body: { lang: lang === 'zh' ? 'zh' : 'en' } });
+      // Never an endless "Looking at your matches…": after 60s the call counts as failed (the function itself gives
+      // the model 40s), Grow shows its error tile and the next visit tries again.
+      let timer;
+      const timeout = new Promise((_, no) => { timer = setTimeout(() => no(fail('network', new Error('timeout'))), conf().growTimeoutMs || 60000); });
+      const { data, error } = await Promise.race([sb().functions.invoke('generate-grow-insights', { body: { lang: lang === 'zh' ? 'zh' : 'en' } }), timeout]).finally(() => clearTimeout(timer));
       if (error) throw dataFail(error);
       // _generatedAt: when the insight was made (Build Next uses it to tell new evidence from old).
       return data && data.insight ? { ...data.insight, _generatedAt: data.generated_at || new Date().toISOString() } : null;

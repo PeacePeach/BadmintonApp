@@ -74,18 +74,20 @@ Deno.serve(async req => {
     // from either.
     const previous:any = slots.find(x => x.lang === lang)?.insight || null, anyPrevious:any = previous || slots[0]?.insight || null;
     // Every Focus as a topic, so Build Next can leave out active topics and bring back completed ones on new evidence.
+    const names:any = Object.fromEntries((players || []).map((p:any)=>[p.id,p.name]));
     const focus = (focusRows || []).map((f:any) => ({ topic: G.focusTopic(f, anyPrevious), status: f.status, completed_at: f.completed_at }));
     const INSIGHT_VERSION = G.ENGINE_VERSION;
     const fp = await hash(INSIGHT_VERSION + (lang === "zh" ? ":zh" : "") + JSON.stringify(recent.map((m:any)=>({
       id:m.id,date:m.date,type:m.type,partner:m.partner,opps:m.opps,games:m.games,wt:m.wt,lt:m.lt,
       worked:safe(m.worked),lost:safe(m.lost),opp_notes:safe(m.opp_notes)
-    }))) + JSON.stringify(focus.map((f:any) => [f.topic, f.status, f.completed_at]).sort()));
+    }))) + JSON.stringify(focus.map((f:any) => [f.topic, f.status, f.completed_at]).sort())
+      // Opponent notes are given to the player they name, so a renamed player is new input.
+      + JSON.stringify((players || []).map((p:any) => [p.id, p.name]).sort()));
 
     const hit = slots.find(x => x.fp === fp);
     if (hit) return Response.json({insight:out(hit.insight),generated_at:hit.generated_at,cached:true},{headers:CORS});
     if (!recent.length) return Response.json({insight:null,cached:false},{headers:CORS});
 
-    const names:any = Object.fromEntries((players || []).map((p:any)=>[p.id,p.name]));
     // Opponents the player wrote notes about, with only those notes (no record: it says nothing about how they play).
     const oppDiag = { matches_with_notes:0, unknown_opponent:0, names_no_opponent:0 };
     const opponents = G.opponentFacts(recent, names, oppDiag);
@@ -93,7 +95,9 @@ Deno.serve(async req => {
     const doubles = G.doublesFacts(recent);
 
     // Engine V2 evidence: everything numeric is decided here; the model only picks and words it.
-    const keyCands = G.keyCandidates(recent, previous?.keyInsight?.candidate_id).slice(0,3);
+    // Engine v14: P1 score trend -> P2 repeated pattern -> P3 early observation, from the same evidence as the sections
+    // below. All are kept for finalizeKey (and the report); the model sees the best 3.
+    const keyAll = G.keyCandidates(recent, previous?.keyInsight?.candidate_id, { focus, names }), keyCands = keyAll.slice(0,3);
     const buildCands = G.buildCandidates(recent, focus, 4);
     const strengthCands = G.strengthCandidates(recent, 3);
     const facts = {
@@ -168,8 +172,11 @@ OUTPUT LANGUAGE: write every visible string in ${lang === "zh" ? "natural Simpli
     let parsed:any = empty();
     if (aiStatus === "ok") {
       try {
+        // A model call that hangs must not hold Grow on "Looking at your matches…": after 40s it counts as failed
+        // (engine sections with template copy, not cached, retried on the next visit).
+        const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), Number(Deno.env.get("GROW_AI_TIMEOUT_MS")) || 40000);
         const ai = await fetch("https://api.openai.com/v1/responses",{
-          method:"POST",
+          method:"POST", signal:ctl.signal,
           headers:{Authorization:`Bearer ${key}`,"Content-Type":"application/json"},
           body:JSON.stringify({
             model:"gpt-5-mini",
@@ -178,6 +185,7 @@ OUTPUT LANGUAGE: write every visible string in ${lang === "zh" ? "natural Simpli
               schema:G.modelSchema(keyCands.map((c:any)=>c.id), buildCands.map((b:any)=>b.topic_id), strengthCands.map((b:any)=>b.topic_id), opponents.map((o:any)=>o.player_id))}}
           })
         });
+        clearTimeout(timer);
         if (!ai.ok) {
           const detail = await ai.text();
           console.error("OpenAI request failed", ai.status, detail.slice(0, 2000));
@@ -193,7 +201,7 @@ OUTPUT LANGUAGE: write every visible string in ${lang === "zh" ? "natural Simpli
 
     parsed.engine_version = G.ENGINE_VERSION;
     // The engine's evidence decides the chart; the AI copy is kept only if it passes the checks, else the template.
-    parsed.keyInsight = G.finalizeKey(keyCands, parsed.keyInsight, lang, recent);
+    parsed.keyInsight = G.finalizeKey(keyAll, parsed.keyInsight, lang, recent);
     parsed.buildNext = G.finalizeItems(buildCands, parsed.buildNext, "build", lang);
     parsed.strengths = G.finalizeItems(strengthCands, parsed.strengths, "strength", lang);
     const failed = [parsed.keyInsight, ...parsed.buildNext, ...parsed.strengths].filter((x:any) => x.copy_source && x.copy_source !== "ai");
@@ -206,6 +214,9 @@ OUTPUT LANGUAGE: write every visible string in ${lang === "zh" ? "natural Simpli
     if (droppedPlans.length) console.warn("opponent plans replaced or dropped", JSON.stringify(droppedPlans));
     parsed.opponentPlans = plans.filter((p:any) => !p.dropped);
     parsed.doublesPlay = G.finalizeDoubles(parsed.doublesPlay, doubles, lang);
+    // Engine v14 invariant: a section with cards means the Key Insight had a candidate.
+    if (parsed.keyInsight.status !== "ok" && (parsed.buildNext.length || parsed.strengths.length || parsed.opponentPlans.length || parsed.doublesPlay.length))
+      console.error("key insight empty while sections have cards", JSON.stringify(parsed.keyInsight));
     parsed.coverage = G.coverage(recent, { build:parsed.buildNext, strengths:parsed.strengths, opps:opponents, plans, doubles, doublesPlay:parsed.doublesPlay, keyInsight:parsed.keyInsight, oppDiag });
 
     const generated_at = new Date().toISOString();

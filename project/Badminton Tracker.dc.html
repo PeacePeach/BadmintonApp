@@ -508,7 +508,7 @@ button:disabled{cursor:default !important;}
                     <div class="rw-metric-value">{{ pf.win }}</div>
                     <div class="rw-trend">
                       <span class="rw-trend-delta {{ pf.deltaCls }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="{{ pf.deltaIcon }}" size="{{ 15 }}" hint-size="15px,15px"></x-import>{{ pf.delta }}</span>
-                      <span>{{ tx.vsPrev10 }}</span>
+                      <span>{{ pf.vsLabel }}</span>
                     </div>
                   </div>
                 </div>
@@ -2044,7 +2044,7 @@ const I18N = {
     cantLoad: "Couldn't Load {what}", cantLoadBody: 'Something went wrong on our side. Try again in a moment.',
     // Insights · Performance
     loadingInsights: 'Loading insights', noInsights: 'No Insights Yet', noInsightsBody: 'Log a few matches and your trends will start to show here.',
-    vsPrev10: 'vs prev 10', form5: '5-match form', now: 'Now', matchesPlayed: 'Matches Played', last30: 'Last 30 days',
+    vsPrev10: 'vs prev 10', vsPrevN: 'vs prev {n}', vsPrevNeed: 'after 6 matches', form5: '5-match form', now: 'Now', matchesPlayed: 'Matches Played', last30: 'Last 30 days',
     recentRecord: 'Recent Record', last5: 'Last 5 matches', breakdown: 'Performance Breakdown',
     singlesWin: 'Singles Win Rate', doublesWin: 'Doubles Win Rate', closeGames: 'Close Games', avgMargin: 'Avg. Score Gap',
     ofMatches: '{w} of {n}', ofGames: '{w} of {n}', perGame: 'per game',
@@ -2204,7 +2204,7 @@ const I18N = {
     connLost: '连接中断', connLostBody: '请检查 Wi-Fi 或移动数据，然后重试。', tryAgain: '重试',
     cantLoad: '无法加载{what}', cantLoadBody: '我们这边出了点问题，请稍后再试。',
     loadingInsights: '正在加载洞察', noInsights: '还没有足够数据', noInsightsBody: '记录几场比赛后，你的趋势就会出现在这里。',
-    vsPrev10: '较前 10 场', form5: '近 5 场走势', now: '最近', matchesPlayed: '比赛场次', last30: '近 30 天',
+    vsPrev10: '较前 10 场', vsPrevN: '较前 {n} 场', vsPrevNeed: '满 6 场后显示', form5: '近 5 场走势', now: '最近', matchesPlayed: '比赛场次', last30: '近 30 天',
     recentRecord: '近期战绩', last5: '近 5 场', breakdown: '表现细分',
     singlesWin: '单打胜率', doublesWin: '双打胜率', closeGames: '关键局', avgMargin: '平均分差',
     ofMatches: '{w}/{n} 场', ofGames: '{w}/{n} 局', perGame: '每局',
@@ -3260,9 +3260,11 @@ class Component extends DCLogic {
       open: () => this.go('detail', { detailId: m.id })
     };
   }
+  // Win rate over decided matches: a level match (1–1 games, voice-logged) is neither a win nor a loss (Engine v12
+  // rule, now also on Performance), so it no longer counts as a loss here.
   rec(list) {
-    const w = list.filter(m => this.res(m.games).win).length, n = list.length;
-    return { w, l: n - w, n, label: `${w}–${n - w}`, pct: n ? w / n : 0, pctStr: n ? Math.round(w / n * 100) + '%' : '—', barW: n ? Math.round(w / n * 100) + '%' : '0%' };
+    const rs = list.map(m => this.res(m.games)), w = rs.filter(r => r.win).length, l = rs.filter(r => !r.win && !r.even).length, n = w + l;
+    return { w, l, n, t: list.length - n, label: `${w}–${l}`, pct: n ? w / n : 0, pctStr: n ? Math.round(w / n * 100) + '%' : '—', barW: n ? Math.round(w / n * 100) + '%' : '0%' };
   }
   // Matches greeting: first name, then last 30 days' win rate against the 30 days before (3+ matches in each),
   // otherwise how many matches are logged.
@@ -3689,8 +3691,10 @@ class Component extends DCLogic {
       startLog: () => this.openVoice('matches'),
       tabs: [[this.t('matches'), 'matches', 'List'], [this.t('insights'), 'insights', 'ChartColumn'], [this.t('navFocus'), 'focus', 'Target']].map(([label, k, icon]) => ({
         label, icon, fg: s.screen === k ? 'var(--text-primary)' : 'var(--text-secondary)', cls: s.screen === k ? 'is-active' : '', current: s.screen === k ? 'page' : null, select: () => {
-          // Back to Insights on Grow with no AI insight on screen (say the language changed since): make one.
-          if (k === 'insights' && this.state.insTab === 'coach' && !this.state.aiGrow) setTimeout(() => this.refreshGrow(), 0);
+          // Back to Insights on Grow: check the insight on screen is still current (kept on screen meanwhile; the function
+          // answers from its cache when nothing changed, so this costs no model call). An insight restored from the
+          // last session may come from an older engine or older matches.
+          if (k === 'insights' && this.state.insTab === 'coach' && this.state.screen !== 'insights') setTimeout(() => this.refreshGrow(), 0);
           this.setState({ screen: k, back: [], menu: false });
         }
       })),
@@ -3825,7 +3829,8 @@ class Component extends DCLogic {
       const prev = span.slice(0, span.length - half), recent = span.slice(-half);
       const rr = this.rec(recent), pr = this.rec(prev);
       const pct = x => Math.round(x * 100);
-      const dl = pct(rr.pct) - pct(pr.pct);
+      // The change needs 3+ decided matches on each side; with fewer it would swing ±100% on one result.
+      const hasDelta = rr.n >= 3 && pr.n >= 3, dl = hasDelta ? pct(rr.pct) - pct(pr.pct) : 0;
       v.insProgress = s.insTab !== 'coach'; v.insCoach = !v.insProgress;
       v.insTabs = [[this.t('performance'), 'progress'], [this.t('grow'), 'coach']].map(([label, k]) => { const on = (s.insTab || 'progress') === k; return { label,
         cls: on ? 'is-active' : '', on: String(on), select: () => {
@@ -3853,7 +3858,8 @@ class Component extends DCLogic {
         const person = (role, id, value, sub) => ({ role, name: this.nm(id), initials: this.ini(id), avCls: this.avDir(id), value, sub, open: () => this.go('player', { playerId: id }) });
         // The headline Win Rate is the overall record, the same as Matches. The change compares the newer half of the
         // last 20 matches with the older half, and its arrow and colour follow the sign.
-        v.pf = { win: this.rec(all).pctStr, delta: (dl > 0 ? '+' : '') + dl + '%', bars,
+        v.pf = { win: this.rec(all).pctStr, delta: hasDelta ? (dl > 0 ? '+' : '') + dl + '%' : '', bars,
+          vsLabel: hasDelta ? this.t('vsPrevN', { n: prev.length }) : this.t('vsPrevNeed'),
           deltaIcon: dl > 0 ? 'ArrowUpRight' : dl < 0 ? 'ArrowDownRight' : 'Minus',
           deltaCls: dl > 0 ? 'is-up' : dl < 0 ? 'is-down' : 'is-flat', formCls: dl < 0 ? 'is-down' : '',
           played: String(all.filter(m => m.date >= cutoff).length), record: this.t('wlShort', { w: last5.w, l: last5.l }), recW: String(last5.w), recL: String(last5.l),
