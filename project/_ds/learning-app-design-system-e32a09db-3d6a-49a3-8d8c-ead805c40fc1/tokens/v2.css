@@ -332,6 +332,12 @@
   --rw-dots-on: var(--rw-color-status-win);           /* B100; Figma #5B9DFF is unbound (Blue Gradient 01 start), nearest Foundation B100 */
   --rw-dots-off: var(--rw-purplegrey-400);            /* Figma purplegrey-400 */
   --rw-focus-tag-icon: var(--rw-color-icon-accent);  /* B100 Insights icon on the From Grow tag */
+  /* Focus Detail (Figma 203:6272) */
+  --rw-focus-source-dot: var(--rw-color-icon-accent); /* B100 dot before Created by you / Added from Grow (Figma #6BA6FF) */
+  --rw-focus-marker-gap: 16px;                        /* session markers (Focus frequency 173:14128) */
+  --rw-check-done-bg: var(--rw-n900);                 /* done session marker: Default Fill #FFFFFF (Figma 173:14118) */
+  --rw-chip-bg: var(--rw-color-surface-highlight);    /* Current / Done week tag; Figma #3A393E is unbound, Highlight Fill pending Han */
+  --rw-chip-fg: var(--rw-color-text-body);            /* Figma #C9C9CB is unbound, nearest semantic text-body N600 */
   --rw-focus-list-gap: 8px;                           /* between Focus tiles (Han 2026-10-25; Figma 16px) */
   --rw-focus-row-gap: 14px;                           /* text to dots, dots to chevron */
   --rw-advice-label-accent: var(--rw-color-text-accent);
@@ -490,4 +496,6 @@
   --rw-type-key-chart-tick: 500 9px/1 var(--font-sans);  /* micro-chart labels ONLY (KeyInsight chart ticks and values); 9px is not allowed anywhere else (Han, 2026-10-24) */
   --rw-type-tile-desc: 500 12px/16.8px var(--font-sans);  /* Tile half width evidence line (Figma 12px, 1.4) */
   --rw-type-tile-text: 500 12px/18.2px var(--font-sans);  /* advice under a tile label: TRY NEXT, KEEP GOING, GAME PLAN */
+  --rw-type-tile-title: 500 14px/19.2px var(--font-sans);  /* tile heading: This Week, Overall Progress, What to Work On (Figma 173:14114) */
+  --rw-type-chip: 500 11px/11px var(--font-sans);          /* week tag chip (Figma 173:14247) */
 }

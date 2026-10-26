@@ -72,6 +72,12 @@
      Focus list ................... .rw-focus-list > .rw-focus-row (8px apart)
      Dots indicator ............... .rw-dots > i[.is-on]  (one dot per session or match; Figma shows 3 to 5, the plan allows up to 7)
      Disclosure (Completed · n) ... .rw-disclosure (label + chevron 20)
+   Focus Detail (Figma 203:6272):
+     Focus head ................... .rw-focus-head > .rw-subtitle.rw-focus-source (B100 dot) + .rw-title + .rw-focus-plan > span (3px dot separators)
+     Focus frequency (173:14128) .. .rw-surface.rw-tile.rw-focus-tile > .rw-tile-head (.rw-tile-title + .rw-subtitle) + .rw-focus-markers > .rw-check[.is-done] (+ .rw-focus-foot)
+     Focus progress (173:14278) ... .rw-surface.rw-tile.rw-focus-tile.is-progress > .rw-focus-weeks > .rw-focus-week[.is-current|.is-past] (label 124px, .rw-dots, .rw-chip)
+     Focus TextBlock (173:14436) .. .rw-surface.rw-tile.rw-focus-tile > .rw-tile-title + .rw-focus-body (.rw-focus-goal + .rw-bullets)
+     Chip (week tag) .............. .rw-chip (24px, Current / Done / Skipped)
    Match Detail (Figma 365:8096):
      Game table ................... .rw-surface.rw-game-table > .rw-game-table-row[.is-head] (.rw-game-table-game: label + .rw-result, .rw-game-table-score[.is-high] x2)
      Notes tile ................... .rw-surface.rw-notes > .rw-note (.rw-note-head: .rw-note-label + .rw-note-tags, .rw-note-text)
@@ -551,6 +557,38 @@ button.rw-input-row{cursor:pointer;}
 .rw-dots{display:flex;gap:var(--rw-dots-gap);}
 .rw-dots>i{width:var(--rw-dots-size);height:var(--rw-dots-size);border-radius:50%;background:var(--rw-dots-off);}
 .rw-dots>i.is-on{background:var(--rw-dots-on);}
+/* Focus Detail (Figma 203:6272): head (source, title, plan line) and three Tile Containers. */
+.rw-focus-head{display:flex;flex-direction:column;gap:10px;}
+.rw-focus-head .rw-title{text-wrap:balance;overflow-wrap:anywhere;}
+.rw-focus-source{display:flex;align-items:center;gap:6px;}
+.rw-focus-source::before{content:"";width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--rw-focus-source-dot);}
+.rw-focus-plan{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font:var(--rw-type-name);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
+.rw-focus-plan>span{display:flex;align-items:center;gap:8px;}
+.rw-focus-plan>span+span::before{content:"";width:3px;height:3px;border-radius:50%;background:currentColor;}
+.rw-focus-tiles{display:flex;flex-direction:column;gap:16px;}
+.rw-focus-tile{display:flex;flex-direction:column;gap:16px;}
+.rw-focus-tile.is-progress{gap:24px;}
+.rw-tile-head{display:flex;justify-content:space-between;align-items:center;gap:12px;}
+.rw-tile-title{margin:0;font:var(--rw-type-tile-title);letter-spacing:var(--rw-tracking);color:var(--rw-text-primary);}
+/* Session markers reuse the CheckBoxes circle (.rw-check, 32px, dashed N400 ring); done = Default Fill + N75 check. */
+.rw-focus-markers{display:flex;flex-wrap:wrap;gap:var(--rw-focus-marker-gap);}
+.rw-check.is-done{background:var(--rw-check-done-bg);color:var(--rw-check-on-fg);}
+.rw-check.is-done::before{content:none;}
+.rw-check:disabled{cursor:default;transform:none;}
+.rw-focus-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:32px;}
+.rw-focus-weeks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;}
+.rw-focus-week{display:flex;align-items:center;min-height:24px;}
+.rw-focus-week-label{width:124px;flex-shrink:0;font:var(--rw-type-meta);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
+.rw-focus-week.is-current .rw-focus-week-label{color:var(--rw-text-primary);}
+.rw-focus-week.is-past .rw-focus-week-label{color:var(--rw-color-text-body);}
+.rw-focus-week .rw-dots{flex:1;}
+.rw-chip{height:24px;min-width:44px;box-sizing:border-box;padding:0 10px;border-radius:99px;display:inline-flex;align-items:center;justify-content:center;background:var(--rw-chip-bg);color:var(--rw-chip-fg);font:var(--rw-type-chip);letter-spacing:var(--rw-tracking);white-space:nowrap;}
+.rw-focus-body{display:flex;flex-direction:column;gap:12px;}
+.rw-focus-goal{margin:0;font:var(--rw-type-body);letter-spacing:var(--rw-tracking);color:var(--rw-color-text-body);text-wrap:pretty;white-space:pre-line;}
+.rw-bullets{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
+.rw-bullets>li{display:flex;align-items:flex-start;gap:12px;font:var(--rw-type-body);letter-spacing:var(--rw-tracking);color:var(--rw-color-text-body);}
+.rw-bullets>li::before{content:"";width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:8px;background:var(--rw-text-secondary);}
+
 /* Disclosure: a 48px row that shows or hides a list (Completed · n). */
 .rw-disclosure{width:100%;height:48px;padding:0;border:none;background:transparent;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font:var(--rw-type-disclosure);letter-spacing:var(--rw-tracking);color:var(--rw-text-secondary);}
 :root[lang="zh-Hans"] .rw-disclosure{line-height:1.25;}

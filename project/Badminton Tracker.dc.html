@@ -781,92 +781,82 @@ button:disabled{cursor:default !important;}
 
     <!-- FOCUS DETAIL: act on the current period, see the overall plan. -->
     <sc-if value="{{ fd }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Focus Detail" style="display:flex;flex-direction:column;gap:12px;">
-        <div style="display:flex;flex-direction:column;gap:22px;margin-bottom:20px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ChevronLeft" size="{{ 48 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="48px,48px"></x-import>
-            <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" size="{{ 48 }}" label="{{ tx.focusActions }}" onClick="{{ toggleMenu }}" hint-size="48px,48px"></x-import>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <div style="display:flex;align-items:center;gap:6px;font:400 13px/1 var(--font-sans);color:var(--text-secondary);"><div style="width:6px;height:6px;border-radius:50%;background: {{ fd.srcDot }};"></div>{{ fd.source }}</div>
-            <h1 style="margin:0;font:600 32px/1.2 var(--font-sans);text-wrap:balance;overflow-wrap:anywhere;">{{ fd.title }}</h1>
-            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;font:400 15px/1.3 var(--font-sans);color:var(--neutral-600);">
-              <sc-for list="{{ fd.summary }}" as="p" hint-placeholder-count="3">
-                <div style="display:flex;align-items:center;gap:8px;"><sc-if value="{{ p.sep }}" hint-placeholder-val="{{ false }}"><div aria-hidden="true" style="width:3px;height:3px;border-radius:50%;background:var(--text-secondary);"></div></sc-if>{{ p.t }}</div>
-              </sc-for>
-            </div>
+      <div data-screen-label="Focus Detail" style="display:flex;flex-direction:column;gap:var(--rw-section-gap);">
+        <div class="rw-appbar-title is-centered">
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="ArrowLeft" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.back }}" onClick="{{ goBack }}" hint-size="44px,44px"></x-import>
+          <h1 class="rw-appbar-name">{{ tx.focusDetails }}</h1>
+          <x-import component-from-global-scope="LearningAppDesignSystem_e32a09.IconButton" icon="Ellipsis" variant="glass" size="{{ 44 }}" iconSize="{{ 18 }}" label="{{ tx.focusActions }}" onClick="{{ toggleMenu }}" hint-size="44px,44px"></x-import>
+        </div>
+        <div class="rw-focus-head">
+          <div class="rw-subtitle rw-focus-source">{{ fd.source }}</div>
+          <h2 class="rw-title">{{ fd.title }}</h2>
+          <div class="rw-focus-plan">
+            <sc-for list="{{ fd.summary }}" as="p" hint-placeholder-count="3"><span>{{ p.t }}</span></sc-for>
           </div>
         </div>
 
-        <sc-if value="{{ fd.hasPeriod }}" hint-placeholder-val="{{ true }}">
-          <section data-screen-label="Current Period" aria-labelledby="fd-period" style="background:var(--surface-primary);border-radius:26px;padding:24px 22px;display:flex;flex-direction:column;gap:24px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
-              <h2 id="fd-period" style="margin:0;font:500 19px/1.2 var(--font-sans);">{{ fd.periodLabel }}</h2>
-              <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ fd.periodPos }}</div>
-            </div>
-            <div style="display:flex;flex-wrap:wrap;gap:12px;max-width: {{ fd.wrapW }};">
-              <sc-for list="{{ fd.markers }}" as="m" hint-placeholder-count="3">
-                <button onClick="{{ m.toggle }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.pressed }}" disabled="{{ m.disabled }}" style="width: {{ m.size }};height: {{ m.size }};padding:0;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;transition:background var(--dur-base) var(--ease-out),transform var(--dur-fast) var(--ease-out);font:500 15px/1 var(--font-sans);background: {{ m.bg }};color: {{ m.fg }};cursor: {{ m.cursor }};" style-active="transform:scale(.92);">
-                  <sc-if value="{{ m.done }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 20 }}" hint-size="20px,20px"></x-import></sc-if>
-                  <sc-if value="{{ m.open }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true">{{ m.n }}</span></sc-if>
-                </button>
-              </sc-for>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:20px;">
-              <div aria-live="polite" style="font:400 13px/1.35 var(--font-sans);color: {{ fd.hintFg }};">{{ fd.hint }}</div>
-              <sc-if value="{{ fd.isMatch }}" hint-placeholder-val="{{ false }}">
-                <button onClick="{{ fd.logMatch }}" style="height:44px;padding:0 18px;border:none;border-radius:99px;background:var(--border-default);color:var(--text-primary);font:500 13px/1 var(--font-sans);cursor:pointer;flex-shrink:0;" style-active="transform:scale(.97);">{{ tx.logMatch }}</button>
-              </sc-if>
-            </div>
-          </section>
-        </sc-if>
+        <div class="rw-focus-tiles">
+          <sc-if value="{{ fd.hasPeriod }}" hint-placeholder-val="{{ true }}">
+            <section data-screen-label="Current Period" aria-labelledby="fd-period" class="rw-surface rw-tile rw-focus-tile">
+              <div class="rw-tile-head">
+                <h3 id="fd-period" class="rw-tile-title">{{ fd.periodLabel }}</h3>
+                <div class="rw-subtitle">{{ fd.periodPos }}</div>
+              </div>
+              <div class="rw-focus-markers">
+                <sc-for list="{{ fd.markers }}" as="m" hint-placeholder-count="3">
+                  <button type="button" class="rw-check {{ m.cls }}" onClick="{{ m.toggle }}" aria-label="{{ m.aria }}" aria-pressed="{{ m.pressed }}" disabled="{{ m.disabled }}">
+                    <sc-if value="{{ m.done }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="LearningAppDesignSystem_e32a09.Icon" name="Check" size="{{ 16 }}" hint-size="16px,16px"></x-import></sc-if>
+                    <sc-if value="{{ m.open }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true">{{ m.n }}</span></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+              <div class="rw-focus-foot">
+                <div aria-live="polite" class="rw-subtitle">{{ fd.hint }}</div>
+                <sc-if value="{{ fd.isMatch }}" hint-placeholder-val="{{ false }}">
+                  <button type="button" class="rw-btn rw-btn-secondary" onClick="{{ fd.logMatch }}">{{ tx.logMatch }}</button>
+                </sc-if>
+              </div>
+            </section>
+          </sc-if>
 
-        <sc-if value="{{ fd.hasOverall }}" hint-placeholder-val="{{ true }}">
-          <section data-screen-label="Overall Progress" aria-labelledby="fd-overall" style="background:var(--surface-primary);border-radius:26px;padding:22px 22px 10px;display:flex;flex-direction:column;gap:8px;">
-            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;">
-              <h2 id="fd-overall" style="margin:0;font:500 19px/1.2 var(--font-sans);">{{ tx.overallProgress }}</h2>
-              <div style="font:400 13px/1 var(--font-sans);color:var(--text-secondary);">{{ fd.overallMeta }}</div>
-            </div>
-            <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;padding:4px 0 12px;">
-              <sc-for list="{{ fd.weeks }}" as="w" hint-placeholder-count="2">
-                <li aria-label="{{ w.aria }}" style="display:grid;grid-template-columns:76px 1fr auto;align-items:center;gap:12px;min-height:28px;">
-                  <div aria-hidden="true" style="font:400 14px/1 var(--font-sans);color: {{ w.labelFg }};">{{ w.label }}</div>
-                  <div aria-hidden="true" style="display:flex;gap:6px;">
-                    <sc-for list="{{ w.dots }}" as="d" hint-placeholder-count="3"><div style="width:10px;height:10px;border-radius:50%;background: {{ d.bg }};"></div></sc-for>
-                  </div>
-                  <div aria-hidden="true" style="min-width:44px;display:flex;justify-content:flex-end;">
-                    <sc-if value="{{ w.hasTag }}" hint-placeholder-val="{{ false }}">
-                      <div class="zh12" style="height:24px;padding:0 10px;border-radius:99px;display:flex;align-items:center;font:500 11px/1 var(--font-sans);background:var(--border-default);color:var(--neutral-600);">{{ w.tag }}</div>
-                    </sc-if>
-                  </div>
-                </li>
-              </sc-for>
-            </ul>
-          </section>
-        </sc-if>
+          <sc-if value="{{ fd.hasOverall }}" hint-placeholder-val="{{ true }}">
+            <section data-screen-label="Overall Progress" aria-labelledby="fd-overall" class="rw-surface rw-tile rw-focus-tile is-progress">
+              <div class="rw-tile-head">
+                <h3 id="fd-overall" class="rw-tile-title">{{ tx.overallProgress }}</h3>
+                <div class="rw-subtitle">{{ fd.overallMeta }}</div>
+              </div>
+              <ul class="rw-focus-weeks">
+                <sc-for list="{{ fd.weeks }}" as="w" hint-placeholder-count="2">
+                  <li class="rw-focus-week {{ w.cls }}" aria-label="{{ w.aria }}">
+                    <div aria-hidden="true" class="rw-focus-week-label">{{ w.label }}</div>
+                    <div aria-hidden="true" class="rw-dots">
+                      <sc-for list="{{ w.dots }}" as="d" hint-placeholder-count="3"><i class="{{ d.cls }}"></i></sc-for>
+                    </div>
+                    <sc-if value="{{ w.hasTag }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" class="rw-chip">{{ w.tag }}</span></sc-if>
+                  </li>
+                </sc-for>
+              </ul>
+            </section>
+          </sc-if>
 
-        <sc-if value="{{ fd.hasCues }}" hint-placeholder-val="{{ true }}">
-          <section data-screen-label="What to Work On" aria-labelledby="fd-work" style="background:var(--surface-primary);border-radius:26px;padding:22px;display:flex;flex-direction:column;gap:14px;">
-            <h2 id="fd-work" style="margin:0;font:500 19px/1.2 var(--font-sans);">{{ tx.whatToWorkOn }}</h2>
-            <sc-if value="{{ fd.hasGoal }}" hint-placeholder-val="{{ true }}">
-              <div style="font:400 15px/1.5 var(--font-sans);color:var(--neutral-600);text-wrap:pretty;white-space:pre-line;">{{ fd.goal }}</div>
-            </sc-if>
-            <sc-if value="{{ fd.hasCueList }}" hint-placeholder-val="{{ true }}">
-            <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;">
-              <sc-for list="{{ fd.cues }}" as="c" hint-placeholder-count="2">
-                <li style="display:flex;align-items:flex-start;gap:12px;">
-                  <div aria-hidden="true" style="width:5px;height:5px;border-radius:50%;background:var(--text-secondary);margin-top:9px;flex-shrink:0;"></div>
-                  <div style="font:400 15px/1.45 var(--font-sans);color:var(--neutral-600);">{{ c.t }}</div>
-                </li>
-              </sc-for>
-            </ul>
-            </sc-if>
-          </section>
-        </sc-if>
+          <sc-if value="{{ fd.hasCues }}" hint-placeholder-val="{{ true }}">
+            <section data-screen-label="What to Work On" aria-labelledby="fd-work" class="rw-surface rw-tile rw-focus-tile">
+              <h3 id="fd-work" class="rw-tile-title">{{ tx.whatToWorkOn }}</h3>
+              <div class="rw-focus-body">
+                <sc-if value="{{ fd.hasGoal }}" hint-placeholder-val="{{ true }}"><p class="rw-focus-goal">{{ fd.goal }}</p></sc-if>
+                <sc-if value="{{ fd.hasCueList }}" hint-placeholder-val="{{ true }}">
+                  <ul class="rw-bullets">
+                    <sc-for list="{{ fd.cues }}" as="c" hint-placeholder-count="2"><li>{{ c.t }}</li></sc-for>
+                  </ul>
+                </sc-if>
+              </div>
+            </section>
+          </sc-if>
 
-        <sc-if value="{{ fd.showComplete }}" hint-placeholder-val="{{ false }}">
-          <button onClick="{{ fd.complete }}" style="align-self:center;margin-top:12px;height:52px;padding:0 28px;border:var(--control-outline-width) solid var(--control-outline);border-radius:999px;background:transparent;color:var(--text-primary);font:500 15px/1 var(--font-sans);cursor:pointer;" style-active="transform:scale(.97);">{{ tx.markComplete }}</button>
-        </sc-if>
+          <sc-if value="{{ fd.showComplete }}" hint-placeholder-val="{{ false }}">
+            <button type="button" class="rw-btn rw-btn-primary" onClick="{{ fd.complete }}">{{ tx.markComplete }}</button>
+          </sc-if>
+        </div>
       </div>
     </sc-if>
 
@@ -2120,8 +2110,8 @@ const I18N = {
     thisPlan: 'This Plan', nMatches: '{n} matches', hintStart: 'Tap a session when you finish it.', hintUndo: 'Tap again to undo.',
     hintWeekDone: 'Week complete. Tap a session to undo.', hintMatch: 'Fills in when you log a match.',
     sessionDone: 'Session {n}, done', sessionOpen: 'Session {n}, not done', matchDone: 'Match {n}, logged', matchOpen: 'Match {n}, not logged yet',
-    overallProgress: 'Overall Progress', tagNow: 'Now', tagDone: 'Done', tagSkipped: 'Skipped', weekRow: 'Week {n}: {d} of {t} sessions',
-    whatToWorkOn: 'What to Work On', focusActions: 'Focus actions', editFocus: 'Edit Focus', deleteFocus: 'Delete Focus', markComplete: 'Mark Complete',
+    overallProgress: 'Overall Progress', tagNow: 'Current', tagDone: 'Done', tagSkipped: 'Skipped', weekRow: 'Week {n}: {d} of {t} sessions',
+    whatToWorkOn: 'What to Work On', focusDetails: 'Focus Details', focusActions: 'Focus actions', editFocus: 'Edit Focus', deleteFocus: 'Delete Focus', markComplete: 'Mark Complete',
     markActive: 'Move Back to Active', deleteFocusQ: 'Delete Focus?', deleteFocusBody: 'This removes “{title}” and its progress. Your matches and insights stay.',
     tFocusAdded: 'Added to Focus', tFocusUpdated: 'Focus updated', tFocusDeleted: 'Focus deleted', tFocusDeleteFailed: "Couldn't delete focus",
     tFocusCompleted: 'Marked complete', tFocusReopened: 'Moved back to Active',
@@ -2274,7 +2264,7 @@ const I18N = {
     hintWeekDone: '本周已完成。点一下可撤销。', hintMatch: '记录比赛后会自动更新。',
     sessionDone: '第 {n} 次，已完成', sessionOpen: '第 {n} 次，未完成', matchDone: '第 {n} 场，已记录', matchOpen: '第 {n} 场，尚未记录',
     overallProgress: '整体进度', tagNow: '当前', tagDone: '完成', tagSkipped: '已跳过', weekRow: '第 {n} 周：{d}/{t} 次',
-    whatToWorkOn: '练习要点', focusActions: '训练目标操作', editFocus: '编辑训练目标', deleteFocus: '删除训练目标', markComplete: '标记为完成',
+    whatToWorkOn: '练习要点', focusDetails: '训练目标详情', focusActions: '训练目标操作', editFocus: '编辑训练目标', deleteFocus: '删除训练目标', markComplete: '标记为完成',
     markActive: '移回进行中', deleteFocusQ: '删除这个训练目标？', deleteFocusBody: '会删除“{title}”和它的进度，你的比赛和洞察不受影响。',
     tFocusAdded: '已添加训练目标', tFocusUpdated: '训练目标已更新', tFocusDeleted: '训练目标已删除', tFocusDeleteFailed: '训练目标未能删除',
     tFocusCompleted: '已标记为完成', tFocusReopened: '已移回进行中',
@@ -3539,7 +3529,7 @@ class Component extends DCLogic {
     const exists = s.players.some(p => p.name.toLowerCase() === q);
     const v = {
       scrollRef: this.scrollRef, onScroll: this.onScroll, overall, greeting: this.greeting(all),
-      scrollCls: ['matches', 'insights', 'focus', 'detail', 'voice', 'review', 'players', 'player', 'profile', 'settings', 'account', 'password', 'language', 'notifications', 'privacy', 'login', 'signup', 'forgot', 'resetSent', 'onboarding'].includes(s.screen)
+      scrollCls: ['matches', 'insights', 'focus', 'focusDetail', 'detail', 'voice', 'review', 'players', 'player', 'profile', 'settings', 'account', 'password', 'language', 'notifications', 'privacy', 'login', 'signup', 'forgot', 'resetSent', 'onboarding'].includes(s.screen)
         ? 'rw-scroll is-v2' + (['detail', 'focusDetail', 'player', 'profile', 'settings', 'account', 'password', 'language', 'notifications', 'privacy'].includes(s.screen) ? ' is-detail' : '') : 'rw-scroll',
       isMatches: s.screen === 'matches', isInsights: s.screen === 'insights', isLog: s.screen === 'log', isVoice: s.screen === 'voice' && !!s.voice, isReview: s.screen === 'review' && !!s.log, voiceRef: this.voiceRef,
       isDetail: s.screen === 'detail', isPlayers: s.screen === 'players', isPlayer: s.screen === 'player',
@@ -4182,24 +4172,20 @@ class Component extends DCLogic {
     if (fdF) {
       const f = fdF, P = f.type === 'practice', Mt = f.type === 'match', done = f.status === 'completed';
       const parts = planParts(f).concat(done ? [this.t('focusCompleted')] : []);
-      let markers = [], hint = '', hintFg = 'var(--text-secondary)', periodPos = '', wrapW = 'none';
+      let markers = [], hint = '', periodPos = '';
       const cur = P && !done ? weekNow(f) : null;
       if (cur) {
         const n = cur.target, d = doneIn(cur), k = this.weekIndex(f, day);
-        // Markers are 48px, the size of the app's IconButton: 1–5 on one row, 6–7 over two rows.
-        const size = 48, gap = 12;
-        if (n >= 6) wrapW = (4 * size + 3 * gap) + 'px';
-        markers = cur.marks.map((m, i) => ({ done: m, open: !m, n: String(i + 1), size: size + 'px', gap,
+        // Markers are the 32px CheckBoxes circle (.rw-check, 44px tap area), up to FOCUS_MAX on one row.
+        markers = cur.marks.map((m, i) => ({ done: m, open: !m, n: String(i + 1), cls: m ? 'is-done' : '',
           aria: this.t(m ? 'sessionDone' : 'sessionOpen', { n: i + 1 }), pressed: m, disabled: false,
-          bg: m ? 'var(--progress-active)' : 'var(--border-default)', fg: m ? 'var(--text-primary)' : 'var(--neutral-600)', cursor: 'pointer',
           toggle: () => this.toggleSession(f.id, cur.start, i) }));
-        hint = this.t(d >= n ? 'hintWeekDone' : d ? 'hintUndo' : 'hintStart'); if (d >= n) hintFg = 'var(--neutral-600)';
+        hint = this.t(d >= n ? 'hintWeekDone' : d ? 'hintUndo' : 'hintStart');
         periodPos = f.plan.periods ? this.t('weekOf', { n: k + 1, t: f.plan.periods }) : this.t('weekN', { n: k + 1 });
       } else if (Mt && !done) {
         const md = Math.min(this.matchesDone(f), f.plan.target);
-        markers = Array.from({ length: f.plan.target }, (_, i) => { const m = i < md; return { done: m, open: !m, n: String(i + 1), size: '48px', gap: 12,
-          aria: this.t(m ? 'matchDone' : 'matchOpen', { n: i + 1 }), pressed: null, disabled: true,
-          bg: m ? 'var(--progress-active)' : 'var(--border-default)', fg: m ? 'var(--text-primary)' : 'var(--text-secondary)', cursor: 'default', toggle: () => {} }; });
+        markers = Array.from({ length: f.plan.target }, (_, i) => { const m = i < md; return { done: m, open: !m, n: String(i + 1), cls: m ? 'is-done' : '',
+          aria: this.t(m ? 'matchDone' : 'matchOpen', { n: i + 1 }), pressed: null, disabled: true, toggle: () => {} }; });
         hint = this.t('hintMatch'); periodPos = this.t('nMatches', { n: f.plan.target });
       }
       // Overall Progress: every week of the plan. Past and current weeks show their own recorded target and
@@ -4212,14 +4198,14 @@ class Component extends DCLogic {
           const start = this.weekStart(f, k), r = rows.find(x => x.start === start), isCur = k === kNow, past = !isCur && (done || k < kNow);
           const target = r ? r.target : f.plan.target, marks = r ? r.marks : Array(target).fill(false), dd = marks.filter(Boolean).length;
           const tag = isCur ? this.t('tagNow') : r && r.status === 'skipped' ? this.t('tagSkipped') : past && dd >= target ? this.t('tagDone') : '';
-          return { label: this.t('weekN', { n: k + 1 }), labelFg: isCur ? 'var(--text-primary)' : past ? 'var(--neutral-600)' : 'var(--text-secondary)',
+          return { label: this.t('weekN', { n: k + 1 }), cls: isCur ? 'is-current' : past ? 'is-past' : '',
             aria: this.t('weekRow', { n: k + 1, d: dd, t: target }) + (tag ? ' · ' + tag : ''),
-            dots: marks.map(m => ({ bg: m ? 'var(--progress-active)' : 'var(--border-default)' })), hasTag: !!tag, tag };
+            dots: marks.map(m => ({ cls: m ? 'is-on' : '' })), hasTag: !!tag, tag };
         });
       }
-      v.fd = { title: f.title, source: this.t(f.source === 'grow' ? 'addedFromGrow' : 'createdByYou'), srcDot: f.source === 'grow' ? 'var(--progress-active)' : 'var(--text-secondary)',
+      v.fd = { title: f.title, source: this.t(f.source === 'grow' ? 'addedFromGrow' : 'createdByYou'),
         summary: parts.map((t, i) => ({ t, sep: i > 0 })),
-        hasPeriod: markers.length > 0, isMatch: Mt, periodLabel: this.t(P ? 'thisWeek' : 'thisPlan'), periodPos, markers, wrapW, hint, hintFg,
+        hasPeriod: markers.length > 0, isMatch: Mt, periodLabel: this.t(P ? 'thisWeek' : 'thisPlan'), periodPos, markers, hint,
         hasOverall: P && (weeks.length > 1 || !f.plan.periods), weeks, overallMeta: f.plan.periods ? (f.plan.periods === 1 ? this.t('oneWeek') : this.t('weeksN', { n: f.plan.periods })) : this.t('ongoing'),
         hasCues: !!(f.goal || f.cues.length), hasGoal: !!f.goal, goal: f.goal, hasCueList: f.cues.length > 0, cues: f.cues.map(t => ({ t })),
         // No schedule: completing it by hand is the only way to finish, so it gets a quiet button here as well.
