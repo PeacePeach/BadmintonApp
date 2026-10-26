@@ -28,7 +28,7 @@
   const l = `fill="none" stroke="${LINE}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"`;
   const d = `fill="none" stroke="${DETAIL}" stroke-width="2" stroke-linecap="round"`;
 
-  // Each drawing is centred on (80, 80) of a 160 canvas and stays inside the 110 x 110 view box below.
+  // Each drawing is centred on (80, 80) of a 160 canvas; FRAME below places it on the backdrop circle (r 60 at 80, 80).
   const drawings = {
     // Racket and shuttlecock at rest
     'no-matches': (id) => `
@@ -42,7 +42,7 @@
         <path d="M78 82h4v16h-4z" ${o}/>
         <rect x="75" y="98" width="10" height="22" rx="4" ${f}/>
       </g>
-      <g transform="translate(114 116) rotate(-38)">
+      <g transform="translate(110 96) rotate(155)">
         <path d="M-7 0L-12 -24H12L7 0Z" ${o}/>
         <path d="M-2.5 -1L-4 -23M2.5 -1L4 -23M-9.5 -11H9.5" fill="none" stroke="${LINE}" stroke-width="1.5" stroke-linecap="round"/>
         <path d="M-7 0a7 7 0 0 0 14 0Z" ${f}/>
@@ -66,8 +66,8 @@
 
     // Magnifier over an empty result
     'no-results': () => `
-      <path d="M93 90l18 18" fill="none" stroke="${LINE}" stroke-width="12" stroke-linecap="round"/>
-      <path d="M93 90l18 18" fill="none" stroke="${FILL}" stroke-width="8" stroke-linecap="round"/>
+      <path d="M93 90l34 34" fill="none" stroke="${LINE}" stroke-width="12" stroke-linecap="round"/>
+      <path d="M93 90l34 34" fill="none" stroke="${FILL}" stroke-width="8" stroke-linecap="round"/>
       <circle cx="74" cy="72" r="26" ${o}/>
       <path d="M60 64a16 16 0 0 1 12-9" ${l}/>
       <path d="M64 78h20M68 86h12" ${l} opacity=".55"/>`,
@@ -112,22 +112,27 @@
       <g mask="url(#${id}-cut)">
         <path d="M66 94a20 20 0 0 1 28 0M54 82a37 37 0 0 1 52 0M42 70a54 54 0 0 1 76 0" ${l}/>
       </g>
+      <path d="M80 112L64 156H96Z" ${o}/>
+      <path d="M72.4 133H87.6L96 156H64Z" ${f}/>
       <circle cx="80" cy="108" r="7" ${f}/>
       <path d="M54 48l54 60" fill="none" stroke="${FILL}" stroke-width="3.5" stroke-linecap="round"/>`,
   };
 
-  // Masked drawings (Han's reference): drawn larger, their bodies run past the backdrop circle and are cut by its arc
-  // (.rw-illus.is-masked in components-v2.css). Their shapes extend below y 135 so there is always something to cut.
-  const MASKED = { 'no-players': true, 'no-insights': true, 'error': true };
-  const illusClass = (name, compact) => 'rw-illus' + (compact ? ' is-compact' : '') + (MASKED[name] ? ' is-masked' : '');
+  // FRAME (Han's reference): the backdrop circle masks each drawing below its middle, so most drawings are scaled up
+  // [scale, x, y: the drawing point put on the circle's centre] until their base runs past the rim and is cut by its arc.
+  const FRAME = {
+    'no-matches': [1.3, 82, 72], 'no-players': [1.15, 80, 86], 'no-insights': [1.2, 80, 82], 'no-results': [1.3, 80, 78],
+    'error': [1.15, 82, 80], 'success': [1.35, 80, 68], 'no-focus': [1.3, 80, 66], 'connection-lost': [1.05, 80, 98],
+  };
+  const illusClass = (name, compact) => 'rw-illus' + (compact ? ' is-compact' : '');
 
   let seq = 0;
   function illustrationMarkup(name, uid) {
     const draw = drawings[name];
     if (!draw) return '';
     const id = uid || 'rwi' + (++seq);
-    return `<svg viewBox="25 25 110 110" overflow="visible" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-      ${draw(id)}
+    return `<svg viewBox="20 20 120 120" overflow="visible" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <g transform="translate(80 80) scale(${(FRAME[name] || [1])[0]}) translate(${-(FRAME[name] || [1, 80])[1]} ${-(FRAME[name] || [1, 80, 80])[2]})">${draw(id)}</g>
     </svg>`;
   }
 
