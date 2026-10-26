@@ -139,11 +139,37 @@
 
   // Same rule as voice-v2-live resolve(): exact name or first name, case-insensitive.
   // One hit is confirmed; several are ambiguous; none is a new name. The heard name is always kept.
+  // With no exact hit, a name heard in another script is matched by its reading (rallywise-names.js; Han 2026-10-26):
+  // 杨 finds a saved "Yang" and "Yang" a saved 杨. Only one strong match and no other candidate confirms; otherwise every
+  // candidate goes to the Players sheet (strong ones first), so a homophone or another romanization is never merged silently.
   function resolve(heard, players) {
-    const h = heard.trim().toLowerCase();
-    const c = players.filter(p => p.id !== 'me' && (p.name.toLowerCase() === h || p.name.split(/\s+/)[0].toLowerCase() === h));
+    const { cross, ...r } = match(heard, players);
+    return r;
+  }
+  function match(heard, players) {
+    const h = heard.trim().toLowerCase(), others = players.filter(p => p.id !== 'me');
+    let c = others.filter(p => p.name.toLowerCase() === h || p.name.split(/\s+/)[0].toLowerCase() === h), cross = false;
+    const N = typeof module !== 'undefined' && module.exports ? require('./rallywise-names.js') : root.RallywiseNames;
+    if (!c.length && N) {
+      const m = others.map(p => ({ p, k: N.match(heard, p.name) })).filter(x => x.k);
+      const strong = m.filter(x => x.k === 'strong');
+      c = strong.concat(m.filter(x => x.k === 'weak')).map(x => x.p);
+      cross = strong.length === 1 && m.length === 1;
+      if (c.length === 1 && !cross) return { heard: heard.trim(), id: null, cands: [c[0].id], state: 'ambiguous', cross: true };
+    }
     return { heard: heard.trim(), id: c.length === 1 ? c[0].id : null, cands: c.length > 1 ? c.map(p => p.id) : [],
-      state: c.length === 1 ? 'confirmed' : c.length > 1 ? 'ambiguous' : 'new' };
+      state: c.length === 1 ? 'confirmed' : c.length > 1 ? 'ambiguous' : 'new', cross };
+  }
+  // Everyone heard in one match. A player matched only by reading who is already someone else's match (杨 and Yang in
+  // the same sentence) is asked about rather than placed twice.
+  function resolveAll(names, players) {
+    const rs = names.map(n => match(n, players));
+    const exact = new Set(rs.filter(r => r.state === 'confirmed' && !r.cross).map(r => r.id)), seen = new Set();
+    return rs.map(({ cross, ...r }) => {
+      if (r.state !== 'confirmed' || !cross) return r;
+      if (exact.has(r.id) || seen.has(r.id)) return { ...r, id: null, cands: [r.id], state: 'ambiguous' };
+      seen.add(r.id); return r;
+    });
   }
   const missingSlot = () => ({ heard: '', id: null, cands: [], state: 'missing' });
   const slotKeys = type => type === 'Doubles' ? ['partner', 'opp1', 'opp2'] : type === 'Singles' ? ['opp1'] : [];
@@ -260,7 +286,7 @@
     const d = { type, partner: null, opp1: null, opp2: null, slots: {}, pool: [],
       games: [], wt: [], lt: [], worked: '', lost: '', on: '', flags: { players: null, result: null, notes: null } };
     const fp = d.flags;
-    const people = r.multiple_lineups ? [] : r.players.map(p => ({ ...resolve(p.name, players), role: p.role }));
+    const people = r.multiple_lineups ? [] : resolveAll(r.players.map(p => p.name), players).map((x, i) => ({ ...x, role: r.players[i].role }));
     const l = lineup(type, people);
     d.slots = l.slots; d.pool = l.pool;
     for (const k of slotKeys(type)) d[k] = d.slots[k].state === 'confirmed' ? d.slots[k].id : null;
@@ -307,7 +333,7 @@
     return d;
   }
 
-  const api = { SAMPLES, SCENARIOS, sample, chunks, cues, mockParse, resolve, inferType, lineup, choosePartner, unresolved, slotKeys,
+  const api = { SAMPLES, SCENARIOS, sample, chunks, cues, mockParse, resolve, resolveAll, inferType, lineup, choosePartner, unresolved, slotKeys,
     toDraft, fits, tally, savedGames, gameResult, hasScore, fromSaved, winnerScore, MAX_GAMES, UNKNOWN, isUnknown, unknownId, heardOf, isParticipant, participantId, sidesOf, savedPlayers };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.RallywiseVoice = api;

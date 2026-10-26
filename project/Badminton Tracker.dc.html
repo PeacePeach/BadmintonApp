@@ -32,6 +32,7 @@
 <script src="rallywise-config.js"></script>
 <script src="rallywise-backend.js"></script>
 <script src="rallywise-analytics.js"></script>
+<script src="rallywise-names.js"></script>
 <script src="rallywise-voice.js"></script>
 <script>
 /* Native Capacitor shell: use the physical device as the frame, never the desktop preview chrome. */
@@ -4059,7 +4060,7 @@ class Component extends DCLogic {
           slotLabel: k0 ? roles[k0] : '', q: p.q, hasQ: !!p.q, searchCls: p.q ? 'is-filled' : '',
           onQ: e => this.setPs({ q: e.target.value }), clearQ: e => { e.preventDefault(); this.setPs({ q: '' }); },
           canAdd: !!k0 && !!q && !s.players.some(x => x.name.toLowerCase() === ql), addLabel: this.t('addAsNew', { name: q }), add: () => this.psAddNew(k0, q),
-          list: k0 ? s.players.filter(x => x.id !== 'me' && !chosen.includes(x.id) && x.name.toLowerCase().includes(ql)).map(x => {
+          list: k0 ? s.players.filter(x => x.id !== 'me' && !chosen.includes(x.id) && (x.name.toLowerCase().includes(ql) || (!!q && !!window.RallywiseNames && !!window.RallywiseNames.match(q, x.name)))).map(x => {
             const r = k0 === 'partner' ? this.with(x.id) : this.vs(x.id);
             return { name: x.name, initials: this.ini(x.id), avCls: this.avDir(x.id), sub: r.n ? this.t(k0 === 'partner' ? 'together' : 'h2h', { r: this.recWords(r) }) : this.t('newPlayer'), pick: () => k0 === 'partner' && p.pool.length ? this.psFill('partner', { heard: '', id: x.id, cands: [], state: 'confirmed' }) : this.psPickId(k0, x.id) };
           }) : [],
