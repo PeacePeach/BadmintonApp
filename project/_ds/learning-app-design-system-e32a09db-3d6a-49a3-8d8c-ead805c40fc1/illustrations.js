@@ -115,6 +115,9 @@
       <path d="M54 48l54 60" fill="none" stroke="${FILL}" stroke-width="3.5" stroke-linecap="round"/>`,
   };
 
+  // Soft Glow strength per drawing: soft for open line art, strong where a solid body covers the glow's centre.
+  const GLOW = { 'no-matches': 'soft', 'error': 'strong', 'no-insights': 'strong' };
+
   let seq = 0;
   function illustrationMarkup(name, uid) {
     const draw = drawings[name];
@@ -132,7 +135,7 @@
       role: title ? 'img' : undefined,
       'aria-label': title,
       'aria-hidden': title ? undefined : true,
-      className: 'rw-illus' + (compact ? ' is-compact' : ''),
+      className: 'rw-illus' + (compact ? ' is-compact' : '') + (GLOW[name] ? ' is-glow-' + GLOW[name] : ''),
       style,
       dangerouslySetInnerHTML: { __html: illustrationMarkup(name, ref.current) },
     });
